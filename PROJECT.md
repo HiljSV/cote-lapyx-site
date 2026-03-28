@@ -515,8 +515,15 @@ src/
 
 ## Figma файли
 
-- Поточний файл: https://www.figma.com/design/pcoePj3RiNvVqV6Sv0xEz5/cote
-- Попередній варіант: https://www.figma.com/design/DCS7hzwy6cYg4Y1nfJMyzr/Untitled
+- Поточний файл: https://www.figma.com/design/GdNH6d6sR2MnpFKlG49K9a/cote-lapyx
+- Figma Make (перший прев'ю): https://www.figma.com/make/Q8XJ7EGnLCrkeP6v9Q5wX1/Professional-Team-Website-Mockup
+- Опублікований прев'ю: https://flee-kitten-02337269.figma.site/
+
+## GitHub
+
+- Репо: https://github.com/HiljSV/cote-lapyx-site
+- GitHub Pages: https://hiljsv.github.io/cote-lapyx-site/
+- Font preview: https://hiljsv.github.io/cote-lapyx-site/font-preview.html
 
 ---
 
