@@ -1,0 +1,10 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="140" viewBox="0 0 500 140">
+  <image href="cote-lapyx-logo-clean.png" width="500" height="140">
+    <animateTransform attributeName="transform"
+      type="scale"
+      values="1;1.04;1"
+      dur="2s"
+      repeatCount="indefinite"/>
+  </image>
+</svg>
