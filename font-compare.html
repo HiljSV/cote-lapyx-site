@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C vs D — Вибір шрифтів Cote Lapyx</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;600;700&family=Nunito:wght@400;500;600&family=Playfair+Display:wght@400;600;700&family=Raleway:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #060d1a;
+    color: #e8f0fe;
+    min-height: 100vh;
+  }
+
+  /* ─── Голосування ─── */
+  .vote-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #0a1628;
+    border-bottom: 1px solid #1f4e8c44;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+  }
+  .vote-label { font-family: sans-serif; font-size: 13px; color: #8b9ab0; letter-spacing: 1px; }
+  .vote-btn {
+    padding: 8px 28px;
+    border-radius: 8px;
+    border: none;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .vote-btn:hover { transform: scale(1.05); }
+  .vote-c { background: #1f4e8c; color: #fff; }
+  .vote-d { background: #f36f21; color: #fff; }
+  .vote-result { font-family: sans-serif; font-size: 13px; color: #8b9ab0; min-width: 120px; text-align: center; }
+
+  /* ─── Сітка порівняння ─── */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: calc(100vh - 57px);
+  }
+
+  .col {
+    padding: 48px 40px;
+    border-right: 1px solid #1f4e8c33;
+  }
+  .col:last-child { border-right: none; }
+
+  .col-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #1f4e8c33;
+  }
+  .col-badge {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px;
+    font-family: sans-serif;
+  }
+  .badge-c { background: #1f4e8c; color: #fff; }
+  .badge-d { background: #f36f21; color: #fff; }
+  .col-title { font-family: sans-serif; font-size: 14px; color: #8b9ab0; }
+  .col-title strong { display: block; color: #e8f0fe; font-size: 16px; }
+
+  /* ─── Варіант C ─── */
+  .c-h { font-family: 'Geologica', sans-serif; }
+  .c-b { font-family: 'Nunito', sans-serif; }
+
+  /* ─── Варіант D ─── */
+  .d-h { font-family: 'Playfair Display', serif; }
+  .d-b { font-family: 'Raleway', sans-serif; }
+
+  /* ─── Секції контенту ─── */
+  .section { margin-bottom: 48px; }
+
+  .section-label {
+    font-family: sans-serif;
+    font-size: 11px;
+    color: #4a6080;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+
+  /* Hero */
+  .hero-tag {
+    display: inline-block;
+    border: 1px solid #f36f21;
+    color: #f36f21;
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+  }
+  .hero-h1 { font-size: 42px; font-weight: 700; line-height: 1.15; margin-bottom: 12px; }
+  .hero-h2 { font-size: 20px; font-weight: 400; color: #8b9ab0; margin-bottom: 24px; line-height: 1.5; }
+
+  /* Кнопки */
+  .btns { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+  .btn {
+    padding: 11px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    display: inline-block;
+  }
+  .btn-primary { background: #f36f21; color: #fff; }
+  .btn-ghost { background: transparent; border: 1px solid #1f4e8c; color: #e8f0fe; }
+
+  /* Про нас */
+  .about-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+  .about-sub { font-size: 14px; color: #f36f21; margin-bottom: 16px; }
+  .about-text { font-size: 15px; line-height: 1.75; color: #b0bdd0; }
+
+  /* Послуги */
+  .services { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .service-card {
+    background: #0d1f3c;
+    border: 1px solid #1f4e8c33;
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .service-icon { font-size: 24px; margin-bottom: 10px; }
+  .service-name { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .service-desc { font-size: 13px; color: #8b9ab0; line-height: 1.5; }
+
+  /* Команда */
+  .team { display: flex; gap: 16px; }
+  .member {
+    flex: 1;
+    background: #0d1f3c;
+    border: 1px solid #1f4e8c33;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+  .member-avatar {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: #1f4e8c;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin: 0 auto 12px;
+  }
+  .member-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .member-role { font-size: 12px; color: #8b9ab0; }
+
+  /* Блог */
+  .blog-card {
+    background: #0d1f3c;
+    border: 1px solid #1f4e8c33;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+  .blog-date { font-size: 11px; color: #4a6080; margin-bottom: 8px; font-family: sans-serif; }
+  .blog-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+  .blog-excerpt { font-size: 13px; color: #8b9ab0; line-height: 1.6; }
+
+  @media (max-width: 900px) {
+    .compare-grid { grid-template-columns: 1fr; }
+    .col { border-right: none; border-bottom: 1px solid #1f4e8c33; }
+    .hero-h1 { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Голосування -->
+<div class="vote-bar">
+  <button class="vote-btn vote-c c-h" onclick="vote('C')">▲ Варіант C</button>
+  <div class="vote-result" id="vote-result">Обери свій варіант</div>
+  <button class="vote-btn vote-d d-h" onclick="vote('D')">Варіант D ▲</button>
+</div>
+
+<div class="compare-grid">
+
+  <!-- ═══════════ ВАРІАНТ C ═══════════ -->
+  <div class="col">
+    <div class="col-header">
+      <div class="col-badge badge-c">C</div>
+      <div class="col-title">
+        <strong>Geologica + Nunito</strong>
+        Сучасний · Геометричний · Чіткий
+      </div>
+    </div>
+
+    <!-- Hero -->
+    <div class="section">
+      <div class="section-label">Hero секція</div>
+      <div class="hero-tag c-b">IT команда · Україна</div>
+      <div class="hero-h1 c-h">Cote Lapyx —<br>команда яка будує</div>
+      <div class="hero-h2 c-b">Frontend, Backend та дизайн під одним дахом. Ми створюємо цифрові продукти.</div>
+      <div class="btns">
+        <a class="btn btn-primary c-b">Наші послуги</a>
+        <a class="btn btn-ghost c-b">Проекти</a>
+      </div>
+    </div>
+
+    <!-- Про нас -->
+    <div class="section">
+      <div class="section-label">Про команду</div>
+      <div class="about-title c-h">Хто ми</div>
+      <div class="about-sub c-b">Три розробники · Один вектор</div>
+      <div class="about-text c-b">Ми — невелика команда з великими амбіціями. Валерій, Сергій та Андрій об'єднали свої скіли щоб будувати якісні веб-продукти від ідеї до деплою.</div>
+    </div>
+
+    <!-- Послуги -->
+    <div class="section">
+      <div class="section-label">Послуги</div>
+      <div class="services">
+        <div class="service-card">
+          <div class="service-icon">⚡</div>
+          <div class="service-name c-h">Frontend</div>
+          <div class="service-desc c-b">HTML, CSS, JS, React, адаптивна верстка</div>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">🔧</div>
+          <div class="service-name c-h">Backend</div>
+          <div class="service-desc c-b">Java Spring Boot, API, PostgreSQL</div>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">🎨</div>
+          <div class="service-name c-h">UI/UX</div>
+          <div class="service-desc c-b">Figma, дизайн систем, прототипи</div>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">☁️</div>
+          <div class="service-name c-h">DevOps</div>
+          <div class="service-desc c-b">CI/CD, Docker, деплой, хостинг</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Команда -->
+    <div class="section">
+      <div class="section-label">Команда</div>
+      <div class="team">
+        <div class="member">
+          <div class="member-avatar">👨‍💻</div>
+          <div class="member-name c-h">Валерій</div>
+          <div class="member-role c-b">Frontend</div>
+        </div>
+        <div class="member">
+          <div class="member-avatar">🛠</div>
+          <div class="member-name c-h">Сергій</div>
+          <div class="member-role c-b">Backend</div>
+        </div>
+        <div class="member">
+          <div class="member-avatar">☕</div>
+          <div class="member-name c-h">Андрій</div>
+          <div class="member-role c-b">Java Dev</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Блог -->
+    <div class="section">
+      <div class="section-label">Блог</div>
+      <div class="blog-card">
+        <div class="blog-date">29 березня 2026</div>
+        <div class="blog-title c-h">Як ми запустили cote-lapyx.com</div>
+        <div class="blog-excerpt c-b">Від ідеї до продакшну — наш шлях розробки командного сайту з нуля...</div>
+      </div>
+      <div class="blog-card">
+        <div class="blog-date">15 березня 2026</div>
+        <div class="blog-title c-h">Spring Boot + PostgreSQL: наш стек</div>
+        <div class="blog-excerpt c-b">Чому ми обрали саме цей стек і як він працює в нашому проекті...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ ВАРІАНТ D ═══════════ -->
+  <div class="col">
+    <div class="col-header">
+      <div class="col-badge badge-d">D</div>
+      <div class="col-title">
+        <strong>Playfair Display + Raleway</strong>
+        Елегантний · Класичний · Стильний
+      </div>
+    </div>
+
+    <!-- Hero -->
+    <div class="section">
+      <div class="section-label">Hero секція</div>
+      <div class="hero-tag d-b">IT команда · Україна</div>
+      <div class="hero-h1 d-h">Cote Lapyx —<br>команда яка будує</div>
+      <div class="hero-h2 d-b">Frontend, Backend та дизайн під одним дахом. Ми створюємо цифрові продукти.</div>
+      <div class="btns">
+        <a class="btn btn-primary d-b">Наші послуги</a>
+        <a class="btn btn-ghost d-b">Проекти</a>
+      </div>
+    </div>
+
+    <!-- Про нас -->
+    <div class="section">
+      <div class="section-label">Про команду</div>
+      <div class="about-title d-h">Хто ми</div>
+      <div class="about-sub d-b">Три розробники · Один вектор</div>
+      <div class="about-text d-b">Ми — невелика команда з великими амбіціями. Валерій, Сергій та Андрій об'єднали свої скіли щоб будувати якісні веб-продукти від ідеї до деплою.</div>
+    </div>
+
+    <!-- Послуги -->
+    <div class="section">
+      <div class="section-label">Послуги</div>
+      <div class="services">
+        <div class="service-card">
+          <div class="service-icon">⚡</div>
+          <div class="service-name d-h">Frontend</div>
+          <div class="service-desc d-b">HTML, CSS, JS, React, адаптивна верстка</div>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">🔧</div>
+          <div class="service-name d-h">Backend</div>
+          <div class="service-desc d-b">Java Spring Boot, API, PostgreSQL</div>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">🎨</div>
+          <div class="service-name d-h">UI/UX</div>
+          <div class="service-desc d-b">Figma, дизайн систем, прототипи</div>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">☁️</div>
+          <div class="service-name d-h">DevOps</div>
+          <div class="service-desc d-b">CI/CD, Docker, деплой, хостинг</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Команда -->
+    <div class="section">
+      <div class="section-label">Команда</div>
+      <div class="team">
+        <div class="member">
+          <div class="member-avatar">👨‍💻</div>
+          <div class="member-name d-h">Валерій</div>
+          <div class="member-role d-b">Frontend</div>
+        </div>
+        <div class="member">
+          <div class="member-avatar">🛠</div>
+          <div class="member-name d-h">Сергій</div>
+          <div class="member-role d-b">Backend</div>
+        </div>
+        <div class="member">
+          <div class="member-avatar">☕</div>
+          <div class="member-name d-h">Андрій</div>
+          <div class="member-role d-b">Java Dev</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Блог -->
+    <div class="section">
+      <div class="section-label">Блог</div>
+      <div class="blog-card">
+        <div class="blog-date">29 березня 2026</div>
+        <div class="blog-title d-h">Як ми запустили cote-lapyx.com</div>
+        <div class="blog-excerpt d-b">Від ідеї до продакшну — наш шлях розробки командного сайту з нуля...</div>
+      </div>
+      <div class="blog-card">
+        <div class="blog-date">15 березня 2026</div>
+        <div class="blog-title d-h">Spring Boot + PostgreSQL: наш стек</div>
+        <div class="blog-excerpt d-b">Чому ми обрали саме цей стек і як він працює в нашому проекті...</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const votes = { C: 1, D: 1 }; // Котик=C, Сергій=D
+  let myVote = null;
+
+  function vote(v) {
+    const el = document.getElementById('vote-result');
+    if (myVote) {
+      votes[myVote]--;
+    }
+    myVote = v;
+    votes[v]++;
+    el.innerHTML = `C: ${votes.C} голос${votes.C>1?'и':''} &nbsp;|&nbsp; D: ${votes.D} голос${votes.D>1?'и':''}`;
+  }
+
+  // Показати початковий рахунок
+  document.getElementById('vote-result').innerHTML = 'Котик: C &nbsp;|&nbsp; Сергій: D';
+</script>
+</body>
+</html>
