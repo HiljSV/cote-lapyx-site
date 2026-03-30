@@ -1,20 +1,62 @@
+@use "sass:color";
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Google Fonts
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+@import url("https://fonts.googleapis.com/css2?family=Geologica:wght@400;600;700&family=Nunito:wght@400;500;600&display=swap");
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// CSS змінні — Day / Night
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+:root {
+	--color-bg: #{$colorWhite};
+	--color-bg-alt: #{$colorLightGray};
+	--color-surface: #{$colorWhite};
+	--color-text: #{$mainColor};
+	--color-text-muted: #{$colorTextMuted};
+	--color-heading: #{$colorNavy};
+	--color-border: #{$colorBorder};
+	--color-accent: #{$colorAccent};
+	--color-primary: #{$colorBlue};
+	--color-navy: #{$colorNavy};
+
+	--shadow: #{$shadow};
+	--shadow-hover: #{$shadowHover};
+	--radius: #{$borderRadius};
+	--radius-lg: #{$borderRadiusLg};
+	--transition: #{$transition};
+}
+
+[data-theme="dark"] {
+	--color-bg: #{$colorDarkBg};
+	--color-bg-alt: #{$colorDarkSurface};
+	--color-surface: #{$colorDarkSurface};
+	--color-text: #{$colorDarkText};
+	--color-text-muted: #8da0bc;
+	--color-heading: #{$colorDarkText};
+	--color-border: #{$colorBorderDark};
+	--color-accent: #{$colorAccent};
+	--color-primary: #3b7dd8;
+	--color-navy: #{$colorDarkSurface};
+
+	--shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+	--shadow-hover: 0 8px 40px rgba(0, 0, 0, 0.5);
+}
+
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Підключення CSS-змінних
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // @use "includes/variables.css";
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// Підключення загальних віддалених шрифтів (Google Fonts)
-// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Стилі тега BODY
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 body {
 	min-width: #{$minWidth}px;
-	color: $mainColor;
+	color: var(--color-text);
 	font-family: $fontFamily;
 	font-size: #{$fontSize}px;
+	background-color: var(--color-bg);
+	transition: background-color $transition, color $transition;
 
 	// Скролл заблоковано
 	[data-fls-scrolllock] & {
@@ -28,6 +70,181 @@ body {
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Типографіка
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: $fontFamilyHeading;
+	color: var(--color-heading);
+	line-height: 1.2;
+	font-weight: 700;
+	margin: 0;
+}
+
+h1 {
+	font-size: clamp(36px, 5vw, 64px);
+}
+
+h2 {
+	font-size: clamp(28px, 3.5vw, 48px);
+}
+
+h3 {
+	font-size: clamp(22px, 2.5vw, 32px);
+}
+
+h4 {
+	font-size: clamp(18px, 2vw, 24px);
+}
+
+h5 {
+	font-size: clamp(16px, 1.5vw, 20px);
+}
+
+h6 {
+	font-size: clamp(14px, 1.2vw, 18px);
+}
+
+p {
+	font-family: $fontFamily;
+	color: var(--color-text);
+	line-height: 1.7;
+	margin: 0;
+}
+
+a {
+	color: var(--color-primary);
+	text-decoration: none;
+	transition: color $transition;
+
+	&:hover {
+		color: $colorAccent;
+	}
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Кнопки
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+.btn-primary,
+.btn-secondary,
+.btn-ghost {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 14px 32px;
+	border-radius: $borderRadius;
+	font-family: $fontFamily;
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1;
+	cursor: pointer;
+	text-decoration: none;
+	border: 2px solid transparent;
+	transition: background-color $transition, color $transition, border-color $transition, box-shadow $transition, transform $transition;
+	white-space: nowrap;
+
+	&:hover {
+		transform: translateY(-2px);
+	}
+
+	&:active {
+		transform: translateY(0);
+	}
+}
+
+.btn-primary {
+	background-color: $colorAccent;
+	color: $colorWhite;
+	border-color: $colorAccent;
+
+	&:hover {
+		background-color: color.adjust($colorAccent, $lightness: -8%);
+		border-color: color.adjust($colorAccent, $lightness: -8%);
+		color: $colorWhite;
+		box-shadow: 0 8px 24px rgba($colorAccent, 0.4);
+	}
+}
+
+.btn-secondary {
+	background-color: $colorBlue;
+	color: $colorWhite;
+	border-color: $colorBlue;
+
+	&:hover {
+		background-color: color.adjust($colorBlue, $lightness: -8%);
+		border-color: color.adjust($colorBlue, $lightness: -8%);
+		color: $colorWhite;
+		box-shadow: 0 8px 24px rgba($colorBlue, 0.4);
+	}
+}
+
+.btn-ghost {
+	background-color: transparent;
+	color: $colorWhite;
+	border-color: rgba($colorWhite, 0.5);
+
+	&:hover {
+		background-color: rgba($colorWhite, 0.1);
+		border-color: $colorWhite;
+		color: $colorWhite;
+	}
+
+	&--dark {
+		color: $colorNavy;
+		border-color: rgba($colorNavy, 0.3);
+
+		&:hover {
+			background-color: $colorNavy;
+			color: $colorWhite;
+			border-color: $colorNavy;
+		}
+	}
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Section title
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+.section-title {
+	display: inline-flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 12px;
+
+	&__label {
+		font-family: $fontFamily;
+		font-size: 13px;
+		font-weight: 600;
+		letter-spacing: 2px;
+		text-transform: uppercase;
+		color: $colorAccent;
+	}
+
+	&__text {
+		font-family: $fontFamilyHeading;
+		color: var(--color-heading);
+		line-height: 1.2;
+		font-weight: 700;
+	}
+
+	&__line {
+		width: 48px;
+		height: 3px;
+		background-color: $colorAccent;
+		border-radius: 2px;
+	}
+
+	&--center {
+		align-items: center;
+		text-align: center;
+	}
+}
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Оболонка WRAPPER
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -36,6 +253,7 @@ body {
 	display: flex;
 	flex-direction: column;
 	overflow: clip;
+	background-color: var(--color-bg);
 
 	// Притискаємо footer
 	> main {
@@ -50,11 +268,6 @@ body {
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Обмежуючий контейнер
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-// Стилі будуть застосовуватись до
-// всіх класів, що містять *__container
-// Наприклад header__container, main__container і т.п.
-// Сніппет (HTML): cnt
 
 @if ($responsiveType==1) {
 	// Чуйна

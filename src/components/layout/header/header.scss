@@ -1,5 +1,318 @@
 .header {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 100;
+	background-color: transparent;
+	transition: background-color $transition, backdrop-filter $transition, box-shadow $transition;
+
+	// Після скролу — темна підкладка з blur
+	&--scrolled {
+		background-color: rgba($colorNavy, 0.92);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		box-shadow: 0 2px 24px rgba(0, 0, 0, 0.2);
+	}
+
+	// Dark theme — завжди з підкладкою
+	[data-theme="dark"] & {
+		&--scrolled {
+			background-color: rgba($colorDarkBg, 0.95);
+		}
+	}
+
 	// .header__container
 	&__container {
+		display: flex;
+		align-items: center;
+		gap: 32px;
+		height: 72px;
+
+		@media (max-width: toEm($tablet)) {
+			gap: 16px;
+			height: 64px;
+		}
+	}
+
+	// .header__logo
+	&__logo {
+		display: flex;
+		align-items: center;
+		flex-shrink: 0;
+		text-decoration: none;
+		transition: opacity $transition;
+
+		&:hover {
+			opacity: 0.85;
+		}
+	}
+
+	&__logo-img {
+		height: 36px;
+		width: auto;
+		display: block;
+
+		@media (max-width: toEm($mobile)) {
+			height: 30px;
+		}
+	}
+
+	// .header__nav
+	&__nav {
+		flex: 1 1 auto;
+
+		@media (max-width: toEm($tablet)) {
+			// Мобільне меню
+			position: fixed;
+			top: 0;
+			right: -100%;
+			bottom: 0;
+			width: min(320px, 85vw);
+			background-color: $colorNavy;
+			padding: 88px 32px 40px;
+			overflow-y: auto;
+			transition: right $transition;
+			z-index: 99;
+			box-shadow: -4px 0 32px rgba(0, 0, 0, 0.3);
+
+			[data-theme="dark"] & {
+				background-color: $colorDarkSurface;
+			}
+
+			&.is-open {
+				right: 0;
+			}
+		}
+	}
+
+	&__nav-list {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+
+		@media (max-width: toEm($tablet)) {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 4px;
+		}
+	}
+
+	&__nav-item {
+		@media (max-width: toEm($tablet)) {
+			width: 100%;
+		}
+	}
+
+	&__nav-link {
+		display: inline-flex;
+		align-items: center;
+		padding: 8px 14px;
+		border-radius: 8px;
+		font-family: $fontFamily;
+		font-size: 14px;
+		font-weight: 600;
+		color: rgba($colorWhite, 0.85);
+		text-decoration: none;
+		transition: color $transition, background-color $transition;
+		white-space: nowrap;
+
+		&:hover {
+			color: $colorWhite;
+			background-color: rgba($colorWhite, 0.1);
+		}
+
+		&--active {
+			color: $colorAccent;
+			background-color: rgba($colorAccent, 0.12);
+
+			&:hover {
+				color: $colorAccent;
+				background-color: rgba($colorAccent, 0.18);
+			}
+		}
+
+		@media (max-width: toEm($tablet)) {
+			width: 100%;
+			padding: 12px 16px;
+			font-size: 16px;
+			border-radius: 10px;
+		}
+	}
+
+	// .header__actions
+	&__actions {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin-left: auto;
+		flex-shrink: 0;
+
+		@media (max-width: toEm($tablet)) {
+			gap: 8px;
+		}
+	}
+
+	// .header__lang
+	&__lang {
+		display: flex;
+		align-items: center;
+		gap: 2px;
+
+		@media (max-width: toEm($mobileSmall)) {
+			display: none;
+		}
+	}
+
+	&__lang-btn {
+		background: none;
+		border: none;
+		padding: 4px 6px;
+		font-family: $fontFamily;
+		font-size: 13px;
+		font-weight: 600;
+		color: rgba($colorWhite, 0.6);
+		cursor: pointer;
+		border-radius: 4px;
+		transition: color $transition, background-color $transition;
+		letter-spacing: 0.5px;
+
+		&:hover {
+			color: $colorWhite;
+		}
+
+		&--active {
+			color: $colorWhite;
+		}
+	}
+
+	&__lang-sep {
+		color: rgba($colorWhite, 0.3);
+		font-size: 12px;
+	}
+
+	// .header__theme-toggle
+	&__theme-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 38px;
+		height: 38px;
+		background: rgba($colorWhite, 0.1);
+		border: 1px solid rgba($colorWhite, 0.2);
+		border-radius: 8px;
+		color: rgba($colorWhite, 0.85);
+		cursor: pointer;
+		transition: background-color $transition, color $transition, border-color $transition;
+		padding: 0;
+
+		&:hover {
+			background: rgba($colorWhite, 0.18);
+			color: $colorWhite;
+			border-color: rgba($colorWhite, 0.35);
+		}
+	}
+
+	&__theme-icon {
+		display: block;
+		flex-shrink: 0;
+
+		&--moon {
+			display: none;
+		}
+
+		[data-theme="dark"] & {
+			&--sun {
+				display: none;
+			}
+			&--moon {
+				display: block;
+			}
+		}
+	}
+
+	// .header__login-btn
+	&__login-btn {
+		padding: 10px 22px;
+		font-size: 14px;
+
+		@media (max-width: toEm($mobile)) {
+			display: none;
+		}
+	}
+
+	// .header__burger
+	&__burger {
+		display: none;
+		flex-direction: column;
+		justify-content: center;
+		gap: 5px;
+		width: 42px;
+		height: 42px;
+		padding: 8px;
+		background: rgba($colorWhite, 0.1);
+		border: 1px solid rgba($colorWhite, 0.2);
+		border-radius: 8px;
+		cursor: pointer;
+		flex-shrink: 0;
+		transition: background-color $transition;
+
+		&:hover {
+			background: rgba($colorWhite, 0.18);
+		}
+
+		@media (max-width: toEm($tablet)) {
+			display: flex;
+		}
+
+		// Активний стан
+		&.is-active {
+			.header__burger-line {
+				&:nth-child(1) {
+					transform: translateY(7px) rotate(45deg);
+				}
+				&:nth-child(2) {
+					opacity: 0;
+					transform: scaleX(0);
+				}
+				&:nth-child(3) {
+					transform: translateY(-7px) rotate(-45deg);
+				}
+			}
+		}
+	}
+
+	&__burger-line {
+		display: block;
+		width: 100%;
+		height: 2px;
+		background-color: rgba($colorWhite, 0.85);
+		border-radius: 2px;
+		transition: transform $transition, opacity $transition;
+		transform-origin: center;
+	}
+
+	// Overlay при відкритому меню (мобайл)
+	&__overlay {
+		display: none;
+
+		@media (max-width: toEm($tablet)) {
+			display: block;
+			position: fixed;
+			inset: 0;
+			background-color: rgba(0, 0, 0, 0.5);
+			z-index: 98;
+			opacity: 0;
+			pointer-events: none;
+			transition: opacity $transition;
+
+			&.is-visible {
+				opacity: 1;
+				pointer-events: auto;
+			}
+		}
 	}
 }
