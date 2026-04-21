@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Профіль учасника команди cote-lapyx" />
+    <title>Профіль — cote-lapyx</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;600;700&family=Nunito:wght@400;500;600&display=swap"
+    />
+    <link rel="stylesheet" href="styles/style.scss" />
+    <link
+      rel="shortcut icon"
+      href="@img/favicon.ico"
+    />
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- HEADER -->
+      <header class="header" id="header">
+        <div class="header__container">
+          <a
+            href="index.html"
+            class="header__logo"
+            aria-label="cote-lapyx — на головну"
+          >
+            <img
+              class="header__logo-img"
+              src="@img/team/logo-clean.png"
+              alt="cote-lapyx logo"
+              width="36"
+              height="36"
+            />
+            <span class="header__logo-text">cote-lapyx</span>
+          </a>
+
+          <nav class="header__nav" id="main-nav" aria-label="Основна навігація">
+            <ul class="header__nav-list" role="list">
+              <li class="header__nav-item">
+                <a href="index.html" class="header__nav-link">Головна</a>
+              </li>
+              <li class="header__nav-item">
+                <a href="index.html#about" class="header__nav-link">Про нас</a>
+              </li>
+              <li class="header__nav-item">
+                <a
+                  href="team.html"
+                  class="header__nav-link is-active"
+                  aria-current="page"
+                  >Команда</a
+                >
+              </li>
+              <li class="header__nav-item">
+                <a href="index.html#services" class="header__nav-link"
+                  >Послуги</a
+                >
+              </li>
+              <li class="header__nav-item">
+                <a href="projects.html" class="header__nav-link">Проекти</a>
+              </li>
+              <li class="header__nav-item">
+                <a href="blog.html" class="header__nav-link">Блог</a>
+              </li>
+              <li class="header__nav-item">
+                <a href="index.html#contact" class="header__nav-link"
+                  >Контакт</a
+                >
+              </li>
+            </ul>
+          </nav>
+
+          <div class="header__controls">
+            <div class="header__lang" aria-label="Вибір мови">
+              <button
+                class="header__lang-btn is-active"
+                aria-pressed="true"
+                data-lang="ua"
+              >
+                UA
+              </button>
+              <button
+                class="header__lang-btn"
+                aria-pressed="false"
+                data-lang="en"
+              >
+                EN
+              </button>
+              <button
+                class="header__lang-btn"
+                aria-pressed="false"
+                data-lang="fr"
+              >
+                FR
+              </button>
+              <button
+                class="header__lang-btn"
+                aria-pressed="false"
+                data-lang="de"
+              >
+                DE
+              </button>
+            </div>
+            <button
+              class="header__theme-toggle"
+              id="theme-toggle"
+              aria-label="Перемкнути тему"
+              aria-pressed="true"
+            >
+              🌙
+            </button>
+            <a href="index.html#contact" class="btn btn--cyan btn--sm"
+              >Увійти</a
+            >
+            <button
+              class="header__burger"
+              id="burger-btn"
+              aria-label="Відкрити меню"
+              aria-expanded="false"
+              aria-controls="main-nav"
+            >
+              <span class="header__burger-line"></span>
+              <span class="header__burger-line"></span>
+              <span class="header__burger-line"></span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="page">
+        <!-- PROFILE HERO — Валерія (default) -->
+        <section class="member-hero" aria-label="Профіль учасника">
+          <div class="member-hero__container">
+            <div class="member-hero__photo-wrap">
+              <img
+                class="member-hero__photo"
+                src="@img/team/valerka.png"
+                alt="Валерія — Frontend Developer"
+                width="180"
+                height="180"
+                id="member-photo"
+              />
+            </div>
+            <div class="member-hero__info">
+              <h1 class="member-hero__name" id="member-name">Валерія</h1>
+              <p class="member-hero__role" id="member-role">
+                Frontend Developer
+              </p>
+              <p class="member-hero__bio" id="member-bio">
+                Спеціалізується на побудові пікселідеальних адаптивних
+                інтерфейсів. Закохана в BEM-методологію, CSS-анімації та
+                доступність. Вірить, що гарний код і гарний дизайн — нероздільні
+                речі. Постійно вдосконалює майстерність у рамках навчання
+                «Чертоги Фрілансера».
+              </p>
+              <ul class="member-hero__badges" aria-label="Навички" role="list">
+                <li><span class="neon-badge neon-badge--cyan">HTML5</span></li>
+                <li>
+                  <span class="neon-badge neon-badge--cyan">SCSS / BEM</span>
+                </li>
+                <li>
+                  <span class="neon-badge neon-badge--cyan">JavaScript</span>
+                </li>
+                <li><span class="neon-badge neon-badge--cyan">Vite</span></li>
+                <li>
+                  <span class="neon-badge neon-badge--magenta">Figma</span>
+                </li>
+                <li><span class="neon-badge neon-badge--green">Git</span></li>
+              </ul>
+              <div class="member-hero__actions">
+                <a href="#" class="btn btn--cyan">GitHub</a>
+                <a href="#" class="btn btn--magenta">LinkedIn</a>
+                <a href="#" class="btn btn--green">Telegram</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="section-divider" aria-hidden="true"></div>
+
+        <!-- SKILLS -->
+        <section
+          class="section section--surface"
+          aria-labelledby="skills-heading"
+        >
+          <div class="header__container">
+            <div class="section__header">
+              <h2 class="section-title" id="skills-heading">
+                Технічні навички
+              </h2>
+            </div>
+            <div class="member-skills__grid">
+              <div class="member-skills__group">
+                <h3 class="member-skills__group-title">Frontend</h3>
+                <div class="member-skills__bars">
+                  <div class="skill-bar">
+                    <div class="skill-bar__label">
+                      <span>HTML / CSS</span><span>95%</span>
+                    </div>
+                    <div class="skill-bar__track">
+                      <div class="skill-bar__fill" style="width: 95%"></div>
+                    </div>
+                  </div>
+                  <div class="skill-bar">
+                    <div class="skill-bar__label">
+                      <span>SCSS / BEM</span><span>90%</span>
+                    </div>
+                    <div class="skill-bar__track">
+                      <div class="skill-bar__fill" style="width: 90%"></div>
+                    </div>
+                  </div>
+                  <div class="skill-bar">
+                    <div class="skill-bar__label">
+                      <span>JavaScript ES6+</span><span>80%</span>
+                    </div>
+                    <div class="skill-bar__track">
+                      <div class="skill-bar__fill" style="width: 80%"></div>
+                    </div>
+                  </div>
+                  <div class="skill-bar">
+                    <div class="skill-bar__label">
+                      <span>Адаптивна верстка</span><span>92%</span>
+                    </div>
+                    <div class="skill-bar__track">
+                      <div class="skill-bar__fill" style="width: 92%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="member-skills__group">
+                <h3 class="member-skills__group-title">Інструменти</h3>
+                <div class="member-skills__bars">
+                  <div class="skill-bar">
+                    <div class="skill-bar__label">
+                      <span>Figma</span><span>75%</span>
+                    </div>
+                    <div class="skill-bar__track">
+                      <div
+                        class="skill-bar__fill skill-bar__fill--magenta"
+                        style="width: 75%"
+                      ></div>
+                    </div>
+                  </div>
+                  <div class="skill-bar">
+                    <div class="skill-bar__label">
+                      <span>Vite / Build Tools</span><span>70%</span>
+                    </div>
+                    <div class="skill-bar__track">
+                      <div
+                        class="skill-bar__fill skill-bar__fill--magenta"
+                        style="width: 70%"
+                      ></div>
+                    </div>
+                  </div>
+                  <div class="skill-bar">
+                    <div class="skill-bar__label">
+                      <span>Git / GitHub</span><span>78%</span>
+                    </div>
+                    <div class="skill-bar__track">
+                      <div
+                        class="skill-bar__fill skill-bar__fill--green"
+                        style="width: 78%"
+                      ></div>
+                    </div>
+                  </div>
+                  <div class="skill-bar">
+                    <div class="skill-bar__label">
+                      <span>Accessibility (a11y)</span><span>72%</span>
+                    </div>
+                    <div class="skill-bar__track">
+                      <div
+                        class="skill-bar__fill skill-bar__fill--green"
+                        style="width: 72%"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="section-divider" aria-hidden="true"></div>
+
+        <!-- PORTFOLIO -->
+        <section
+          class="section section--dark"
+          aria-labelledby="portfolio-heading"
+        >
+          <div class="header__container">
+            <div class="section__header">
+              <h2 class="section-title" id="portfolio-heading">
+                Особисті проекти
+              </h2>
+            </div>
+            <ul class="member-portfolio__grid" role="list">
+              <li>
+                <article class="project-card project-card--cyan">
+                  <div
+                    class="project-card__cover-placeholder"
+                    aria-hidden="true"
+                  >
+                    &lt;/&gt;
+                  </div>
+                  <div class="project-card__body">
+                    <h3 class="project-card__title">cote-lapyx.com</h3>
+                    <p class="project-card__description">
+                      Офіційний сайт студії. Pixel-perfect верстка за дизайном
+                      Андрія, BEM + SCSS, Vite.
+                    </p>
+                    <ul
+                      class="project-card__tags"
+                      aria-label="Технології"
+                      role="list"
+                    >
+                      <li>
+                        <span class="neon-badge neon-badge--cyan">HTML</span>
+                      </li>
+                      <li>
+                        <span class="neon-badge neon-badge--cyan">SCSS</span>
+                      </li>
+                      <li>
+                        <span class="neon-badge neon-badge--green">Vite</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="project-card__footer">
+                    <div class="project-card__links">
+                      <a href="#" class="btn btn--ghost btn--sm">GitHub</a>
+                      <a
+                        href="https://cote-lapyx.com"
+                        class="btn btn--cyan btn--sm"
+                        target="_blank"
+                        rel="noopener"
+                        >Demo</a
+                      >
+                    </div>
+                  </div>
+                </article>
+              </li>
+              <li>
+                <article class="project-card project-card--magenta">
+                  <div
+                    class="project-card__cover-placeholder"
+                    aria-hidden="true"
+                  >
+                    &#127912;
+                  </div>
+                  <div class="project-card__body">
+                    <h3 class="project-card__title">FLS Portfolio Template</h3>
+                    <p class="project-card__description">
+                      Шаблон портфоліо на базі FLS + Vite з анімаціями та
+                      підтримкою тем.
+                    </p>
+                    <ul
+                      class="project-card__tags"
+                      aria-label="Технології"
+                      role="list"
+                    >
+                      <li>
+                        <span class="neon-badge neon-badge--cyan">HTML</span>
+                      </li>
+                      <li>
+                        <span class="neon-badge neon-badge--cyan">SCSS</span>
+                      </li>
+                      <li>
+                        <span class="neon-badge neon-badge--magenta">JS</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="project-card__footer">
+                    <div class="project-card__links">
+                      <a href="#" class="btn btn--ghost btn--sm">GitHub</a>
+                      <a href="#" class="btn btn--magenta btn--sm">Demo</a>
+                    </div>
+                  </div>
+                </article>
+              </li>
+              <li>
+                <article class="project-card project-card--green">
+                  <div
+                    class="project-card__cover-placeholder"
+                    aria-hidden="true"
+                  >
+                    &#128196;
+                  </div>
+                  <div class="project-card__body">
+                    <h3 class="project-card__title">Component Library</h3>
+                    <p class="project-card__description">
+                      Особиста бібліотека UI-компонентів — картки, кнопки,
+                      форми, навігація у cyberpunk-стилі.
+                    </p>
+                    <ul
+                      class="project-card__tags"
+                      aria-label="Технології"
+                      role="list"
+                    >
+                      <li>
+                        <span class="neon-badge neon-badge--cyan">SCSS</span>
+                      </li>
+                      <li>
+                        <span class="neon-badge neon-badge--green">BEM</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <div class="project-card__footer">
+                    <div class="project-card__links">
+                      <a href="#" class="btn btn--ghost btn--sm">GitHub</a>
+                    </div>
+                  </div>
+                </article>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <div class="section-divider" aria-hidden="true"></div>
+
+        <!-- BLOG POSTS -->
+        <section
+          class="section section--surface"
+          aria-labelledby="posts-heading"
+        >
+          <div class="header__container">
+            <div class="section__header">
+              <h2 class="section-title" id="posts-heading">Статті</h2>
+            </div>
+            <nav class="member-posts__list" aria-label="Статті учасника">
+              <a href="blog.html" class="member-posts__item">
+                <time class="member-posts__date" datetime="2024-04-10"
+                  >10 квіт 2024</time
+                >
+                <span class="member-posts__title"
+                  >Cyberpunk-дизайн система на чистому SCSS</span
+                >
+                <span class="member-posts__arrow" aria-hidden="true">→</span>
+              </a>
+              <a href="blog.html" class="member-posts__item">
+                <time class="member-posts__date" datetime="2024-01-18"
+                  >18 січ 2024</time
+                >
+                <span class="member-posts__title"
+                  >BEM-методологія: чому ми все ще її любимо</span
+                >
+                <span class="member-posts__arrow" aria-hidden="true">→</span>
+              </a>
+            </nav>
+          </div>
+        </section>
+
+        <div class="section-divider" aria-hidden="true"></div>
+
+        <!-- CONTACT -->
+        <section class="cta" aria-labelledby="member-contact-heading">
+          <div class="cta__container">
+            <h2 class="cta__heading" id="member-contact-heading">
+              Хочете співпрацювати?
+            </h2>
+            <p class="cta__subheading">
+              Відкрита до нових проектів та фрілансу. Пишіть — обговоримо!
+            </p>
+            <a
+              href="mailto:hello@cote-lapyx.com"
+              class="btn btn--cyan btn--lg btn--pulse-cyan"
+              >Написати</a
+            >
+          </div>
+        </section>
+      </main>
+
+      <!-- FOOTER -->
+      <footer class="footer">
+        <div class="footer__top">
+          <div class="footer__container">
+            <div class="footer__col">
+              <a href="index.html" class="footer__logo">
+                <img
+                  class="footer__logo-img"
+                  src="@img/team/logo-clean.png"
+                  alt="cote-lapyx"
+                  width="32"
+                  height="32"
+                />
+                <span class="footer__logo-text">cote-lapyx</span>
+              </a>
+              <p class="footer__tagline">
+                IT-студія повного циклу — frontend, backend, дизайн.
+              </p>
+            </div>
+            <div class="footer__col">
+              <p class="footer__nav-title">Навігація</p>
+              <ul class="footer__nav-list" role="list">
+                <li>
+                  <a href="index.html" class="footer__nav-link">Головна</a>
+                </li>
+                <li>
+                  <a href="team.html" class="footer__nav-link">Команда</a>
+                </li>
+                <li>
+                  <a href="projects.html" class="footer__nav-link">Проекти</a>
+                </li>
+                <li><a href="blog.html" class="footer__nav-link">Блог</a></li>
+              </ul>
+            </div>
+            <div class="footer__col">
+              <p class="footer__nav-title">Контакти</p>
+              <a href="mailto:hello@cote-lapyx.com" class="footer__contact-item"
+                >hello@cote-lapyx.com</a
+              >
+              <a
+                href="https://t.me/cotelapyx"
+                class="footer__contact-item"
+                target="_blank"
+                rel="noopener"
+                >Telegram</a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="footer__bottom">
+          <div class="footer__container">
+            <div class="footer__bottom-inner">
+              <p class="footer__copyright">
+                &copy; 2024 cote-lapyx. Всі права захищені.
+              </p>
+              <p class="footer__powered">
+                Powered by <span>cote-lapyx team</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>

@@ -11,20 +11,20 @@
 // Стилі тега BODY
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 body {
-	min-width: #{$minWidth}px;
-	color: $mainColor;
-	font-family: $fontFamily;
-	font-size: #{$fontSize}px;
+  min-width: #{$minWidth}px;
+  color: $mainColor;
+  font-family: $fontFamily;
+  font-size: #{$fontSize}px;
 
-	// Скролл заблоковано
-	[data-fls-scrolllock] & {
-		overflow: hidden;
-		touch-action: none;
-		overscroll-behavior: none;
-	}
-	// Сайт завантажений
-	[data-fls-loaded] & {
-	}
+  // Скролл заблоковано
+  [data-fls-scrolllock] & {
+    overflow: hidden;
+    touch-action: none;
+    overscroll-behavior: none;
+  }
+  // Сайт завантажений
+  [data-fls-loaded] & {
+  }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -32,19 +32,19 @@ body {
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 .wrapper {
-	min-height: 100%;
-	display: flex;
-	flex-direction: column;
-	overflow: clip;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: clip;
 
-	// Притискаємо footer
-	> main {
-		flex: 1 1 auto;
-	}
-	// Фікс для слайдерів
-	> * {
-		min-width: 0;
-	}
+  // Притискаємо footer
+  > main {
+    flex: 1 1 auto;
+  }
+  // Фікс для слайдерів
+  > * {
+    min-width: 0;
+  }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -57,50 +57,100 @@ body {
 // Сніппет (HTML): cnt
 
 @if ($responsiveType==1) {
-	// Чуйна
-	[class*="__container"] {
-		@if ($maxWidthContainer>0) {
-			max-width: #{$containerWidth}px;
-			margin: 0 auto;
-		}
-		@if ($containerPadding>0) {
-			@if ($maxWidthContainer>0) {
-				padding-left: #{math.div($containerPadding, 2)}px;
-				padding-right: #{math.div($containerPadding, 2)}px;
-			} @else {
-				@include adaptiveValue("padding-left", math.div($containerPadding, 2), 15);
-				@include adaptiveValue("padding-right", math.div($containerPadding, 2), 15);
-			}
-		}
-	}
+  // Чуйна
+  [class*="__container"] {
+    @if ($maxWidthContainer>0) {
+      max-width: #{$containerWidth}px;
+      margin: 0 auto;
+    }
+    @if ($containerPadding>0) {
+      @if ($maxWidthContainer>0) {
+        padding-left: #{math.div($containerPadding, 2)}px;
+        padding-right: #{math.div($containerPadding, 2)}px;
+      } @else {
+        @include adaptiveValue(
+          "padding-left",
+          math.div($containerPadding, 2),
+          15
+        );
+        @include adaptiveValue(
+          "padding-right",
+          math.div($containerPadding, 2),
+          15
+        );
+      }
+    }
+  }
 } @else {
-	// Брейк-поїнтами
-	[class*="__container"] {
-		margin: 0 auto;
-		@if ($maxWidthContainer>0) {
-			max-width: #{$maxWidthContainer}px;
-		} @else {
-			@if ($containerPadding>0) {
-				padding-left: #{math.div($containerPadding, 2)}px;
-				padding-right: #{math.div($containerPadding, 2)}px;
-			}
-		}
-		@media (max-width: toEm($pc)) {
-			max-width: 970px;
-		}
-		@media (max-width: toEm($tablet)) {
-			max-width: 750px;
-		}
-		@media (max-width: toEm($mobile)) {
-			max-width: none;
-			@if ($containerPadding>0 and $maxWidthContainer>0) {
-				padding-left: #{math.div($containerPadding, 2)}px;
-				padding-right: #{math.div($containerPadding, 2)}px;
-			}
-		}
-	}
+  // Брейк-поїнтами
+  [class*="__container"] {
+    margin: 0 auto;
+    @if ($maxWidthContainer>0) {
+      max-width: #{$maxWidthContainer}px;
+    } @else {
+      @if ($containerPadding>0) {
+        padding-left: #{math.div($containerPadding, 2)}px;
+        padding-right: #{math.div($containerPadding, 2)}px;
+      }
+    }
+    @media (max-width: toEm($pc)) {
+      max-width: 970px;
+    }
+    @media (max-width: toEm($tablet)) {
+      max-width: 750px;
+    }
+    @media (max-width: toEm($mobile)) {
+      max-width: none;
+      @if ($containerPadding>0 and $maxWidthContainer>0) {
+        padding-left: #{math.div($containerPadding, 2)}px;
+        padding-right: #{math.div($containerPadding, 2)}px;
+      }
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Загальні стилі для усього сайту
 // ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+// Cyberpunk design system
+@import "cyberpunk";
+
+// Base reset for dark theme
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: $bg-dark;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: inherit;
+}
+
+// Components
+@import "components/buttons";
+@import "components/header";
+@import "components/footer";
+@import "components/hero";
+@import "components/cards";
+@import "components/forms";
+
+// Pages
+@import "pages/home";
+@import "pages/team";
+@import "pages/projects";
+@import "pages/blog";
+@import "pages/member";

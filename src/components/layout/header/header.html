@@ -1,5 +1,88 @@
-<header data-fls-header class="header">
-	<div class="header__container">
-		<!-- <include src="@components/layout/menu/menu.html" locals='{"active":"[[active]]"}'></include> -->
-	</div>
+<header data-fls-header class="header" id="header">
+  <div class="header__container">
+    <a href="/" class="header__logo" aria-label="cote-lapyx — на головну">
+      <img
+        class="header__logo-img"
+        src="@img/team/logo-clean.png"
+        alt="cote-lapyx logo"
+        width="36"
+        height="36"
+      />
+      <span class="header__logo-text">cote-lapyx</span>
+    </a>
+
+    <nav class="header__nav" id="main-nav" aria-label="Основна навігація">
+      <ul class="header__nav-list" role="list">
+        <li class="header__nav-item">
+          <a href="/" class="header__nav-link" data-nav-link>Головна</a>
+        </li>
+        <li class="header__nav-item">
+          <a href="#about" class="header__nav-link" data-nav-link>Про нас</a>
+        </li>
+        <li class="header__nav-item">
+          <a href="team.html" class="header__nav-link" data-nav-link>Команда</a>
+        </li>
+        <li class="header__nav-item">
+          <a href="#services" class="header__nav-link" data-nav-link>Послуги</a>
+        </li>
+        <li class="header__nav-item">
+          <a href="projects.html" class="header__nav-link" data-nav-link
+            >Проекти</a
+          >
+        </li>
+        <li class="header__nav-item">
+          <a href="blog.html" class="header__nav-link" data-nav-link>Блог</a>
+        </li>
+        <li class="header__nav-item">
+          <a href="#contact" class="header__nav-link" data-nav-link>Контакт</a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="header__controls">
+      <div class="header__lang" aria-label="Вибір мови">
+        <button
+          class="header__lang-btn is-active"
+          aria-pressed="true"
+          data-lang="ua"
+        >
+          UA
+        </button>
+        <button class="header__lang-btn" aria-pressed="false" data-lang="en">
+          EN
+        </button>
+        <button class="header__lang-btn" aria-pressed="false" data-lang="fr">
+          FR
+        </button>
+        <button class="header__lang-btn" aria-pressed="false" data-lang="de">
+          DE
+        </button>
+      </div>
+
+      <button
+        class="header__theme-toggle"
+        id="theme-toggle"
+        aria-label="Перемкнути тему"
+        aria-pressed="true"
+      >
+        🌙
+      </button>
+
+      <a href="#contact" class="header__login-btn btn btn--cyan btn--sm"
+        >Увійти</a
+      >
+
+      <button
+        class="header__burger"
+        id="burger-btn"
+        aria-label="Відкрити меню"
+        aria-expanded="false"
+        aria-controls="main-nav"
+      >
+        <span class="header__burger-line"></span>
+        <span class="header__burger-line"></span>
+        <span class="header__burger-line"></span>
+      </button>
+    </div>
+  </div>
 </header>

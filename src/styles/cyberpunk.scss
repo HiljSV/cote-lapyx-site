@@ -1,0 +1,204 @@
+// =============================================================================
+// Cyberpunk Design System — cote-lapyx.com
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// Mixins
+// -----------------------------------------------------------------------------
+
+@mixin neon-glow($color, $intensity: 1) {
+  box-shadow:
+    0 0 #{10px * $intensity} $color,
+    0 0 #{20px * $intensity} $color,
+    0 0 #{40px * $intensity} rgba($color, 0.3);
+}
+
+@mixin neon-text($color) {
+  color: $color;
+  text-shadow:
+    0 0 10px $color,
+    0 0 20px $color,
+    0 0 40px rgba($color, 0.5);
+}
+
+@mixin glass-card {
+  background: $bg-card;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid $border-cyan;
+  border-radius: 12px;
+}
+
+@mixin neon-border($color, $radius: 12px) {
+  border: 1px solid $color;
+  border-radius: $radius;
+  box-shadow:
+    0 0 8px rgba($color, 0.4),
+    inset 0 0 8px rgba($color, 0.05);
+}
+
+@mixin hex-bg {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='52' viewBox='0 0 60 52'%3E%3Cpolygon points='30,2 58,16 58,44 30,58 2,44 2,16' fill='none' stroke='rgba(0,229,255,0.04)' stroke-width='1'/%3E%3C/svg%3E");
+  background-size: 60px 52px;
+}
+
+// -----------------------------------------------------------------------------
+// Keyframe animations
+// -----------------------------------------------------------------------------
+
+@keyframes neon-pulse-cyan {
+  0%,
+  100% {
+    box-shadow:
+      0 0 10px $neon-cyan,
+      0 0 20px $neon-cyan,
+      0 0 40px rgba($neon-cyan, 0.3);
+  }
+  50% {
+    box-shadow:
+      0 0 15px $neon-cyan,
+      0 0 35px $neon-cyan,
+      0 0 60px rgba($neon-cyan, 0.5);
+  }
+}
+
+@keyframes neon-pulse-magenta {
+  0%,
+  100% {
+    box-shadow:
+      0 0 10px $neon-magenta,
+      0 0 20px $neon-magenta,
+      0 0 40px rgba($neon-magenta, 0.3);
+  }
+  50% {
+    box-shadow:
+      0 0 15px $neon-magenta,
+      0 0 35px $neon-magenta,
+      0 0 60px rgba($neon-magenta, 0.5);
+  }
+}
+
+@keyframes neon-pulse-green {
+  0%,
+  100% {
+    box-shadow:
+      0 0 10px $neon-green,
+      0 0 20px $neon-green,
+      0 0 40px rgba($neon-green, 0.3);
+  }
+  50% {
+    box-shadow:
+      0 0 15px $neon-green,
+      0 0 30px $neon-green,
+      0 0 55px rgba($neon-green, 0.5);
+  }
+}
+
+@keyframes hex-drift {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 60px 52px;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cursor-trail-fade {
+  0% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Utility classes
+// -----------------------------------------------------------------------------
+
+.neon-text-cyan {
+  @include neon-text($neon-cyan);
+}
+
+.neon-text-magenta {
+  @include neon-text($neon-magenta);
+}
+
+.neon-text-green {
+  @include neon-text($neon-green);
+}
+
+.section-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    $neon-cyan 30%,
+    $neon-magenta 70%,
+    transparent 100%
+  );
+  opacity: 0.5;
+  margin: 0;
+}
+
+.section-title {
+  font-family: $fontHeading;
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 700;
+  color: $text-primary;
+  position: relative;
+  display: inline-block;
+
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 60%;
+    height: 2px;
+    background: linear-gradient(90deg, $neon-cyan, transparent);
+    box-shadow: 0 0 8px $neon-cyan;
+  }
+}
+
+.neon-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+
+  &--cyan {
+    color: $neon-cyan;
+    border: 1px solid rgba($neon-cyan, 0.5);
+    background: rgba($neon-cyan, 0.07);
+  }
+
+  &--magenta {
+    color: $neon-magenta;
+    border: 1px solid rgba($neon-magenta, 0.5);
+    background: rgba($neon-magenta, 0.07);
+  }
+
+  &--green {
+    color: $neon-green;
+    border: 1px solid rgba($neon-green, 0.5);
+    background: rgba($neon-green, 0.07);
+  }
+}

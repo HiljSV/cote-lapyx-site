@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Блог команди cote-lapyx — Frontend, Backend, Design"
+    />
+    <title>Блог — cote-lapyx</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;600;700&family=Nunito:wght@400;500;600&display=swap"
+    />
+    <link rel="stylesheet" href="styles/style.scss" />
+    <link
+      rel="shortcut icon"
+      href="@img/favicon.ico"
+    />
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- HEADER -->
+      <header class="header" id="header">
+        <div class="header__container">
+          <a
+            href="index.html"
+            class="header__logo"
+            aria-label="cote-lapyx — на головну"
+          >
+            <img
+              class="header__logo-img"
+              src="@img/team/logo-clean.png"
+              alt="cote-lapyx logo"
+              width="36"
+              height="36"
+            />
+            <span class="header__logo-text">cote-lapyx</span>
+          </a>
+
+          <nav class="header__nav" id="main-nav" aria-label="Основна навігація">
+            <ul class="header__nav-list" role="list">
+              <li class="header__nav-item">
+                <a href="index.html" class="header__nav-link">Головна</a>
+              </li>
+              <li class="header__nav-item">
+                <a href="index.html#about" class="header__nav-link">Про нас</a>
+              </li>
+              <li class="header__nav-item">
+                <a href="team.html" class="header__nav-link">Команда</a>
+              </li>
+              <li class="header__nav-item">
+                <a href="index.html#services" class="header__nav-link"
+                  >Послуги</a
+                >
+              </li>
+              <li class="header__nav-item">
+                <a href="projects.html" class="header__nav-link">Проекти</a>
+              </li>
+              <li class="header__nav-item">
+                <a
+                  href="blog.html"
+                  class="header__nav-link is-active"
+                  aria-current="page"
+                  >Блог</a
+                >
+              </li>
+              <li class="header__nav-item">
+                <a href="index.html#contact" class="header__nav-link"
+                  >Контакт</a
+                >
+              </li>
+            </ul>
+          </nav>
+
+          <div class="header__controls">
+            <div class="header__lang" aria-label="Вибір мови">
+              <button
+                class="header__lang-btn is-active"
+                aria-pressed="true"
+                data-lang="ua"
+              >
+                UA
+              </button>
+              <button
+                class="header__lang-btn"
+                aria-pressed="false"
+                data-lang="en"
+              >
+                EN
+              </button>
+              <button
+                class="header__lang-btn"
+                aria-pressed="false"
+                data-lang="fr"
+              >
+                FR
+              </button>
+              <button
+                class="header__lang-btn"
+                aria-pressed="false"
+                data-lang="de"
+              >
+                DE
+              </button>
+            </div>
+            <button
+              class="header__theme-toggle"
+              id="theme-toggle"
+              aria-label="Перемкнути тему"
+              aria-pressed="true"
+            >
+              🌙
+            </button>
+            <a href="index.html#contact" class="btn btn--cyan btn--sm"
+              >Увійти</a
+            >
+            <button
+              class="header__burger"
+              id="burger-btn"
+              aria-label="Відкрити меню"
+              aria-expanded="false"
+              aria-controls="main-nav"
+            >
+              <span class="header__burger-line"></span>
+              <span class="header__burger-line"></span>
+              <span class="header__burger-line"></span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- PAGE HERO -->
+      <div class="page-hero">
+        <div class="page-hero__container">
+          <h1 class="page-hero__heading">Блог</h1>
+          <p class="page-hero__subheading">
+            Думки, досвід і технічні нотатки команди cote-lapyx
+          </p>
+        </div>
+      </div>
+
+      <main class="page">
+        <section class="section section--dark" aria-label="Статті блогу">
+          <div class="header__container">
+            <!-- Filter bar -->
+            <div class="blog-page__filter">
+              <div class="filter-bar" role="search" aria-label="Фільтр статей">
+                <div class="filter-bar__group">
+                  <span class="filter-bar__label">Категорія:</span>
+                  <button
+                    class="filter-bar__btn is-active"
+                    data-filter-cat="all"
+                  >
+                    Всі
+                  </button>
+                  <button class="filter-bar__btn" data-filter-cat="frontend">
+                    Frontend
+                  </button>
+                  <button class="filter-bar__btn" data-filter-cat="backend">
+                    Backend
+                  </button>
+                  <button class="filter-bar__btn" data-filter-cat="design">
+                    Design
+                  </button>
+                  <button class="filter-bar__btn" data-filter-cat="devops">
+                    DevOps
+                  </button>
+                </div>
+                <div class="filter-bar__search">
+                  <span class="filter-bar__search-icon" aria-hidden="true"
+                    >&#128269;</span
+                  >
+                  <input
+                    class="filter-bar__search-input"
+                    type="search"
+                    placeholder="Пошук статей..."
+                    aria-label="Пошук статей"
+                    id="blog-search"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Grid -->
+            <ul class="blog-page__grid" role="list" id="blog-grid">
+              <li data-cat="frontend">
+                <article class="blog-card">
+                  <div class="blog-card__cover-placeholder" aria-hidden="true">
+                    &#128196;
+                  </div>
+                  <div class="blog-card__body">
+                    <div class="blog-card__meta">
+                      <span class="blog-card__category">Frontend</span>
+                      <span class="blog-card__read-time">5 хв читання</span>
+                    </div>
+                    <h2 class="blog-card__title">
+                      Cyberpunk-дизайн система на чистому SCSS
+                    </h2>
+                    <p class="blog-card__excerpt">
+                      Як побудувати повноцінну дизайн-систему з неоновими
+                      ефектами, BEM та мобільним підходом без жодного
+                      фреймворку.
+                    </p>
+                    <div class="blog-card__footer">
+                      <div class="blog-card__author">
+                        <img
+                          class="blog-card__author-avatar"
+                          src="@img/team/valerka.png"
+                          alt="Валерія"
+                          width="26"
+                          height="26"
+                        />
+                        Валерія
+                      </div>
+                      <time class="blog-card__date" datetime="2024-04-10"
+                        >10 квіт 2024</time
+                      >
+                    </div>
+                  </div>
+                </article>
+              </li>
+
+              <li data-cat="backend">
+                <article class="blog-card">
+                  <div class="blog-card__cover-placeholder" aria-hidden="true">
+                    &#9881;
+                  </div>
+                  <div class="blog-card__body">
+                    <div class="blog-card__meta">
+                      <span class="blog-card__category">Backend</span>
+                      <span class="blog-card__read-time">7 хв читання</span>
+                    </div>
+                    <h2 class="blog-card__title">
+                      REST API на Java Spring Boot: архітектура з нуля
+                    </h2>
+                    <p class="blog-card__excerpt">
+                      Практичний гайд по побудові масштабованого REST API з
+                      авторизацією JWT, валідацією та документацією Swagger.
+                    </p>
+                    <div class="blog-card__footer">
+                      <div class="blog-card__author">
+                        <div
+                          style="
+                            width: 26px;
+                            height: 26px;
+                            border-radius: 50%;
+                            background: linear-gradient(
+                              135deg,
+                              rgba(0, 229, 255, 0.2),
+                              rgba(224, 64, 251, 0.2)
+                            );
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 11px;
+                            font-weight: 700;
+                            color: #00e5ff;
+                            border: 1px solid rgba(0, 229, 255, 0.3);
+                          "
+                          aria-hidden="true"
+                        >
+                          С
+                        </div>
+                        Сергій
+                      </div>
+                      <time class="blog-card__date" datetime="2024-03-28"
+                        >28 бер 2024</time
+                      >
+                    </div>
+                  </div>
+                </article>
+              </li>
+
+              <li data-cat="design">
+                <article class="blog-card">
+                  <div class="blog-card__cover-placeholder" aria-hidden="true">
+                    &#9670;
+                  </div>
+                  <div class="blog-card__body">
+                    <div class="blog-card__meta">
+                      <span class="blog-card__category">Design</span>
+                      <span class="blog-card__read-time">4 хв читання</span>
+                    </div>
+                    <h2 class="blog-card__title">
+                      Створення логотипу: геометричний кіт з неоном
+                    </h2>
+                    <p class="blog-card__excerpt">
+                      Розповідь про процес створення брендингу cote-lapyx — від
+                      ескізу до фінальної SVG-анімації та кольорової палітри.
+                    </p>
+                    <div class="blog-card__footer">
+                      <div class="blog-card__author">
+                        <img
+                          class="blog-card__author-avatar"
+                          src="@img/team/andrii.png"
+                          alt="Андрій"
+                          width="26"
+                          height="26"
+                        />
+                        Андрій
+                      </div>
+                      <time class="blog-card__date" datetime="2024-03-15"
+                        >15 бер 2024</time
+                      >
+                    </div>
+                  </div>
+                </article>
+              </li>
+
+              <li data-cat="devops">
+                <article class="blog-card">
+                  <div class="blog-card__cover-placeholder" aria-hidden="true">
+                    &#128640;
+                  </div>
+                  <div class="blog-card__body">
+                    <div class="blog-card__meta">
+                      <span class="blog-card__category">DevOps</span>
+                      <span class="blog-card__read-time">6 хв читання</span>
+                    </div>
+                    <h2 class="blog-card__title">
+                      Деплой на Apache: від localhost до продакшену
+                    </h2>
+                    <p class="blog-card__excerpt">
+                      Покрокова інструкція налаштування Apache, SSL-сертифікатів
+                      та автодеплою для Vite-проектів на Debian-сервері.
+                    </p>
+                    <div class="blog-card__footer">
+                      <div class="blog-card__author">
+                        <img
+                          class="blog-card__author-avatar"
+                          src="@img/team/andrii.png"
+                          alt="Андрій"
+                          width="26"
+                          height="26"
+                        />
+                        Андрій
+                      </div>
+                      <time class="blog-card__date" datetime="2024-02-20"
+                        >20 лют 2024</time
+                      >
+                    </div>
+                  </div>
+                </article>
+              </li>
+
+              <li data-cat="backend">
+                <article class="blog-card">
+                  <div class="blog-card__cover-placeholder" aria-hidden="true">
+                    &#129302;
+                  </div>
+                  <div class="blog-card__body">
+                    <div class="blog-card__meta">
+                      <span class="blog-card__category">Backend</span>
+                      <span class="blog-card__read-time">8 хв читання</span>
+                    </div>
+                    <h2 class="blog-card__title">
+                      Інтеграція Claude API: голосовий асистент за 3 кроки
+                    </h2>
+                    <p class="blog-card__excerpt">
+                      Як ми побудували JARVIS на базі Anthropic Claude API —
+                      розпізнавання мови, обробка контексту та відповіді в
+                      реальному часі.
+                    </p>
+                    <div class="blog-card__footer">
+                      <div class="blog-card__author">
+                        <div
+                          style="
+                            width: 26px;
+                            height: 26px;
+                            border-radius: 50%;
+                            background: linear-gradient(
+                              135deg,
+                              rgba(0, 229, 255, 0.2),
+                              rgba(224, 64, 251, 0.2)
+                            );
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 11px;
+                            font-weight: 700;
+                            color: #00e5ff;
+                            border: 1px solid rgba(0, 229, 255, 0.3);
+                          "
+                          aria-hidden="true"
+                        >
+                          С
+                        </div>
+                        Сергій
+                      </div>
+                      <time class="blog-card__date" datetime="2024-02-05"
+                        >05 лют 2024</time
+                      >
+                    </div>
+                  </div>
+                </article>
+              </li>
+
+              <li data-cat="frontend">
+                <article class="blog-card">
+                  <div class="blog-card__cover-placeholder" aria-hidden="true">
+                    &#127912;
+                  </div>
+                  <div class="blog-card__body">
+                    <div class="blog-card__meta">
+                      <span class="blog-card__category">Frontend</span>
+                      <span class="blog-card__read-time">5 хв читання</span>
+                    </div>
+                    <h2 class="blog-card__title">
+                      BEM-методологія: чому ми все ще її любимо
+                    </h2>
+                    <p class="blog-card__excerpt">
+                      Переваги BEM у великих проектах, типові помилки та наші
+                      патерни найменування класів у реальному коді
+                      cote-lapyx.com.
+                    </p>
+                    <div class="blog-card__footer">
+                      <div class="blog-card__author">
+                        <img
+                          class="blog-card__author-avatar"
+                          src="@img/team/valerka.png"
+                          alt="Валерія"
+                          width="26"
+                          height="26"
+                        />
+                        Валерія
+                      </div>
+                      <time class="blog-card__date" datetime="2024-01-18"
+                        >18 січ 2024</time
+                      >
+                    </div>
+                  </div>
+                </article>
+              </li>
+            </ul>
+          </div>
+        </section>
+      </main>
+
+      <!-- FOOTER -->
+      <footer class="footer">
+        <div class="footer__top">
+          <div class="footer__container">
+            <div class="footer__col">
+              <a href="index.html" class="footer__logo">
+                <img
+                  class="footer__logo-img"
+                  src="@img/team/logo-clean.png"
+                  alt="cote-lapyx"
+                  width="32"
+                  height="32"
+                />
+                <span class="footer__logo-text">cote-lapyx</span>
+              </a>
+              <p class="footer__tagline">
+                IT-студія повного циклу — frontend, backend, дизайн.
+              </p>
+            </div>
+            <div class="footer__col">
+              <p class="footer__nav-title">Навігація</p>
+              <ul class="footer__nav-list" role="list">
+                <li>
+                  <a href="index.html" class="footer__nav-link">Головна</a>
+                </li>
+                <li>
+                  <a href="team.html" class="footer__nav-link">Команда</a>
+                </li>
+                <li>
+                  <a href="projects.html" class="footer__nav-link">Проекти</a>
+                </li>
+                <li><a href="blog.html" class="footer__nav-link">Блог</a></li>
+              </ul>
+            </div>
+            <div class="footer__col">
+              <p class="footer__nav-title">Контакти</p>
+              <a href="mailto:hello@cote-lapyx.com" class="footer__contact-item"
+                >hello@cote-lapyx.com</a
+              >
+              <a
+                href="https://t.me/cotelapyx"
+                class="footer__contact-item"
+                target="_blank"
+                rel="noopener"
+                >Telegram</a
+              >
+            </div>
+          </div>
+        </div>
+        <div class="footer__bottom">
+          <div class="footer__container">
+            <div class="footer__bottom-inner">
+              <p class="footer__copyright">
+                &copy; 2024 cote-lapyx. Всі права захищені.
+              </p>
+              <p class="footer__powered">
+                Powered by <span>cote-lapyx team</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,206 @@
+// =============================================================================
+// Footer — Cyberpunk style
+// =============================================================================
+
+.footer {
+  background: $bg-surface;
+  border-top: 1px solid $border-cyan;
+  box-shadow: 0 -4px 40px rgba($neon-cyan, 0.05);
+  margin-top: auto;
+
+  &__top {
+    padding: 60px 0 40px;
+  }
+
+  &__container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px;
+
+    @media (max-width: toEm($tablet)) {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    @media (max-width: toEm($mobile)) {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+  }
+
+  &__col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  // Logo column
+  &__logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    margin-bottom: 4px;
+
+    &-img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+    }
+
+    &-text {
+      font-family: $fontHeading;
+      font-size: 16px;
+      font-weight: 700;
+      @include neon-text($neon-cyan);
+      letter-spacing: 0.05em;
+    }
+  }
+
+  &__tagline {
+    font-size: 14px;
+    color: $text-muted;
+    line-height: 1.6;
+    max-width: 240px;
+  }
+
+  // Nav column
+  &__nav-title {
+    font-family: $fontHeading;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: $neon-cyan;
+    margin-bottom: 4px;
+  }
+
+  &__nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__nav-link {
+    font-size: 14px;
+    color: $text-secondary;
+    text-decoration: none;
+    transition: color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    &::before {
+      content: "›";
+      color: $neon-cyan;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    &:hover,
+    &:focus-visible {
+      color: $neon-cyan;
+
+      &::before {
+        opacity: 1;
+      }
+    }
+
+    &:focus-visible {
+      outline: 1px solid $neon-cyan;
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+  }
+
+  // Contacts column
+  &__contact-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: $text-secondary;
+    text-decoration: none;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: $neon-cyan;
+    }
+
+    svg,
+    .footer__contact-icon {
+      color: $neon-cyan;
+      flex-shrink: 0;
+      opacity: 0.8;
+    }
+  }
+
+  &__socials {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+  }
+
+  &__social-link {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid $border-cyan;
+    border-radius: 6px;
+    color: $text-secondary;
+    text-decoration: none;
+    font-size: 16px;
+    transition: all 0.2s ease;
+
+    &:hover,
+    &:focus-visible {
+      color: $neon-cyan;
+      border-color: rgba($neon-cyan, 0.6);
+      box-shadow: 0 0 10px rgba($neon-cyan, 0.2);
+    }
+
+    &:focus-visible {
+      outline: 2px solid $neon-cyan;
+      outline-offset: 2px;
+    }
+  }
+
+  // Bottom bar
+  &__bottom {
+    border-top: 1px solid $border-cyan;
+    padding: 16px 0;
+  }
+
+  &__bottom-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+
+    @media (max-width: toEm($mobile)) {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+
+  &__copyright {
+    font-size: 13px;
+    color: $text-muted;
+  }
+
+  &__powered {
+    font-size: 13px;
+    color: $text-muted;
+
+    span {
+      color: $neon-cyan;
+      font-weight: 600;
+    }
+  }
+}

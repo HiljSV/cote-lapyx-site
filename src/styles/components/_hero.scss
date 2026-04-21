@@ -1,0 +1,256 @@
+// =============================================================================
+// Hero — Cyberpunk style
+// =============================================================================
+
+.hero {
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  background: $bg-dark;
+
+  // Animated hexagon background
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    @include hex-bg;
+    animation: hex-drift 20s linear infinite;
+    pointer-events: none;
+  }
+
+  // Radial glow
+  &::after {
+    content: "";
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 800px;
+    height: 400px;
+    background: radial-gradient(
+      ellipse at center,
+      rgba($neon-cyan, 0.06) 0%,
+      rgba($neon-magenta, 0.03) 40%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+
+  &__container {
+    position: relative;
+    z-index: 1;
+    padding-top: 80px;
+    padding-bottom: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 32px;
+
+    @media (max-width: toEm($mobile)) {
+      padding-top: 60px;
+      padding-bottom: 60px;
+      gap: 24px;
+    }
+  }
+
+  &__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: $fontHeading;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: $neon-cyan;
+    opacity: 0.8;
+    animation: fade-in-up 0.6s ease both;
+    animation-delay: 0.1s;
+
+    &::before,
+    &::after {
+      content: "";
+      display: block;
+      width: 24px;
+      height: 1px;
+      background: $neon-cyan;
+      box-shadow: 0 0 4px $neon-cyan;
+    }
+  }
+
+  &__heading {
+    font-family: $fontHeading;
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: $text-primary;
+    animation: fade-in-up 0.6s ease both;
+    animation-delay: 0.2s;
+    max-width: 900px;
+
+    .hero__word--cyan {
+      @include neon-text($neon-cyan);
+    }
+
+    .hero__word--magenta {
+      @include neon-text($neon-magenta);
+    }
+  }
+
+  &__subheading {
+    font-size: clamp(16px, 2vw, 20px);
+    color: $text-secondary;
+    max-width: 560px;
+    line-height: 1.6;
+    animation: fade-in-up 0.6s ease both;
+    animation-delay: 0.35s;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    animation: fade-in-up 0.6s ease both;
+    animation-delay: 0.5s;
+
+    @media (max-width: toEm($mobileSmall)) {
+      flex-direction: column;
+      width: 100%;
+
+      .btn {
+        width: 100%;
+      }
+    }
+  }
+
+  // Corner bracket decorations
+  &__bracket {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    pointer-events: none;
+
+    &--tl {
+      top: 24px;
+      left: 24px;
+      border-top: 2px solid $neon-cyan;
+      border-left: 2px solid $neon-cyan;
+      box-shadow: -4px -4px 10px rgba($neon-cyan, 0.3);
+
+      @media (max-width: toEm($mobile)) {
+        width: 36px;
+        height: 36px;
+      }
+    }
+
+    &--tr {
+      top: 24px;
+      right: 24px;
+      border-top: 2px solid $neon-magenta;
+      border-right: 2px solid $neon-magenta;
+      box-shadow: 4px -4px 10px rgba($neon-magenta, 0.3);
+
+      @media (max-width: toEm($mobile)) {
+        width: 36px;
+        height: 36px;
+      }
+    }
+
+    &--bl {
+      bottom: 24px;
+      left: 24px;
+      border-bottom: 2px solid $neon-magenta;
+      border-left: 2px solid $neon-magenta;
+      box-shadow: -4px 4px 10px rgba($neon-magenta, 0.3);
+
+      @media (max-width: toEm($mobile)) {
+        width: 36px;
+        height: 36px;
+      }
+    }
+
+    &--br {
+      bottom: 24px;
+      right: 24px;
+      border-bottom: 2px solid $neon-green;
+      border-right: 2px solid $neon-green;
+      box-shadow: 4px 4px 10px rgba($neon-green, 0.3);
+
+      @media (max-width: toEm($mobile)) {
+        width: 36px;
+        height: 36px;
+      }
+    }
+  }
+
+  &__scroll-hint {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-family: $fontHeading;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: $text-muted;
+    animation: fade-in-up 0.6s ease both;
+    animation-delay: 0.7s;
+
+    &::after {
+      content: "";
+      width: 1px;
+      height: 32px;
+      background: linear-gradient(to bottom, $neon-cyan, transparent);
+      box-shadow: 0 0 4px $neon-cyan;
+    }
+  }
+}
+
+// Inner page hero (shorter)
+.page-hero {
+  padding: 80px 0 60px;
+  background: $bg-dark;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    @include hex-bg;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  &__container {
+    position: relative;
+    z-index: 1;
+  }
+
+  &__heading {
+    font-family: $fontHeading;
+    font-size: clamp(32px, 5vw, 56px);
+    font-weight: 700;
+    @include neon-text($neon-cyan);
+    margin-bottom: 16px;
+  }
+
+  &__subheading {
+    font-size: 18px;
+    color: $text-secondary;
+    max-width: 500px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+}

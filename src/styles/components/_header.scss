@@ -1,0 +1,302 @@
+// =============================================================================
+// Header — Cyberpunk style
+// =============================================================================
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  @include glass-card;
+  border-radius: 0;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid $border-cyan;
+  box-shadow:
+    0 0 20px rgba($neon-cyan, 0.08),
+    0 2px 40px rgba(0, 0, 0, 0.6);
+  transition: background 0.3s ease;
+
+  &__container {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    height: 70px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  // Logo
+  &__logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    flex-shrink: 0;
+
+    &-img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+    }
+
+    &-text {
+      font-family: $fontHeading;
+      font-size: 18px;
+      font-weight: 700;
+      @include neon-text($neon-cyan);
+      letter-spacing: 0.05em;
+    }
+  }
+
+  // Navigation
+  &__nav {
+    flex: 1 1 auto;
+    display: flex;
+    justify-content: center;
+
+    @media (max-width: toEm($tablet)) {
+      display: none;
+      position: fixed;
+      top: 70px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      background: rgba($bg-dark, 0.97);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid $border-cyan;
+
+      &.is-open {
+        display: flex;
+      }
+    }
+  }
+
+  &__nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    @media (max-width: toEm($tablet)) {
+      flex-direction: column;
+      gap: 0;
+      width: 100%;
+      text-align: center;
+    }
+  }
+
+  &__nav-item {
+    @media (max-width: toEm($tablet)) {
+      width: 100%;
+    }
+  }
+
+  &__nav-link {
+    display: block;
+    padding: 8px 14px;
+    font-family: $fontHeading;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: $text-secondary;
+    text-decoration: none;
+    border-radius: 4px;
+    transition:
+      color 0.2s ease,
+      background 0.2s ease;
+    position: relative;
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: 4px;
+      left: 14px;
+      right: 14px;
+      height: 1px;
+      background: $neon-cyan;
+      box-shadow: 0 0 6px $neon-cyan;
+      transform: scaleX(0);
+      transition: transform 0.2s ease;
+    }
+
+    &:hover,
+    &:focus-visible,
+    &.is-active {
+      color: $neon-cyan;
+
+      &::after {
+        transform: scaleX(1);
+      }
+    }
+
+    &:focus-visible {
+      outline: 2px solid $neon-cyan;
+      outline-offset: 2px;
+    }
+
+    @media (max-width: toEm($tablet)) {
+      font-size: 20px;
+      padding: 18px 24px;
+      border-radius: 0;
+
+      &::after {
+        bottom: 10px;
+        left: 24px;
+        right: 24px;
+      }
+    }
+  }
+
+  // Controls (lang + theme + login)
+  &__controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  &__lang {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+
+    @media (max-width: toEm($mobile)) {
+      display: none;
+    }
+  }
+
+  &__lang-btn {
+    background: transparent;
+    border: none;
+    color: $text-muted;
+    font-family: $fontHeading;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 6px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+
+    &:hover,
+    &.is-active {
+      color: $neon-cyan;
+    }
+
+    &:focus-visible {
+      outline: 1px solid $neon-cyan;
+      outline-offset: 2px;
+    }
+
+    & + & {
+      border-left: 1px solid $border-cyan;
+    }
+  }
+
+  &__theme-toggle {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid $border-cyan;
+    border-radius: 6px;
+    color: $text-secondary;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: $neon-cyan;
+      border-color: rgba($neon-cyan, 0.5);
+      box-shadow: 0 0 8px rgba($neon-cyan, 0.2);
+    }
+
+    &:focus-visible {
+      outline: 2px solid $neon-cyan;
+      outline-offset: 2px;
+    }
+  }
+
+  &__login-btn {
+    @extend .btn;
+    @extend .btn--cyan;
+    @extend .btn--sm;
+
+    @media (max-width: toEm($mobile)) {
+      display: none;
+    }
+  }
+
+  // Hamburger
+  &__burger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: 1px solid $border-cyan;
+    border-radius: 6px;
+    padding: 7px 8px;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+
+    @media (max-width: toEm($tablet)) {
+      display: flex;
+    }
+
+    &:hover {
+      border-color: rgba($neon-cyan, 0.6);
+    }
+
+    &:focus-visible {
+      outline: 2px solid $neon-cyan;
+      outline-offset: 2px;
+    }
+  }
+
+  &__burger-line {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: $neon-cyan;
+    border-radius: 2px;
+    transition:
+      transform 0.25s ease,
+      opacity 0.25s ease;
+    box-shadow: 0 0 4px rgba($neon-cyan, 0.7);
+  }
+
+  &.is-menu-open &__burger-line {
+    &:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+
+    &:nth-child(2) {
+      opacity: 0;
+    }
+
+    &:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+  }
+}
+
+// Offset for sticky header
+.page {
+  padding-top: 70px;
+}
