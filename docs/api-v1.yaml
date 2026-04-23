@@ -1,0 +1,2815 @@
+openapi: 3.1.0
+
+info:
+  title: Cote Lapyx API
+  version: 1.2.0
+  description: |
+    REST API for cote-lapyx.com — a team website for Валерія, Сергій, Андрій.
+
+    ## Authentication
+    All protected endpoints require `Authorization: Bearer <accessToken>`.
+    Access tokens expire in **15 minutes**. Use `POST /auth/refresh` (with the refresh
+    token in the request body) to obtain a new pair. Refresh tokens expire in **30 days**
+    and are rotated on every use.
+
+    ## Roles
+    - **owner** — three team members; full write access to all resources and admin endpoints.
+    - **subscriber** — registered guests; can comment, subscribe, and manage their own profile.
+    - **public** — unauthenticated; read-only access to published content.
+
+    ## Multilingual content
+    Dynamic content (posts, projects, team profiles) is stored in the `translations` table.
+    Pass the desired locale via the `Accept-Language` header (`uk`, `en`, `fr`, `de`) or the
+    `?locale=` query parameter. Defaults to `uk` when not provided.
+
+    ## Pagination
+    List endpoints follow Spring `Pageable` conventions.
+    Query parameters: `page` (0-indexed), `size` (default 20), `sort` (e.g. `createdAt,desc`).
+    Responses wrap items in `content[]` alongside a `page` metadata object.
+
+    ## Errors
+    All error responses use RFC 9457 `application/problem+json`.
+
+  contact:
+    name: cote-lapyx team
+    url: https://cote-lapyx.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://cote-lapyx.com/api/v1
+    description: Production
+  - url: http://localhost:8080/api/v1
+    description: Local development
+
+tags:
+  - name: Auth
+    description: Registration, login, token refresh and logout
+  - name: Users
+    description: User profile management
+  - name: TeamMembers
+    description: Public team member profiles
+  - name: Posts
+    description: Blog posts — general (team blog) and personal (member blog)
+  - name: Projects
+    description: Portfolio projects
+  - name: Comments
+    description: Post comments
+  - name: Categories
+    description: Blog post categories (owner-managed)
+  - name: Tags
+    description: Blog post tags (owner-managed)
+  - name: Subscriptions
+    description: Newsletter/content subscriptions
+  - name: Contact
+    description: Contact form and admin message management
+  - name: Contacts
+    description: |
+      Team contact links (Telegram, Instagram, LinkedIn, GitHub, Email, etc.).
+
+      > **Note (v1.x):** Contact mutation endpoints use the `/admin/` prefix for
+      > simplified Spring Security `antMatcher` config. A future version may migrate
+      > to a single `/contacts` resource with role-based method-level security
+      > (Variant B) for a cleaner REST resource model.
+  - name: Translations
+    description: Dynamic multilingual content
+
+# ---------------------------------------------------------------------------
+# Security schemes
+# ---------------------------------------------------------------------------
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token, 15-minute TTL.
+
+  # ---------------------------------------------------------------------------
+  # Reusable parameters
+  # ---------------------------------------------------------------------------
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      description: Zero-based page index.
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+
+    SizeParam:
+      name: size
+      in: query
+      description: Number of items per page.
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+    SortParam:
+      name: sort
+      in: query
+      description: "Sort field and direction, e.g. `createdAt,desc`."
+      required: false
+      schema:
+        type: string
+        example: createdAt,desc
+
+    LocaleParam:
+      name: locale
+      in: query
+      description: "Locale fallback when Accept-Language header is absent."
+      required: false
+      schema:
+        $ref: "#/components/schemas/Locale"
+
+    AcceptLanguageHeader:
+      name: Accept-Language
+      in: header
+      description: "Preferred locale for translated content. Defaults to `uk`."
+      required: false
+      schema:
+        $ref: "#/components/schemas/Locale"
+
+  # ---------------------------------------------------------------------------
+  # Schemas
+  # ---------------------------------------------------------------------------
+  schemas:
+    # --- Enums and primitives ---
+
+    Locale:
+      type: string
+      enum: [uk, en, fr, de]
+      default: uk
+      description: Supported content locale.
+
+    PostType:
+      type: string
+      enum: [general, personal]
+      description: "`general` = team blog; `personal` = individual member blog."
+
+    PostStatus:
+      type: string
+      enum: [draft, published, archived]
+
+    ProjectStatus:
+      type: string
+      enum: [draft, published, archived]
+
+    CommentStatus:
+      type: string
+      enum: [pending, approved, rejected, deleted]
+
+    SubscriptionType:
+      type: string
+      enum: [general, personal]
+
+    SubscriptionStatus:
+      type: string
+      enum: [active, cancelled, expired]
+
+    ContactMessageStatus:
+      type: string
+      enum: [new, read, replied]
+
+    UserRole:
+      type: string
+      enum: [owner, subscriber]
+
+    # --- Problem Detail (RFC 9457) ---
+
+    ProblemDetail:
+      type: object
+      required: [type, title, status, detail, instance]
+      properties:
+        type:
+          type: string
+          format: uri
+          example: https://cote-lapyx.com/errors/validation-failed
+        title:
+          type: string
+          example: Validation Failed
+        status:
+          type: integer
+          example: 422
+        detail:
+          type: string
+          example: One or more fields failed validation.
+        instance:
+          type: string
+          format: uri
+          example: /api/v1/auth/register
+        errors:
+          type: array
+          description: Per-field validation errors (present on 400/422 only).
+          items:
+            $ref: "#/components/schemas/FieldError"
+
+    FieldError:
+      type: object
+      required: [field, message]
+      properties:
+        field:
+          type: string
+          example: email
+        message:
+          type: string
+          example: must be a valid email address
+        rejectedValue:
+          description: The value that was rejected (omit if sensitive).
+
+    # --- Pagination wrapper ---
+
+    PageMetadata:
+      type: object
+      required: [number, size, totalElements, totalPages]
+      properties:
+        number:
+          type: integer
+          description: Current page index (0-based).
+          example: 0
+        size:
+          type: integer
+          example: 20
+        totalElements:
+          type: integer
+          format: int64
+          example: 143
+        totalPages:
+          type: integer
+          example: 8
+
+    # --- Auth ---
+
+    AuthRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: andrii@cote-lapyx.com
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 72
+          example: "S3cur3P@ss!"
+
+    RegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: Андрій
+        email:
+          type: string
+          format: email
+          example: andrii@cote-lapyx.com
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 72
+          example: "S3cur3P@ss!"
+
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+
+    LogoutRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+          format: uuid
+
+    AuthResponse:
+      type: object
+      required: [user, accessToken, refreshToken]
+      properties:
+        user:
+          $ref: "#/components/schemas/UserDTO"
+        accessToken:
+          type: string
+          description: JWT access token, valid for 15 minutes.
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        refreshToken:
+          type: string
+          format: uuid
+          description: Opaque refresh token UUID, valid for 30 days.
+          example: 550e8400-e29b-41d4-a716-446655440000
+
+    TokenRefreshResponse:
+      type: object
+      required: [accessToken, refreshToken]
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+          format: uuid
+
+    # --- User ---
+
+    UserDTO:
+      type: object
+      required: [id, name, email, role, createdAt]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: Андрій
+        email:
+          type: string
+          format: email
+          example: andrii@cote-lapyx.com
+        role:
+          $ref: "#/components/schemas/UserRole"
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+          example: https://cdn.cote-lapyx.com/avatars/andrii.png
+        bio:
+          type: string
+          nullable: true
+          maxLength: 1000
+        skills:
+          type: array
+          items:
+            type: string
+          example: [Java, Spring Boot, PostgreSQL]
+        socialLinks:
+          $ref: "#/components/schemas/SocialLinks"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-01-15T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2026-04-23T14:30:00Z"
+
+    UserUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+        bio:
+          type: string
+          maxLength: 1000
+          nullable: true
+        skills:
+          type: array
+          items:
+            type: string
+        socialLinks:
+          $ref: "#/components/schemas/SocialLinks"
+
+    SocialLinks:
+      type: object
+      nullable: true
+      properties:
+        telegram:
+          type: string
+          format: uri
+          nullable: true
+        instagram:
+          type: string
+          format: uri
+          nullable: true
+        linkedin:
+          type: string
+          format: uri
+          nullable: true
+        github:
+          type: string
+          format: uri
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+
+    # --- Team Member ---
+
+    TeamMemberDTO:
+      type: object
+      required: [id, userId, slug, profession]
+      properties:
+        id:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        slug:
+          type: string
+          pattern: "^[a-z0-9-]+$"
+          example: andrii
+        profession:
+          type: string
+          example: Backend Developer
+        shortDescription:
+          type: string
+          nullable: true
+          maxLength: 300
+        fullDescription:
+          type: string
+          nullable: true
+        technologies:
+          type: array
+          items:
+            type: string
+          example: [Java, Spring Boot, PostgreSQL, Docker]
+        portfolioVisible:
+          type: boolean
+          default: true
+        user:
+          $ref: "#/components/schemas/UserDTO"
+
+    TeamMemberUpdateRequest:
+      type: object
+      properties:
+        profession:
+          type: string
+          maxLength: 200
+        shortDescription:
+          type: string
+          maxLength: 300
+          nullable: true
+        fullDescription:
+          type: string
+          nullable: true
+        technologies:
+          type: array
+          items:
+            type: string
+        portfolioVisible:
+          type: boolean
+
+    # --- Blog Post ---
+
+    BlogPostDTO:
+      type: object
+      required: [id, slug, title, type, status, authorId, createdAt]
+      properties:
+        id:
+          type: integer
+          format: int64
+        slug:
+          type: string
+          pattern: "^[a-z0-9-]+$"
+          example: my-first-post
+        title:
+          type: string
+          example: Перший пост
+        type:
+          $ref: "#/components/schemas/PostType"
+        excerpt:
+          type: string
+          nullable: true
+          maxLength: 500
+        content:
+          type: string
+          nullable: true
+          description: Full HTML/Markdown content. Omitted in list responses.
+        coverImage:
+          type: string
+          format: uri
+          nullable: true
+        status:
+          $ref: "#/components/schemas/PostStatus"
+        publishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        authorId:
+          type: integer
+          format: int64
+        author:
+          $ref: "#/components/schemas/UserDTO"
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/CategoryDTO"
+        tags:
+          type: array
+          items:
+            $ref: "#/components/schemas/TagDTO"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    BlogPostCreateRequest:
+      type: object
+      required: [title, type, content]
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 255
+        type:
+          $ref: "#/components/schemas/PostType"
+        excerpt:
+          type: string
+          maxLength: 500
+          nullable: true
+        content:
+          type: string
+          minLength: 1
+        coverImage:
+          type: string
+          format: uri
+          nullable: true
+        status:
+          $ref: "#/components/schemas/PostStatus"
+          default: draft
+        categoryIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+        tagIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+
+    BlogPostUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 255
+        excerpt:
+          type: string
+          maxLength: 500
+          nullable: true
+        content:
+          type: string
+        coverImage:
+          type: string
+          format: uri
+          nullable: true
+        status:
+          $ref: "#/components/schemas/PostStatus"
+        categoryIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+        tagIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+
+    PagedBlogPostResponse:
+      type: object
+      required: [content, page]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/BlogPostDTO"
+        page:
+          $ref: "#/components/schemas/PageMetadata"
+
+    # --- Project ---
+
+    ProjectDTO:
+      type: object
+      required: [id, slug, title, status, authorId, createdAt]
+      properties:
+        id:
+          type: integer
+          format: int64
+        slug:
+          type: string
+          pattern: "^[a-z0-9-]+$"
+          example: cote-lapyx-website
+        title:
+          type: string
+          example: Cote Lapyx Website
+        shortDescription:
+          type: string
+          nullable: true
+          maxLength: 500
+        fullDescription:
+          type: string
+          nullable: true
+          description: Omitted in list responses.
+        coverImage:
+          type: string
+          format: uri
+          nullable: true
+        gallery:
+          type: array
+          items:
+            type: string
+            format: uri
+          description: Omitted in list responses.
+        technologies:
+          type: array
+          items:
+            type: string
+          example: [Java, Spring Boot, React]
+        projectUrl:
+          type: string
+          format: uri
+          nullable: true
+        githubUrl:
+          type: string
+          format: uri
+          nullable: true
+        status:
+          $ref: "#/components/schemas/ProjectStatus"
+        authorId:
+          type: integer
+          format: int64
+        author:
+          $ref: "#/components/schemas/UserDTO"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ProjectCreateRequest:
+      type: object
+      required: [title, shortDescription]
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 255
+        shortDescription:
+          type: string
+          maxLength: 500
+        fullDescription:
+          type: string
+          nullable: true
+        coverImage:
+          type: string
+          format: uri
+          nullable: true
+        gallery:
+          type: array
+          items:
+            type: string
+            format: uri
+        technologies:
+          type: array
+          items:
+            type: string
+        projectUrl:
+          type: string
+          format: uri
+          nullable: true
+        githubUrl:
+          type: string
+          format: uri
+          nullable: true
+        status:
+          $ref: "#/components/schemas/ProjectStatus"
+          default: draft
+
+    ProjectUpdateRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 3
+          maxLength: 255
+        shortDescription:
+          type: string
+          maxLength: 500
+          nullable: true
+        fullDescription:
+          type: string
+          nullable: true
+        coverImage:
+          type: string
+          format: uri
+          nullable: true
+        gallery:
+          type: array
+          items:
+            type: string
+            format: uri
+        technologies:
+          type: array
+          items:
+            type: string
+        projectUrl:
+          type: string
+          format: uri
+          nullable: true
+        githubUrl:
+          type: string
+          format: uri
+          nullable: true
+        status:
+          $ref: "#/components/schemas/ProjectStatus"
+
+    PagedProjectResponse:
+      type: object
+      required: [content, page]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProjectDTO"
+        page:
+          $ref: "#/components/schemas/PageMetadata"
+
+    # --- Comment ---
+
+    CommentDTO:
+      type: object
+      required: [id, postId, userId, status, createdAt]
+      properties:
+        id:
+          type: integer
+          format: int64
+        postId:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        author:
+          $ref: "#/components/schemas/UserDTO"
+        content:
+          type: string
+          nullable: true
+          maxLength: 2000
+          description: |
+            Comment body. `null` when `status` is `deleted` and the caller is not an owner.
+            Owners always receive the original content even for deleted comments.
+        status:
+          $ref: "#/components/schemas/CommentStatus"
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp of soft-deletion. Present (non-null) only when `status` is `deleted`.
+        deletedMessage:
+          type: string
+          nullable: true
+          description: |
+            Localized placeholder string shown to subscribers in place of deleted content
+            (e.g. "Коментар видалено" / "Comment deleted"). Locale is resolved from the
+            `Accept-Language` request header. Null for owner callers.
+        createdAt:
+          type: string
+          format: date-time
+
+    CommentCreateRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 2000
+
+    PagedCommentResponse:
+      type: object
+      required: [content, page]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/CommentDTO"
+        page:
+          $ref: "#/components/schemas/PageMetadata"
+
+    # --- Category ---
+
+    CategoryDTO:
+      type: object
+      required: [id, name, slug]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          example: Backend
+        slug:
+          type: string
+          pattern: "^[a-z0-9-]+$"
+          example: backend
+
+    CategoryRequest:
+      type: object
+      required: [name, slug]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        slug:
+          type: string
+          pattern: "^[a-z0-9-]+$"
+          minLength: 1
+          maxLength: 100
+
+    # --- Tag ---
+
+    TagDTO:
+      type: object
+      required: [id, name, slug]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          example: spring-boot
+        slug:
+          type: string
+          pattern: "^[a-z0-9-]+$"
+          example: spring-boot
+
+    TagRequest:
+      type: object
+      required: [name, slug]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        slug:
+          type: string
+          pattern: "^[a-z0-9-]+$"
+          minLength: 1
+          maxLength: 100
+
+    # --- Subscription ---
+
+    SubscriptionDTO:
+      type: object
+      required: [id, email, type, status, createdAt]
+      properties:
+        id:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+          nullable: true
+          description: Null for anonymous email-only subscriptions.
+        email:
+          type: string
+          format: email
+        type:
+          $ref: "#/components/schemas/SubscriptionType"
+        status:
+          $ref: "#/components/schemas/SubscriptionStatus"
+        plan:
+          type: string
+          nullable: true
+          description: Reserved for future paid tiers.
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    SubscriptionCreateRequest:
+      type: object
+      required: [email, type]
+      properties:
+        email:
+          type: string
+          format: email
+        type:
+          $ref: "#/components/schemas/SubscriptionType"
+
+    # --- Contact Message ---
+
+    ContactMessageDTO:
+      type: object
+      required: [id, name, email, subject, message, status, createdAt]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        subject:
+          type: string
+        message:
+          type: string
+        status:
+          $ref: "#/components/schemas/ContactMessageStatus"
+        createdAt:
+          type: string
+          format: date-time
+
+    ContactMessageCreateRequest:
+      type: object
+      required: [name, email, subject, message]
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        email:
+          type: string
+          format: email
+        subject:
+          type: string
+          minLength: 3
+          maxLength: 255
+        message:
+          type: string
+          minLength: 10
+          maxLength: 5000
+
+    PagedContactMessageResponse:
+      type: object
+      required: [content, page]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContactMessageDTO"
+        page:
+          $ref: "#/components/schemas/PageMetadata"
+
+    # --- Translation ---
+
+    TranslationDTO:
+      type: object
+      required: [id, entityType, entityId, locale, field, value]
+      properties:
+        id:
+          type: integer
+          format: int64
+        entityType:
+          type: string
+          enum: [blog_post, project, team_member, category, tag]
+          example: blog_post
+        entityId:
+          type: integer
+          format: int64
+          example: 42
+        locale:
+          $ref: "#/components/schemas/Locale"
+        field:
+          type: string
+          description: The entity field being translated (e.g. `title`, `content`, `shortDescription`).
+          example: title
+        value:
+          type: string
+          example: My First Post
+
+    TranslationUpsertRequest:
+      type: object
+      required: [locale, field, value]
+      properties:
+        locale:
+          $ref: "#/components/schemas/Locale"
+        field:
+          type: string
+          minLength: 1
+          maxLength: 100
+        value:
+          type: string
+          minLength: 1
+
+    # --- Translation Bulk ---
+
+    TranslationBulkRequest:
+      type: object
+      required: [translations]
+      description: Bulk upsert payload for all translations of a single entity.
+      properties:
+        translations:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [locale, field, value]
+            properties:
+              locale:
+                $ref: "#/components/schemas/Locale"
+              field:
+                type: string
+                minLength: 1
+                maxLength: 100
+                example: title
+              value:
+                type: string
+                minLength: 1
+                example: My First Post
+
+    # --- Translation Bulk Response ---
+
+    TranslationBulkResponse:
+      type: object
+      required: [saved, errors]
+      description: |
+        Partial-success response for bulk translation upsert. Returned with HTTP 207 when at
+        least one item was saved and at least one item was rejected. Check the `errors` array
+        to identify which items failed and why.
+      properties:
+        saved:
+          type: array
+          description: Translations that were successfully persisted.
+          items:
+            $ref: "#/components/schemas/TranslationDTO"
+        errors:
+          type: array
+          description: Items that failed validation or could not be saved.
+          items:
+            type: object
+            required: [index, detail]
+            properties:
+              index:
+                type: integer
+                description: Zero-based index of the failed item in the request array.
+                example: 2
+              locale:
+                type: string
+                description: Locale value from the failed item (if parseable).
+                example: en
+              field:
+                type: string
+                description: Field name from the failed item (if parseable).
+                example: title
+              detail:
+                type: string
+                description: Human-readable reason for the failure.
+                example: "value must not be blank"
+
+    # --- Comment Moderation ---
+
+    CommentRejectedProblem:
+      allOf:
+        - $ref: "#/components/schemas/ProblemDetail"
+        - type: object
+          required: [reason]
+          properties:
+            type:
+              type: string
+              format: uri
+              example: https://cote-lapyx.com/problems/comment-rejected
+            title:
+              type: string
+              example: Comment Rejected
+            status:
+              type: integer
+              example: 422
+            reason:
+              type: string
+              enum: [profanity, hate-speech, spam]
+              description: Machine-readable rejection category from the auto-moderation filter.
+              example: profanity
+
+    # --- Comment Deleted ---
+
+    CommentDeletedResponse:
+      type: object
+      required: [id, deletedAt, status]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 42
+        deletedAt:
+          type: string
+          format: date-time
+          example: "2026-04-23T14:30:00Z"
+        status:
+          type: string
+          const: deleted
+          example: deleted
+
+    # --- Contact ---
+
+    ContactType:
+      type: string
+      enum:
+        [
+          telegram,
+          instagram,
+          linkedin,
+          github,
+          email,
+          discord,
+          whatsapp,
+          behance,
+          other,
+        ]
+      description: Channel/platform type for a team contact link.
+
+    ContactDTO:
+      type: object
+      required: [id, type, value]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        type:
+          $ref: "#/components/schemas/ContactType"
+        value:
+          type: string
+          description: |
+            URL or address for the contact channel.
+            For `type: email` must be a valid email address (RFC 5321).
+            For all other types (telegram, instagram, linkedin, github, discord, whatsapp,
+            behance, other) must be a valid URI (RFC 3986).
+            Backend enforces format per type; the spec describes the constraint here for
+            documentation purposes.
+          x-validation:
+            email: format:email
+            default: format:uri
+          example: https://t.me/cotelapyx
+        label:
+          type: string
+          nullable: true
+          maxLength: 100
+          description: Human-readable display label (optional).
+          example: Telegram
+
+    ContactRequest:
+      type: object
+      required: [type, value]
+      properties:
+        type:
+          $ref: "#/components/schemas/ContactType"
+        value:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: |
+            For `type: email` must be a valid email address (RFC 5321).
+            For all other types must be a valid URI (RFC 3986).
+          x-validation:
+            email: format:email
+            default: format:uri
+        label:
+          type: string
+          maxLength: 100
+          nullable: true
+
+  # ---------------------------------------------------------------------------
+  # Reusable responses
+  # ---------------------------------------------------------------------------
+  responses:
+    Unauthorized:
+      description: Missing or invalid access token.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+          example:
+            type: https://cote-lapyx.com/errors/unauthorized
+            title: Unauthorized
+            status: 401
+            detail: Access token is missing or has expired.
+            instance: /api/v1/auth/me
+
+    Forbidden:
+      description: Authenticated but insufficient role.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+          example:
+            type: https://cote-lapyx.com/errors/forbidden
+            title: Forbidden
+            status: 403
+            detail: This action requires the owner role.
+            instance: /api/v1/posts
+
+    NotFound:
+      description: Resource not found.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+          example:
+            type: https://cote-lapyx.com/errors/not-found
+            title: Not Found
+            status: 404
+            detail: The requested resource was not found.
+            instance: /api/v1/posts/non-existent-slug
+
+    Conflict:
+      description: Unique constraint violation (e.g. duplicate slug or email).
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+
+    ValidationError:
+      description: Request body or parameter validation failed.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+
+    TooManyRequests:
+      description: Rate limit exceeded.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds to wait before retrying.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetail"
+
+# ===========================================================================
+# Paths
+# ===========================================================================
+paths:
+  # ---------------------------------------------------------------------------
+  # Auth
+  # ---------------------------------------------------------------------------
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new subscriber account
+      operationId: registerUser
+      security: []
+      x-roles: [public]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: Account created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Authenticate with email and password
+      operationId: loginUser
+      security: []
+      x-roles: [public]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthRequest"
+      responses:
+        "200":
+          description: Authentication successful.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Rotate refresh token and obtain a new access token
+      operationId: refreshTokens
+      security: []
+      x-roles: [public]
+      description: |
+        Refresh tokens are single-use; each call invalidates the presented token
+        and issues a fresh pair (rotation). Presenting a revoked token returns 401
+        and invalidates the entire token family (detect-and-revoke).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshRequest"
+      responses:
+        "200":
+          description: New token pair issued.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenRefreshResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Revoke refresh token and end the session
+      operationId: logoutUser
+      security:
+        - bearerAuth: []
+      x-roles: [owner, subscriber]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogoutRequest"
+      responses:
+        "204":
+          description: Session terminated; token revoked.
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Return the currently authenticated user
+      operationId: getCurrentUser
+      security:
+        - bearerAuth: []
+      x-roles: [owner, subscriber]
+      responses:
+        "200":
+          description: Authenticated user profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  # ---------------------------------------------------------------------------
+  # Users
+  # ---------------------------------------------------------------------------
+
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Get own user profile
+      operationId: getMyProfile
+      security:
+        - bearerAuth: []
+      x-roles: [owner, subscriber]
+      responses:
+        "200":
+          description: Own user profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    patch:
+      tags: [Users]
+      summary: Update own user profile
+      operationId: updateMyProfile
+      security:
+        - bearerAuth: []
+      x-roles: [owner, subscriber]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdateRequest"
+      responses:
+        "200":
+          description: Updated user profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /users:
+    get:
+      tags: [Users]
+      summary: List all users (owner only)
+      operationId: listUsers
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+        - $ref: "#/components/parameters/SortParam"
+        - name: role
+          in: query
+          description: Filter by role.
+          required: false
+          schema:
+            $ref: "#/components/schemas/UserRole"
+      responses:
+        "200":
+          description: Paginated list of users.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [content, page]
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/UserDTO"
+                  page:
+                    $ref: "#/components/schemas/PageMetadata"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /users/{id}:
+    get:
+      tags: [Users]
+      summary: Get user by ID (owner only)
+      operationId: getUserById
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: User profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ---------------------------------------------------------------------------
+  # Team Members
+  # ---------------------------------------------------------------------------
+
+  /team-members:
+    get:
+      tags: [TeamMembers]
+      summary: List all team members
+      operationId: listTeamMembers
+      security: []
+      x-roles: [public]
+      parameters:
+        - $ref: "#/components/parameters/AcceptLanguageHeader"
+        - $ref: "#/components/parameters/LocaleParam"
+      responses:
+        "200":
+          description: Array of team member profiles.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TeamMemberDTO"
+
+  /team-members/{slug}:
+    get:
+      tags: [TeamMembers]
+      summary: Get team member by slug
+      operationId: getTeamMemberBySlug
+      security: []
+      x-roles: [public]
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+          example: andrii
+        - $ref: "#/components/parameters/AcceptLanguageHeader"
+        - $ref: "#/components/parameters/LocaleParam"
+      responses:
+        "200":
+          description: Team member profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamMemberDTO"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    patch:
+      tags: [TeamMembers]
+      summary: Update own team member profile (owner only)
+      operationId: updateTeamMember
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: An owner may only update their own team member record.
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TeamMemberUpdateRequest"
+      responses:
+        "200":
+          description: Updated team member profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeamMemberDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ---------------------------------------------------------------------------
+  # Posts
+  # ---------------------------------------------------------------------------
+
+  /posts:
+    get:
+      tags: [Posts]
+      summary: List published blog posts
+      operationId: listPosts
+      security: []
+      x-roles: [public]
+      description: |
+        Returns published posts. Owners see all statuses (draft, archived) when
+        authenticated. Personal posts (`type=personal`) for a given author are also
+        served here — filter with `?type=personal&authorId=<id>`.
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+        - $ref: "#/components/parameters/SortParam"
+        - $ref: "#/components/parameters/AcceptLanguageHeader"
+        - $ref: "#/components/parameters/LocaleParam"
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/PostType"
+        - name: authorId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: categorySlug
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: tagSlug
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: q
+          in: query
+          description: Full-text search query.
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Paginated list of blog posts (content field omitted).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedBlogPostResponse"
+
+    post:
+      tags: [Posts]
+      summary: Create a new blog post (owner only)
+      operationId: createPost
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BlogPostCreateRequest"
+      responses:
+        "201":
+          description: Post created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPostDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /posts/{slug}:
+    get:
+      tags: [Posts]
+      summary: Get a single blog post by slug
+      operationId: getPostBySlug
+      security: []
+      x-roles: [public]
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+        - $ref: "#/components/parameters/AcceptLanguageHeader"
+        - $ref: "#/components/parameters/LocaleParam"
+      responses:
+        "200":
+          description: Full blog post including content.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPostDTO"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    put:
+      tags: [Posts]
+      summary: Replace a blog post (owner only)
+      operationId: updatePost
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: Owner can only modify their own posts. Returns 403 if the authenticated owner is not the author.
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BlogPostUpdateRequest"
+      responses:
+        "200":
+          description: Updated post.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlogPostDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: "Owner attempting to modify another owner's resource."
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+    delete:
+      tags: [Posts]
+      summary: Delete a blog post (owner only)
+      operationId: deletePost
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: Owner can only modify their own posts. Returns 403 if the authenticated owner is not the author.
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+      responses:
+        "204":
+          description: Post deleted.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: "Owner attempting to modify another owner's resource."
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ---------------------------------------------------------------------------
+  # Projects
+  # ---------------------------------------------------------------------------
+
+  /projects:
+    get:
+      tags: [Projects]
+      summary: List published projects
+      operationId: listProjects
+      security: []
+      x-roles: [public]
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+        - $ref: "#/components/parameters/SortParam"
+        - $ref: "#/components/parameters/AcceptLanguageHeader"
+        - $ref: "#/components/parameters/LocaleParam"
+        - name: authorId
+          in: query
+          required: false
+          description: Filter by team member (author) ID.
+          schema:
+            type: integer
+            format: int64
+        - name: technology
+          in: query
+          required: false
+          description: Filter projects that include this technology tag.
+          schema:
+            type: string
+        - name: q
+          in: query
+          description: Full-text search query.
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Paginated list of projects (fullDescription and gallery omitted).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedProjectResponse"
+
+    post:
+      tags: [Projects]
+      summary: Create a new project (owner only)
+      operationId: createProject
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectCreateRequest"
+      responses:
+        "201":
+          description: Project created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /projects/{slug}:
+    get:
+      tags: [Projects]
+      summary: Get a single project by slug
+      operationId: getProjectBySlug
+      security: []
+      x-roles: [public]
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+        - $ref: "#/components/parameters/AcceptLanguageHeader"
+        - $ref: "#/components/parameters/LocaleParam"
+      responses:
+        "200":
+          description: Full project details including gallery.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectDTO"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    put:
+      tags: [Projects]
+      summary: Replace a project (owner only)
+      operationId: updateProject
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: Owner can only modify their own projects. Returns 403 if the authenticated owner is not the author.
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectUpdateRequest"
+      responses:
+        "200":
+          description: Updated project.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: "Owner attempting to modify another owner's resource."
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+    delete:
+      tags: [Projects]
+      summary: Delete a project (owner only)
+      operationId: deleteProject
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: Owner can only modify their own projects. Returns 403 if the authenticated owner is not the author.
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+      responses:
+        "204":
+          description: Project deleted.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: "Owner attempting to modify another owner's resource."
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ---------------------------------------------------------------------------
+  # Comments
+  # ---------------------------------------------------------------------------
+
+  /posts/{slug}/comments:
+    get:
+      tags: [Comments]
+      summary: List approved comments on a post
+      operationId: listComments
+      security: []
+      x-roles: [public]
+      description: |
+        Returns approved comments. Owners see all statuses (pending, rejected, deleted) when
+        authenticated. Deleted comments are always included in the response regardless of caller
+        role. Subscribers see `content: null` with a localized `deletedMessage`; owners see the
+        full original content. Both roles receive `deletedAt` and `status: "deleted"` on deleted
+        comments.
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+        - $ref: "#/components/parameters/SortParam"
+      responses:
+        "200":
+          description: Paginated list of comments.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedCommentResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    post:
+      tags: [Comments]
+      summary: Add a comment to a post (subscriber or owner)
+      operationId: createComment
+      security:
+        - bearerAuth: []
+      x-roles: [owner, subscriber]
+      description: |
+        Submits a comment on the specified post.
+        Before saving, the comment is passed through automatic moderation checks
+        (profanity filter, hate-speech detection, and, when media support is added,
+        image content analysis). If the content is rejected a 422 is returned with
+        a machine-readable `reason` field; the comment is NOT persisted.
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentCreateRequest"
+      responses:
+        "201":
+          description: Comment submitted (may be pending human moderation).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          description: Comment rejected by automatic moderation.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/CommentRejectedProblem"
+              example:
+                type: https://cote-lapyx.com/problems/comment-rejected
+                title: Comment Rejected
+                status: 422
+                detail: The comment was rejected by the automatic moderation filter.
+                instance: /api/v1/posts/my-first-post/comments
+                reason: profanity
+
+  /comments/{id}:
+    delete:
+      tags: [Comments]
+      summary: Delete a comment (owner deletes any; subscriber deletes own)
+      operationId: deleteComment
+      security:
+        - bearerAuth: []
+      x-roles: [owner, subscriber]
+      description: |
+        Soft delete. Subscriber can delete their own comments regardless of status
+        (pending or approved). Owner can delete any comment.
+        The comment data is preserved in an audit log inaccessible to the subscriber.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Comment soft-deleted; confirmation payload returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentDeletedResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Subscriber attempting to delete another user's comment.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+              example:
+                type: https://cote-lapyx.com/errors/forbidden
+                title: Forbidden
+                status: 403
+                detail: You can only delete your own comments.
+                instance: /api/v1/comments/42
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ---------------------------------------------------------------------------
+  # Categories
+  # ---------------------------------------------------------------------------
+
+  /categories:
+    get:
+      tags: [Categories]
+      summary: List all categories
+      operationId: listCategories
+      security: []
+      x-roles: [public]
+      responses:
+        "200":
+          description: Array of categories.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CategoryDTO"
+
+    post:
+      tags: [Categories]
+      summary: Create a category (owner only)
+      operationId: createCategory
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryRequest"
+      responses:
+        "201":
+          description: Category created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /categories/{id}:
+    put:
+      tags: [Categories]
+      summary: Update a category (owner only)
+      operationId: updateCategory
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryRequest"
+      responses:
+        "200":
+          description: Updated category.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+    delete:
+      tags: [Categories]
+      summary: Delete a category (owner only)
+      operationId: deleteCategory
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Category deleted.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ---------------------------------------------------------------------------
+  # Tags
+  # ---------------------------------------------------------------------------
+
+  /tags:
+    get:
+      tags: [Tags]
+      summary: List all tags
+      operationId: listTags
+      security: []
+      x-roles: [public]
+      responses:
+        "200":
+          description: Array of tags.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TagDTO"
+
+    post:
+      tags: [Tags]
+      summary: Create a tag (owner only)
+      operationId: createTag
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TagRequest"
+      responses:
+        "201":
+          description: Tag created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /tags/{id}:
+    put:
+      tags: [Tags]
+      summary: Update a tag (owner only)
+      operationId: updateTag
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TagRequest"
+      responses:
+        "200":
+          description: Updated tag.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TagDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+    delete:
+      tags: [Tags]
+      summary: Delete a tag (owner only)
+      operationId: deleteTag
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Tag deleted.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ---------------------------------------------------------------------------
+  # Subscriptions
+  # ---------------------------------------------------------------------------
+
+  /subscriptions:
+    post:
+      tags: [Subscriptions]
+      summary: Subscribe to content updates
+      operationId: createSubscription
+      security: []
+      x-roles: [public]
+      description: |
+        Anonymous users may subscribe by email only.
+        Authenticated subscribers can also link the subscription to their account.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubscriptionCreateRequest"
+      responses:
+        "201":
+          description: Subscription created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubscriptionDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /subscriptions/me:
+    get:
+      tags: [Subscriptions]
+      summary: List own subscriptions
+      operationId: getMySubscriptions
+      security:
+        - bearerAuth: []
+      x-roles: [owner, subscriber]
+      responses:
+        "200":
+          description: Array of own subscriptions.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SubscriptionDTO"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    delete:
+      tags: [Subscriptions]
+      summary: Cancel all own subscriptions
+      operationId: cancelMySubscriptions
+      security:
+        - bearerAuth: []
+      x-roles: [owner, subscriber]
+      description: Sets status to `cancelled` for all active subscriptions of the caller.
+      responses:
+        "204":
+          description: All subscriptions cancelled.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /subscriptions/me/{id}:
+    delete:
+      tags: [Subscriptions]
+      summary: Cancel a specific subscription
+      operationId: cancelSubscription
+      security:
+        - bearerAuth: []
+      x-roles: [owner, subscriber]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Subscription cancelled.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ---------------------------------------------------------------------------
+  # Contact
+  # ---------------------------------------------------------------------------
+
+  /contact:
+    post:
+      tags: [Contact]
+      summary: Submit a contact form message
+      operationId: submitContactMessage
+      security: []
+      x-roles: [public]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactMessageCreateRequest"
+      responses:
+        "201":
+          description: Message received.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id, createdAt]
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                  createdAt:
+                    type: string
+                    format: date-time
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /admin/contact-messages:
+    get:
+      tags: [Contact]
+      summary: List contact form messages (owner only)
+      operationId: listContactMessages
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+        - $ref: "#/components/parameters/SortParam"
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ContactMessageStatus"
+      responses:
+        "200":
+          description: Paginated list of contact messages.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedContactMessageResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /admin/contact-messages/{id}:
+    get:
+      tags: [Contact]
+      summary: Get a single contact message (owner only)
+      operationId: getContactMessage
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Contact message detail.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactMessageDTO"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    patch:
+      tags: [Contact]
+      summary: Update contact message status (owner only)
+      operationId: updateContactMessageStatus
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  $ref: "#/components/schemas/ContactMessageStatus"
+      responses:
+        "200":
+          description: Updated message.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactMessageDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ---------------------------------------------------------------------------
+  # Translations
+  # ---------------------------------------------------------------------------
+
+  /translations/{entityType}/{entityId}:
+    get:
+      tags: [Translations]
+      summary: Get all translations for an entity
+      operationId: getTranslations
+      security: []
+      x-roles: [public]
+      description: Returns all locale-field-value triples for the specified entity.
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [blog_post, project, team_member, category, tag]
+        - name: entityId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: locale
+          in: query
+          required: false
+          description: Filter by a specific locale.
+          schema:
+            $ref: "#/components/schemas/Locale"
+        - $ref: "#/components/parameters/AcceptLanguageHeader"
+      responses:
+        "200":
+          description: Array of translation entries.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TranslationDTO"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    post:
+      tags: [Translations]
+      summary: Bulk upsert translations for an entity (owner only)
+      operationId: bulkUpsertTranslations
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Upserts all translations for the given entity in a single request.
+        Existing translations are overwritten; missing ones are created.
+        Use this instead of making one request per locale/field combination.
+
+        **Partial-success semantics:** If some items in the request array are invalid, the
+        valid items are persisted and the endpoint returns `207 Multi-Status` with a
+        `TranslationBulkResponse` body containing both `saved` and `errors` arrays.
+        `200` is returned only when every item was saved successfully.
+        `400` is returned when no items could be saved (all invalid or request-level failure).
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [blog_post, project, team_member, category, tag]
+        - name: entityId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TranslationBulkRequest"
+      responses:
+        "200":
+          description: All provided translations saved successfully; returns the full upserted set.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TranslationDTO"
+        "207":
+          description: |
+            Partial success — some translations saved, some rejected. Check the `errors` array
+            for per-item failure details. The `saved` array contains all successfully persisted
+            translations for this request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TranslationBulkResponse"
+        "400":
+          description: All items invalid or request-level validation failure; nothing was saved.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /translations/{entityType}/{entityId}/{locale}/{field}:
+    delete:
+      tags: [Translations]
+      summary: Delete a specific translation entry (owner only)
+      operationId: deleteTranslation
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      parameters:
+        - name: entityType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [blog_post, project, team_member, category, tag]
+        - name: entityId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: locale
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Locale"
+        - name: field
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Translation entry deleted.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ---------------------------------------------------------------------------
+  # Contacts
+  # ---------------------------------------------------------------------------
+
+  /contacts:
+    get:
+      tags: [Contacts]
+      summary: List team contact links
+      operationId: listContacts
+      security: []
+      x-roles: [public]
+      description: Returns all public contact links for the team (Telegram, Instagram, LinkedIn, etc.). No authentication required.
+      responses:
+        "200":
+          description: Array of contact links.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContactDTO"
+
+  /admin/contacts:
+    post:
+      tags: [Contacts]
+      summary: Create a contact link (owner only)
+      operationId: createContact
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactRequest"
+      responses:
+        "201":
+          description: Contact link created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /admin/contacts/{id}:
+    put:
+      tags: [Contacts]
+      summary: Update a contact link (owner only)
+      operationId: updateContact
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactRequest"
+      responses:
+        "200":
+          description: Updated contact link.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+    delete:
+      tags: [Contacts]
+      summary: Delete a contact link (owner only)
+      operationId: deleteContact
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Contact link deleted.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"

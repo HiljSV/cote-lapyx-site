@@ -203,7 +203,7 @@ sours/infoforsite/img/andrii_img/cote-lapyx.png
 
 ## Технічний стек
 
-### Frontend (Валерія + Claude)
+### Frontend (Сергій + Claude)
 
 ```
 HTML5 / CSS3 / SASS / JavaScript (ES6+)
