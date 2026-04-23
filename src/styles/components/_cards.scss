@@ -281,6 +281,10 @@
       rgba($neon-cyan, 0.1),
       rgba($neon-magenta, 0.1)
     );
+
+    @media (max-width: toEm($mobile)) {
+      height: 160px;
+    }
   }
 
   &__cover-placeholder {
@@ -298,6 +302,10 @@
     font-family: $fontHeading;
     font-size: 36px;
     color: rgba($neon-cyan, 0.3);
+
+    @media (max-width: toEm($mobile)) {
+      height: 160px;
+    }
   }
 
   &__body {
@@ -387,6 +395,10 @@
     height: 200px;
     object-fit: cover;
     display: block;
+
+    @media (max-width: toEm($mobile)) {
+      height: 170px;
+    }
   }
 
   &__cover-placeholder {
@@ -402,6 +414,10 @@
     justify-content: center;
     font-size: 40px;
     color: rgba($neon-magenta, 0.3);
+
+    @media (max-width: toEm($mobile)) {
+      height: 170px;
+    }
   }
 
   &__body {
@@ -486,6 +502,10 @@
   @include glass-card;
   padding: 32px 28px;
   display: flex;
+
+  @media (max-width: toEm($mobile)) {
+    padding: 24px 20px;
+  }
   flex-direction: column;
   gap: 16px;
   transition:

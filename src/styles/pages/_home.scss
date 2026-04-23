@@ -96,6 +96,10 @@
     font-size: 32px;
     font-weight: 700;
     @include neon-text($neon-cyan);
+
+    @media (max-width: toEm($mobile)) {
+      font-size: 26px;
+    }
   }
 
   &__stat-label {
@@ -237,6 +241,14 @@
 .cta {
   padding: 100px 0;
   background: $bg-dark;
+
+  @media (max-width: toEm($tablet)) {
+    padding: 80px 0;
+  }
+
+  @media (max-width: toEm($mobile)) {
+    padding: 60px 0;
+  }
   position: relative;
   overflow: hidden;
   text-align: center;
@@ -264,6 +276,11 @@
       transparent 70%
     );
     pointer-events: none;
+
+    @media (max-width: toEm($mobile)) {
+      width: 100%;
+      height: 200px;
+    }
   }
 
   &__container {
@@ -289,6 +306,10 @@
     color: $text-secondary;
     max-width: 480px;
     line-height: 1.6;
+
+    @media (max-width: toEm($mobile)) {
+      font-size: 16px;
+    }
   }
 
   &__socials {

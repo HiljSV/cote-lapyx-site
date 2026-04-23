@@ -252,5 +252,17 @@
     max-width: 500px;
     margin: 0 auto;
     line-height: 1.6;
+
+    @media (max-width: toEm($mobile)) {
+      font-size: 16px;
+    }
+  }
+
+  @media (max-width: toEm($mobile)) {
+    padding: 60px 0 40px;
+  }
+
+  @media (max-width: toEm($mobileSmall)) {
+    padding: 48px 0 32px;
   }
 }
