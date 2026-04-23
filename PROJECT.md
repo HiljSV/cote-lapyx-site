@@ -4,16 +4,17 @@
 
 ## Команда
 
-| Учасник | Роль | Стек | Статус | AI-партнер |
-|---------|------|------|--------|------------|
-| Валерія | Frontend розробка | HTML, CSS, SASS, JS, адаптив, UI | не бере участі на поточному етапі | — |
-| Андрій | Backend розробка | Java, Spring Boot, PostgreSQL, API | активний | Claude (Backend Agent) |
-| Сергій | Backend розробка | Java, Spring Boot, C#, Python, API | активний | — |
+| Учасник | Роль              | Стек                               | Статус                            | AI-партнер             |
+| ------- | ----------------- | ---------------------------------- | --------------------------------- | ---------------------- |
+| Валерія | Frontend розробка | HTML, CSS, SASS, JS, адаптив, UI   | не бере участі на поточному етапі | —                      |
+| Андрій  | Backend розробка  | Java, Spring Boot, PostgreSQL, API | активний                          | Claude (Backend Agent) |
+| Сергій  | Backend розробка  | Java, Spring Boot, C#, Python, API | активний                          | —                      |
 
-### Робочий процес (поточний етап)
-- **Figma макети** — створює Claude (Figma Design Agent) за промтом з PROJECT.md
-- **Frontend (верстка)** — підключиться Валерія пізніше
+### Робочий процес (поточний етап — Етап 3)
+
+- **Frontend (верстка)** — Claude + Валерія (підключається до адаптиву та auth-сторінок)
 - **Backend (API, DB)** — Андрій + Claude Backend Agent, Сергій
+- **Пріоритет зараз:** адаптив mobile/tablet + login/register/dashboard
 
 ---
 
@@ -22,6 +23,7 @@
 **cote-lapyx.com** — командний сайт на 3 учасників із загальною головною сторінкою, спільним блогом та окремими персональними сторінками кожного учасника.
 
 Сайт вирішує 4 задачі:
+
 - Презентує команду як digital/IT-студію
 - Показує послуги та кейси
 - Веде спільний та особисті блоги
@@ -32,22 +34,20 @@
 ## Brand Kit
 
 ### Кольори
-```
-Primary Navy:    #0f2747
-Primary Blue:    #1f4e8c
-Accent Orange:   #f36f21
-Light Gray:      #f3f4f6
-White:           #ffffff
 
-Night mode:
-  Background:    #0a1628
-  Surface:       #0d1f3c
-  Text:          #e8edf5
-  Border:        #1f4e8c (30% opacity)
-  Accent:        #f36f21 (без змін)
+```
+Cyberpunk (затверджено):
+  Cyan (primary):  #00e5ff
+  Magenta:         #e040fb
+  Green (accent):  #39ff14
+  Background:      #0a0e1a
+  Surface:         #0d1321
+  Text:            #e8edf5
+  Border cyan:     rgba(0, 229, 255, 0.15)
 ```
 
 ### Типографіка
+
 ```
 Варіант C — обрано командою
 Заголовки: Geologica (700, 600, 400)
@@ -55,7 +55,9 @@ Night mode:
 ```
 
 ### Логотип
+
 Файли в: `sours/infoforsite/img/cote-lapyx-complete-brand-kit/`
+
 - `logo.svg` — основний SVG логотип
 - `logo-vector.svg` — векторний варіант
 - `logo-animated.svg` — анімований SVG
@@ -66,6 +68,7 @@ Night mode:
 - `site.webmanifest` — PWA маніфест
 
 ### Фото учасників
+
 ```
 sours/infoforsite/img/valerii_img/valerka.png
 sours/infoforsite/img/serhii_img/
@@ -77,6 +80,7 @@ sours/infoforsite/img/andrii_img/cote-lapyx.png
 ## Структура сайту
 
 ### Публічна частина
+
 ```
 /                           — Головна
 /about                      — Про нас
@@ -97,6 +101,7 @@ sours/infoforsite/img/andrii_img/cote-lapyx.png
 ```
 
 ### Особистий кабінет — Owner
+
 ```
 /dashboard
 /dashboard/profile
@@ -107,6 +112,7 @@ sours/infoforsite/img/andrii_img/cote-lapyx.png
 ```
 
 ### Особистий кабінет — Subscriber
+
 ```
 /dashboard
 /dashboard/profile
@@ -116,6 +122,7 @@ sours/infoforsite/img/andrii_img/cote-lapyx.png
 ```
 
 ### Адмінка (тільки owner)
+
 ```
 /admin
 /admin/users
@@ -132,6 +139,7 @@ sours/infoforsite/img/andrii_img/cote-lapyx.png
 ## Сторінки — Блоки контенту
 
 ### Головна (/)
+
 1. **Header** — логотип, навігація, мовний перемикач (UA/EN/FR/DE), день/ніч, кнопка Login
 2. **Hero** — назва "Cote Lapyx", позиціонування, кнопки: [Послуги] [Проекти] [Блог] [Зв'язатись]
 3. **Про нас** — хто ми, чим займаємось
@@ -143,6 +151,7 @@ sours/infoforsite/img/andrii_img/cote-lapyx.png
 9. **Footer** — логотип, навігація, копірайт, контакти
 
 ### Особиста сторінка (/members/[slug])
+
 1. Hero — фото, ім'я, роль, коротке біо, кнопки соцмереж
 2. Навички та технології — badge/теги стеку
 3. Особисте портфоліо — сітка проектів
@@ -150,11 +159,13 @@ sours/infoforsite/img/andrii_img/cote-lapyx.png
 5. Контакт
 
 ### Спільний блог (/blog)
+
 - Фільтр: категорії + теги + пошук
 - Сітка карток статей (3 в ряд desktop, 1 mobile)
 - Пагінація
 
 ### Стаття (/blog/[slug])
+
 - Cover image
 - Заголовок, автор, дата, категорія
 - Контент статті
@@ -163,21 +174,25 @@ sours/infoforsite/img/andrii_img/cote-lapyx.png
 - Схожі статті
 
 ### Проекти (/projects)
+
 - Фільтр: по учаснику / технології / типу
 - Сітка карток проектів
 
 ### Авторизація (/login, /register)
+
 - Centered card на темному фоні
 - Логотип
 - Форма, CTA кнопка
 - Розподіл ролей: owner / subscriber
 
 ### Dashboard — Owner (/dashboard)
+
 - Sidebar навігація
 - Статистика, останні пости, останні проекти
 - Швидке редагування профілю
 
 ### Dashboard — Subscriber (/dashboard)
+
 - Sidebar навігація
 - Профіль користувача
 - Мої коментарі
@@ -189,6 +204,7 @@ sours/infoforsite/img/andrii_img/cote-lapyx.png
 ## Технічний стек
 
 ### Frontend (Валерія + Claude)
+
 ```
 HTML5 / CSS3 / SASS / JavaScript (ES6+)
 Збірник: FLS Start (Vite)
@@ -196,6 +212,7 @@ HTML5 / CSS3 / SASS / JavaScript (ES6+)
 ```
 
 ### Backend (Андрій + Сергій + Claude)
+
 ```
 Java Spring Boot
 REST API
@@ -204,11 +221,13 @@ Swagger/OpenAPI документація
 ```
 
 ### База даних
+
 ```
 PostgreSQL
 ```
 
 ### Деплой
+
 ```
 Ubuntu VPS
 Nginx
@@ -217,6 +236,7 @@ SSL: Let's Encrypt
 ```
 
 ### Мультиязичність
+
 ```
 Основна мова: Українська (UA)
 Додаткові: EN, FR, DE
@@ -288,10 +308,12 @@ translations (id, entity_type, entity_id, locale, field, value)
 ## Авторизація та ролі
 
 ### Owner (власники — 3 учасники)
+
 - Вхід в адмін-панель
 - Створення та редагування: блогів, проектів, профілів, коментарів, контенту
 
 ### Subscriber (підписники — гості)
+
 - Реєстрація / вхід
 - Підписка на оновлення
 - Коментарі до статей
@@ -424,6 +446,7 @@ Auto Layout everywhere. Figma Variables for colors (day/night modes).
 ## Інструменти розробки
 
 ### FLS Start (Vite шаблон)
+
 ```
 Розташування: sours/cote-lapyx/
 Запуск dev:   npm run dev
@@ -433,6 +456,7 @@ Auto Layout everywhere. Figma Variables for colors (day/night modes).
 ```
 
 ### Структура src/
+
 ```
 src/
 ├── index.html
@@ -449,42 +473,48 @@ src/
 
 ## Етапи розробки
 
-### Етап 1 — Проектування (поточний)
+### Етап 1 — Проектування ✅
+
 - [x] Концепція сайту
-- [x] Brand Kit (кольори, логотип, шрифти)
-- [ ] Figma макет — Desktop + Mobile (Андрій)
-- [ ] Карта сайту затверджена
+- [x] Brand Kit (кольори — Cyberpunk, логотип, шрифти)
+- [x] Figma файл створено (Claude Figma Agent)
+- [x] Карта сайту затверджена
 
 ### Етап 1.5 — API Contract (Андрій + Сергій)
+
 - [ ] Андрій описує всі REST ендпоінти у форматі OpenAPI/Swagger
 - [ ] Структура запитів і відповідей для: auth, users, posts, projects, comments, subscriptions, translations
 - [ ] Затверджений контракт зберігається як `API-v1` в документації
 - [ ] Після затвердження: Frontend і Backend можуть працювати паралельно без блокерів
 
-### Етап 2 — Дизайн (Claude Figma Agent)
-- [ ] UI Kit в Figma (компоненти)
-- [ ] Макети Desktop 1440px
-- [ ] Макети Tablet 768px
-- [ ] Макети Mobile 375px
-- [ ] Day/Night варіанти
-- [ ] Затвердження макету Валерієм
+### Етап 2 — Дизайн ✅ (частково)
 
-### Етап 3 — Frontend верстка (Валерія)
-- [ ] Налаштування FLS Start
-- [ ] Базові компоненти (header, footer, картки)
-- [ ] Головна сторінка
-- [ ] Особисті сторінки
-- [ ] Блог + стаття
-- [ ] Проекти
-- [ ] Авторизація
-- [ ] Dashboard
+- [x] Cyberpunk дизайн-стиль затверджено
+- [x] HTML/CSS прототип — Desktop (5 сторінок)
+- [ ] Макети Tablet 768px — адаптив
+- [ ] Макети Mobile 375px — адаптив
+- [ ] Figma UI Kit (компоненти) — опційно
+
+### Етап 3 — Frontend верстка (поточний) 🚧
+
+- [x] Налаштування FLS Start (Vite)
+- [x] Базові компоненти (header, footer, картки)
+- [x] SCSS дизайн-система (cyberpunk.scss, BEM, mobile-first)
+- [x] Головна сторінка (index.html) — Desktop
+- [x] Сторінка команди (team.html) — Desktop
+- [x] Сторінка проектів (projects.html) — Desktop
+- [x] Блог (blog.html) — Desktop
+- [x] Сторінка учасника (member.html) — Desktop
+- [x] JS: theme toggle, hamburger, smooth scroll, filters, cursor trail
+- [ ] Адаптив mobile 375px / tablet 768px — всі сторінки
+- [ ] Авторизація (login.html, register.html)
+- [ ] Dashboard (dashboard.html, admin.html)
 - [ ] Мультиязичність (uk/en/fr/de) — статичний UI через JSON
-- [ ] День/Ніч режим
-- [ ] Адаптив (mobile 375px / tablet 768px / desktop 1440px)
-- [ ] SEO: мета-теги per-page, OpenGraph, JSON-LD (команда, блог)
+- [ ] SEO: мета-теги per-page, OpenGraph, JSON-LD
 - [ ] sitemap.xml + robots.txt
 
 ### Етап 4 — Backend (Сергій)
+
 - [ ] Spring Boot проект
 - [ ] PostgreSQL схема БД
 - [ ] REST API (CRUD для блогів, проектів, юзерів)
@@ -494,18 +524,21 @@ src/
 - [ ] Docker + docker-compose
 
 ### Етап 5 — Інтеграція
+
 - [ ] Підключення фронтенду до API
 - [ ] Авторизація на фронтенді
 - [ ] Dashboard функціонал
 - [ ] Мультиязичність через API
 
 ### Етап 6 — Тестування
+
 - [ ] Функціональне тестування
 - [ ] Адаптивність
 - [ ] Продуктивність
 - [ ] Безпека
 
 ### Етап 7 — Деплой
+
 - [ ] Ubuntu VPS налаштування
 - [ ] Nginx конфігурація
 - [ ] Docker деплой
@@ -528,4 +561,4 @@ src/
 
 ---
 
-*Документ: PROJECT.md | Проект: cote-lapyx.com | Основна мова: Українська*
+_Документ: PROJECT.md | Проект: cote-lapyx.com | Основна мова: Українська_
