@@ -22,13 +22,15 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p 142 -H cote-lapyx.com >> ~/.ssh/known_hosts
+
       - name: Deploy to server
-        uses: easingthemes/ssh-deploy@v5
-        with:
-          SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
-          ARGS: "-avz --delete"
-          SOURCE: "dist/"
-          REMOTE_HOST: cote-lapyx.com
-          REMOTE_PORT: 142
-          REMOTE_USER: hilj
-          TARGET: /var/www/cote-lapyx.com/html/
+        run: |
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key -p 142 -o StrictHostKeyChecking=no" \
+            dist/ hilj@cote-lapyx.com:/var/www/cote-lapyx.com/html/
