@@ -163,6 +163,10 @@
     align-items: center;
     gap: 12px;
     flex-shrink: 0;
+
+    @media (max-width: toEm($tablet)) {
+      margin-left: auto;
+    }
   }
 
   &__lang {
