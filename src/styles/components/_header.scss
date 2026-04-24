@@ -54,6 +54,7 @@
   // Navigation
   &__nav {
     flex: 1 1 auto;
+    min-width: 0;
     display: flex;
     justify-content: center;
 
@@ -89,7 +90,7 @@
 
     @media (max-width: toEm($tablet)) {
       flex-direction: column;
-      gap: 0;
+      gap: 10px;
       width: 100%;
       text-align: center;
     }
@@ -143,6 +144,11 @@
     &:focus-visible {
       outline: 2px solid $neon-cyan;
       outline-offset: 2px;
+    }
+
+    @media (max-width: toEm($pc)) {
+      padding: 8px 9px;
+      font-size: 12px;
     }
 
     @media (max-width: toEm($tablet)) {
