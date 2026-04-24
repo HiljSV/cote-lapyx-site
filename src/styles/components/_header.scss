@@ -68,9 +68,11 @@
       align-items: center;
       justify-content: center;
       gap: 0;
-      background: rgba($bg-dark, 0.97);
-      backdrop-filter: blur(20px);
-      border-top: 1px solid $border-cyan;
+      background: $bg-dark;
+      border-top: 2px solid $border-cyan;
+      box-shadow: 0 4px 40px rgba(0, 0, 0, 0.8);
+      z-index: 99;
+      overflow-y: auto;
 
       &.is-open {
         display: flex;
