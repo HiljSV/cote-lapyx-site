@@ -40,23 +40,35 @@
     </nav>
 
     <div class="header__controls">
-      <div class="header__lang" aria-label="Вибір мови">
+      <div class="header__lang" id="lang-switcher" aria-label="Вибір мови">
         <button
-          class="header__lang-btn is-active"
-          aria-pressed="true"
-          data-lang="ua"
+          class="header__lang-toggle"
+          id="lang-toggle"
+          aria-expanded="false"
+          aria-haspopup="listbox"
+          aria-controls="lang-dropdown"
         >
-          UA
+          <span class="header__lang-current">UA</span>
+          <span class="header__lang-chevron">▾</span>
         </button>
-        <button class="header__lang-btn" aria-pressed="false" data-lang="en">
-          EN
-        </button>
-        <button class="header__lang-btn" aria-pressed="false" data-lang="fr">
-          FR
-        </button>
-        <button class="header__lang-btn" aria-pressed="false" data-lang="de">
-          DE
-        </button>
+        <div class="header__lang-dropdown" id="lang-dropdown" role="listbox">
+          <button
+            class="header__lang-btn is-active"
+            aria-pressed="true"
+            data-lang="ua"
+          >
+            UA
+          </button>
+          <button class="header__lang-btn" aria-pressed="false" data-lang="en">
+            EN
+          </button>
+          <button class="header__lang-btn" aria-pressed="false" data-lang="fr">
+            FR
+          </button>
+          <button class="header__lang-btn" aria-pressed="false" data-lang="de">
+            DE
+          </button>
+        </div>
       </div>
 
       <button

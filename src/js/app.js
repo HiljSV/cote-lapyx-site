@@ -134,6 +134,26 @@ import {
 // =============================================================================
 (function initLangSwitcher() {
   const btns = document.querySelectorAll(".header__lang-btn");
+  const toggle = document.getElementById("lang-toggle");
+  const currentLabel = document.querySelector(".header__lang-current");
+  const wrapper = document.getElementById("lang-switcher");
+
+  // Mobile dropdown toggle
+  if (toggle && wrapper) {
+    toggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const isOpen = wrapper.classList.toggle("is-open");
+      toggle.setAttribute("aria-expanded", String(isOpen));
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!wrapper.contains(e.target)) {
+        wrapper.classList.remove("is-open");
+        toggle.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
+
   btns.forEach((btn) => {
     btn.addEventListener("click", () => {
       btns.forEach((b) => {
@@ -142,6 +162,17 @@ import {
       });
       btn.classList.add("is-active");
       btn.setAttribute("aria-pressed", "true");
+
+      // Update mobile toggle label
+      if (currentLabel) {
+        currentLabel.textContent = btn.dataset.lang.toUpperCase();
+      }
+
+      // Close dropdown
+      if (wrapper && toggle) {
+        wrapper.classList.remove("is-open");
+        toggle.setAttribute("aria-expanded", "false");
+      }
     });
   });
 })();

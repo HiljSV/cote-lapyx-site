@@ -174,9 +174,70 @@
     display: flex;
     align-items: center;
     gap: 2px;
+    position: relative;
+  }
+
+  &__lang-toggle {
+    display: none;
+
+    @media (max-width: toEm($mobile)) {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: transparent;
+      border: 1px solid $border-cyan;
+      border-radius: 4px;
+      color: $neon-cyan;
+      font-family: $fontHeading;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+
+      &:hover {
+        border-color: rgba($neon-cyan, 0.6);
+      }
+    }
+  }
+
+  &__lang-chevron {
+    font-size: 10px;
+    line-height: 1;
+    transition: transform 0.2s ease;
+
+    .header__lang.is-open & {
+      transform: rotate(180deg);
+    }
+  }
+
+  &__lang-dropdown {
+    display: flex;
+    align-items: center;
+    gap: 2px;
 
     @media (max-width: toEm($mobile)) {
       display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      flex-direction: column;
+      gap: 0;
+      min-width: 68px;
+      background: $bg-surface;
+      border: 1px solid $border-cyan;
+      border-radius: 6px;
+      overflow: hidden;
+      box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.6),
+        0 0 12px rgba($neon-cyan, 0.08);
+      z-index: 10;
+
+      .header__lang.is-open & {
+        display: flex;
+      }
     }
   }
 
@@ -206,6 +267,25 @@
 
     & + & {
       border-left: 1px solid $border-cyan;
+    }
+
+    @media (max-width: toEm($mobile)) {
+      width: 100%;
+      padding: 10px 16px;
+      border-radius: 0;
+      border-left: none !important;
+      font-size: 12px;
+      text-align: center;
+
+      &:hover,
+      &.is-active {
+        background: rgba($neon-cyan, 0.08);
+        color: $neon-cyan;
+      }
+
+      & + & {
+        border-top: 1px solid $border-cyan;
+      }
     }
   }
 
