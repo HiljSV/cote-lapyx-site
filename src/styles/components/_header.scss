@@ -71,7 +71,6 @@
       background: $bg-dark;
       border-top: 2px solid $border-cyan;
       box-shadow: 0 4px 40px rgba(0, 0, 0, 0.8);
-      z-index: 99;
       overflow-y: auto;
 
       &.is-open {
