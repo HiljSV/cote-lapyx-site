@@ -251,31 +251,50 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+  transition: box-shadow 0.3s ease;
 
   &:hover {
-    transform: translateY(-4px);
     box-shadow:
-      0 0 20px rgba($neon-cyan, 0.15),
-      0 8px 40px rgba(0, 0, 0, 0.4);
+      0 0 30px rgba($neon-cyan, 0.35),
+      0 0 60px rgba($neon-cyan, 0.12),
+      0 8px 40px rgba(0, 0, 0, 0.5);
   }
 
   // Neon top border by member color
   &--cyan {
     border-top: 2px solid $neon-cyan;
     box-shadow: 0 -2px 12px rgba($neon-cyan, 0.2);
+
+    &:hover {
+      box-shadow:
+        0 0 30px rgba($neon-cyan, 0.35),
+        0 0 60px rgba($neon-cyan, 0.12),
+        0 8px 40px rgba(0, 0, 0, 0.5);
+    }
   }
 
   &--magenta {
     border-top: 2px solid $neon-magenta;
     box-shadow: 0 -2px 12px rgba($neon-magenta, 0.2);
+
+    &:hover {
+      box-shadow:
+        0 0 30px rgba($neon-magenta, 0.35),
+        0 0 60px rgba($neon-magenta, 0.12),
+        0 8px 40px rgba(0, 0, 0, 0.5);
+    }
   }
 
   &--green {
     border-top: 2px solid $neon-green;
     box-shadow: 0 -2px 12px rgba($neon-green, 0.2);
+
+    &:hover {
+      box-shadow:
+        0 0 30px rgba($neon-green, 0.35),
+        0 0 60px rgba($neon-green, 0.12),
+        0 8px 40px rgba(0, 0, 0, 0.5);
+    }
   }
 
   &__cover {
@@ -386,15 +405,13 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+  transition: box-shadow 0.3s ease;
 
   &:hover {
-    transform: translateY(-4px);
     box-shadow:
-      0 0 20px rgba($neon-magenta, 0.12),
-      0 8px 40px rgba(0, 0, 0, 0.4);
+      0 0 30px rgba($neon-magenta, 0.35),
+      0 0 60px rgba($neon-magenta, 0.12),
+      0 8px 40px rgba(0, 0, 0, 0.5);
   }
 
   &__cover {
@@ -515,30 +532,27 @@
   }
   flex-direction: column;
   gap: 16px;
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
-
-  &:hover {
-    transform: translateY(-4px);
-  }
+  transition: box-shadow 0.3s ease;
 
   &--cyan:hover {
     box-shadow:
-      0 0 24px rgba($neon-cyan, 0.2),
-      0 8px 40px rgba(0, 0, 0, 0.4);
+      0 0 30px rgba($neon-cyan, 0.35),
+      0 0 60px rgba($neon-cyan, 0.12),
+      0 8px 40px rgba(0, 0, 0, 0.5);
   }
 
   &--magenta:hover {
     box-shadow:
-      0 0 24px rgba($neon-magenta, 0.2),
-      0 8px 40px rgba(0, 0, 0, 0.4);
+      0 0 30px rgba($neon-magenta, 0.35),
+      0 0 60px rgba($neon-magenta, 0.12),
+      0 8px 40px rgba(0, 0, 0, 0.5);
   }
 
   &--green:hover {
     box-shadow:
-      0 0 24px rgba($neon-green, 0.2),
-      0 8px 40px rgba(0, 0, 0, 0.4);
+      0 0 30px rgba($neon-green, 0.35),
+      0 0 60px rgba($neon-green, 0.12),
+      0 8px 40px rgba(0, 0, 0, 0.5);
   }
 
   &__icon {
