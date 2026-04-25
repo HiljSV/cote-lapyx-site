@@ -295,7 +295,7 @@ import {
   canvas.setAttribute("aria-hidden", "true");
   // z-index:2 puts canvas above .wrapper (z-index:1); pointer-events:none keeps clicks through
   canvas.style.cssText =
-    "position:fixed;inset:0;pointer-events:none;z-index:2;";
+    "position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2;";
   document.body.prepend(canvas);
 
   const ctx = canvas.getContext("2d");
