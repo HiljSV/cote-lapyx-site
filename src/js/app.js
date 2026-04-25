@@ -309,7 +309,7 @@ import {
   let W = 0,
     H = 0,
     visEdges = [];
-  let hexPath = null; // Path2D of the static grid, rebuilt on resize
+  let hexPath = null;
   const particles = [];
   let rafId = null;
   let lastTime = null;
@@ -378,7 +378,6 @@ import {
         b.y < H + TY,
     );
 
-    // Pre-build Path2D for the static hex grid (drawn every frame via single stroke call)
     hexPath = new Path2D();
     visEdges.forEach(([a, b]) => {
       hexPath.moveTo(a.x, a.y);
@@ -395,7 +394,7 @@ import {
   }
 
   // Parallax: grid shifts at 15% of scroll speed.
-  // We mod by TY so the periodic pattern loops seamlessly — no jumps.
+  // Modulo TY keeps it within one tile period so the hex pattern loops seamlessly.
   const PARALLAX = 0.15;
 
   function frame(now) {
@@ -405,16 +404,13 @@ import {
 
     ctx.clearRect(0, 0, W, H);
 
-    // Scroll-based vertical offset. Modulo TY keeps it within one tile period
-    // so the repeating hex pattern scrolls infinitely without a visible seam.
     const offsetY = (window.scrollY * PARALLAX) % TY;
 
     ctx.save();
     ctx.translate(0, -offsetY);
 
-    // Static hex grid
     if (hexPath) {
-      ctx.strokeStyle = "rgba(180,210,255,0.08)";
+      ctx.strokeStyle = "rgba(180,210,255,0.12)";
       ctx.lineWidth = 0.8;
       ctx.stroke(hexPath);
     }
@@ -491,7 +487,6 @@ import {
 
   buildGrid();
 
-  // Pre-seed particles at random progress so screen isn't empty on load
   for (let i = 0; i < 6; i++) {
     if (visEdges.length) {
       const [a, b] = visEdges[Math.floor(Math.random() * visEdges.length)];
@@ -507,7 +502,6 @@ import {
     }
   }
 
-  // Start the animation loop
   lastTime = null;
   rafId = requestAnimationFrame(frame);
 })();
@@ -516,7 +510,7 @@ import {
 // Neon cursor trail (subtle, desktop only)
 // =============================================================================
 (function initCursorTrail() {
-  if (isMobile()) return;
+  if (isMobile.any()) return;
 
   const COLORS = ["#00e5ff", "#e040fb", "#39ff14"];
   let frame = null;
