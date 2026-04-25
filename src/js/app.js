@@ -506,6 +506,10 @@ import {
       });
     }
   }
+
+  // Start the animation loop
+  lastTime = null;
+  rafId = requestAnimationFrame(frame);
 })();
 
 // =============================================================================
