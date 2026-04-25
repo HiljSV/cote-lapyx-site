@@ -36,6 +36,8 @@ body {
   display: flex;
   flex-direction: column;
   overflow: clip;
+  position: relative;
+  z-index: 1;
 
   // Притискаємо footer
   > main {

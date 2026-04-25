@@ -11,16 +11,6 @@
   overflow: hidden;
   background: $bg-dark;
 
-  // Animated hexagon background
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    @include hex-bg;
-    animation: hex-drift 20s linear infinite;
-    pointer-events: none;
-  }
-
   // Radial glow
   &::after {
     content: "";
@@ -42,18 +32,77 @@
   &__container {
     position: relative;
     z-index: 1;
-    padding-top: 80px;
+    padding-top: 100px;
     padding-bottom: 100px;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     align-items: center;
-    text-align: center;
-    gap: 32px;
+    gap: 48px;
+
+    @media (max-width: toEm($tablet)) {
+      grid-template-columns: 1fr;
+      text-align: center;
+      padding-top: 80px;
+      padding-bottom: 80px;
+      gap: 48px;
+    }
 
     @media (max-width: toEm($mobile)) {
       padding-top: 60px;
       padding-bottom: 96px;
+      gap: 32px;
+    }
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+
+    @media (max-width: toEm($tablet)) {
+      align-items: center;
+    }
+
+    @media (max-width: toEm($mobile)) {
       gap: 24px;
+    }
+  }
+
+  &__visual {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    @media (max-width: toEm($tablet)) {
+      order: -1;
+    }
+  }
+
+  &__visual-glow {
+    position: absolute;
+    inset: -40px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba($neon-cyan, 0.12) 0%,
+      rgba($neon-magenta, 0.06) 40%,
+      transparent 70%
+    );
+    pointer-events: none;
+  }
+
+  &__visual-logo {
+    width: 100%;
+    max-width: 420px;
+    height: auto;
+    filter: drop-shadow(0 0 24px rgba($neon-cyan, 0.4))
+      drop-shadow(0 0 60px rgba($neon-cyan, 0.15))
+      drop-shadow(0 0 40px rgba($neon-magenta, 0.15));
+    animation: logo-float 6s ease-in-out infinite;
+
+    @media (max-width: toEm($tablet)) {
+      max-width: 280px;
     }
   }
 
@@ -114,11 +163,15 @@
   &__actions {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 16px;
     flex-wrap: wrap;
     animation: fade-in-up 0.6s ease both;
     animation-delay: 0.5s;
+
+    @media (max-width: toEm($tablet)) {
+      justify-content: center;
+    }
 
     @media (max-width: toEm($mobileSmall)) {
       flex-direction: column;
@@ -214,6 +267,16 @@
       background: linear-gradient(to bottom, $neon-cyan, transparent);
       box-shadow: 0 0 4px $neon-cyan;
     }
+  }
+}
+
+@keyframes logo-float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-14px);
   }
 }
 
