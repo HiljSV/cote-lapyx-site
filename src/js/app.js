@@ -485,25 +485,34 @@ import {
 
   window.addEventListener("resize", buildGrid, { passive: true });
 
-  buildGrid();
+  function boot() {
+    buildGrid();
 
-  for (let i = 0; i < 6; i++) {
-    if (visEdges.length) {
-      const [a, b] = visEdges[Math.floor(Math.random() * visEdges.length)];
-      const color = COLORS[Math.floor(Math.random() * COLORS.length)];
-      particles.push({
-        a,
-        b,
-        t: 0.05 + Math.random() * 0.85,
-        speed: 1 / (1800 + Math.random() * 2200),
-        color,
-        alpha: 1,
-      });
+    for (let i = 0; i < 6; i++) {
+      if (visEdges.length) {
+        const [a, b] = visEdges[Math.floor(Math.random() * visEdges.length)];
+        const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+        particles.push({
+          a,
+          b,
+          t: 0.05 + Math.random() * 0.85,
+          speed: 1 / (1800 + Math.random() * 2200),
+          color,
+          alpha: 1,
+        });
+      }
     }
+
+    lastTime = null;
+    rafId = requestAnimationFrame(frame);
   }
 
-  lastTime = null;
-  rafId = requestAnimationFrame(frame);
+  // Wait for full page load so window dimensions are final before buildGrid
+  if (document.readyState === "complete") {
+    boot();
+  } else {
+    window.addEventListener("load", boot, { once: true });
+  }
 })();
 
 // =============================================================================
