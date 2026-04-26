@@ -1,0 +1,169 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <filter id="glow-cyan" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-magenta" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-strong" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="text-glow" x="-20%" y="-50%" width="140%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- HEXAGONS background decorative -->
+  <polygon points="512,108 551,130 551,175 512,197 473,175 473,130"
+    fill="none" stroke="#1e2d42" stroke-width="1.5" opacity="0.55"/>
+  <polygon points="430,108 469,130 469,175 430,197 391,175 391,130"
+    fill="none" stroke="#1e2d42" stroke-width="1.5" opacity="0.45"/>
+  <polygon points="594,108 633,130 633,175 594,197 555,175 555,130"
+    fill="none" stroke="#1e2d42" stroke-width="1.5" opacity="0.45"/>
+  <polygon points="348,108 387,130 387,175 348,197 309,175 309,130"
+    fill="none" stroke="#1e2d42" stroke-width="1.2" opacity="0.3"/>
+  <polygon points="676,108 715,130 715,175 676,197 637,175 637,130"
+    fill="none" stroke="#1e2d42" stroke-width="1.2" opacity="0.3"/>
+
+  <!-- PIXEL SQUARES top-left -->
+  <rect x="248" y="215" width="11" height="11" fill="#00e5ff" opacity="0.9"/>
+  <rect x="261" y="215" width="11" height="11" fill="#00e5ff" opacity="0.8"/>
+  <rect x="274" y="215" width="11" height="11" fill="#00e5ff" opacity="0.55"/>
+  <rect x="248" y="228" width="11" height="11" fill="#00e5ff" opacity="0.7"/>
+  <rect x="261" y="228" width="11" height="11" fill="#00e5ff" opacity="0.85"/>
+  <rect x="274" y="228" width="11" height="11" fill="#00e5ff" opacity="0.4"/>
+  <rect x="248" y="241" width="11" height="11" fill="#00e5ff" opacity="0.45"/>
+  <rect x="261" y="241" width="11" height="11" fill="#00e5ff" opacity="0.6"/>
+  <rect x="274" y="241" width="11" height="11" fill="#00e5ff" opacity="0.3"/>
+  <rect x="248" y="215" width="37" height="37" fill="#00e5ff" opacity="0.08" filter="url(#glow-cyan)"/>
+
+  <!-- PIXEL SQUARES right of right ear -->
+  <rect x="648" y="170" width="9" height="9" fill="#00e5ff" opacity="0.85"/>
+  <rect x="659" y="170" width="9" height="9" fill="#00e5ff" opacity="0.6"/>
+  <rect x="648" y="181" width="9" height="9" fill="#00e5ff" opacity="0.5"/>
+  <rect x="648" y="170" width="20" height="20" fill="#00e5ff" opacity="0.06" filter="url(#glow-cyan)"/>
+
+  <!-- LEFT EAR (cyan) -->
+  <polygon points="332,302 428,142 498,302"
+    fill="#0a1520" opacity="0.97"/>
+  <polygon points="332,302 428,142 498,302"
+    fill="none" stroke="#00e5ff" stroke-width="2" opacity="0.85"/>
+  <polygon points="332,302 428,142 498,302"
+    fill="#00e5ff" opacity="0.12" filter="url(#glow-cyan)"/>
+  <polygon points="362,288 428,172 474,288"
+    fill="#00e5ff" opacity="0.22" filter="url(#glow-cyan)"/>
+  <circle cx="428" cy="144" r="7" fill="#00e5ff" opacity="1" filter="url(#glow-strong)"/>
+  <circle cx="428" cy="144" r="3" fill="#ffffff" opacity="0.9"/>
+
+  <!-- RIGHT EAR (dark purple/magenta) -->
+  <polygon points="538,302 604,146 705,302"
+    fill="#0e0a1e" opacity="0.97"/>
+  <polygon points="538,302 604,146 705,302"
+    fill="none" stroke="#4a1565" stroke-width="1.8" opacity="0.8"/>
+  <polygon points="538,302 604,146 705,302"
+    fill="#9b00d4" opacity="0.06" filter="url(#glow-magenta)"/>
+  <polygon points="562,282 604,178 648,282"
+    fill="none" stroke="#e040fb" stroke-width="1.2" opacity="0.45" filter="url(#glow-magenta)"/>
+  <circle cx="604" cy="148" r="8" fill="#e040fb" opacity="1" filter="url(#glow-strong)"/>
+  <circle cx="604" cy="148" r="3.5" fill="#ffffff" opacity="0.7"/>
+  <line x1="648" y1="178" x2="658" y2="218"
+    stroke="#00e5ff" stroke-width="1.5" opacity="0.65" filter="url(#glow-cyan)"/>
+
+  <!-- CAT FACE - base polygon -->
+  <polygon points="305,348 348,300 492,288 538,288 678,300 720,358 724,448 684,548 624,595 512,616 400,595 340,548 302,448"
+    fill="#0d1120" opacity="1"/>
+
+  <!-- Face zones -->
+  <polygon points="348,300 415,272 512,265 610,272 678,300 645,312 512,308 380,312"
+    fill="#161c2e" opacity="0.95"/>
+  <polygon points="305,348 380,312 418,382 390,462 330,472 302,422"
+    fill="#181e32" opacity="0.9"/>
+  <polygon points="720,358 645,312 612,382 640,462 700,472 724,422"
+    fill="#161b2f" opacity="0.9"/>
+  <polygon points="458,308 512,292 568,308 548,382 512,398 478,382"
+    fill="#232840" opacity="0.9"/>
+  <polygon points="380,312 438,298 464,332 445,392 402,402 364,372 355,332"
+    fill="#1e2438" opacity="0.9"/>
+  <polygon points="645,312 588,298 562,332 582,392 625,402 663,372 672,332"
+    fill="#1c2235" opacity="0.9"/>
+  <polygon points="428,442 512,428 598,442 612,502 562,548 512,562 464,548 415,502"
+    fill="#1c2340" opacity="0.9"/>
+  <polygon points="464,548 512,562 562,548 578,592 512,616 448,592"
+    fill="#14192c" opacity="0.95"/>
+  <polygon points="340,548 415,502 428,542 400,595 340,562"
+    fill="#131828" opacity="0.9"/>
+  <polygon points="684,548 598,502 582,542 624,595 684,562"
+    fill="#131828" opacity="0.9"/>
+  <polygon points="482,272 512,260 545,272 535,310 512,318 492,310"
+    fill="#2a3050" opacity="0.7"/>
+
+  <!-- LEFT EYE -->
+  <ellipse cx="415" cy="358" rx="44" ry="30" fill="#080c18" opacity="0.95"/>
+  <ellipse cx="415" cy="358" rx="30" ry="21" fill="#004050" opacity="0.9"/>
+  <ellipse cx="415" cy="358" rx="20" ry="14" fill="#00b8d4" opacity="0.95"/>
+  <ellipse cx="415" cy="358" rx="10" ry="7" fill="#00e5ff" opacity="1"/>
+  <ellipse cx="415" cy="358" rx="3.5" ry="13" fill="#06080f" opacity="0.95"/>
+  <ellipse cx="415" cy="358" rx="32" ry="23" fill="none" stroke="#00e5ff" stroke-width="1" opacity="0.5" filter="url(#glow-cyan)"/>
+  <ellipse cx="415" cy="358" rx="10" ry="7" fill="#00e5ff" opacity="0.6" filter="url(#glow-strong)"/>
+
+  <!-- RIGHT EYE -->
+  <ellipse cx="612" cy="358" rx="44" ry="30" fill="#080c18" opacity="0.95"/>
+  <ellipse cx="612" cy="358" rx="30" ry="21" fill="#004050" opacity="0.9"/>
+  <ellipse cx="612" cy="358" rx="20" ry="14" fill="#00b8d4" opacity="0.95"/>
+  <ellipse cx="612" cy="358" rx="10" ry="7" fill="#00e5ff" opacity="1"/>
+  <ellipse cx="612" cy="358" rx="3.5" ry="13" fill="#06080f" opacity="0.95"/>
+  <ellipse cx="612" cy="358" rx="32" ry="23" fill="none" stroke="#00e5ff" stroke-width="1" opacity="0.5" filter="url(#glow-cyan)"/>
+  <ellipse cx="612" cy="358" rx="10" ry="7" fill="#00e5ff" opacity="0.6" filter="url(#glow-strong)"/>
+
+  <!-- NOSE -->
+  <polygon points="496,462 512,447 528,462 512,480"
+    fill="#00c4d4" opacity="1"/>
+  <polygon points="496,462 512,447 528,462 512,480"
+    fill="#00e5ff" opacity="0.5" filter="url(#glow-strong)"/>
+
+  <!-- Mouth lines -->
+  <line x1="512" y1="480" x2="498" y2="500" stroke="#00e5ff" stroke-width="1.2" opacity="0.45"/>
+  <line x1="512" y1="480" x2="526" y2="500" stroke="#00e5ff" stroke-width="1.2" opacity="0.45"/>
+
+  <!-- Whisker marks -->
+  <line x1="312" y1="432" x2="358" y2="418" stroke="#00e5ff" stroke-width="1" opacity="0.35"/>
+  <line x1="315" y1="450" x2="358" y2="440" stroke="#00e5ff" stroke-width="1" opacity="0.25"/>
+  <line x1="712" y1="432" x2="666" y2="418" stroke="#00e5ff" stroke-width="1" opacity="0.35"/>
+  <line x1="710" y1="450" x2="666" y2="440" stroke="#00e5ff" stroke-width="1" opacity="0.25"/>
+
+  <!-- Ear base accent lines -->
+  <line x1="348" y1="300" x2="390" y2="300" stroke="#00e5ff" stroke-width="1.5" opacity="0.65" filter="url(#glow-cyan)"/>
+  <line x1="640" y1="300" x2="680" y2="300" stroke="#e040fb" stroke-width="1.5" opacity="0.55" filter="url(#glow-magenta)"/>
+
+  <!-- Small dot accents -->
+  <circle cx="355" cy="492" r="3" fill="#00e5ff" opacity="0.55"/>
+  <circle cx="670" cy="492" r="3" fill="#00e5ff" opacity="0.55"/>
+
+  <!-- TEXT underline (magenta) -->
+  <rect x="272" y="760" width="480" height="4" fill="#e040fb" opacity="0.92" rx="2" filter="url(#glow-magenta)"/>
+
+  <!-- TEXT glow -->
+  <text x="512" y="752"
+    font-family="'Orbitron', 'Share Tech Mono', 'Courier New', monospace"
+    font-size="90" font-weight="700"
+    text-anchor="middle"
+    fill="#00e5ff"
+    opacity="0.35"
+    filter="url(#glow-strong)"
+    letter-spacing="5">cote-lapyx</text>
+
+  <!-- TEXT main -->
+  <text x="512" y="752"
+    font-family="'Orbitron', 'Share Tech Mono', 'Courier New', monospace"
+    font-size="90" font-weight="700"
+    text-anchor="middle"
+    fill="#00e5ff"
+    opacity="1"
+    filter="url(#text-glow)"
+    letter-spacing="5">cote-lapyx</text>
+</svg>
