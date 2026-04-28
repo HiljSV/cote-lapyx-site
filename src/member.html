@@ -1,415 +1,452 @@
 <!doctype html>
 <html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Профіль учасника команди cote-lapyx" />
+    <title>Профіль — cote-lapyx</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;600;700&family=Nunito:wght@400;500;600&display=swap"
+    />
+    <link rel="stylesheet" href="styles/style.scss" />
+    <link rel="shortcut icon" href="@img/favicon.ico" />
+  </head>
 
-<head>
-	<meta charset="UTF-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<meta name="description" content="Профіль учасника команди cote-lapyx" />
-	<title>Профіль — cote-lapyx</title>
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-	<link rel="stylesheet"
-		href="https://fonts.googleapis.com/css2?family=Geologica:wght@400;600;700&family=Nunito:wght@400;500;600&display=swap" />
-	<link rel="stylesheet" href="styles/style.scss" />
-	<link rel="shortcut icon" href="@img/favicon.ico" />
-</head>
+  <body>
+    <div class="wrapper">
+      <!-- HEADER -->
+      <header class="header" id="header">
+        <div class="header__container">
+          <a
+            href="index.html"
+            class="header__logo"
+            aria-label="cote-lapyx — на головну"
+          >
+            <img
+              class="header__logo-img"
+              src="@img/team/logo-clean.png"
+              alt="cote-lapyx logo"
+              width="36"
+              height="36"
+            />
+            <span class="header__logo-text">cote-lapyx</span>
+          </a>
 
-<body>
-	<div class="wrapper">
-		<!-- HEADER -->
-		<header class="header" id="header">
-			<div class="header__container">
-				<a href="index.html" class="header__logo" aria-label="cote-lapyx — на головну">
-					<img class="header__logo-img" src="@img/team/logo-clean.png" alt="cote-lapyx logo" width="36"
-						height="36" />
-					<span class="header__logo-text">cote-lapyx</span>
-				</a>
+          <nav class="header__nav" id="main-nav" aria-label="Основна навігація">
+            <ul class="header__nav-list" role="list">
+              <li class="header__nav-item">
+                <a href="index.html" class="header__nav-link">Головна</a>
+              </li>
+              <li class="header__nav-item">
+                <a href="index.html#about" class="header__nav-link">Про нас</a>
+              </li>
+              <li class="header__nav-item">
+                <a
+                  href="team.html"
+                  class="header__nav-link is-active"
+                  aria-current="page"
+                  >Команда</a
+                >
+              </li>
+              <li class="header__nav-item">
+                <a href="index.html#services" class="header__nav-link"
+                  >Послуги</a
+                >
+              </li>
+              <li class="header__nav-item">
+                <a href="projects.html" class="header__nav-link">Проекти</a>
+              </li>
+              <li class="header__nav-item">
+                <a href="blog.html" class="header__nav-link">Блог</a>
+              </li>
+              <li class="header__nav-item">
+                <a href="index.html#contact" class="header__nav-link"
+                  >Контакт</a
+                >
+              </li>
+            </ul>
+          </nav>
 
-				<nav class="header__nav" id="main-nav" aria-label="Основна навігація">
-					<ul class="header__nav-list" role="list">
-						<li class="header__nav-item">
-							<a href="index.html" class="header__nav-link">Головна</a>
-						</li>
-						<li class="header__nav-item">
-							<a href="index.html#about" class="header__nav-link">Про нас</a>
-						</li>
-						<li class="header__nav-item">
-							<a href="team.html" class="header__nav-link is-active" aria-current="page">Команда</a>
-						</li>
-						<li class="header__nav-item">
-							<a href="index.html#services" class="header__nav-link">Послуги</a>
-						</li>
-						<li class="header__nav-item">
-							<a href="projects.html" class="header__nav-link">Проекти</a>
-						</li>
-						<li class="header__nav-item">
-							<a href="blog.html" class="header__nav-link">Блог</a>
-						</li>
-						<li class="header__nav-item">
-							<a href="index.html#contact" class="header__nav-link">Контакт</a>
-						</li>
-					</ul>
-				</nav>
+          <div class="header__controls">
+            <div class="header__lang" aria-label="Вибір мови">
+              <button
+                class="header__lang-btn is-active"
+                aria-pressed="true"
+                data-lang="ua"
+              >
+                UA
+              </button>
+              <button
+                class="header__lang-btn"
+                aria-pressed="false"
+                data-lang="en"
+              >
+                EN
+              </button>
+              <button
+                class="header__lang-btn"
+                aria-pressed="false"
+                data-lang="fr"
+              >
+                FR
+              </button>
+              <button
+                class="header__lang-btn"
+                aria-pressed="false"
+                data-lang="de"
+              >
+                DE
+              </button>
+            </div>
+            <button
+              class="header__theme-toggle"
+              id="theme-toggle"
+              aria-label="Перемкнути тему"
+              aria-pressed="true"
+            >
+              🌙
+            </button>
+            <a href="index.html#contact" class="btn btn--cyan btn--sm"
+              >Увійти</a
+            >
+            <button
+              class="header__burger"
+              id="burger-btn"
+              aria-label="Відкрити меню"
+              aria-expanded="false"
+              aria-controls="main-nav"
+            >
+              <span class="header__burger-line"></span>
+              <span class="header__burger-line"></span>
+              <span class="header__burger-line"></span>
+            </button>
+          </div>
+        </div>
+      </header>
 
-				<div class="header__controls">
-					<div class="header__lang" aria-label="Вибір мови">
-						<button class="header__lang-btn is-active" aria-pressed="true" data-lang="ua">
-							UA
-						</button>
-						<button class="header__lang-btn" aria-pressed="false" data-lang="en">
-							EN
-						</button>
-						<button class="header__lang-btn" aria-pressed="false" data-lang="fr">
-							FR
-						</button>
-						<button class="header__lang-btn" aria-pressed="false" data-lang="de">
-							DE
-						</button>
-					</div>
-					<button class="header__theme-toggle" id="theme-toggle" aria-label="Перемкнути тему"
-						aria-pressed="true">
-						🌙
-					</button>
-					<a href="index.html#contact" class="btn btn--cyan btn--sm">Увійти</a>
-					<button class="header__burger" id="burger-btn" aria-label="Відкрити меню" aria-expanded="false"
-						aria-controls="main-nav">
-						<span class="header__burger-line"></span>
-						<span class="header__burger-line"></span>
-						<span class="header__burger-line"></span>
-					</button>
-				</div>
-			</div>
-		</header>
+      <main class="page">
+        <!-- PROFILE HERO — Валерія (default) -->
+        <section class="member-hero" aria-label="Профіль учасника">
+          <div class="member-hero__container">
+            <div class="member-hero__photo-wrap">
+              <div id="member-photo-wrap"></div>
+            </div>
+            <div class="member-hero__info">
+              <h1 class="member-hero__name" id="member-name"></h1>
+              <p class="member-hero__role" id="member-role"></p>
+              <p class="member-hero__bio" id="member-bio"></p>
+              <ul
+                class="member-hero__badges"
+                id="member-badges"
+                aria-label="Навички"
+                role="list"
+              ></ul>
+              <div class="member-hero__actions" id="member-socials"></div>
+            </div>
+          </div>
+        </section>
 
-		<main class="page">
-			<!-- PROFILE HERO — Валерія (default) -->
-			<section class="member-hero" aria-label="Профіль учасника">
-				<div class="member-hero__container">
-					<div class="member-hero__photo-wrap">
-						<img class="member-hero__photo" src="@img/team/valerka.png" alt="Валерія — Frontend Developer"
-							width="180" height="180" id="member-photo" />
-					</div>
-					<div class="member-hero__info">
-						<h1 class="member-hero__name" id="member-name">Валерія</h1>
-						<p class="member-hero__role" id="member-role">
-							Frontend Developer
-						</p>
-						<p class="member-hero__bio" id="member-bio">
-							Спеціалізується на побудові пікселідеальних адаптивних
-							інтерфейсів. Закохана в BEM-методологію, CSS-анімації та
-							доступність. Вірить, що гарний код і гарний дизайн — нероздільні
-							речі. Постійно вдосконалює майстерність у рамках навчання
-							«Чертоги Фрілансера».
-						</p>
-						<ul class="member-hero__badges" aria-label="Навички" role="list">
-							<li><span class="neon-badge neon-badge--cyan">HTML5</span></li>
-							<li>
-								<span class="neon-badge neon-badge--cyan">SCSS / BEM</span>
-							</li>
-							<li>
-								<span class="neon-badge neon-badge--cyan">JavaScript</span>
-							</li>
-							<li><span class="neon-badge neon-badge--cyan">Vite</span></li>
-							<li>
-								<span class="neon-badge neon-badge--magenta">Figma</span>
-							</li>
-							<li><span class="neon-badge neon-badge--green">Git</span></li>
-						</ul>
-						<div class="member-hero__actions">
-							<a href="#" class="btn btn--cyan">GitHub</a>
-							<a href="#" class="btn btn--magenta">LinkedIn</a>
-							<a href="#" class="btn btn--green">Telegram</a>
-						</div>
-					</div>
-				</div>
-			</section>
+        <div class="section-divider" aria-hidden="true"></div>
 
-			<div class="section-divider" aria-hidden="true"></div>
+        <!-- SKILLS -->
+        <section
+          class="section section--surface"
+          aria-labelledby="skills-heading"
+        >
+          <div class="page__container">
+            <div class="section__header">
+              <h2 class="section-title" id="skills-heading">
+                Технічні навички
+              </h2>
+            </div>
+            <div class="member-skills__grid" id="member-skills"></div>
+          </div>
+        </section>
 
-			<!-- SKILLS -->
-			<section class="section section--surface" aria-labelledby="skills-heading">
-				<div class="page__container">
-					<div class="section__header">
-						<h2 class="section-title" id="skills-heading">
-							Технічні навички
-						</h2>
-					</div>
-					<div class="member-skills__grid">
-						<div class="member-skills__group">
-							<h3 class="member-skills__group-title">Frontend</h3>
-							<div class="member-skills__bars">
-								<div class="skill-bar">
-									<div class="skill-bar__label">
-										<span>HTML / CSS</span><span>95%</span>
-									</div>
-									<div class="skill-bar__track">
-										<div class="skill-bar__fill" style="width: 95%"></div>
-									</div>
-								</div>
-								<div class="skill-bar">
-									<div class="skill-bar__label">
-										<span>SCSS / BEM</span><span>90%</span>
-									</div>
-									<div class="skill-bar__track">
-										<div class="skill-bar__fill" style="width: 90%"></div>
-									</div>
-								</div>
-								<div class="skill-bar">
-									<div class="skill-bar__label">
-										<span>JavaScript ES6+</span><span>80%</span>
-									</div>
-									<div class="skill-bar__track">
-										<div class="skill-bar__fill" style="width: 80%"></div>
-									</div>
-								</div>
-								<div class="skill-bar">
-									<div class="skill-bar__label">
-										<span>Адаптивна верстка</span><span>92%</span>
-									</div>
-									<div class="skill-bar__track">
-										<div class="skill-bar__fill" style="width: 92%"></div>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="member-skills__group">
-							<h3 class="member-skills__group-title">Інструменти</h3>
-							<div class="member-skills__bars">
-								<div class="skill-bar">
-									<div class="skill-bar__label">
-										<span>Figma</span><span>75%</span>
-									</div>
-									<div class="skill-bar__track">
-										<div class="skill-bar__fill skill-bar__fill--magenta" style="width: 75%"></div>
-									</div>
-								</div>
-								<div class="skill-bar">
-									<div class="skill-bar__label">
-										<span>Vite / Build Tools</span><span>70%</span>
-									</div>
-									<div class="skill-bar__track">
-										<div class="skill-bar__fill skill-bar__fill--magenta" style="width: 70%"></div>
-									</div>
-								</div>
-								<div class="skill-bar">
-									<div class="skill-bar__label">
-										<span>Git / GitHub</span><span>78%</span>
-									</div>
-									<div class="skill-bar__track">
-										<div class="skill-bar__fill skill-bar__fill--green" style="width: 78%"></div>
-									</div>
-								</div>
-								<div class="skill-bar">
-									<div class="skill-bar__label">
-										<span>Accessibility (a11y)</span><span>72%</span>
-									</div>
-									<div class="skill-bar__track">
-										<div class="skill-bar__fill skill-bar__fill--green" style="width: 72%"></div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</section>
+        <div class="section-divider" aria-hidden="true"></div>
 
-			<div class="section-divider" aria-hidden="true"></div>
+        <!-- PORTFOLIO -->
+        <section
+          class="section section--dark"
+          aria-labelledby="portfolio-heading"
+        >
+          <div class="page__container">
+            <div class="section__header">
+              <h2 class="section-title" id="portfolio-heading">
+                Особисті проекти
+              </h2>
+            </div>
+            <ul
+              class="member-portfolio__grid"
+              id="member-projects"
+              role="list"
+            ></ul>
+          </div>
+        </section>
 
-			<!-- PORTFOLIO -->
-			<section class="section section--dark" aria-labelledby="portfolio-heading">
-				<div class="page__container">
-					<div class="section__header">
-						<h2 class="section-title" id="portfolio-heading">
-							Особисті проекти
-						</h2>
-					</div>
-					<ul class="member-portfolio__grid" role="list">
-						<li>
-							<article class="project-card project-card--cyan">
-								<div class="project-card__cover-placeholder" aria-hidden="true">
-									&lt;/&gt;
-								</div>
-								<div class="project-card__body">
-									<h3 class="project-card__title">cote-lapyx.com</h3>
-									<p class="project-card__description">
-										Офіційний сайт студії. Pixel-perfect верстка за дизайном
-										Андрія, BEM + SCSS, Vite.
-									</p>
-									<ul class="project-card__tags" aria-label="Технології" role="list">
-										<li>
-											<span class="neon-badge neon-badge--cyan">HTML</span>
-										</li>
-										<li>
-											<span class="neon-badge neon-badge--cyan">SCSS</span>
-										</li>
-										<li>
-											<span class="neon-badge neon-badge--green">Vite</span>
-										</li>
-									</ul>
-								</div>
-								<div class="project-card__footer">
-									<div class="project-card__links">
-										<a href="#" class="btn btn--ghost btn--sm">GitHub</a>
-										<a href="https://cote-lapyx.com" class="btn btn--cyan btn--sm" target="_blank"
-											rel="noopener">Demo</a>
-									</div>
-								</div>
-							</article>
-						</li>
-						<li>
-							<article class="project-card project-card--magenta">
-								<div class="project-card__cover-placeholder" aria-hidden="true">
-									&#127912;
-								</div>
-								<div class="project-card__body">
-									<h3 class="project-card__title">FLS Portfolio Template</h3>
-									<p class="project-card__description">
-										Шаблон портфоліо на базі FLS + Vite з анімаціями та
-										підтримкою тем.
-									</p>
-									<ul class="project-card__tags" aria-label="Технології" role="list">
-										<li>
-											<span class="neon-badge neon-badge--cyan">HTML</span>
-										</li>
-										<li>
-											<span class="neon-badge neon-badge--cyan">SCSS</span>
-										</li>
-										<li>
-											<span class="neon-badge neon-badge--magenta">JS</span>
-										</li>
-									</ul>
-								</div>
-								<div class="project-card__footer">
-									<div class="project-card__links">
-										<a href="#" class="btn btn--ghost btn--sm">GitHub</a>
-										<a href="#" class="btn btn--magenta btn--sm">Demo</a>
-									</div>
-								</div>
-							</article>
-						</li>
-						<li>
-							<article class="project-card project-card--green">
-								<div class="project-card__cover-placeholder" aria-hidden="true">
-									&#128196;
-								</div>
-								<div class="project-card__body">
-									<h3 class="project-card__title">Component Library</h3>
-									<p class="project-card__description">
-										Особиста бібліотека UI-компонентів — картки, кнопки,
-										форми, навігація у cyberpunk-стилі.
-									</p>
-									<ul class="project-card__tags" aria-label="Технології" role="list">
-										<li>
-											<span class="neon-badge neon-badge--cyan">SCSS</span>
-										</li>
-										<li>
-											<span class="neon-badge neon-badge--green">BEM</span>
-										</li>
-									</ul>
-								</div>
-								<div class="project-card__footer">
-									<div class="project-card__links">
-										<a href="#" class="btn btn--ghost btn--sm">GitHub</a>
-									</div>
-								</div>
-							</article>
-						</li>
-					</ul>
-				</div>
-			</section>
+        <div class="section-divider" aria-hidden="true"></div>
 
-			<div class="section-divider" aria-hidden="true"></div>
+        <!-- BLOG POSTS -->
+        <section
+          class="section section--surface"
+          aria-labelledby="posts-heading"
+        >
+          <div class="page__container">
+            <div class="section__header">
+              <h2 class="section-title" id="posts-heading">Статті</h2>
+            </div>
+            <nav
+              class="member-posts__list"
+              id="member-posts"
+              aria-label="Статті учасника"
+            ></nav>
+          </div>
+        </section>
 
-			<!-- BLOG POSTS -->
-			<section class="section section--surface" aria-labelledby="posts-heading">
-				<div class="page__container">
-					<div class="section__header">
-						<h2 class="section-title" id="posts-heading">Статті</h2>
-					</div>
-					<nav class="member-posts__list" aria-label="Статті учасника">
-						<a href="blog.html" class="member-posts__item">
-							<time class="member-posts__date" datetime="2024-04-10">10 квіт 2024</time>
-							<span class="member-posts__title">Cyberpunk-дизайн система на чистому SCSS</span>
-							<span class="member-posts__arrow" aria-hidden="true">→</span>
-						</a>
-						<a href="blog.html" class="member-posts__item">
-							<time class="member-posts__date" datetime="2024-01-18">18 січ 2024</time>
-							<span class="member-posts__title">BEM-методологія: чому ми все ще її любимо</span>
-							<span class="member-posts__arrow" aria-hidden="true">→</span>
-						</a>
-					</nav>
-				</div>
-			</section>
+        <div class="section-divider" aria-hidden="true"></div>
 
-			<div class="section-divider" aria-hidden="true"></div>
+        <!-- CONTACT -->
+        <section class="cta" aria-labelledby="member-contact-heading">
+          <div class="cta__container">
+            <h2 class="cta__heading" id="member-contact-heading">
+              Хочете співпрацювати?
+            </h2>
+            <p class="cta__subheading">
+              Відкрита до нових проектів та фрілансу. Пишіть — обговоримо!
+            </p>
+            <a
+              href="mailto:hello@cote-lapyx.com"
+              class="btn btn--cyan btn--lg btn--pulse-cyan"
+              >Написати</a
+            >
+          </div>
+        </section>
+      </main>
 
-			<!-- CONTACT -->
-			<section class="cta" aria-labelledby="member-contact-heading">
-				<div class="cta__container">
-					<h2 class="cta__heading" id="member-contact-heading">
-						Хочете співпрацювати?
-					</h2>
-					<p class="cta__subheading">
-						Відкрита до нових проектів та фрілансу. Пишіть — обговоримо!
-					</p>
-					<a href="mailto:hello@cote-lapyx.com" class="btn btn--cyan btn--lg btn--pulse-cyan">Написати</a>
-				</div>
-			</section>
-		</main>
+      <!-- FOOTER -->
+      <footer data-fls-footer class="footer">
+        <div class="footer__container">
+          <div class="footer__top">
+            <div class="footer__col">
+              <a
+                href="index.html"
+                class="footer__logo"
+                aria-label="cote-lapyx — на головну"
+              >
+                <p class="footer__nav-title">COTE-LAPYX</p>
+              </a>
+              <p class="footer__tagline">
+                IT-студія повного циклу — frontend, backend, дизайн.
+                Перетворюємо ідеї на продукти.
+              </p>
+              <div class="footer__socials" aria-label="Соціальні мережі">
+                <a
+                  href="#"
+                  class="footer__social-link"
+                  aria-label="Telegram"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.26 13.835l-2.94-.916c-.638-.203-.65-.638.135-.943l11.49-4.43c.533-.194 1.001.13.949.675z"
+                    />
+                  </svg>
+                </a>
+                <a
+                  href="#"
+                  class="footer__social-link"
+                  aria-label="Instagram"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"
+                    />
+                  </svg>
+                </a>
+                <a
+                  href="https://github.com/cote-lapyx"
+                  class="footer__social-link"
+                  aria-label="GitHub"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"
+                    />
+                  </svg>
+                </a>
+                <a
+                  href="https://linkedin.com"
+                  class="footer__social-link"
+                  aria-label="LinkedIn"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                    />
+                  </svg>
+                </a>
+                <a
+                  href="mailto:hello@cote-lapyx.com"
+                  class="footer__social-link"
+                  aria-label="Email"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+                    />
+                  </svg>
+                </a>
+              </div>
+            </div>
 
-		<!-- FOOTER -->
-		<footer class="footer">
-			<div class="footer__top">
-				<div class="footer__container">
-					<div class="footer__col">
-						<a href="index.html" class="footer__logo">
-							<img class="footer__logo-img" src="@img/team/logo-clean.png" alt="cote-lapyx" width="32"
-								height="32" />
-							<span class="footer__logo-text">cote-lapyx</span>
-						</a>
-						<p class="footer__tagline">
-							IT-студія повного циклу — frontend, backend, дизайн.
-						</p>
-					</div>
-					<div class="footer__col">
-						<p class="footer__nav-title">Навігація</p>
-						<ul class="footer__nav-list" role="list">
-							<li>
-								<a href="index.html" class="footer__nav-link">Головна</a>
-							</li>
-							<li>
-								<a href="team.html" class="footer__nav-link">Команда</a>
-							</li>
-							<li>
-								<a href="projects.html" class="footer__nav-link">Проекти</a>
-							</li>
-							<li><a href="blog.html" class="footer__nav-link">Блог</a></li>
-						</ul>
-					</div>
-					<div class="footer__col">
-						<p class="footer__nav-title">Контакти</p>
-						<a href="mailto:hello@cote-lapyx.com" class="footer__contact-item">hello@cote-lapyx.com</a>
-						<a href="https://t.me/cotelapyx" class="footer__contact-item" target="_blank"
-							rel="noopener">Telegram</a>
-					</div>
-				</div>
-			</div>
-			<div class="footer__bottom">
-				<div class="footer__container">
-					<div class="footer__bottom-inner">
-						<p class="footer__copyright">
-							&copy; 2024 cote-lapyx. Всі права захищені.
-						</p>
-						<p class="footer__powered">
-							Powered by <span>cote-lapyx team</span>
-						</p>
-					</div>
-				</div>
-			</div>
-		</footer>
-	</div>
+            <div class="footer__col">
+              <p class="footer__nav-title">Навігація</p>
+              <ul class="footer__nav-list" role="list">
+                <li>
+                  <a href="index.html" class="footer__nav-link">Головна</a>
+                </li>
+                <li>
+                  <a href="index.html#about" class="footer__nav-link"
+                    >Про нас</a
+                  >
+                </li>
+                <li>
+                  <a href="team.html" class="footer__nav-link">Команда</a>
+                </li>
+                <li>
+                  <a href="index.html#services" class="footer__nav-link"
+                    >Послуги</a
+                  >
+                </li>
+                <li>
+                  <a href="projects.html" class="footer__nav-link">Проекти</a>
+                </li>
+                <li><a href="blog.html" class="footer__nav-link">Блог</a></li>
+                <li>
+                  <a href="index.html#contact" class="footer__nav-link"
+                    >Контакт</a
+                  >
+                </li>
+              </ul>
+            </div>
 
-	<script type="module" src="js/app.js"></script>
-</body>
+            <div class="footer__col footer__col--contacts">
+              <p class="footer__nav-title">Контакти</p>
+              <a
+                href="mailto:hello@cote-lapyx.com"
+                class="footer__contact-item"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  class="footer__contact-icon"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+                  />
+                </svg>
+                hello@cote-lapyx.com
+              </a>
+              <a
+                href="https://t.me/cotelapyx"
+                class="footer__contact-item"
+                target="_blank"
+                rel="noopener"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  class="footer__contact-icon"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.26 13.835l-2.94-.916c-.638-.203-.65-.638.135-.943l11.49-4.43c.533-.194 1.001.13.949.675z"
+                  />
+                </svg>
+                Telegram
+              </a>
+              <a
+                href="https://github.com/cote-lapyx"
+                class="footer__contact-item"
+                target="_blank"
+                rel="noopener"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  class="footer__contact-icon"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"
+                  />
+                </svg>
+                github.com/cote-lapyx
+              </a>
+            </div>
+          </div>
 
+          <div class="footer__bottom">
+            <p class="footer__copyright">
+              &copy; 2024 cote-lapyx. Всі права захищені.
+            </p>
+            <p class="footer__powered">
+              Powered by <span>cote-lapyx team</span>
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+    <script type="module" src="js/blog.js"></script>
+    <script type="module" src="js/member.js"></script>
+  </body>
 </html>

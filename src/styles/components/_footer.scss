@@ -8,26 +8,29 @@
   box-shadow: 0 -4px 40px rgba($neon-cyan, 0.05);
   margin-top: auto;
 
-  &__top {
-    padding: 60px 0 40px;
-
-    @media (max-width: toEm($mobile)) {
-      padding: 40px 0 28px;
-    }
+  // Single container — max-width + padding
+  &__container {
+    max-width: toRem(1200);
+    margin: 0 auto;
+    padding: 0 toRem(15);
   }
 
-  &__container {
+  // Top section — 3-column grid
+  &__top {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     @include adaptiveValue("gap", 60, 40);
+    padding: 60px 0 40px;
 
     @media (max-width: toEm($tablet)) {
       grid-template-columns: 1fr 1fr;
+      padding: 48px 0 32px;
     }
 
     @media (max-width: toEm($mobile)) {
       grid-template-columns: 1fr;
       gap: 32px;
+      padding: 40px 0 28px;
     }
   }
 
@@ -90,7 +93,6 @@
 
   &__nav-link {
     @include adaptiveValue("font-size", 16, 18);
-
     color: $text-secondary;
     text-decoration: none;
     transition: color 0.2s ease;
@@ -179,24 +181,29 @@
 
   // Bottom bar
   &__bottom {
-    border-top: 1px solid $border-cyan;
-    padding: 16px 0;
-  }
-
-  &__bottom-inner {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: nowrap;
+    border-top: 1px solid $border-cyan;
+    padding: 16px 0;
+
+    @media (max-width: toEm($mobileSmall)) {
+      flex-direction: column;
+      gap: 6px;
+    }
   }
 
   &__copyright {
     font-size: 13px;
     color: $text-muted;
+    white-space: nowrap;
   }
 
   &__powered {
     font-size: 13px;
     color: $text-muted;
+    white-space: nowrap;
   }
 }

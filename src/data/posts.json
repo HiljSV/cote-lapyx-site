@@ -1,0 +1,74 @@
+[
+  {
+    "id": "cyberpunk-scss",
+    "title": "Cyberpunk-дизайн система на чистому SCSS",
+    "date": "2024-04-10",
+    "dateLabel": "10 квітня 2024",
+    "category": "Frontend",
+    "readTime": "5 хв читання",
+    "excerpt": "Як побудувати повноцінну дизайн-систему з неоновими ефектами, BEM та мобільним підходом без жодного фреймворку.",
+    "icon": "📄",
+    "author": "serhii",
+    "url": "blog.html"
+  },
+  {
+    "id": "spring-boot-api",
+    "title": "REST API на Java Spring Boot: архітектура з нуля",
+    "date": "2024-03-28",
+    "dateLabel": "28 березня 2024",
+    "category": "Backend",
+    "readTime": "7 хв читання",
+    "excerpt": "Практичний гайд по побудові масштабованого REST API з авторизацією JWT, валідацією та документацією Swagger.",
+    "icon": "⚙️",
+    "author": "andrii",
+    "url": "blog.html"
+  },
+  {
+    "id": "logo-creation",
+    "title": "Створення логотипу: геометричний кіт з неоном",
+    "date": "2024-03-15",
+    "dateLabel": "15 березня 2024",
+    "category": "Design",
+    "readTime": "4 хв читання",
+    "excerpt": "Розповідь про процес створення брендингу cote-lapyx — від ескізу до фінальної SVG-анімації.",
+    "icon": "◆",
+    "author": "valeriia",
+    "url": "blog.html"
+  },
+  {
+    "id": "postgresql-tips",
+    "title": "PostgreSQL: 5 прийомів для продуктивного запиту",
+    "date": "2024-02-10",
+    "dateLabel": "10 лютого 2024",
+    "category": "Backend",
+    "readTime": "8 хв читання",
+    "excerpt": "Indexed queries, EXPLAIN ANALYZE, connection pooling та інші прийоми які прискорять ваш backend.",
+    "icon": "🗄️",
+    "author": "andrii",
+    "url": "blog.html"
+  },
+  {
+    "id": "bem-methodology",
+    "title": "BEM-методологія: чому ми все ще її любимо",
+    "date": "2024-01-18",
+    "dateLabel": "18 січня 2024",
+    "category": "Frontend",
+    "readTime": "6 хв читання",
+    "excerpt": "Пояснюємо чому BEM залишається стандартом у 2024 — менше конфліктів, читабельний код, легша підтримка.",
+    "icon": "📝",
+    "author": "serhii",
+    "url": "blog.html"
+  },
+  {
+    "id": "figma-components",
+    "title": "Figma Components: як ми будуємо дизайн-систему",
+    "date": "2024-01-05",
+    "dateLabel": "5 січня 2024",
+    "category": "Design",
+    "readTime": "5 хв читання",
+    "excerpt": "Atomic design, variants, auto layout — наш підхід до Figma який економить години роботи при оновленнях.",
+    "icon": "🎨",
+    "author": "valeriia",
+    "url": "blog.html"
+  }
+]
