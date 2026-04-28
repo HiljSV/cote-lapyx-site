@@ -20,7 +20,7 @@
   <body>
     <div class="wrapper">
       <!-- HEADER -->
-      <header class="header" id="header">
+      <header data-fls-header class="header" id="header">
         <div class="header__container">
           <a
             href="index.html"
@@ -29,43 +29,42 @@
           >
             <img
               class="header__logo-img"
-              src="@img/team/logo-clean.png"
+              src="@img/team/logo-icon.png"
               alt="cote-lapyx logo"
               width="36"
               height="36"
             />
-            <span class="header__logo-text">cote-lapyx</span>
           </a>
 
           <nav class="header__nav" id="main-nav" aria-label="Основна навігація">
             <ul class="header__nav-list" role="list">
               <li class="header__nav-item">
-                <a href="index.html" class="header__nav-link">Головна</a>
+                <a href="index.html" class="header__nav-link" data-nav-link>Головна</a>
               </li>
               <li class="header__nav-item">
-                <a href="index.html#about" class="header__nav-link">Про нас</a>
+                <a href="index.html#about" class="header__nav-link" data-nav-link>Про нас</a>
               </li>
               <li class="header__nav-item">
-                <a href="team.html" class="header__nav-link">Команда</a>
+                <a href="team.html" class="header__nav-link" data-nav-link>Команда</a>
               </li>
               <li class="header__nav-item">
-                <a href="index.html#services" class="header__nav-link"
+                <a href="index.html#services" class="header__nav-link" data-nav-link
                   >Послуги</a
                 >
               </li>
               <li class="header__nav-item">
-                <a href="projects.html" class="header__nav-link">Проекти</a>
+                <a href="projects.html" class="header__nav-link" data-nav-link>Проекти</a>
               </li>
               <li class="header__nav-item">
                 <a
                   href="blog.html"
                   class="header__nav-link is-active"
-                  aria-current="page"
+                  aria-current="page" data-nav-link
                   >Блог</a
                 >
               </li>
               <li class="header__nav-item">
-                <a href="index.html#contact" class="header__nav-link"
+                <a href="index.html#contact" class="header__nav-link" data-nav-link
                   >Контакт</a
                 >
               </li>
@@ -73,35 +72,23 @@
           </nav>
 
           <div class="header__controls">
-            <div class="header__lang" aria-label="Вибір мови">
+                          <div class="header__lang" id="lang-switcher" aria-label="Вибір мови">
               <button
-                class="header__lang-btn is-active"
-                aria-pressed="true"
-                data-lang="ua"
+                class="header__lang-toggle"
+                id="lang-toggle"
+                aria-expanded="false"
+                aria-haspopup="listbox"
+                aria-controls="lang-dropdown"
               >
-                UA
+                <span class="header__lang-current">UA</span>
+                <span class="header__lang-chevron">▾</span>
               </button>
-              <button
-                class="header__lang-btn"
-                aria-pressed="false"
-                data-lang="en"
-              >
-                EN
-              </button>
-              <button
-                class="header__lang-btn"
-                aria-pressed="false"
-                data-lang="fr"
-              >
-                FR
-              </button>
-              <button
-                class="header__lang-btn"
-                aria-pressed="false"
-                data-lang="de"
-              >
-                DE
-              </button>
+              <div class="header__lang-dropdown" id="lang-dropdown" role="listbox">
+                <button class="header__lang-btn is-active" aria-pressed="true" data-lang="ua">UA</button>
+                <button class="header__lang-btn" aria-pressed="false" data-lang="en">EN</button>
+                <button class="header__lang-btn" aria-pressed="false" data-lang="fr">FR</button>
+                <button class="header__lang-btn" aria-pressed="false" data-lang="de">DE</button>
+              </div>
             </div>
             <button
               class="header__theme-toggle"
@@ -111,9 +98,7 @@
             >
               🌙
             </button>
-            <a href="index.html#contact" class="btn btn--cyan btn--sm"
-              >Увійти</a
-            >
+            <a href="index.html#contact" class="header__login-btn btn btn--cyan btn--sm">Увійти</a>
             <button
               class="header__burger"
               id="burger-btn"
