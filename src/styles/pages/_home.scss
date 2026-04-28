@@ -27,7 +27,8 @@
   }
 
   &__subtitle {
-    font-size: 16px;
+    @include adaptiveValue("font-size", 28, 22);
+
     color: $text-secondary;
     margin-top: 16px;
     max-width: 560px;
@@ -45,12 +46,13 @@
   &__container {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 60px;
+    @include adaptiveValue("gap", 60, 25);
+    // gap: 60px;
     align-items: center;
 
-    @media (max-width: toEm($tablet)) {
+    @media (max-width: toEm($mobile)) {
       grid-template-columns: 1fr;
-      gap: 40px;
+      //   gap: 40px;
     }
   }
 
@@ -73,16 +75,21 @@
   }
 
   &__body {
-    font-size: 16px;
+    @include adaptiveValue("font-size", 16, 18);
     color: $text-secondary;
     line-height: 1.8;
   }
 
   &__stats {
     display: flex;
-    gap: 32px;
+    align-self: center;
+    // gap: 32px;
+    @include adaptiveValue("gap", 32, 12);
     flex-wrap: wrap;
     margin-top: 8px;
+    @media (max-width: toEm($mobileSmall)) {
+      flex-direction: column;
+    }
   }
 
   &__stat {
@@ -114,15 +121,19 @@
   // Tech icons column
   &__visual {
     display: flex;
-    flex-direction: column;
+    // flex-direction: row;
+
+    justify-content: center;
     gap: 16px;
     align-items: center;
 
     @media (max-width: toEm($tablet)) {
-      flex-direction: row;
       justify-content: center;
+      flex-direction: column;
     }
-
+    @media (max-width: toEm($mobile)) {
+      flex-direction: row;
+    }
     @media (max-width: toEm($mobileSmall)) {
       flex-direction: column;
     }
