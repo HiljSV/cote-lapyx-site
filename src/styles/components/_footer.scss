@@ -188,12 +188,6 @@
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    flex-wrap: wrap;
-
-    @media (max-width: toEm($mobile)) {
-      flex-direction: column;
-      text-align: center;
-    }
   }
 
   &__copyright {
