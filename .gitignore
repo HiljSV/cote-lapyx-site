@@ -1,4 +1,38 @@
+# Dependencies
 node_modules/
+
+# Build output
 dist/
-node_modules
+
+# Environment variables
 .env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build cache
+.vite/
+*.cache
+
+# Backup files from image editors
+*.png~
+*.jpg~
+*.jpeg~
+
+# Source materials (personal working folder, not for repo)
+sours/
