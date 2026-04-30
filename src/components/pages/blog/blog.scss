@@ -5,6 +5,10 @@
 .blog-page {
   &__filter {
     margin-bottom: 40px;
+
+    @media (max-width: toEm($mobile)) {
+      margin-bottom: 24px;
+    }
   }
 
   &__grid {
