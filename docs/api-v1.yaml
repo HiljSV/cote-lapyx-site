@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Cote Lapyx API
-  version: 1.2.0
+  version: 1.4.0
   description: |
     REST API for cote-lapyx.com — a team website for Валерія, Сергій, Андрій.
 
@@ -30,6 +30,11 @@ info:
     ## Errors
     All error responses use RFC 9457 `application/problem+json`.
 
+    ## Admin vs. resource endpoints
+    Owner-scoped admin operations (user management, content moderation, inbox) live
+    under the `/admin/` prefix to simplify Spring Security `antMatcher` configuration.
+    Self-service endpoints (`/users/me`, `/subscriptions/me`) stay under the resource prefix.
+
   contact:
     name: cote-lapyx team
     url: https://cote-lapyx.com
@@ -46,7 +51,7 @@ tags:
   - name: Auth
     description: Registration, login, token refresh and logout
   - name: Users
-    description: User profile management
+    description: User profile management (self-service)
   - name: TeamMembers
     description: Public team member profiles
   - name: Posts
@@ -61,18 +66,22 @@ tags:
     description: Blog post tags (owner-managed)
   - name: Subscriptions
     description: Newsletter/content subscriptions
-  - name: Contact
-    description: Contact form and admin message management
+  - name: ContactMessages
+    description: Public contact form submissions and owner inbox management
   - name: Contacts
     description: |
       Team contact links (Telegram, Instagram, LinkedIn, GitHub, Email, etc.).
 
-      > **Note (v1.x):** Contact mutation endpoints use the `/admin/` prefix for
-      > simplified Spring Security `antMatcher` config. A future version may migrate
-      > to a single `/contacts` resource with role-based method-level security
-      > (Variant B) for a cleaner REST resource model.
+      > **Note (v1.x):** Mutation endpoints use the `/admin/` prefix for
+      > simplified Spring Security `antMatcher` config.
   - name: Translations
-    description: Dynamic multilingual content
+    description: Dynamic multilingual content (bulk upsert, per-entity)
+  - name: Admin
+    description: |
+      Owner-only administrative operations: user management, content moderation,
+      inbox, and platform settings. All paths require `role = owner`.
+  - name: Dashboard
+    description: Authenticated-user views — statistics and personal data summaries.
 
 # ---------------------------------------------------------------------------
 # Security schemes
@@ -389,6 +398,17 @@ components:
         socialLinks:
           $ref: "#/components/schemas/SocialLinks"
 
+    UserAdminUpdateRequest:
+      type: object
+      description: Owner-only fields that may be changed on any user account.
+      properties:
+        role:
+          $ref: "#/components/schemas/UserRole"
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+
     SocialLinks:
       type: object
       nullable: true
@@ -413,6 +433,19 @@ components:
           type: string
           format: email
           nullable: true
+
+    # --- Paged responses ---
+
+    PagedUserResponse:
+      type: object
+      required: [content, page]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserDTO"
+        page:
+          $ref: "#/components/schemas/PageMetadata"
 
     # --- Team Member ---
 
@@ -803,6 +836,16 @@ components:
           minLength: 1
           maxLength: 2000
 
+    CommentModerationRequest:
+      type: object
+      required: [status]
+      description: Owner-only payload to change a comment's moderation status.
+      properties:
+        status:
+          type: string
+          enum: [approved, rejected]
+          description: "`approved` makes the comment visible; `rejected` hides it from public."
+
     PagedCommentResponse:
       type: object
       required: [content, page]
@@ -919,6 +962,17 @@ components:
         type:
           $ref: "#/components/schemas/SubscriptionType"
 
+    PagedSubscriptionResponse:
+      type: object
+      required: [content, page]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/SubscriptionDTO"
+        page:
+          $ref: "#/components/schemas/PageMetadata"
+
     # --- Contact Message ---
 
     ContactMessageDTO:
@@ -962,6 +1016,14 @@ components:
           type: string
           minLength: 10
           maxLength: 5000
+
+    ContactMessageStatusUpdateRequest:
+      type: object
+      required: [status]
+      description: Owner-only payload to update a contact message processing status.
+      properties:
+        status:
+          $ref: "#/components/schemas/ContactMessageStatus"
 
     PagedContactMessageResponse:
       type: object
@@ -1015,8 +1077,6 @@ components:
           type: string
           minLength: 1
 
-    # --- Translation Bulk ---
-
     TranslationBulkRequest:
       type: object
       required: [translations]
@@ -1040,8 +1100,6 @@ components:
                 type: string
                 minLength: 1
                 example: My First Post
-
-    # --- Translation Bulk Response ---
 
     TranslationBulkResponse:
       type: object
@@ -1104,8 +1162,6 @@ components:
               description: Machine-readable rejection category from the auto-moderation filter.
               example: profanity
 
-    # --- Comment Deleted ---
-
     CommentDeletedResponse:
       type: object
       required: [id, deletedAt, status]
@@ -1156,10 +1212,7 @@ components:
           description: |
             URL or address for the contact channel.
             For `type: email` must be a valid email address (RFC 5321).
-            For all other types (telegram, instagram, linkedin, github, discord, whatsapp,
-            behance, other) must be a valid URI (RFC 3986).
-            Backend enforces format per type; the spec describes the constraint here for
-            documentation purposes.
+            For all other types must be a valid URI (RFC 3986).
           x-validation:
             email: format:email
             default: format:uri
@@ -1191,6 +1244,87 @@ components:
           type: string
           maxLength: 100
           nullable: true
+
+    ContactSubmitResponse:
+      type: object
+      required: [id, createdAt]
+      description: Minimal confirmation returned after a contact form submission.
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 17
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-04-29T10:00:00Z"
+
+    # --- Dashboard ---
+
+    DashboardStatsDTO:
+      type: object
+      required:
+        [
+          postsTotal,
+          projectsTotal,
+          subscribersTotal,
+          commentsTotal,
+          messagesUnread,
+        ]
+      description: |
+        Aggregated statistics for the owner dashboard home screen.
+        Counts reflect all records visible to the authenticated owner.
+      properties:
+        postsTotal:
+          type: integer
+          format: int64
+          description: Total number of blog posts across all statuses.
+          example: 24
+        postsPublished:
+          type: integer
+          format: int64
+          description: Blog posts with `status = published`.
+          example: 18
+        postsDraft:
+          type: integer
+          format: int64
+          description: Blog posts with `status = draft`.
+          example: 4
+        projectsTotal:
+          type: integer
+          format: int64
+          description: Total number of portfolio projects across all statuses.
+          example: 12
+        projectsPublished:
+          type: integer
+          format: int64
+          description: Projects with `status = published`.
+          example: 9
+        subscribersTotal:
+          type: integer
+          format: int64
+          description: Total number of active subscriptions.
+          example: 340
+        commentsTotal:
+          type: integer
+          format: int64
+          description: Total comments across all moderation states.
+          example: 87
+        commentsPending:
+          type: integer
+          format: int64
+          description: Comments awaiting moderation (`status = pending`).
+          example: 5
+        messagesUnread:
+          type: integer
+          format: int64
+          description: Contact messages with `status = new`.
+          example: 3
+        usersTotal:
+          type: integer
+          format: int64
+          description: Total registered users (owners + subscribers).
+          example: 156
 
   # ---------------------------------------------------------------------------
   # Reusable responses
@@ -1276,6 +1410,8 @@ paths:
       operationId: registerUser
       security: []
       x-roles: [public]
+      description: |
+        Creates a new account with role `subscriber`. Rate-limited to 5 requests/minute per IP.
       requestBody:
         required: true
         content:
@@ -1305,6 +1441,9 @@ paths:
       operationId: loginUser
       security: []
       x-roles: [public]
+      description: |
+        Returns a JWT access token (15 min TTL) and a refresh token (30 day TTL).
+        Rate-limited to 5 requests/minute per IP.
       requestBody:
         required: true
         content:
@@ -1362,6 +1501,9 @@ paths:
       security:
         - bearerAuth: []
       x-roles: [owner, subscriber]
+      description: |
+        Revokes the provided refresh token. The access token expires naturally
+        after its 15-minute TTL. Client must discard both tokens after this call.
       requestBody:
         required: true
         content:
@@ -1395,7 +1537,7 @@ paths:
           $ref: "#/components/responses/Unauthorized"
 
   # ---------------------------------------------------------------------------
-  # Users
+  # Users (self-service)
   # ---------------------------------------------------------------------------
 
   /users/me:
@@ -1442,73 +1584,6 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "422":
           $ref: "#/components/responses/ValidationError"
-
-  /users:
-    get:
-      tags: [Users]
-      summary: List all users (owner only)
-      operationId: listUsers
-      security:
-        - bearerAuth: []
-      x-roles: [owner]
-      parameters:
-        - $ref: "#/components/parameters/PageParam"
-        - $ref: "#/components/parameters/SizeParam"
-        - $ref: "#/components/parameters/SortParam"
-        - name: role
-          in: query
-          description: Filter by role.
-          required: false
-          schema:
-            $ref: "#/components/schemas/UserRole"
-      responses:
-        "200":
-          description: Paginated list of users.
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [content, page]
-                properties:
-                  content:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/UserDTO"
-                  page:
-                    $ref: "#/components/schemas/PageMetadata"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-
-  /users/{id}:
-    get:
-      tags: [Users]
-      summary: Get user by ID (owner only)
-      operationId: getUserById
-      security:
-        - bearerAuth: []
-      x-roles: [owner]
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        "200":
-          description: User profile.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/UserDTO"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/NotFound"
 
   # ---------------------------------------------------------------------------
   # Team Members
@@ -1761,7 +1836,7 @@ paths:
       security:
         - bearerAuth: []
       x-roles: [owner]
-      description: Owner can only modify their own posts. Returns 403 if the authenticated owner is not the author.
+      description: Owner can only delete their own posts. Returns 403 if the authenticated owner is not the author.
       parameters:
         - name: slug
           in: path
@@ -1934,7 +2009,7 @@ paths:
       security:
         - bearerAuth: []
       x-roles: [owner]
-      description: Owner can only modify their own projects. Returns 403 if the authenticated owner is not the author.
+      description: Owner can only delete their own projects. Returns 403 if the authenticated owner is not the author.
       parameters:
         - name: slug
           in: path
@@ -2003,9 +2078,8 @@ paths:
       description: |
         Submits a comment on the specified post.
         Before saving, the comment is passed through automatic moderation checks
-        (profanity filter, hate-speech detection, and, when media support is added,
-        image content analysis). If the content is rejected a 422 is returned with
-        a machine-readable `reason` field; the comment is NOT persisted.
+        (profanity filter, hate-speech detection). If the content is rejected a 422
+        is returned with a machine-readable `reason` field; the comment is NOT persisted.
       parameters:
         - name: slug
           in: path
@@ -2047,6 +2121,51 @@ paths:
                 reason: profanity
 
   /comments/{id}:
+    patch:
+      tags: [Comments]
+      summary: Moderate a comment — approve or reject (owner only)
+      operationId: moderateComment
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Changes the moderation status of a comment from `pending` to `approved` or `rejected`.
+        Use `DELETE /comments/{id}` for soft-deletion (works for both owners and subscribers).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentModerationRequest"
+      responses:
+        "200":
+          description: Comment status updated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Comment is already in a terminal state (deleted).
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+
     delete:
       tags: [Comments]
       summary: Delete a comment (owner deletes any; subscriber deletes own)
@@ -2407,16 +2526,19 @@ paths:
           $ref: "#/components/responses/NotFound"
 
   # ---------------------------------------------------------------------------
-  # Contact
+  # Contact Messages (public submit + admin inbox)
   # ---------------------------------------------------------------------------
 
   /contact:
     post:
-      tags: [Contact]
+      tags: [ContactMessages]
       summary: Submit a contact form message
       operationId: submitContactMessage
       security: []
       x-roles: [public]
+      description: |
+        Public endpoint for the /contact page form. Rate-limited to prevent spam.
+        Returns a minimal confirmation without exposing internal message state.
       requestBody:
         required: true
         content:
@@ -2429,15 +2551,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required: [id, createdAt]
-                properties:
-                  id:
-                    type: integer
-                    format: int64
-                  createdAt:
-                    type: string
-                    format: date-time
+                $ref: "#/components/schemas/ContactSubmitResponse"
         "400":
           $ref: "#/components/responses/ValidationError"
         "422":
@@ -2447,7 +2561,7 @@ paths:
 
   /admin/contact-messages:
     get:
-      tags: [Contact]
+      tags: [ContactMessages]
       summary: List contact form messages (owner only)
       operationId: listContactMessages
       security:
@@ -2476,7 +2590,7 @@ paths:
 
   /admin/contact-messages/{id}:
     get:
-      tags: [Contact]
+      tags: [ContactMessages]
       summary: Get a single contact message (owner only)
       operationId: getContactMessage
       security:
@@ -2504,7 +2618,7 @@ paths:
           $ref: "#/components/responses/NotFound"
 
     patch:
-      tags: [Contact]
+      tags: [ContactMessages]
       summary: Update contact message status (owner only)
       operationId: updateContactMessageStatus
       security:
@@ -2522,11 +2636,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required: [status]
-              properties:
-                status:
-                  $ref: "#/components/schemas/ContactMessageStatus"
+              $ref: "#/components/schemas/ContactMessageStatusUpdateRequest"
       responses:
         "200":
           description: Updated message.
@@ -2536,6 +2646,31 @@ paths:
                 $ref: "#/components/schemas/ContactMessageDTO"
         "400":
           $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    delete:
+      tags: [ContactMessages]
+      summary: Delete a contact message (owner only)
+      operationId: deleteContactMessage
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: Permanently removes a contact message from the inbox.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Contact message deleted.
         "401":
           $ref: "#/components/responses/Unauthorized"
         "403":
@@ -2597,7 +2732,6 @@ paths:
       description: |
         Upserts all translations for the given entity in a single request.
         Existing translations are overwritten; missing ones are created.
-        Use this instead of making one request per locale/field combination.
 
         **Partial-success semantics:** If some items in the request array are invalid, the
         valid items are persisted and the endpoint returns `207 Multi-Status` with a
@@ -2625,7 +2759,7 @@ paths:
               $ref: "#/components/schemas/TranslationBulkRequest"
       responses:
         "200":
-          description: All provided translations saved successfully; returns the full upserted set.
+          description: All provided translations saved successfully.
           content:
             application/json:
               schema:
@@ -2635,8 +2769,7 @@ paths:
         "207":
           description: |
             Partial success — some translations saved, some rejected. Check the `errors` array
-            for per-item failure details. The `saved` array contains all successfully persisted
-            translations for this request.
+            for per-item failure details.
           content:
             application/json:
               schema:
@@ -2698,7 +2831,7 @@ paths:
           $ref: "#/components/responses/NotFound"
 
   # ---------------------------------------------------------------------------
-  # Contacts
+  # Contacts (team social links)
   # ---------------------------------------------------------------------------
 
   /contacts:
@@ -2813,3 +2946,378 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
+
+  # ---------------------------------------------------------------------------
+  # Admin — User Management
+  # ---------------------------------------------------------------------------
+
+  /admin/users:
+    get:
+      tags: [Admin]
+      summary: List all users (owner only)
+      operationId: adminListUsers
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Paginated list of all registered users. Supports filtering by role.
+        Used by the `/admin/users` dashboard page.
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+        - $ref: "#/components/parameters/SortParam"
+        - name: role
+          in: query
+          description: Filter by role.
+          required: false
+          schema:
+            $ref: "#/components/schemas/UserRole"
+        - name: q
+          in: query
+          description: Search by name or email.
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Paginated list of users.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedUserResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /admin/users/{id}:
+    get:
+      tags: [Admin]
+      summary: Get a user by ID (owner only)
+      operationId: adminGetUser
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: User profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    patch:
+      tags: [Admin]
+      summary: Update user role or name (owner only)
+      operationId: adminUpdateUser
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Allows an owner to change another user's `role` or `name`.
+        An owner may not change their own role via this endpoint.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserAdminUpdateRequest"
+      responses:
+        "200":
+          description: Updated user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Attempted to change own role.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+
+    delete:
+      tags: [Admin]
+      summary: Delete a user account (owner only)
+      operationId: adminDeleteUser
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Permanently removes the user account and all associated data (comments, subscriptions).
+        An owner cannot delete their own account via this endpoint.
+        Returns 409 if the target user is an owner with published content.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: User account deleted.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  # ---------------------------------------------------------------------------
+  # Admin — Posts (all statuses, all authors)
+  # ---------------------------------------------------------------------------
+
+  /admin/posts:
+    get:
+      tags: [Admin]
+      summary: List all posts across all statuses (owner only)
+      operationId: adminListPosts
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Returns posts of all statuses (draft, published, archived) from all authors.
+        Used by the `/admin/posts` management page. Supports filtering by status, type,
+        and author.
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+        - $ref: "#/components/parameters/SortParam"
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/PostStatus"
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/PostType"
+        - name: authorId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: q
+          in: query
+          description: Full-text search on title or excerpt.
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Paginated list of posts (all statuses).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedBlogPostResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /admin/posts/{id}:
+    delete:
+      tags: [Admin]
+      summary: Force-delete any post by ID (owner only)
+      operationId: adminDeletePost
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Permanently deletes any post regardless of author. Intended for moderation
+        (e.g. removing policy-violating content). For normal author-scoped deletion
+        use `DELETE /posts/{slug}`.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Post permanently deleted.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ---------------------------------------------------------------------------
+  # Admin — Projects (all statuses, all authors)
+  # ---------------------------------------------------------------------------
+
+  /admin/projects:
+    get:
+      tags: [Admin]
+      summary: List all projects across all statuses (owner only)
+      operationId: adminListProjects
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Returns projects of all statuses from all authors.
+        Used by the `/admin/projects` management page.
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+        - $ref: "#/components/parameters/SortParam"
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ProjectStatus"
+        - name: authorId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: q
+          in: query
+          description: Full-text search on title or short description.
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Paginated list of projects (all statuses).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedProjectResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /admin/projects/{id}:
+    delete:
+      tags: [Admin]
+      summary: Force-delete any project by ID (owner only)
+      operationId: adminDeleteProject
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Permanently deletes any project regardless of author. For normal author-scoped
+        deletion use `DELETE /projects/{slug}`.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "204":
+          description: Project permanently deleted.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ---------------------------------------------------------------------------
+  # Admin — Subscriptions
+  # ---------------------------------------------------------------------------
+
+  /admin/subscriptions:
+    get:
+      tags: [Admin]
+      summary: List all subscriptions (owner only)
+      operationId: adminListSubscriptions
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Returns all subscriptions across all users. Supports filtering by status and type.
+        Used by the owner dashboard's `/dashboard/subscribers` view.
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+        - $ref: "#/components/parameters/SortParam"
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/SubscriptionStatus"
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/SubscriptionType"
+      responses:
+        "200":
+          description: Paginated list of all subscriptions.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedSubscriptionResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  # ---------------------------------------------------------------------------
+  # Dashboard
+  # ---------------------------------------------------------------------------
+
+  /dashboard/stats:
+    get:
+      tags: [Dashboard]
+      summary: Get aggregated platform statistics (owner only)
+      operationId: getDashboardStats
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Returns platform-wide counts used to populate the owner dashboard home screen:
+        total posts/projects/subscribers/comments/unread messages.
+        All counts are computed at request time (no caching guarantee in v1).
+      responses:
+        "200":
+          description: Dashboard statistics.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStatsDTO"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
