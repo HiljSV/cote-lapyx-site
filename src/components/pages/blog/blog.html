@@ -1,0 +1,54 @@
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="page-hero__container">
+    <h1 class="page-hero__heading">Блог</h1>
+    <p class="page-hero__subheading">
+      Думки, досвід і технічні нотатки команди cote-lapyx
+    </p>
+  </div>
+</div>
+
+<main class="page">
+  <section class="section section--dark" aria-label="Статті блогу">
+    <div class="page__container">
+      <!-- Filter bar -->
+      <div class="blog-page__filter">
+        <div class="filter-bar" role="search" aria-label="Фільтр статей">
+          <div class="filter-bar__group">
+            <span class="filter-bar__label">Категорія:</span>
+            <button class="filter-bar__btn is-active" data-filter-cat="all">
+              Всі
+            </button>
+            <button class="filter-bar__btn" data-filter-cat="frontend">
+              Frontend
+            </button>
+            <button class="filter-bar__btn" data-filter-cat="backend">
+              Backend
+            </button>
+            <button class="filter-bar__btn" data-filter-cat="design">
+              Design
+            </button>
+            <button class="filter-bar__btn" data-filter-cat="devops">
+              DevOps
+            </button>
+          </div>
+          <div class="filter-bar__search">
+            <span class="filter-bar__search-icon" aria-hidden="true"
+              >&#128269;</span
+            >
+            <input
+              class="filter-bar__search-input"
+              type="search"
+              placeholder="Пошук статей..."
+              aria-label="Пошук статей"
+              id="blog-search"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid -->
+      <ul class="blog-page__grid" id="blog-list" role="list"></ul>
+    </div>
+  </section>
+</main>

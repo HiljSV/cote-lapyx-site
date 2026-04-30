@@ -163,17 +163,19 @@ a {
   color: inherit;
 }
 
-// Components
-@import "components/buttons";
-@import "components/header";
-@import "components/footer";
-@import "components/hero";
-@import "components/cards";
-@import "components/forms";
+// Layout
+@import "../components/layout/header/header";
+@import "../components/layout/footer/footer";
+
+// UI
+@import "../components/ui/buttons/buttons";
+@import "../components/ui/hero/hero";
+@import "../components/ui/cards/cards";
+@import "../components/ui/forms/forms";
 
 // Pages
-@import "pages/home";
-@import "pages/team";
-@import "pages/projects";
-@import "pages/blog";
-@import "pages/member";
+@import "../components/pages/index/index";
+@import "../components/pages/team/team";
+@import "../components/pages/projects/projects";
+@import "../components/pages/blog/blog";
+@import "../components/pages/member/member";
