@@ -6,11 +6,7 @@
   &__grid {
     display: flex;
     flex-direction: column;
-    gap: 32px;
-
-    @media (max-width: toEm($mobile)) {
-      gap: 24px;
-    }
+    @include adaptiveValue("gap", 52, 24);
   }
 
   &__skills-section {

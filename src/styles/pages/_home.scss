@@ -64,7 +64,7 @@
 
   &__heading {
     font-family: $fontHeading;
-    font-size: clamp(28px, 4vw, 42px);
+    @include adaptiveValue("font-size", 42, 28);
     font-weight: 700;
     color: $text-primary;
     line-height: 1.2;
