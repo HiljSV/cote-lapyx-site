@@ -36,3 +36,6 @@ yarn-error.log*
 
 # Source materials (personal working folder, not for repo)
 sours/
+
+# Claude Code agent memory
+.claude/
