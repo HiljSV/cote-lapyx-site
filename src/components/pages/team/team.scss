@@ -16,6 +16,10 @@
       margin-top: 16px;
     }
 
+    @media (max-width: toEm($mobileSmall)) {
+      margin-top: 12px;
+    }
+
     h3 {
       font-family: $fontHeading;
       font-size: 13px;
@@ -31,5 +35,17 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+
+    @media (max-width: toEm($mobileSmall)) {
+      gap: 8px;
+    }
+  }
+
+  &__profile-btn {
+    margin-top: 16px;
+
+    @media (max-width: toEm($mobileSmall)) {
+      margin-top: 12px;
+    }
   }
 }
