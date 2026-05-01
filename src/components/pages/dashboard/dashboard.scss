@@ -425,16 +425,21 @@
     font-size: 13px;
   }
 
+  // Avoid display:flex on td — it breaks table row height sync in some browsers.
+  // neon-badge is inline-block, so badges flow naturally.
   &__tech {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    .neon-badge + .neon-badge {
+      margin-left: 6px;
+    }
   }
 
+  // btn is inline-flex, so buttons are inline by default.
   &__actions {
-    display: flex;
-    gap: 8px;
     white-space: nowrap;
+
+    .btn + .btn {
+      margin-left: 8px;
+    }
   }
 }
 
