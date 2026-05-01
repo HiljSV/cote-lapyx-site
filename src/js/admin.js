@@ -15,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const overlay = document.getElementById("admin-overlay");
   const mobileToggle = document.getElementById("admin-mobile-toggle");
+  const closeBtn = document.getElementById("admin-sidebar-close");
   const logoutBtn = document.getElementById("admin-logout");
   const navLinks = sidebar.querySelectorAll(".dash-sidebar__nav-link");
   const panels = document.querySelectorAll(".admin-section-panel");
@@ -29,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     overlay.classList.add("is-visible");
     overlay.removeAttribute("aria-hidden");
     mobileToggle?.setAttribute("aria-expanded", "true");
+    document.body.style.overflow = "hidden"; // prevent page scroll behind drawer
     document.addEventListener("keydown", handleEsc);
   }
 
@@ -38,6 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
     overlay.classList.remove("is-visible");
     overlay.setAttribute("aria-hidden", "true");
     mobileToggle?.setAttribute("aria-expanded", "false");
+    document.body.style.overflow = ""; // restore page scroll
     document.removeEventListener("keydown", handleEsc);
   }
 
@@ -60,6 +63,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Click on backdrop overlay closes sidebar
   overlay?.addEventListener("click", closeSidebar);
+
+  // X close button inside the sidebar
+  closeBtn?.addEventListener("click", () => {
+    closeSidebar();
+    mobileToggle?.focus();
+  });
 
   // ---------------------------------------------------------------------------
   // Section navigation (SPA-style panel switching)

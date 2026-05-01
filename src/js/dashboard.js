@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const sidebar = document.getElementById("dash-sidebar");
   const overlay = document.getElementById("dash-overlay");
   const mobileToggle = document.getElementById("dash-mobile-toggle");
+  const closeBtn = document.getElementById("dash-sidebar-close");
   const logoutBtn = document.getElementById("dash-logout");
   const navLinks = document.querySelectorAll(".dash-sidebar__nav-link");
   const panels = document.querySelectorAll(".dash-section-panel");
@@ -25,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     overlay.classList.add("is-visible");
     overlay.removeAttribute("aria-hidden");
     mobileToggle.setAttribute("aria-expanded", "true");
-    // Trap focus back to sidebar when Escape is pressed
+    document.body.style.overflow = "hidden"; // prevent page scroll behind drawer
     document.addEventListener("keydown", handleEsc);
   }
 
@@ -34,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
     overlay.classList.remove("is-visible");
     overlay.setAttribute("aria-hidden", "true");
     mobileToggle.setAttribute("aria-expanded", "false");
+    document.body.style.overflow = ""; // restore page scroll
     document.removeEventListener("keydown", handleEsc);
   }
 
@@ -58,6 +60,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // Click on overlay closes sidebar
   if (overlay) {
     overlay.addEventListener("click", closeSidebar);
+  }
+
+  // X close button inside the sidebar
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      closeSidebar();
+      mobileToggle?.focus();
+    });
   }
 
   // ---------------------------------------------------------------------------

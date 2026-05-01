@@ -192,6 +192,42 @@
     }
   }
 
+  // ----- Close button (drawer mode only) -----
+
+  &__close {
+    display: none;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 1px solid rgba($border-cyan, 0.5);
+    border-radius: 6px;
+    color: $text-muted;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition:
+      color 0.2s ease,
+      border-color 0.2s ease;
+
+    &:hover {
+      color: $neon-magenta;
+      border-color: rgba($neon-magenta, 0.5);
+    }
+
+    &:focus-visible {
+      outline: 2px solid $neon-cyan;
+      outline-offset: 2px;
+    }
+
+    @media (max-width: toEm($tablet)) {
+      display: flex;
+    }
+  }
+
   // ----- Logout button -----
 
   &__logout {
@@ -226,6 +262,7 @@
   padding: 32px;
   background: $bg-dark;
   min-width: 0; // prevent grid blowout
+  overflow-x: hidden; // catch any child overflow before it scrolls the page
 
   @media (max-width: toEm($mobile)) {
     padding: 20px 16px;
@@ -375,10 +412,11 @@
 // Table
 // -----------------------------------------------------------------------------
 
+// overflow:auto creates a scroll container for wide tables AND clips border-radius.
+// Do not split into overflow:hidden + overflow-x:auto — that pair blocks the scrollbar.
 .dash-table-wrap {
   @include glass-card;
-  overflow: hidden; // keeps border-radius on table
-  overflow-x: auto;
+  overflow: auto;
 }
 
 .dash-table {
