@@ -4,7 +4,7 @@
     "name": "Сергій",
     "role": "Frontend Developer",
     "bio": "Поєднує дизайн-мислення та фронтенд-розробку. Автор фірмового стилю cote-lapyx.",
-    "photo": null,
+    "photo": "assets/img/serhii/prince.png",
     "initial": "С",
     "color": "cyan",
     "socials": {
@@ -56,7 +56,7 @@
     "name": "Андрій",
     "role": "Backend Developer",
     "bio": "Java та C# розробник. Розробляє REST API та системи авторизації.",
-    "photo": "assets/img/main_page/team/andrii.png",
+    "photo": "assets/img/andrii/coteAndrii.png",
     "initial": "А",
     "color": "green",
     "socials": {
@@ -110,7 +110,7 @@
     "name": "Валерія",
     "role": "UI/UX Designer",
     "bio": "UI/UX дизайнер з фокусом на web та digital-продукти. Дбає про UX кожної деталі.",
-    "photo": "assets/img/main_page/team/valerka.png",
+    "photo": "assets/img/valerii/valerka.png",
     "initial": "В",
     "color": "magenta",
     "socials": {
