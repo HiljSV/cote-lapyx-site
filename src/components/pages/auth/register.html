@@ -1,20 +1,46 @@
-<div class="auth-card">
-  <!-- Header -->
-  <div class="auth-card__header">
-    <h1 class="auth-card__title">Реєстрація</h1>
-    <p class="auth-card__subtitle">Приєднуйтесь до cote-lapyx</p>
-  </div>
+<section class="auth-section">
+  <div class="auth-card" style="width: 100%; max-width: 440px">
+    <!-- Header -->
+    <div class="auth-card__header">
+      <h1 class="auth-card__title">Реєстрація</h1>
+      <p class="auth-card__subtitle">Приєднуйтесь до cote-lapyx</p>
+    </div>
 
-  <!-- Role selector -->
-  <div class="auth-role" role="group" aria-labelledby="role-label">
-    <p class="auth-role__label" id="role-label">Ви реєструєтесь як:</p>
-    <div class="auth-role__options">
-      <label class="auth-role__option">
-        <input type="radio" name="role" value="subscriber" checked />
-        <span class="auth-role__card">
+    <!-- Role selector -->
+    <div class="auth-role" role="group" aria-labelledby="role-label">
+      <p class="auth-role__label" id="role-label">Ви реєструєтесь як:</p>
+      <div class="auth-role__options">
+        <label class="auth-role__option">
+          <input type="radio" name="role" value="subscriber" checked />
+          <span class="auth-role__card">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+              />
+            </svg>
+            <strong>Підписник</strong>
+            <small>Читайте блог, залишайте коментарі</small>
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Register form -->
+    <form class="auth-form" id="register-form" novalidate>
+      <!-- Name field -->
+      <div class="auth-form__group">
+        <label class="auth-form__label" for="reg-name">Ім'я</label>
+        <div class="auth-form__input-wrap">
           <svg
-            width="20"
-            height="20"
+            class="auth-form__icon"
+            width="16"
+            height="16"
             viewBox="0 0 24 24"
             fill="currentColor"
             aria-hidden="true"
@@ -23,107 +49,26 @@
               d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
             />
           </svg>
-          <strong>Підписник</strong>
-          <small>Читайте блог, залишайте коментарі</small>
-        </span>
-      </label>
-    </div>
-  </div>
-
-  <!-- Register form -->
-  <form class="auth-form" id="register-form" novalidate>
-    <!-- Name field -->
-    <div class="auth-form__group">
-      <label class="auth-form__label" for="reg-name">Ім'я</label>
-      <div class="auth-form__input-wrap">
-        <svg
-          class="auth-form__icon"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          aria-hidden="true"
-        >
-          <path
-            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+          <input
+            class="auth-form__input"
+            type="text"
+            id="reg-name"
+            name="name"
+            placeholder="Ваше ім'я"
+            autocomplete="name"
+            required
+            minlength="2"
           />
-        </svg>
-        <input
-          class="auth-form__input"
-          type="text"
-          id="reg-name"
-          name="name"
-          placeholder="Ваше ім'я"
-          autocomplete="name"
-          required
-          minlength="2"
-        />
+        </div>
+        <span class="auth-form__error" id="reg-name-error" role="alert"></span>
       </div>
-      <span class="auth-form__error" id="reg-name-error" role="alert"></span>
-    </div>
 
-    <!-- Email field -->
-    <div class="auth-form__group">
-      <label class="auth-form__label" for="reg-email">Email</label>
-      <div class="auth-form__input-wrap">
-        <svg
-          class="auth-form__icon"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          aria-hidden="true"
-        >
-          <path
-            d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
-          />
-        </svg>
-        <input
-          class="auth-form__input"
-          type="email"
-          id="reg-email"
-          name="email"
-          placeholder="your@email.com"
-          autocomplete="email"
-          required
-        />
-      </div>
-      <span class="auth-form__error" id="reg-email-error" role="alert"></span>
-    </div>
-
-    <!-- Password field -->
-    <div class="auth-form__group">
-      <label class="auth-form__label" for="reg-password">Пароль</label>
-      <div class="auth-form__input-wrap">
-        <svg
-          class="auth-form__icon"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          aria-hidden="true"
-        >
-          <path
-            d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
-          />
-        </svg>
-        <input
-          class="auth-form__input"
-          type="password"
-          id="reg-password"
-          name="password"
-          placeholder="Мінімум 8 символів"
-          autocomplete="new-password"
-          required
-          minlength="8"
-        />
-        <button
-          type="button"
-          class="auth-form__toggle-password"
-          aria-label="Показати пароль"
-          data-toggle-password="reg-password"
-        >
+      <!-- Email field -->
+      <div class="auth-form__group">
+        <label class="auth-form__label" for="reg-email">Email</label>
+        <div class="auth-form__input-wrap">
           <svg
+            class="auth-form__icon"
             width="16"
             height="16"
             viewBox="0 0 24 24"
@@ -131,83 +76,150 @@
             aria-hidden="true"
           >
             <path
-              d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
+              d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
             />
           </svg>
-        </button>
-      </div>
-      <!-- Password strength indicator -->
-      <div
-        class="auth-form__password-strength"
-        id="reg-password-strength"
-        aria-live="polite"
-      >
-        <div class="auth-form__strength-bar">
-          <span class="auth-form__strength-fill" id="reg-strength-fill"></span>
-        </div>
-        <span class="auth-form__strength-label" id="reg-strength-label"></span>
-      </div>
-      <span
-        class="auth-form__error"
-        id="reg-password-error"
-        role="alert"
-      ></span>
-    </div>
-
-    <!-- Confirm password field -->
-    <div class="auth-form__group">
-      <label class="auth-form__label" for="reg-confirm"
-        >Підтвердження пароля</label
-      >
-      <div class="auth-form__input-wrap">
-        <svg
-          class="auth-form__icon"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-          aria-hidden="true"
-        >
-          <path
-            d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+          <input
+            class="auth-form__input"
+            type="email"
+            id="reg-email"
+            name="email"
+            placeholder="your@email.com"
+            autocomplete="email"
+            required
           />
-        </svg>
-        <input
-          class="auth-form__input"
-          type="password"
-          id="reg-confirm"
-          name="confirm_password"
-          placeholder="Повторіть пароль"
-          autocomplete="new-password"
-          required
-        />
+        </div>
+        <span class="auth-form__error" id="reg-email-error" role="alert"></span>
       </div>
-      <span class="auth-form__error" id="reg-confirm-error" role="alert"></span>
+
+      <!-- Password field -->
+      <div class="auth-form__group">
+        <label class="auth-form__label" for="reg-password">Пароль</label>
+        <div class="auth-form__input-wrap">
+          <svg
+            class="auth-form__icon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+            />
+          </svg>
+          <input
+            class="auth-form__input"
+            type="password"
+            id="reg-password"
+            name="password"
+            placeholder="Мінімум 8 символів"
+            autocomplete="new-password"
+            required
+            minlength="8"
+          />
+          <button
+            type="button"
+            class="auth-form__toggle-password"
+            aria-label="Показати пароль"
+            data-toggle-password="reg-password"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"
+              />
+            </svg>
+          </button>
+        </div>
+        <!-- Password strength indicator -->
+        <div
+          class="auth-form__password-strength"
+          id="reg-password-strength"
+          aria-live="polite"
+        >
+          <div class="auth-form__strength-bar">
+            <span
+              class="auth-form__strength-fill"
+              id="reg-strength-fill"
+            ></span>
+          </div>
+          <span
+            class="auth-form__strength-label"
+            id="reg-strength-label"
+          ></span>
+        </div>
+        <span
+          class="auth-form__error"
+          id="reg-password-error"
+          role="alert"
+        ></span>
+      </div>
+
+      <!-- Confirm password field -->
+      <div class="auth-form__group">
+        <label class="auth-form__label" for="reg-confirm"
+          >Підтвердження пароля</label
+        >
+        <div class="auth-form__input-wrap">
+          <svg
+            class="auth-form__icon"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+            />
+          </svg>
+          <input
+            class="auth-form__input"
+            type="password"
+            id="reg-confirm"
+            name="confirm_password"
+            placeholder="Повторіть пароль"
+            autocomplete="new-password"
+            required
+          />
+        </div>
+        <span
+          class="auth-form__error"
+          id="reg-confirm-error"
+          role="alert"
+        ></span>
+      </div>
+
+      <!-- Server error -->
+      <div
+        class="auth-form__server-error"
+        id="reg-server-error"
+        role="alert"
+        hidden
+      ></div>
+
+      <!-- Submit -->
+      <button
+        type="submit"
+        class="btn btn--cyan btn--lg auth-form__submit"
+        id="reg-submit"
+      >
+        Зареєструватись
+      </button>
+    </form>
+
+    <!-- Footer link -->
+    <div class="auth-card__footer">
+      <p class="auth-card__footer-text">
+        Вже маєте акаунт?
+        <a href="login.html" class="auth-card__link">Увійти</a>
+      </p>
     </div>
-
-    <!-- Server error -->
-    <div
-      class="auth-form__server-error"
-      id="reg-server-error"
-      role="alert"
-      hidden
-    ></div>
-
-    <!-- Submit -->
-    <button
-      type="submit"
-      class="btn btn--cyan btn--lg auth-form__submit"
-      id="reg-submit"
-    >
-      Зареєструватись
-    </button>
-  </form>
-
-  <!-- Footer link -->
-  <div class="auth-card__footer">
-    <p class="auth-card__footer-text">
-      Вже маєте акаунт?
-      <a href="login.html" class="auth-card__link">Увійти</a>
-    </p>
   </div>
-</div>
+</section>

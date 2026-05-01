@@ -1,6 +1,6 @@
 <script type="module" src="@js/auth.js"></script>
 <template
-  src="@components/templates/auth/auth.html"
+  src="@components/templates/inner/inner.html"
   locals='{
   "title": "Увійти — COTE-LAPYX",
   "lang": "uk",
@@ -9,7 +9,16 @@
   "description": "Вхід до акаунту cote-lapyx"
 }'
 >
+  <block name="header">
+    <include
+      src="@components/layout/header/header.html"
+      locals='{"active":"Login"}'
+    ></include>
+  </block>
   <block name="main">
     <include src="@components/pages/auth/login.html" locals="{}"></include>
+  </block>
+  <block name="footer">
+    <include src="@components/layout/footer/footer.html" locals="{}"></include>
   </block>
 </template>
