@@ -1,0 +1,393 @@
+// =============================================================================
+// Auth Card & Form — Cyberpunk style
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// Auth card — glass container
+// -----------------------------------------------------------------------------
+
+.auth-card {
+  @include glass-card;
+  @include neon-border($neon-cyan, 16px);
+  padding: 40px;
+
+  &__header {
+    margin-bottom: 28px;
+    text-align: center;
+  }
+
+  &__title {
+    font-family: $fontHeading;
+    font-size: clamp(24px, 3vw, 32px);
+    font-weight: 700;
+    color: $text-primary;
+    margin-bottom: 6px;
+    @include neon-text($neon-cyan);
+  }
+
+  &__subtitle {
+    font-size: 14px;
+    color: $text-secondary;
+  }
+
+  &__footer {
+    margin-top: 24px;
+    text-align: center;
+  }
+
+  &__footer-text {
+    font-size: 14px;
+    color: $text-secondary;
+  }
+
+  &__link {
+    color: $neon-cyan;
+    text-decoration: none;
+    font-weight: 600;
+    transition: text-decoration 0.2s ease;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $neon-cyan;
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+  }
+
+  // Mobile S
+  @media (max-width: #{$mobileSmall}px) {
+    padding: 24px 20px;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Auth form — fields layout
+// -----------------------------------------------------------------------------
+
+.auth-form {
+  &__group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 20px;
+
+    // Remove bottom margin from last group before submit
+    &:last-of-type {
+      margin-bottom: 0;
+    }
+  }
+
+  &__label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: $text-secondary;
+    text-transform: uppercase;
+  }
+
+  // Input wrapper — positions icon and toggle button
+  &__input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  // Decorative icon inside input
+  &__icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba($neon-cyan, 0.5);
+    pointer-events: none;
+    flex-shrink: 0;
+  }
+
+  // Text/email/password input
+  &__input {
+    width: 100%;
+    padding: 12px 44px 12px 40px;
+    background: rgba($bg-dark, 0.8);
+    border: 1px solid $border-cyan;
+    border-radius: 8px;
+    color: $text-primary;
+    font-family: $fontFamily;
+    font-size: 15px;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+
+    &::placeholder {
+      color: $text-muted;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $neon-cyan;
+      box-shadow:
+        0 0 6px rgba($neon-cyan, 0.4),
+        inset 0 0 6px rgba($neon-cyan, 0.05);
+    }
+
+    // Invalid state (after user interaction)
+    &:user-invalid,
+    &.is-invalid {
+      border-color: rgba($neon-magenta, 0.6);
+
+      &:focus {
+        box-shadow:
+          0 0 6px rgba($neon-magenta, 0.4),
+          inset 0 0 6px rgba($neon-magenta, 0.05);
+      }
+    }
+  }
+
+  // Show/hide password toggle button
+  &__toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: $text-muted;
+    padding: 4px;
+    border-radius: 4px;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: $neon-cyan;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $neon-cyan;
+      outline-offset: 2px;
+      color: $neon-cyan;
+    }
+  }
+
+  // Inline validation error
+  &__error {
+    display: block;
+    min-height: 16px;
+    font-size: 12px;
+    color: $neon-magenta;
+    text-shadow: 0 0 8px rgba($neon-magenta, 0.5);
+  }
+
+  // Server-side error block
+  &__server-error {
+    @include glass-card;
+    border-color: rgba($neon-magenta, 0.5);
+    padding: 12px 16px;
+    font-size: 14px;
+    color: $neon-magenta;
+    margin-bottom: 16px;
+    box-shadow:
+      0 0 8px rgba($neon-magenta, 0.2),
+      inset 0 0 8px rgba($neon-magenta, 0.05);
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  // Submit button — full width
+  &__submit {
+    width: 100%;
+    margin-top: 8px;
+    justify-content: center;
+
+    // Loading state
+    &.is-loading {
+      opacity: 0.7;
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+  }
+
+  // -----------------------------------------------------------------------------
+  // Password strength indicator
+  // -----------------------------------------------------------------------------
+
+  &__password-strength {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  &__strength-bar {
+    flex: 1;
+    height: 4px;
+    background: rgba($neon-cyan, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  &__strength-fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: 2px;
+    transition:
+      width 0.35s ease,
+      background-color 0.35s ease;
+
+    // Strength levels
+    &.weak {
+      width: 25%;
+      background: #ff4444;
+    }
+
+    &.medium {
+      width: 55%;
+      background: #ffaa00;
+    }
+
+    &.strong {
+      width: 80%;
+      background: $neon-green;
+    }
+
+    &.very-strong {
+      width: 100%;
+      background: $neon-cyan;
+      box-shadow: 0 0 6px rgba($neon-cyan, 0.6);
+    }
+  }
+
+  &__strength-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: $text-muted;
+    white-space: nowrap;
+    min-width: 64px;
+    transition: color 0.35s ease;
+
+    &.weak {
+      color: #ff4444;
+    }
+    &.medium {
+      color: #ffaa00;
+    }
+    &.strong {
+      color: $neon-green;
+    }
+    &.very-strong {
+      color: $neon-cyan;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Role selector — registration page
+// -----------------------------------------------------------------------------
+
+.auth-role {
+  margin-bottom: 20px;
+
+  &__label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: $text-secondary;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  &__options {
+    display: flex;
+    gap: 12px;
+  }
+
+  // Visually hidden native radio
+  &__option {
+    flex: 1;
+    cursor: pointer;
+
+    input[type="radio"] {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  }
+
+  // Visual card for each role option
+  &__card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    @include glass-card;
+    border-color: $border-cyan;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+
+    svg {
+      color: rgba($neon-cyan, 0.5);
+      margin-bottom: 4px;
+      flex-shrink: 0;
+    }
+
+    strong {
+      font-size: 14px;
+      font-weight: 700;
+      color: $text-primary;
+      font-family: $fontHeading;
+    }
+
+    small {
+      font-size: 12px;
+      color: $text-muted;
+      line-height: 1.4;
+    }
+  }
+
+  // Active state — when radio is checked
+  &__option input[type="radio"]:checked + &__card {
+    border-color: $neon-cyan;
+    box-shadow:
+      0 0 8px rgba($neon-cyan, 0.3),
+      inset 0 0 8px rgba($neon-cyan, 0.05);
+
+    svg {
+      color: $neon-cyan;
+    }
+
+    strong {
+      @include neon-text($neon-cyan);
+    }
+  }
+
+  // Focus-visible ring on keyboard navigation
+  &__option input[type="radio"]:focus-visible + &__card {
+    outline: 2px solid $neon-cyan;
+    outline-offset: 2px;
+  }
+
+  // Hover state
+  &__option:hover &__card {
+    border-color: rgba($neon-cyan, 0.5);
+  }
+}

@@ -1,0 +1,15 @@
+<script type="module" src="@js/auth.js"></script>
+<template
+  src="@components/templates/auth/auth.html"
+  locals='{
+  "title": "Реєстрація — COTE-LAPYX",
+  "lang": "uk",
+  "preloader": {"enable":"false","once":"false"},
+  "keywords": "",
+  "description": "Реєстрація нового акаунту cote-lapyx"
+}'
+>
+  <block name="main">
+    <include src="@components/pages/auth/register.html" locals="{}"></include>
+  </block>
+</template>
