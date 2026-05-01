@@ -1,0 +1,1204 @@
+<!-- ============================================================
+     Admin Panel — Site administrator interface
+     Reuses .dashboard grid + .dash-* classes from dashboard.scss
+     New admin-specific classes are defined in admin.scss
+     ============================================================ -->
+<div class="dashboard">
+  <!-- ===== SIDEBAR ===== -->
+  <!-- dash-sidebar--admin modifier overrides accent colour to magenta -->
+  <aside
+    class="dash-sidebar dash-sidebar--admin"
+    id="admin-sidebar"
+    aria-label="Адмін навігація"
+  >
+    <!-- User info block -->
+    <div class="dash-sidebar__user">
+      <div class="dash-sidebar__avatar" aria-hidden="true">СК</div>
+      <div class="dash-sidebar__info">
+        <p class="dash-sidebar__name">Сергій К.</p>
+        <p class="dash-sidebar__role">Site Administrator</p>
+        <span class="neon-badge neon-badge--magenta dash-sidebar__badge"
+          >admin</span
+        >
+      </div>
+    </div>
+
+    <!-- Primary navigation -->
+    <nav class="dash-sidebar__nav" aria-label="Розділи адмін-панелі">
+      <ul class="dash-sidebar__nav-list" role="list">
+        <!-- 1. Overview -->
+        <li class="dash-sidebar__nav-item">
+          <a
+            href="#"
+            class="dash-sidebar__nav-link is-active"
+            data-section="overview"
+            aria-current="page"
+          >
+            <!-- Dashboard/grid icon -->
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"
+              />
+            </svg>
+            Огляд
+          </a>
+        </li>
+
+        <!-- 2. Users -->
+        <li class="dash-sidebar__nav-item">
+          <a href="#" class="dash-sidebar__nav-link" data-section="users">
+            <!-- Group/people icon -->
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
+              />
+            </svg>
+            Користувачі
+          </a>
+        </li>
+
+        <!-- 3. Posts -->
+        <li class="dash-sidebar__nav-item">
+          <a href="#" class="dash-sidebar__nav-link" data-section="posts">
+            <!-- Article/document icon -->
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"
+              />
+            </svg>
+            Публікації
+          </a>
+        </li>
+
+        <!-- 4. Projects -->
+        <li class="dash-sidebar__nav-item">
+          <a href="#" class="dash-sidebar__nav-link" data-section="projects">
+            <!-- Folder icon -->
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"
+              />
+            </svg>
+            Проекти
+          </a>
+        </li>
+
+        <!-- 5. Comments -->
+        <li class="dash-sidebar__nav-item">
+          <a href="#" class="dash-sidebar__nav-link" data-section="comments">
+            <!-- Chat bubble icon -->
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M21 15c0 1.1-.9 2-2 2H7l-4 4V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v10z"
+              />
+            </svg>
+            Коментарі
+          </a>
+        </li>
+
+        <!-- 6. Settings -->
+        <li class="dash-sidebar__nav-item">
+          <a href="#" class="dash-sidebar__nav-link" data-section="settings">
+            <!-- Gear/settings icon -->
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.06 7.06 0 0 0-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.48.48 0 0 0-.59.22L2.74 8.87a.47.47 0 0 0 .12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.47.47 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.37 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.47.47 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 0 1 8.4 12 3.6 3.6 0 0 1 12 8.4 3.6 3.6 0 0 1 15.6 12 3.6 3.6 0 0 1 12 15.6z"
+              />
+            </svg>
+            Налаштування
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Logout button -->
+    <button
+      type="button"
+      class="btn btn--ghost dash-sidebar__logout"
+      id="admin-logout"
+      aria-label="Вийти з адмін-панелі"
+    >
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"
+        />
+      </svg>
+      Вийти
+    </button>
+  </aside>
+  <!-- /admin-sidebar -->
+
+  <!-- ===== MOBILE OVERLAY ===== -->
+  <div class="dash-overlay" id="admin-overlay" aria-hidden="true"></div>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="dash-main" id="admin-main">
+    <!-- Mobile sidebar toggle -->
+    <button
+      type="button"
+      class="dash-mobile-toggle"
+      id="admin-mobile-toggle"
+      aria-label="Відкрити навігацію адмін-панелі"
+      aria-expanded="false"
+      aria-controls="admin-sidebar"
+    >
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+      </svg>
+      Меню
+    </button>
+
+    <!-- ================================================================
+         PANEL: OVERVIEW (default active)
+         ================================================================ -->
+    <div class="admin-section-panel is-active" data-panel="overview">
+      <!-- Stats row — 4 cards -->
+      <section class="dash-stats" aria-label="Загальна статистика сайту">
+        <!-- Users count -->
+        <div class="dash-stat-card">
+          <div class="dash-stat-card__icon" aria-hidden="true">
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              style="color: #00e5ff"
+            >
+              <path
+                d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"
+              />
+            </svg>
+          </div>
+          <p class="dash-stat-card__value">24</p>
+          <p class="dash-stat-card__label">Користувачів</p>
+        </div>
+
+        <!-- Posts count -->
+        <div class="dash-stat-card">
+          <div class="dash-stat-card__icon" aria-hidden="true">
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              style="color: #39ff14"
+            >
+              <path
+                d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"
+              />
+            </svg>
+          </div>
+          <p class="dash-stat-card__value">18</p>
+          <p class="dash-stat-card__label">Публікацій</p>
+        </div>
+
+        <!-- New comments count -->
+        <div class="dash-stat-card">
+          <div class="dash-stat-card__icon" aria-hidden="true">
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              style="color: #e040fb"
+            >
+              <path
+                d="M21 15c0 1.1-.9 2-2 2H7l-4 4V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v10z"
+              />
+            </svg>
+          </div>
+          <p class="dash-stat-card__value">7</p>
+          <p class="dash-stat-card__label">Нових коментарів</p>
+        </div>
+
+        <!-- Active projects count -->
+        <div class="dash-stat-card">
+          <div class="dash-stat-card__icon" aria-hidden="true">
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              style="color: #00e5ff"
+            >
+              <path
+                d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"
+              />
+            </svg>
+          </div>
+          <p class="dash-stat-card__value">5</p>
+          <p class="dash-stat-card__label">Активних проектів</p>
+        </div>
+      </section>
+      <!-- /dash-stats -->
+
+      <!-- Weekly activity chart -->
+      <section class="dash-section" aria-label="Активність за тиждень">
+        <div class="dash-section__header">
+          <h2 class="dash-section__title">Активність за тиждень</h2>
+        </div>
+
+        <!-- Bar chart — pure CSS/HTML, no canvas -->
+        <div
+          class="admin-activity-chart"
+          role="img"
+          aria-label="Стовпчаста діаграма активності за 7 днів"
+        >
+          <div class="admin-activity-chart__bars">
+            <!-- Heights reflect mock activity: Пн 30% Вт 60% Ср 45% Чт 80% Пт 55% Сб 35% Нд 70% -->
+            <div
+              class="admin-activity-chart__bar"
+              style="height: 30%"
+              title="Понеділок"
+            ></div>
+            <div
+              class="admin-activity-chart__bar"
+              style="height: 60%"
+              title="Вівторок"
+            ></div>
+            <div
+              class="admin-activity-chart__bar"
+              style="height: 45%"
+              title="Середа"
+            ></div>
+            <div
+              class="admin-activity-chart__bar"
+              style="height: 80%"
+              title="Четвер"
+            ></div>
+            <div
+              class="admin-activity-chart__bar"
+              style="height: 55%"
+              title="П'ятниця"
+            ></div>
+            <div
+              class="admin-activity-chart__bar"
+              style="height: 35%"
+              title="Субота"
+            ></div>
+            <div
+              class="admin-activity-chart__bar"
+              style="height: 70%"
+              title="Неділя"
+            ></div>
+          </div>
+          <div class="admin-activity-chart__labels" aria-hidden="true">
+            <span class="admin-activity-chart__label">Пн</span>
+            <span class="admin-activity-chart__label">Вт</span>
+            <span class="admin-activity-chart__label">Ср</span>
+            <span class="admin-activity-chart__label">Чт</span>
+            <span class="admin-activity-chart__label">Пт</span>
+            <span class="admin-activity-chart__label">Сб</span>
+            <span class="admin-activity-chart__label">Нд</span>
+          </div>
+        </div>
+      </section>
+      <!-- /activity chart -->
+
+      <!-- Recent registrations table -->
+      <section class="dash-section" aria-label="Останні реєстрації">
+        <div class="dash-section__header">
+          <h2 class="dash-section__title">Останні реєстрації</h2>
+          <a href="#" class="btn btn--ghost btn--sm" data-section-link="users"
+            >Всі користувачі</a
+          >
+        </div>
+
+        <div class="dash-table-wrap">
+          <table class="dash-table" aria-label="Таблиця останніх реєстрацій">
+            <thead>
+              <tr>
+                <th scope="col">Ім'я</th>
+                <th scope="col">Email</th>
+                <th scope="col">Роль</th>
+                <th scope="col">Дата</th>
+                <th scope="col">Статус</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="dash-table__title">Валерія О.</td>
+                <td>valeriia@cote-lapyx.com</td>
+                <td><span class="neon-badge neon-badge--cyan">member</span></td>
+                <td class="dash-table__date">01 бер 2025</td>
+                <td>
+                  <span class="dash-status dash-status--published"
+                    >Активний</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td class="dash-table__title">user_01</td>
+                <td>user01@example.com</td>
+                <td>
+                  <span class="neon-badge neon-badge--green">subscriber</span>
+                </td>
+                <td class="dash-table__date">15 квіт 2025</td>
+                <td>
+                  <span class="dash-status dash-status--published"
+                    >Активний</span
+                  >
+                </td>
+              </tr>
+              <tr>
+                <td class="dash-table__title">dev_neon</td>
+                <td>devneon@example.com</td>
+                <td>
+                  <span class="neon-badge neon-badge--green">subscriber</span>
+                </td>
+                <td class="dash-table__date">20 бер 2025</td>
+                <td>
+                  <span class="dash-status dash-status--draft"
+                    >Заблокований</span
+                  >
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <!-- /recent registrations -->
+    </div>
+    <!-- /panel: overview -->
+
+    <!-- ================================================================
+         PANEL: USERS
+         ================================================================ -->
+    <div class="admin-section-panel" data-panel="users" hidden>
+      <section class="dash-section" aria-label="Управління користувачами">
+        <div class="dash-section__header">
+          <h2 class="dash-section__title">Користувачі</h2>
+        </div>
+
+        <div class="dash-table-wrap">
+          <table class="dash-table" aria-label="Таблиця всіх користувачів">
+            <thead>
+              <tr>
+                <th scope="col">Ім'я</th>
+                <th scope="col">Email</th>
+                <th scope="col">Роль</th>
+                <th scope="col">Зареєстрований</th>
+                <th scope="col">Статус</th>
+                <th scope="col">Дії</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Row 1: admin -->
+              <tr>
+                <td class="dash-table__title">Сергій К.</td>
+                <td>hiljsv@gmail.com</td>
+                <td>
+                  <span class="neon-badge neon-badge--magenta">admin</span>
+                </td>
+                <td class="dash-table__date">01 лют 2025</td>
+                <td>
+                  <span class="dash-status dash-status--published"
+                    >Активний</span
+                  >
+                </td>
+                <td class="dash-table__actions">
+                  <button
+                    type="button"
+                    class="btn btn--ghost btn--sm"
+                    aria-label="Редагувати Сергій К."
+                  >
+                    Редагувати
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--magenta btn--sm"
+                    aria-label="Заблокувати Сергій К."
+                  >
+                    Заблокувати
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Row 2: member -->
+              <tr>
+                <td class="dash-table__title">Андрій М.</td>
+                <td>andrii@cote-lapyx.com</td>
+                <td><span class="neon-badge neon-badge--cyan">member</span></td>
+                <td class="dash-table__date">15 лют 2025</td>
+                <td>
+                  <span class="dash-status dash-status--published"
+                    >Активний</span
+                  >
+                </td>
+                <td class="dash-table__actions">
+                  <button
+                    type="button"
+                    class="btn btn--ghost btn--sm"
+                    aria-label="Редагувати Андрій М."
+                  >
+                    Редагувати
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--magenta btn--sm"
+                    aria-label="Заблокувати Андрій М."
+                  >
+                    Заблокувати
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Row 3: member -->
+              <tr>
+                <td class="dash-table__title">Валерія О.</td>
+                <td>valeriia@cote-lapyx.com</td>
+                <td><span class="neon-badge neon-badge--cyan">member</span></td>
+                <td class="dash-table__date">01 бер 2025</td>
+                <td>
+                  <span class="dash-status dash-status--published"
+                    >Активний</span
+                  >
+                </td>
+                <td class="dash-table__actions">
+                  <button
+                    type="button"
+                    class="btn btn--ghost btn--sm"
+                    aria-label="Редагувати Валерія О."
+                  >
+                    Редагувати
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--magenta btn--sm"
+                    aria-label="Заблокувати Валерія О."
+                  >
+                    Заблокувати
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Row 4: subscriber -->
+              <tr>
+                <td class="dash-table__title">user_01</td>
+                <td>user01@example.com</td>
+                <td>
+                  <span class="neon-badge neon-badge--green">subscriber</span>
+                </td>
+                <td class="dash-table__date">15 квіт 2025</td>
+                <td>
+                  <span class="dash-status dash-status--published"
+                    >Активний</span
+                  >
+                </td>
+                <td class="dash-table__actions">
+                  <button
+                    type="button"
+                    class="btn btn--ghost btn--sm"
+                    aria-label="Редагувати user_01"
+                  >
+                    Редагувати
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--magenta btn--sm"
+                    aria-label="Заблокувати user_01"
+                  >
+                    Заблокувати
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Row 5: blocked subscriber -->
+              <tr>
+                <td class="dash-table__title">dev_neon</td>
+                <td>devneon@example.com</td>
+                <td>
+                  <span class="neon-badge neon-badge--green">subscriber</span>
+                </td>
+                <td class="dash-table__date">20 бер 2025</td>
+                <td>
+                  <span class="dash-status dash-status--draft"
+                    >Заблокований</span
+                  >
+                </td>
+                <td class="dash-table__actions">
+                  <button
+                    type="button"
+                    class="btn btn--ghost btn--sm"
+                    aria-label="Редагувати dev_neon"
+                  >
+                    Редагувати
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--cyan btn--sm"
+                    aria-label="Розблокувати dev_neon"
+                  >
+                    Розблокувати
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+    <!-- /panel: users -->
+
+    <!-- ================================================================
+         PANEL: POSTS
+         ================================================================ -->
+    <div class="admin-section-panel" data-panel="posts" hidden>
+      <section class="dash-section" aria-label="Управління публікаціями">
+        <div class="dash-section__header">
+          <h2 class="dash-section__title">Публікації</h2>
+        </div>
+
+        <div class="dash-table-wrap">
+          <table class="dash-table" aria-label="Таблиця всіх публікацій">
+            <thead>
+              <tr>
+                <th scope="col">Заголовок</th>
+                <th scope="col">Автор</th>
+                <th scope="col">Категорія</th>
+                <th scope="col">Дата</th>
+                <th scope="col">Статус</th>
+                <th scope="col">Дії</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="dash-table__title">Cyberpunk SCSS: neon-система</td>
+                <td>Сергій К.</td>
+                <td>
+                  <span class="neon-badge neon-badge--cyan">Frontend</span>
+                </td>
+                <td class="dash-table__date">10 квіт 2025</td>
+                <td>
+                  <span class="dash-status dash-status--published"
+                    >Опубліковано</span
+                  >
+                </td>
+                <td class="dash-table__actions">
+                  <button
+                    type="button"
+                    class="btn btn--ghost btn--sm"
+                    aria-label="Зняти з публікації: Cyberpunk SCSS"
+                  >
+                    Зняти
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--magenta btn--sm"
+                    aria-label="Видалити: Cyberpunk SCSS"
+                  >
+                    Видалити
+                  </button>
+                </td>
+              </tr>
+
+              <tr>
+                <td class="dash-table__title">REST API: практичний гайд</td>
+                <td>Андрій М.</td>
+                <td>
+                  <span class="neon-badge neon-badge--magenta">Backend</span>
+                </td>
+                <td class="dash-table__date">22 бер 2025</td>
+                <td>
+                  <span class="dash-status dash-status--published"
+                    >Опубліковано</span
+                  >
+                </td>
+                <td class="dash-table__actions">
+                  <button
+                    type="button"
+                    class="btn btn--ghost btn--sm"
+                    aria-label="Зняти з публікації: REST API"
+                  >
+                    Зняти
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--magenta btn--sm"
+                    aria-label="Видалити: REST API"
+                  >
+                    Видалити
+                  </button>
+                </td>
+              </tr>
+
+              <tr>
+                <td class="dash-table__title">Brand Kit: cyberpunk-система</td>
+                <td>Валерія О.</td>
+                <td>
+                  <span class="neon-badge neon-badge--green">Design</span>
+                </td>
+                <td class="dash-table__date">05 бер 2025</td>
+                <td>
+                  <span class="dash-status dash-status--draft">Чернетка</span>
+                </td>
+                <td class="dash-table__actions">
+                  <button
+                    type="button"
+                    class="btn btn--cyan btn--sm"
+                    aria-label="Опублікувати: Brand Kit"
+                  >
+                    Опублікувати
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--magenta btn--sm"
+                    aria-label="Видалити: Brand Kit"
+                  >
+                    Видалити
+                  </button>
+                </td>
+              </tr>
+
+              <tr>
+                <td class="dash-table__title">Vite + SCSS: швидкий старт</td>
+                <td>Сергій К.</td>
+                <td>
+                  <span class="neon-badge neon-badge--cyan">Frontend</span>
+                </td>
+                <td class="dash-table__date">18 лют 2025</td>
+                <td>
+                  <span class="dash-status dash-status--published"
+                    >Опубліковано</span
+                  >
+                </td>
+                <td class="dash-table__actions">
+                  <button
+                    type="button"
+                    class="btn btn--ghost btn--sm"
+                    aria-label="Зняти з публікації: Vite + SCSS"
+                  >
+                    Зняти
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--magenta btn--sm"
+                    aria-label="Видалити: Vite + SCSS"
+                  >
+                    Видалити
+                  </button>
+                </td>
+              </tr>
+
+              <tr>
+                <td class="dash-table__title">Docker для фронтендера</td>
+                <td>Андрій М.</td>
+                <td>
+                  <span class="neon-badge neon-badge--magenta">DevOps</span>
+                </td>
+                <td class="dash-table__date">02 лют 2025</td>
+                <td>
+                  <span class="dash-status dash-status--draft">Чернетка</span>
+                </td>
+                <td class="dash-table__actions">
+                  <button
+                    type="button"
+                    class="btn btn--cyan btn--sm"
+                    aria-label="Опублікувати: Docker для фронтендера"
+                  >
+                    Опублікувати
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--magenta btn--sm"
+                    aria-label="Видалити: Docker для фронтендера"
+                  >
+                    Видалити
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+    <!-- /panel: posts -->
+
+    <!-- ================================================================
+         PANEL: PROJECTS
+         ================================================================ -->
+    <div class="admin-section-panel" data-panel="projects" hidden>
+      <section class="dash-section" aria-label="Управління проектами">
+        <div class="dash-section__header">
+          <h2 class="dash-section__title">Проекти</h2>
+        </div>
+
+        <div class="dash-table-wrap">
+          <table class="dash-table" aria-label="Таблиця всіх проектів">
+            <thead>
+              <tr>
+                <th scope="col">Назва</th>
+                <th scope="col">Автор</th>
+                <th scope="col">Технології</th>
+                <th scope="col">Статус</th>
+                <th scope="col">Дії</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="dash-table__title">cote-lapyx.com</td>
+                <td>Сергій К.</td>
+                <td class="dash-table__tech">
+                  <span class="neon-badge neon-badge--cyan">HTML</span>
+                  <span class="neon-badge neon-badge--magenta">SCSS</span>
+                  <span class="neon-badge neon-badge--green">JS</span>
+                </td>
+                <td>
+                  <span class="dash-status dash-status--published"
+                    >Активний</span
+                  >
+                </td>
+                <td class="dash-table__actions">
+                  <button
+                    type="button"
+                    class="btn btn--ghost btn--sm"
+                    aria-label="Редагувати cote-lapyx.com"
+                  >
+                    Редагувати
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--magenta btn--sm"
+                    aria-label="Видалити cote-lapyx.com"
+                  >
+                    Видалити
+                  </button>
+                </td>
+              </tr>
+
+              <tr>
+                <td class="dash-table__title">Component Library</td>
+                <td>Сергій К.</td>
+                <td class="dash-table__tech">
+                  <span class="neon-badge neon-badge--cyan">SCSS</span>
+                  <span class="neon-badge neon-badge--magenta">Storybook</span>
+                </td>
+                <td>
+                  <span class="dash-status dash-status--draft">В розробці</span>
+                </td>
+                <td class="dash-table__actions">
+                  <button
+                    type="button"
+                    class="btn btn--ghost btn--sm"
+                    aria-label="Редагувати Component Library"
+                  >
+                    Редагувати
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--magenta btn--sm"
+                    aria-label="Видалити Component Library"
+                  >
+                    Видалити
+                  </button>
+                </td>
+              </tr>
+
+              <tr>
+                <td class="dash-table__title">API Gateway</td>
+                <td>Андрій М.</td>
+                <td class="dash-table__tech">
+                  <span class="neon-badge neon-badge--magenta">Node.js</span>
+                  <span class="neon-badge neon-badge--cyan">REST</span>
+                </td>
+                <td>
+                  <span class="dash-status dash-status--published"
+                    >Активний</span
+                  >
+                </td>
+                <td class="dash-table__actions">
+                  <button
+                    type="button"
+                    class="btn btn--ghost btn--sm"
+                    aria-label="Редагувати API Gateway"
+                  >
+                    Редагувати
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--magenta btn--sm"
+                    aria-label="Видалити API Gateway"
+                  >
+                    Видалити
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+    <!-- /panel: projects -->
+
+    <!-- ================================================================
+         PANEL: COMMENTS (with moderation filter tabs)
+         ================================================================ -->
+    <div class="admin-section-panel" data-panel="comments" hidden>
+      <section class="dash-section" aria-label="Модерація коментарів">
+        <div class="dash-section__header">
+          <h2 class="dash-section__title">Модерація коментарів</h2>
+        </div>
+
+        <!-- Filter tabs: Всі / Очікують / Спам -->
+        <div
+          class="admin-filter-tabs"
+          role="tablist"
+          aria-label="Фільтр коментарів"
+        >
+          <button
+            type="button"
+            class="admin-filter-tab is-active"
+            role="tab"
+            aria-selected="true"
+            data-filter="all"
+          >
+            Всі
+          </button>
+          <button
+            type="button"
+            class="admin-filter-tab"
+            role="tab"
+            aria-selected="false"
+            data-filter="pending"
+          >
+            Очікують
+          </button>
+          <button
+            type="button"
+            class="admin-filter-tab"
+            role="tab"
+            aria-selected="false"
+            data-filter="spam"
+          >
+            Спам
+          </button>
+        </div>
+
+        <div class="dash-table-wrap">
+          <table
+            class="dash-table"
+            aria-label="Таблиця коментарів для модерації"
+          >
+            <thead>
+              <tr>
+                <th scope="col">Автор</th>
+                <th scope="col">Коментар</th>
+                <th scope="col">Пост</th>
+                <th scope="col">Дата</th>
+                <th scope="col">Статус</th>
+                <th scope="col">Дії</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Approved comment -->
+              <tr>
+                <td class="dash-table__title">user_01</td>
+                <td>Відмінна стаття!</td>
+                <td>Cyberpunk SCSS</td>
+                <td class="dash-table__date">12 квіт</td>
+                <td>
+                  <span class="admin-status admin-status--approved"
+                    >Схвалено</span
+                  >
+                </td>
+                <td class="dash-table__actions">
+                  <button
+                    type="button"
+                    class="btn btn--ghost btn--sm"
+                    aria-label="Відхилити коментар user_01"
+                  >
+                    Відхилити
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--magenta btn--sm"
+                    aria-label="Видалити коментар user_01"
+                  >
+                    Видалити
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Approved comment -->
+              <tr>
+                <td class="dash-table__title">dev_neon</td>
+                <td>Можна приклад?</td>
+                <td>Cyberpunk SCSS</td>
+                <td class="dash-table__date">11 квіт</td>
+                <td>
+                  <span class="admin-status admin-status--approved"
+                    >Схвалено</span
+                  >
+                </td>
+                <td class="dash-table__actions">
+                  <button
+                    type="button"
+                    class="btn btn--ghost btn--sm"
+                    aria-label="Відхилити коментар dev_neon"
+                  >
+                    Відхилити
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--magenta btn--sm"
+                    aria-label="Видалити коментар dev_neon"
+                  >
+                    Видалити
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Spam comment -->
+              <tr>
+                <td class="dash-table__title">anon_42</td>
+                <td>купити підписку…</td>
+                <td>REST API</td>
+                <td class="dash-table__date">09 квіт</td>
+                <td>
+                  <span class="admin-status admin-status--spam">Спам</span>
+                </td>
+                <td class="dash-table__actions">
+                  <button
+                    type="button"
+                    class="btn btn--cyan btn--sm"
+                    aria-label="Схвалити коментар anon_42"
+                  >
+                    Схвалити
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--magenta btn--sm"
+                    aria-label="Видалити коментар anon_42"
+                  >
+                    Видалити
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Pending comment -->
+              <tr>
+                <td class="dash-table__title">alphacode</td>
+                <td>Дуже корисно!</td>
+                <td>REST API</td>
+                <td class="dash-table__date">24 бер</td>
+                <td>
+                  <span class="admin-status admin-status--pending">Очікує</span>
+                </td>
+                <td class="dash-table__actions">
+                  <button
+                    type="button"
+                    class="btn btn--cyan btn--sm"
+                    aria-label="Схвалити коментар alphacode"
+                  >
+                    Схвалити
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--ghost btn--sm"
+                    aria-label="Відхилити коментар alphacode"
+                  >
+                    Відхилити
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--magenta btn--sm"
+                    aria-label="Видалити коментар alphacode"
+                  >
+                    Видалити
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+    <!-- /panel: comments -->
+
+    <!-- ================================================================
+         PANEL: SETTINGS
+         ================================================================ -->
+    <div class="admin-section-panel" data-panel="settings" hidden>
+      <section class="dash-section" aria-label="Налаштування сайту">
+        <div class="dash-section__header">
+          <h2 class="dash-section__title">Налаштування</h2>
+        </div>
+
+        <!-- Sub-section 1: General settings -->
+        <div class="admin-settings-block">
+          <h3 class="admin-settings-block__title">Загальні налаштування</h3>
+
+          <!-- Reuse dash-profile-form grid layout -->
+          <form
+            class="dash-profile-form"
+            id="admin-settings-form"
+            novalidate
+            aria-label="Форма загальних налаштувань сайту"
+          >
+            <!-- Site name -->
+            <div class="dash-profile-form__group">
+              <label class="dash-profile-form__label" for="settings-site-name"
+                >Назва сайту</label
+              >
+              <input
+                class="dash-profile-form__input"
+                type="text"
+                id="settings-site-name"
+                name="site_name"
+                value="COTE-LAPYX"
+                autocomplete="off"
+              />
+            </div>
+
+            <!-- Contact email -->
+            <div class="dash-profile-form__group">
+              <label class="dash-profile-form__label" for="settings-email"
+                >Контактний email</label
+              >
+              <input
+                class="dash-profile-form__input"
+                type="email"
+                id="settings-email"
+                name="contact_email"
+                value="admin@cote-lapyx.com"
+                autocomplete="email"
+              />
+            </div>
+
+            <!-- Site description — full width -->
+            <div
+              class="dash-profile-form__group dash-profile-form__group--full"
+            >
+              <label class="dash-profile-form__label" for="settings-description"
+                >Опис сайту</label
+              >
+              <textarea
+                class="dash-profile-form__input dash-profile-form__textarea"
+                id="settings-description"
+                name="description"
+                rows="3"
+              >
+IT команда, що будує майбутнє</textarea
+              >
+            </div>
+
+            <!-- Submit — full width, right-aligned via __actions -->
+            <div
+              class="dash-profile-form__group dash-profile-form__group--full dash-profile-form__actions"
+            >
+              <button
+                type="submit"
+                class="btn btn--cyan"
+                aria-label="Зберегти загальні налаштування"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"
+                  />
+                </svg>
+                Зберегти налаштування
+              </button>
+            </div>
+          </form>
+        </div>
+        <!-- /admin-settings-block: general -->
+
+        <!-- Sub-section 2: System toggles -->
+        <div class="admin-settings-block">
+          <h3 class="admin-settings-block__title">Системні перемикачі</h3>
+
+          <!-- Toggle: new user registration -->
+          <div class="admin-toggle-row">
+            <div class="admin-toggle-row__info">
+              <p class="admin-toggle-row__label">
+                Реєстрація нових користувачів
+              </p>
+              <p class="admin-toggle-row__desc">
+                Дозволяє новим користувачам реєструватися на сайті
+              </p>
+            </div>
+            <label
+              class="admin-toggle"
+              aria-label="Реєстрація нових користувачів"
+            >
+              <input type="checkbox" checked aria-checked="true" />
+              <span class="admin-toggle__slider"></span>
+            </label>
+          </div>
+
+          <!-- Toggle: maintenance mode -->
+          <div class="admin-toggle-row">
+            <div class="admin-toggle-row__info">
+              <p class="admin-toggle-row__label">Режим обслуговування</p>
+              <p class="admin-toggle-row__desc">
+                Показує сторінку технічних робіт для всіх відвідувачів
+              </p>
+            </div>
+            <label class="admin-toggle" aria-label="Режим обслуговування">
+              <input type="checkbox" aria-checked="false" />
+              <span class="admin-toggle__slider"></span>
+            </label>
+          </div>
+        </div>
+        <!-- /admin-settings-block: system toggles -->
+      </section>
+    </div>
+    <!-- /panel: settings -->
+  </main>
+  <!-- /admin-main -->
+</div>
+<!-- /dashboard -->

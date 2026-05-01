@@ -1,0 +1,24 @@
+<script type="module" src="@js/admin.js"></script>
+<template
+  src="@components/templates/inner/inner.html"
+  locals='{
+  "title": "Admin — COTE-LAPYX",
+  "lang": "uk",
+  "preloader": {"enable":"false","once":"false"},
+  "keywords": "",
+  "description": "Адміністративна панель cote-lapyx"
+}'
+>
+  <block name="header">
+    <include
+      src="@components/layout/header/header.html"
+      locals='{"active":"Admin"}'
+    ></include>
+  </block>
+  <block name="main">
+    <include src="@components/pages/admin/admin.html" locals="{}"></include>
+  </block>
+  <block name="footer">
+    <include src="@components/layout/footer/footer.html" locals="{}"></include>
+  </block>
+</template>

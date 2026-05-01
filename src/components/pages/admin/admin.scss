@@ -1,0 +1,334 @@
+// =============================================================================
+// Admin Panel — Site administrator interface, Cyberpunk style
+// Extends dashboard.scss: reuses all .dash-* classes.
+// Only admin-specific overrides and new components are defined here.
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// Sidebar modifier — magenta accent instead of cyan
+// -----------------------------------------------------------------------------
+
+.dash-sidebar--admin {
+  border-right-color: rgba($neon-magenta, 0.2);
+
+  // Avatar — magenta gradient and glow
+  .dash-sidebar__avatar {
+    background: linear-gradient(
+      135deg,
+      rgba($neon-magenta, 0.15),
+      rgba($neon-cyan, 0.15)
+    );
+    border-color: rgba($neon-magenta, 0.5);
+    color: $neon-magenta;
+    text-shadow: 0 0 10px rgba($neon-magenta, 0.8);
+  }
+
+  // Nav links — magenta active/hover state
+  .dash-sidebar__nav-link {
+    &:hover {
+      color: $neon-magenta;
+      background: rgba($neon-magenta, 0.05);
+    }
+
+    &:focus-visible {
+      outline-color: $neon-magenta;
+    }
+
+    &.is-active {
+      color: $neon-magenta;
+      background: rgba($neon-magenta, 0.1);
+      border-left-color: $neon-magenta;
+
+      svg {
+        opacity: 1;
+        filter: drop-shadow(0 0 4px rgba($neon-magenta, 0.8));
+      }
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Section panel switcher — admin variant
+// Same behaviour as .dash-section-panel
+// -----------------------------------------------------------------------------
+
+.admin-section-panel {
+  &[hidden] {
+    display: none;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Weekly activity bar chart (pure CSS, no canvas)
+// -----------------------------------------------------------------------------
+
+.admin-activity-chart {
+  @include glass-card;
+  padding: 24px;
+  margin-bottom: 0;
+
+  // Container holding all 7 bars — flex, aligned to bottom
+  &__bars {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    height: 80px;
+  }
+
+  // Individual bar — height set via inline style
+  &__bar {
+    flex: 1;
+    background: rgba($neon-cyan, 0.2);
+    border-radius: 3px 3px 0 0;
+    transition:
+      background 0.2s ease,
+      box-shadow 0.2s ease;
+    cursor: default;
+
+    &:hover {
+      background: rgba($neon-cyan, 0.5);
+      box-shadow: 0 0 8px rgba($neon-cyan, 0.3);
+    }
+  }
+
+  // Day labels below the bars
+  &__labels {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  &__label {
+    flex: 1;
+    text-align: center;
+    font-family: $fontHeading;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: $text-muted;
+    text-transform: uppercase;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Comment moderation status badges
+// Similar to .dash-status but with additional states: approved, pending, spam
+// -----------------------------------------------------------------------------
+
+.admin-status {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+
+  // Approved — green (same as dash-status--published)
+  &--approved {
+    color: $neon-green;
+    border: 1px solid rgba($neon-green, 0.4);
+    background: rgba($neon-green, 0.07);
+  }
+
+  // Pending — amber/yellow
+  &--pending {
+    color: #ffaa00;
+    border: 1px solid rgba(#ffaa00, 0.4);
+    background: rgba(#ffaa00, 0.07);
+  }
+
+  // Spam — magenta
+  &--spam {
+    color: $neon-magenta;
+    border: 1px solid rgba($neon-magenta, 0.4);
+    background: rgba($neon-magenta, 0.07);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Comment filter tabs (Всі / Очікують / Спам)
+// -----------------------------------------------------------------------------
+
+.admin-filter-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.admin-filter-tab {
+  padding: 6px 18px;
+  background: none;
+  border: 1px solid $border-cyan;
+  border-radius: 6px;
+  color: $text-muted;
+  font-family: $fontHeading;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+
+  &:hover {
+    color: $neon-cyan;
+    border-color: rgba($neon-cyan, 0.4);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $neon-cyan;
+    outline-offset: 2px;
+  }
+
+  // Active tab
+  &.is-active {
+    color: $neon-cyan;
+    border-color: $neon-cyan;
+    background: rgba($neon-cyan, 0.08);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Settings block — glass card wrapping each settings sub-section
+// -----------------------------------------------------------------------------
+
+.admin-settings-block {
+  @include glass-card;
+  padding: 28px;
+  margin-bottom: 24px;
+
+  // Remove bottom margin from the last block
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &__title {
+    font-family: $fontHeading;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: $text-primary;
+    margin-bottom: 20px;
+
+    // Decorative underline
+    &::after {
+      content: "";
+      display: block;
+      width: 30px;
+      height: 2px;
+      background: linear-gradient(90deg, $neon-magenta, transparent);
+      box-shadow: 0 0 6px $neon-magenta;
+      margin-top: 6px;
+    }
+  }
+
+  // Override dash-profile-form border/shadow when nested inside settings block
+  .dash-profile-form {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Toggle switch row (label + description + CSS-only switch)
+// -----------------------------------------------------------------------------
+
+.admin-toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba($border-cyan, 0.5);
+
+  // No bottom border on the last row
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__label {
+    font-size: 14px;
+    font-weight: 600;
+    color: $text-primary;
+    margin-bottom: 4px;
+  }
+
+  &__desc {
+    font-size: 12px;
+    color: $text-muted;
+    line-height: 1.5;
+  }
+}
+
+// CSS-only toggle switch
+.admin-toggle {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+  cursor: pointer;
+
+  // Hide native checkbox
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+  }
+
+  // Track
+  &__slider {
+    position: absolute;
+    inset: 0;
+    background: rgba($text-muted, 0.2);
+    border-radius: 24px;
+    border: 1px solid rgba($text-muted, 0.2);
+    transition:
+      background 0.25s ease,
+      border-color 0.25s ease;
+
+    // Knob
+    &::before {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 2px;
+      top: 2px;
+      background: $text-muted;
+      border-radius: 50%;
+      transition:
+        transform 0.25s ease,
+        background 0.25s ease,
+        box-shadow 0.25s ease;
+    }
+  }
+
+  // Checked state — cyan glow
+  input:checked + &__slider {
+    background: rgba($neon-cyan, 0.15);
+    border-color: rgba($neon-cyan, 0.4);
+
+    &::before {
+      transform: translateX(20px);
+      background: $neon-cyan;
+      box-shadow: 0 0 8px rgba($neon-cyan, 0.7);
+    }
+  }
+
+  // Focus-visible ring
+  input:focus-visible + &__slider {
+    outline: 2px solid $neon-cyan;
+    outline-offset: 2px;
+  }
+}
