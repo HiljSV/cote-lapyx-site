@@ -16,10 +16,10 @@ const SOCIAL_ICONS = {
   },
 };
 
-function buildInitialsPlaceholder(member, size = 180, fontSize = 64) {
+function buildInitialsPlaceholder(member) {
   const colorMap = { cyan: "#00e5ff", magenta: "#e040fb", green: "#39ff14" };
   const neon = colorMap[member.color] || "#00e5ff";
-  return `<div class="member-hero__photo-placeholder" style="width:${size}px;height:${size}px;border-radius:50%;background:linear-gradient(135deg,rgba(0,229,255,0.15),rgba(57,255,20,0.15));display:flex;align-items:center;justify-content:center;font-size:${fontSize}px;font-weight:700;color:${neon};border:2px solid rgba(57,255,20,0.3)" aria-label="${member.name}">${member.initial}</div>`;
+  return `<div class="member-hero__photo-placeholder" style="width:100%;height:100%;border-radius:50%;background:linear-gradient(135deg,rgba(0,229,255,0.15),rgba(57,255,20,0.15));display:flex;align-items:center;justify-content:center;font-size:clamp(32px,5vw,64px);font-weight:700;color:${neon};border:2px solid rgba(57,255,20,0.3)" aria-label="${member.name}">${member.initial}</div>`;
 }
 
 function renderPhoto(member) {

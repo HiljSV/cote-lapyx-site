@@ -56,7 +56,7 @@
     "name": "Андрій",
     "role": "Backend Developer",
     "bio": "Java та C# розробник. Розробляє REST API та системи авторизації.",
-    "photo": "@img/team/andrii.png",
+    "photo": "assets/img/main_page/team/andrii.png",
     "initial": "А",
     "color": "green",
     "socials": {
@@ -110,7 +110,7 @@
     "name": "Валерія",
     "role": "UI/UX Designer",
     "bio": "UI/UX дизайнер з фокусом на web та digital-продукти. Дбає про UX кожної деталі.",
-    "photo": "@img/team/valerka.png",
+    "photo": "assets/img/main_page/team/valerka.png",
     "initial": "В",
     "color": "magenta",
     "socials": {
