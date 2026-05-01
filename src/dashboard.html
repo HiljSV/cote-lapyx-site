@@ -1,0 +1,27 @@
+<script type="module" src="@js/dashboard.js"></script>
+<template
+  src="@components/templates/inner/inner.html"
+  locals='{
+  "title": "Dashboard — COTE-LAPYX",
+  "lang": "uk",
+  "preloader": {"enable":"false","once":"false"},
+  "keywords": "",
+  "description": "Особистий кабінет cote-lapyx"
+}'
+>
+  <block name="header">
+    <include
+      src="@components/layout/header/header.html"
+      locals='{"active":"Dashboard"}'
+    ></include>
+  </block>
+  <block name="main">
+    <include
+      src="@components/pages/dashboard/dashboard.html"
+      locals="{}"
+    ></include>
+  </block>
+  <block name="footer">
+    <include src="@components/layout/footer/footer.html" locals="{}"></include>
+  </block>
+</template>
