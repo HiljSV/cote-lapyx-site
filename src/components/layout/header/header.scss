@@ -329,7 +329,7 @@
     @extend .btn--cyan;
     @extend .btn--sm;
 
-    @media (max-width: toEm($mobile)) {
+    @media (max-width: toEm($mobileSmall)) {
       display: none;
     }
   }
