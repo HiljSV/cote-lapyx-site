@@ -3,12 +3,6 @@
 // =============================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Token guard — redirect to login if not authenticated
-  if (!localStorage.getItem("cl_access")) {
-    window.location.replace("/login.html");
-    return;
-  }
-
   // ---------------------------------------------------------------------------
   // Element refs
   // ---------------------------------------------------------------------------
@@ -22,6 +16,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const panels = document.querySelectorAll(".dash-section-panel");
 
   if (!sidebar) return; // not on dashboard page
+
+  // Token guard — runs only on dashboard page (after sidebar check)
+  if (!localStorage.getItem("cl_access")) {
+    window.location.replace("/login.html");
+    return;
+  }
 
   // ---------------------------------------------------------------------------
   // Sidebar open / close (mobile)
