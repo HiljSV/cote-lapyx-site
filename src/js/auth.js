@@ -174,7 +174,7 @@ function initLoginForm() {
     setLoading(submitBtn, "Зачекайте...");
 
     try {
-      const res = await fetch("/php/auth.php?action=login", {
+      const res = await fetch("https://api.cote-lapyx.com/api/v1/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -182,12 +182,15 @@ function initLoginForm() {
 
       const data = await res.json();
 
-      if (res.ok && data.success) {
+      if (res.ok && data.accessToken) {
+        // Store JWT tokens
+        localStorage.setItem("cl_access", data.accessToken);
+        localStorage.setItem("cl_refresh", data.refreshToken);
         window.location.href = "/dashboard.html";
       } else {
         showServerError(
           serverError,
-          data.message ?? "Помилка входу. Спробуйте ще раз.",
+          data.detail ?? data.message ?? "Помилка входу. Спробуйте ще раз.",
         );
       }
     } catch {
@@ -288,20 +291,20 @@ function initRegisterForm() {
     setLoading(submitBtn, "Зачекайте...");
 
     try {
-      const res = await fetch("/php/auth.php?action=register", {
+      const res = await fetch("https://api.cote-lapyx.com/api/v1/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, role }),
+        body: JSON.stringify({ name, email, password }),
       });
 
       const data = await res.json();
 
-      if (res.ok && data.success) {
+      if (res.ok && data.accessToken) {
         window.location.href = "/login.html?registered=1";
       } else {
         showServerError(
           serverError,
-          data.message ?? "Помилка реєстрації. Спробуйте ще раз.",
+          data.detail ?? data.message ?? "Помилка реєстрації. Спробуйте ще раз.",
         );
       }
     } catch {

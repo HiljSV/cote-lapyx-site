@@ -13,6 +13,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // Guard: exit early if not on the admin page
   if (!sidebar) return;
 
+  // Token guard — redirect to login if not authenticated
+  if (!localStorage.getItem("cl_access")) {
+    window.location.replace("/login.html");
+    return;
+  }
+
   const overlay = document.getElementById("admin-overlay");
   const mobileToggle = document.getElementById("admin-mobile-toggle");
   const closeBtn = document.getElementById("admin-sidebar-close");
@@ -123,8 +129,18 @@ document.addEventListener("DOMContentLoaded", () => {
   // Logout
   // ---------------------------------------------------------------------------
 
-  logoutBtn?.addEventListener("click", () => {
-    window.location.href = "login.html";
+  logoutBtn?.addEventListener("click", async () => {
+    const refreshToken = localStorage.getItem("cl_refresh");
+    if (refreshToken) {
+      fetch("https://api.cote-lapyx.com/api/v1/auth/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken }),
+      }).catch(() => {});
+    }
+    localStorage.removeItem("cl_access");
+    localStorage.removeItem("cl_refresh");
+    window.location.replace("/login.html");
   });
 
   // ---------------------------------------------------------------------------

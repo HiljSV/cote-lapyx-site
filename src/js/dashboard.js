@@ -3,6 +3,12 @@
 // =============================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Token guard — redirect to login if not authenticated
+  if (!localStorage.getItem("cl_access")) {
+    window.location.replace("/login.html");
+    return;
+  }
+
   // ---------------------------------------------------------------------------
   // Element refs
   // ---------------------------------------------------------------------------
@@ -125,8 +131,19 @@ document.addEventListener("DOMContentLoaded", () => {
   // ---------------------------------------------------------------------------
 
   if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-      window.location.href = "login.html";
+    logoutBtn.addEventListener("click", async () => {
+      const refreshToken = localStorage.getItem("cl_refresh");
+      if (refreshToken) {
+        // Best-effort logout call — don't block redirect on failure
+        fetch("https://api.cote-lapyx.com/api/v1/auth/logout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken }),
+        }).catch(() => {});
+      }
+      localStorage.removeItem("cl_access");
+      localStorage.removeItem("cl_refresh");
+      window.location.replace("/login.html");
     });
   }
 
