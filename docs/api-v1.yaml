@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Cote Lapyx API
-  version: 1.4.0
+  version: 1.5.0
   description: |
     REST API for cote-lapyx.com — a team website for Валерія, Сергій, Андрій.
 
@@ -408,6 +408,10 @@ components:
           type: string
           minLength: 2
           maxLength: 100
+        status:
+          type: string
+          enum: [active, blocked, suspended]
+          description: Account status. Use `blocked` to prevent login; `suspended` for temporary restriction.
 
     SocialLinks:
       type: object
@@ -1523,6 +1527,8 @@ paths:
       tags: [Auth]
       summary: Return the currently authenticated user
       operationId: getCurrentUser
+      deprecated: true
+      description: "Deprecated: use `GET /users/me` instead. Kept for backwards compatibility."
       security:
         - bearerAuth: []
       x-roles: [owner, subscriber]
@@ -1786,14 +1792,14 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
-    put:
+    patch:
       tags: [Posts]
-      summary: Replace a blog post (owner only)
+      summary: Partially update a blog post (owner only)
       operationId: updatePost
       security:
         - bearerAuth: []
       x-roles: [owner]
-      description: Owner can only modify their own posts. Returns 403 if the authenticated owner is not the author.
+      description: Partial update — all fields optional. Owner can only modify their own posts. Returns 403 if the authenticated owner is not the author.
       parameters:
         - name: slug
           in: path
@@ -1959,14 +1965,14 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 
-    put:
+    patch:
       tags: [Projects]
-      summary: Replace a project (owner only)
+      summary: Partially update a project (owner only)
       operationId: updateProject
       security:
         - bearerAuth: []
       x-roles: [owner]
-      description: Owner can only modify their own projects. Returns 403 if the authenticated owner is not the author.
+      description: Partial update — all fields optional. Owner can only modify their own projects. Returns 403 if the authenticated owner is not the author.
       parameters:
         - name: slug
           in: path
@@ -2058,6 +2064,15 @@ paths:
         - $ref: "#/components/parameters/PageParam"
         - $ref: "#/components/parameters/SizeParam"
         - $ref: "#/components/parameters/SortParam"
+        - name: status
+          in: query
+          required: false
+          description: |
+            Filter comments by moderation status. Non-owner callers always receive
+            only `approved` comments regardless of this parameter.
+          schema:
+            type: string
+            enum: [pending, approved, rejected, deleted]
       responses:
         "200":
           description: Paginated list of comments.
@@ -2185,12 +2200,8 @@ paths:
             type: integer
             format: int64
       responses:
-        "200":
-          description: Comment soft-deleted; confirmation payload returned.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CommentDeletedResponse"
+        "204":
+          description: Comment soft-deleted successfully. No content returned.
         "401":
           $ref: "#/components/responses/Unauthorized"
         "403":
@@ -3252,6 +3263,44 @@ paths:
           $ref: "#/components/responses/Forbidden"
         "404":
           $ref: "#/components/responses/NotFound"
+
+  # ---------------------------------------------------------------------------
+  # Admin — Comments
+  # ---------------------------------------------------------------------------
+
+  /admin/comments:
+    get:
+      tags: [Admin]
+      summary: List all comments with moderation filter (owner only)
+      operationId: adminListComments
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Returns all comments across all posts. Supports filtering by moderation status.
+        Used by the admin panel's comments moderation section (filter tabs: Всі / Очікують / Спам).
+      parameters:
+        - name: status
+          in: query
+          required: false
+          description: Filter by moderation status. Omit to return all statuses.
+          schema:
+            type: string
+            enum: [pending, approved, rejected, spam, deleted]
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+        - $ref: "#/components/parameters/SortParam"
+      responses:
+        "200":
+          description: Paginated list of comments.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedCommentResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
 
   # ---------------------------------------------------------------------------
   # Admin — Subscriptions
