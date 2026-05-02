@@ -861,6 +861,32 @@ components:
         page:
           $ref: "#/components/schemas/PageMetadata"
 
+    FavoriteDTO:
+      type: object
+      required: [postSlug, postTitle, favoritedAt]
+      description: A post bookmarked by the authenticated user.
+      properties:
+        postSlug:
+          type: string
+          example: cyberpunk-scss-neon
+        postTitle:
+          type: string
+          example: "Cyberpunk SCSS: neon-система"
+        favoritedAt:
+          type: string
+          format: date-time
+
+    PagedFavoriteResponse:
+      type: object
+      required: [content, page]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/FavoriteDTO"
+        page:
+          $ref: "#/components/schemas/PageMetadata"
+
     # --- Category ---
 
     CategoryDTO:
@@ -1330,6 +1356,65 @@ components:
           description: Total registered users (owners + subscribers).
           example: 156
 
+    SiteSettingsDTO:
+      type: object
+      description: Site-wide configuration visible to the owner.
+      properties:
+        siteName:
+          type: string
+          example: cote-lapyx
+        siteDescription:
+          type: string
+          example: IT studio by COTE & LAPYX
+        contactEmail:
+          type: string
+          format: email
+          example: hello@cote-lapyx.com
+        telegramUsername:
+          type: string
+          example: cotelapyx
+        githubUrl:
+          type: string
+          format: uri
+          example: https://github.com/cote-lapyx
+        registrationEnabled:
+          type: boolean
+          description: Allow new user registrations.
+          example: true
+        maintenanceMode:
+          type: boolean
+          description: Put site in maintenance mode (non-owners see maintenance page).
+          example: false
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-04-10T14:30:00Z"
+
+    SiteSettingsUpdateRequest:
+      type: object
+      description: Partial update for site settings. All fields optional.
+      properties:
+        siteName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        siteDescription:
+          type: string
+          maxLength: 500
+        contactEmail:
+          type: string
+          format: email
+        telegramUsername:
+          type: string
+          maxLength: 50
+        githubUrl:
+          type: string
+          format: uri
+        registrationEnabled:
+          type: boolean
+        maintenanceMode:
+          type: boolean
+
   # ---------------------------------------------------------------------------
   # Reusable responses
   # ---------------------------------------------------------------------------
@@ -1590,6 +1675,50 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "422":
           $ref: "#/components/responses/ValidationError"
+
+  /users/me/comments:
+    get:
+      tags: [Users]
+      summary: List own comments (subscriber or owner)
+      operationId: getMyComments
+      security:
+        - bearerAuth: []
+      x-roles: [owner, subscriber]
+      description: Returns all comments posted by the authenticated user, newest first.
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+      responses:
+        "200":
+          description: Paginated list of own comments.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedCommentResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /users/me/favorites:
+    get:
+      tags: [Users]
+      summary: List own bookmarked posts (subscriber or owner)
+      operationId: getMyFavorites
+      security:
+        - bearerAuth: []
+      x-roles: [owner, subscriber]
+      description: Returns posts the authenticated user has bookmarked, newest first.
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+      responses:
+        "200":
+          description: Paginated list of bookmarked posts.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedFavoriteResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
 
   # ---------------------------------------------------------------------------
   # Team Members
@@ -2216,6 +2345,68 @@ paths:
                 status: 403
                 detail: You can only delete your own comments.
                 instance: /api/v1/comments/42
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ---------------------------------------------------------------------------
+  # Post Favorites
+  # ---------------------------------------------------------------------------
+
+  /posts/{slug}/favorites:
+    post:
+      tags: [Posts]
+      summary: Add a post to favorites (subscriber/owner)
+      operationId: addPostFavorite
+      security:
+        - bearerAuth: []
+      x-roles: [subscriber, owner]
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Post added to favorites.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FavoriteDTO"
+        "409":
+          description: Post already in favorites.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+              example:
+                type: https://cote-lapyx.com/errors/conflict
+                title: Conflict
+                status: 409
+                detail: Post already in favorites.
+                instance: /api/v1/posts/my-post/favorites
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [Posts]
+      summary: Remove a post from favorites (subscriber/owner)
+      operationId: removePostFavorite
+      security:
+        - bearerAuth: []
+      x-roles: [subscriber, owner]
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Post removed from favorites. No content returned.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
 
@@ -3366,6 +3557,59 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DashboardStatsDTO"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  # ---------------------------------------------------------------------------
+  # Admin Settings
+  # ---------------------------------------------------------------------------
+
+  /admin/settings:
+    get:
+      tags: [Admin]
+      summary: Get site settings (owner only)
+      operationId: getAdminSettings
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Returns the current site-wide configuration (site name, description, contact email,
+        social links, registration toggle, maintenance mode, etc.).
+      responses:
+        "200":
+          description: Site settings.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSettingsDTO"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    patch:
+      tags: [Admin]
+      summary: Update site settings (owner only)
+      operationId: updateAdminSettings
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SiteSettingsUpdateRequest"
+      responses:
+        "200":
+          description: Updated site settings.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteSettingsDTO"
+        "400":
+          $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "403":
