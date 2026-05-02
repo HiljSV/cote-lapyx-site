@@ -409,79 +409,6 @@
 }
 
 // -----------------------------------------------------------------------------
-// Table
-// -----------------------------------------------------------------------------
-
-// overflow:auto creates a scroll container for wide tables AND clips border-radius.
-// Do not split into overflow:hidden + overflow-x:auto — that pair blocks the scrollbar.
-.dash-table-wrap {
-  @include glass-card;
-  overflow: auto;
-}
-
-.dash-table {
-  width: 100%;
-  border-collapse: collapse;
-
-  th {
-    padding: 14px 16px;
-    text-align: left;
-    font-family: $fontHeading;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: $text-muted;
-    border-bottom: 1px solid $border-cyan;
-    white-space: nowrap;
-  }
-
-  td {
-    padding: 14px 16px;
-    font-size: 14px;
-    color: $text-secondary;
-    border-bottom: 1px solid rgba($border-cyan, 0.5);
-    vertical-align: middle;
-  }
-
-  tr:last-child td {
-    border-bottom: none;
-  }
-
-  tr:hover td {
-    background: rgba($neon-cyan, 0.03);
-  }
-
-  &__title {
-    color: $text-primary;
-    font-weight: 500;
-  }
-
-  &__date {
-    white-space: nowrap;
-    color: $text-muted;
-    font-size: 13px;
-  }
-
-  // Avoid display:flex on td — it breaks table row height sync in some browsers.
-  // neon-badge is inline-block, so badges flow naturally.
-  &__tech {
-    .neon-badge + .neon-badge {
-      margin-left: 6px;
-    }
-  }
-
-  // btn is inline-flex, so buttons are inline by default.
-  &__actions {
-    white-space: nowrap;
-
-    .btn + .btn {
-      margin-left: 8px;
-    }
-  }
-}
-
-// -----------------------------------------------------------------------------
 // Status badges
 // -----------------------------------------------------------------------------
 
@@ -595,69 +522,178 @@
 }
 
 // -----------------------------------------------------------------------------
-// Responsive table — card layout on mobile
-// Each row becomes a block of label:value pairs via data-label on <td>
+// List — replaces <table>: CSS grid on desktop, single-column cards on mobile
 // -----------------------------------------------------------------------------
 
+.dash-list {
+  @include glass-card;
+  overflow: hidden;
+}
+
+.dash-list__head,
+.dash-list__row {
+  display: grid;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.dash-list__head {
+  border-bottom: 1px solid $border-cyan;
+
+  > div {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: $text-muted;
+    white-space: nowrap;
+  }
+}
+
+.dash-list__row {
+  border-bottom: 1px solid rgba($border-cyan, 0.4);
+  font-size: 14px;
+  color: $text-secondary;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: rgba($neon-cyan, 0.03);
+  }
+}
+
+.dash-list__title {
+  color: $text-primary;
+  font-weight: 500;
+}
+
+.dash-list__date {
+  white-space: nowrap;
+  color: $text-muted;
+  font-size: 13px;
+}
+
+.dash-list__tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.dash-list__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+// --- Grid column layouts per list type ---
+
+// posts: Title | Category | Date | Status | Actions
+.dash-list--posts {
+  .dash-list__head,
+  .dash-list__row {
+    grid-template-columns: 1fr 110px 100px 130px 185px;
+  }
+}
+
+// projects: Name | Technologies | Status | Actions
+.dash-list--projects {
+  .dash-list__head,
+  .dash-list__row {
+    grid-template-columns: 1fr 170px 120px 185px;
+  }
+}
+
+// comments (dashboard): Author | Comment | Post | Date
+.dash-list--comments {
+  .dash-list__head,
+  .dash-list__row {
+    grid-template-columns: 100px 1fr 150px 100px;
+  }
+}
+
+// subscribers: Name | Email | Date
+.dash-list--subscribers {
+  .dash-list__head,
+  .dash-list__row {
+    grid-template-columns: 120px 1fr 130px;
+  }
+}
+
+// admin recent registrations: Name | Email | Role | Date | Status
+.dash-list--admin-reg {
+  .dash-list__head,
+  .dash-list__row {
+    grid-template-columns: 1fr 1fr 90px 110px 110px;
+  }
+}
+
+// admin all users: Name | Email | Role | Registered | Status | Actions
+.dash-list--admin-users {
+  .dash-list__head,
+  .dash-list__row {
+    grid-template-columns: 1fr 1fr 90px 110px 100px 185px;
+  }
+}
+
+// admin posts: Title | Author | Category | Date | Status | Actions
+.dash-list--admin-posts {
+  .dash-list__head,
+  .dash-list__row {
+    grid-template-columns: 1fr 100px 100px 100px 120px 185px;
+  }
+}
+
+// admin projects: Name | Author | Technologies | Status | Actions
+.dash-list--admin-projects {
+  .dash-list__head,
+  .dash-list__row {
+    grid-template-columns: 1fr 100px 160px 120px 185px;
+  }
+}
+
+// admin comments: Author | Comment | Post | Date | Status | Actions
+.dash-list--admin-comments {
+  .dash-list__head,
+  .dash-list__row {
+    grid-template-columns: 90px 1fr 120px 90px 110px 185px;
+  }
+}
+
+// --- Mobile: single-column card layout ---
+
 @media (max-width: toEm($mobile)) {
-  .dash-table-wrap {
-    overflow: visible;
+  .dash-list__head {
+    display: none;
   }
 
-  .dash-table,
-  .dash-table thead,
-  .dash-table tbody,
-  .dash-table th,
-  .dash-table td,
-  .dash-table tr {
-    display: block;
-  }
+  .dash-list__row {
+    grid-template-columns: 1fr !important;
+    padding: 12px 16px;
 
-  .dash-table thead tr {
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
-  }
+    > div {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 4px 0;
 
-  .dash-table tr {
-    padding: 12px 0;
-    border-bottom: 1px solid rgba($border-cyan, 0.4);
-
-    &:last-child {
-      border-bottom: none;
+      &::before {
+        content: attr(data-label);
+        flex-shrink: 0;
+        min-width: 90px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: $text-muted;
+        padding-top: 2px;
+      }
     }
   }
 
-  .dash-table tr:hover td {
-    background: transparent;
-  }
-
-  .dash-table td {
-    border: none;
-    padding: 6px 16px;
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-
-    &::before {
-      content: attr(data-label);
-      flex-shrink: 0;
-      min-width: 90px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: $text-muted;
-      padding-top: 3px;
-    }
-  }
-
-  .dash-table__actions {
+  .dash-list__actions {
     flex-wrap: wrap;
-    gap: 6px;
-
-    .btn + .btn {
-      margin-left: 0;
-    }
   }
 }
