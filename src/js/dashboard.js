@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const initEl = document.querySelector(".dash-sidebar__avatar");
       if (nameEl && user.name) nameEl.textContent = user.name;
       if (initEl && user.name) {
-        const parts = user.name.trim().split(" ");
+        const parts = user.name.trim().split(/\s+/);
         const initials =
           parts.length >= 2 ? parts[0][0] + parts[1][0] : parts[0].slice(0, 2);
         initEl.textContent = initials.toUpperCase();

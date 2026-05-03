@@ -19,7 +19,9 @@
     "new": "node template_modules/createnewpage.js",
     "wp": "node template_modules/wordpress/terminal.js up -d && vite -- --wp",
     "wpbuild": "node template_modules/wordpress/terminal.js up -d && vite build -- --wp",
-    "wpstop": "node template_modules/wordpress/terminal.js down"
+    "wpstop": "node template_modules/wordpress/terminal.js down",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@davestewart/outliner": "latest",
@@ -81,6 +83,7 @@
     "vite-plugin-webfont-dl": "latest",
     "vite-plugin-zip-pack": "latest",
     "vite-svg-2-webfont": "latest",
+    "vitest": "^4.1.5",
     "vue": "latest"
   },
   "optionalDependencies": {
