@@ -50,6 +50,9 @@ function showNotFound() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Guard: only run on project.html (bundle mode sends all JS to every page)
+  if (!document.getElementById("project-content")) return;
+
   const params = new URLSearchParams(window.location.search);
   const slug = params.get("slug");
   if (!slug) {

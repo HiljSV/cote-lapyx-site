@@ -148,6 +148,9 @@ function renderCta(member) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Guard: only run on member.html (bundle mode sends all JS to every page)
+  if (!document.getElementById("member-photo-wrap")) return;
+
   const params = new URLSearchParams(window.location.search);
   const memberId = params.get("id") || "valeriia";
 
