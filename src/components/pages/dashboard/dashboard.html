@@ -497,37 +497,15 @@
           class="dash-list dash-list--subscribers"
           aria-label="Таблиця підписників"
         >
-          <!-- Header row — hidden on mobile -->
           <div class="dash-list__head" aria-hidden="true">
-            <div>Ім'я</div>
             <div>Email</div>
+            <div>Тип</div>
+            <div>Статус</div>
             <div>Дата підписки</div>
           </div>
-          <!-- Row 1 -->
-          <div class="dash-list__row">
-            <div data-label="Ім'я">user_01</div>
-            <div data-label="Email">user01@example.com</div>
-            <div class="dash-list__date" data-label="Дата підписки">
-              15 квіт 2025
-            </div>
-          </div>
-          <!-- Row 2 -->
-          <div class="dash-list__row">
-            <div data-label="Ім'я">dev_neon</div>
-            <div data-label="Email">devneon@example.com</div>
-            <div class="dash-list__date" data-label="Дата підписки">
-              20 бер 2025
-            </div>
-          </div>
-          <!-- Row 3 -->
-          <div class="dash-list__row">
-            <div data-label="Ім'я">alphacode</div>
-            <div data-label="Email">alpha@example.com</div>
-            <div class="dash-list__date" data-label="Дата підписки">
-              01 бер 2025
-            </div>
-          </div>
+          <div id="subscribers-list-body"></div>
         </div>
+        <div class="dash-pagination" id="subscribers-pagination"></div>
       </section>
     </div>
     <!-- /subscribers panel -->

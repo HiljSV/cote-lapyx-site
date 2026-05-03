@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let postsStatusFilter = "";
   let projectsPage = 0;
   let projectsStatusFilter = "";
+  let subscribersPage = 0;
 
   // Load user data: reveal admin link + populate profile form + update sidebar
   (async () => {
@@ -173,6 +174,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       if (section === "projects" && myUserId) {
         loadProjects(0, projectsStatusFilter);
+      }
+      if (section === "subscribers") {
+        loadSubscribers(0);
       }
       // Close sidebar on mobile after navigation
       if (window.innerWidth <= 991.98) {
@@ -1003,4 +1007,77 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("project-form")
     ?.addEventListener("submit", handleProjectSubmit);
+
+  // ---------------------------------------------------------------------------
+  // Subscribers panel
+  // ---------------------------------------------------------------------------
+
+  const SUB_TYPE_LABEL = { EMAIL: "Email", PUSH: "Push", ALL: "Всі" };
+  const SUB_STATUS_LABEL = {
+    ACTIVE: "Активна",
+    CANCELLED: "Скасована",
+    EXPIRED: "Закінчилась",
+  };
+  const SUB_STATUS_CLASS = {
+    ACTIVE: "published",
+    CANCELLED: "draft",
+    EXPIRED: "archived",
+  };
+
+  async function loadSubscribers(page) {
+    subscribersPage = page;
+    const listBody = document.getElementById("subscribers-list-body");
+    const pagination = document.getElementById("subscribers-pagination");
+    if (!listBody) return;
+
+    listBody.innerHTML = '<div class="dash-list__empty">Завантаження...</div>';
+    if (pagination) pagination.innerHTML = "";
+
+    try {
+      const res = await fetchWithAuth(
+        `${API}/admin/subscriptions?size=20&sort=createdAt,desc&page=${page}`,
+      );
+      if (!res.ok) {
+        listBody.innerHTML =
+          '<div class="dash-list__empty">Помилка завантаження</div>';
+        return;
+      }
+      const data = await res.json();
+      const rows = (data.content || [])
+        .map((sub) => {
+          const sClass = SUB_STATUS_CLASS[sub.status] || "draft";
+          const sLabel = SUB_STATUS_LABEL[sub.status] || sub.status;
+          const typeLabel = SUB_TYPE_LABEL[sub.type] || sub.type;
+          return `<div class="dash-list__row">
+            <div data-label="Email">${escHtml(sub.email)}</div>
+            <div data-label="Тип">${escHtml(typeLabel)}</div>
+            <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
+            <div class="dash-list__date" data-label="Дата підписки">${fmtDate(sub.createdAt)}</div>
+          </div>`;
+        })
+        .join("");
+      listBody.innerHTML =
+        rows || '<div class="dash-list__empty">Підписників ще немає</div>';
+
+      if (pagination && data.page && data.page.totalPages > 1) {
+        const { number, totalPages } = data.page;
+        pagination.innerHTML = Array.from({ length: totalPages }, (_, i) => {
+          const active = i === number ? " is-active" : "";
+          return `<button type="button" class="dash-pagination__btn${active}" data-page="${i}">${i + 1}</button>`;
+        }).join("");
+      }
+    } catch (err) {
+      console.error("Subscribers load error:", err);
+      listBody.innerHTML =
+        '<div class="dash-list__empty">Помилка завантаження</div>';
+    }
+  }
+
+  document
+    .getElementById("subscribers-pagination")
+    ?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-page]");
+      if (!btn) return;
+      loadSubscribers(Number(btn.dataset.page));
+    });
 });

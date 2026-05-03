@@ -1,270 +1,69 @@
 <!-- PAGE HERO -->
 <div class="page-hero">
-	<div class="page-hero__container">
-		<h1 class="page-hero__heading">Проекти</h1>
-		<p class="page-hero__subheading">
-			Що ми побудували — від ідеї до продакшену
-		</p>
-	</div>
+  <div class="page-hero__container">
+    <h1 class="page-hero__heading">Проекти</h1>
+    <p class="page-hero__subheading">
+      Що ми побудували — від ідеї до продакшену
+    </p>
+  </div>
 </div>
 
 <main class="page">
-	<section class="section section--dark" aria-label="Список проектів">
-		<div class="page__container">
-			<!-- Filter bar -->
-			<div class="projects-page__filter">
-				<div class="filter-bar" role="search" aria-label="Фільтр проектів">
-					<div class="filter-bar__group">
-						<span class="filter-bar__label">Автор:</span>
-						<button class="filter-bar__btn is-active" data-filter-author="all">
-							Всі
-						</button>
-						<button class="filter-bar__btn" data-filter-author="serhii">
-							Сергій
-						</button>
-						<button class="filter-bar__btn" data-filter-author="andrii">
-							Андрій
-						</button>
-						<button class="filter-bar__btn" data-filter-author="valeriia">
-							Валерія
-						</button>
-					</div>
-					<div class="filter-bar__group">
-						<span class="filter-bar__label">Стек:</span>
-						<button class="filter-bar__btn is-active" data-filter-tech="all">
-							Всі
-						</button>
-						<button class="filter-bar__btn" data-filter-tech="frontend">
-							Frontend
-						</button>
-						<button class="filter-bar__btn" data-filter-tech="backend">
-							Backend
-						</button>
-						<button class="filter-bar__btn" data-filter-tech="design">
-							Design
-						</button>
-					</div>
-					<div class="filter-bar__search">
-						<span class="filter-bar__search-icon" aria-hidden="true">&#128269;</span>
-						<input class="filter-bar__search-input" type="search" placeholder="Пошук проектів..."
-							aria-label="Пошук проектів" id="projects-search" />
-					</div>
-				</div>
-			</div>
+  <section class="section section--dark" aria-label="Список проектів">
+    <div class="page__container">
+      <!-- Filter bar -->
+      <div class="projects-page__filter">
+        <div class="filter-bar" role="search" aria-label="Фільтр проектів">
+          <div class="filter-bar__group">
+            <span class="filter-bar__label">Стек:</span>
+            <button class="filter-bar__btn is-active" data-filter-tech="">
+              Всі
+            </button>
+            <button class="filter-bar__btn" data-filter-tech="HTML">
+              HTML/CSS
+            </button>
+            <button class="filter-bar__btn" data-filter-tech="JavaScript">
+              JavaScript
+            </button>
+            <button class="filter-bar__btn" data-filter-tech="Python">
+              Python
+            </button>
+            <button class="filter-bar__btn" data-filter-tech="Java">
+              Java
+            </button>
+          </div>
+          <div class="filter-bar__search">
+            <span class="filter-bar__search-icon" aria-hidden="true"
+              >&#128269;</span
+            >
+            <input
+              class="filter-bar__search-input"
+              type="search"
+              placeholder="Пошук проектів..."
+              aria-label="Пошук проектів"
+              id="projects-search"
+            />
+          </div>
+        </div>
+      </div>
 
-			<!-- Grid -->
-			<ul class="projects-page__grid" role="list" id="projects-grid">
-				<li data-author="serhii" data-tech="frontend">
-					<article class="project-card project-card--cyan">
-						<div class="project-card__cover-placeholder" aria-hidden="true">
-							&lt;/&gt;
-						</div>
-						<div class="project-card__body">
-							<h2 class="project-card__title">cote-lapyx.com</h2>
-							<p class="project-card__description">
-								Офіційний сайт студії. Повний цикл: від дизайну у Figma до
-								деплою на Apache. HTML/SCSS/JS + PHP backend на базі FLS + Vite.
-							</p>
-							<ul class="project-card__tags" aria-label="Технології" role="list">
-								<li><span class="neon-badge neon-badge--cyan">HTML</span></li>
-								<li><span class="neon-badge neon-badge--cyan">SCSS</span></li>
-								<li><span class="neon-badge neon-badge--cyan">JS</span></li>
-								<li><span class="neon-badge neon-badge--magenta">PHP</span></li>
-								<li><span class="neon-badge neon-badge--green">Vite</span></li>
-							</ul>
-						</div>
-						<div class="project-card__footer">
-							<div class="project-card__links">
-								<a href="https://github.com/cote-lapyx" class="btn btn--ghost btn--sm" target="_blank"
-									rel="noopener">GitHub</a>
-								<a href="https://cote-lapyx.com" class="btn btn--cyan btn--sm" target="_blank"
-									rel="noopener">Demo</a>
-							</div>
-							<div class="project-card__author">
-								<img class="project-card__author-avatar" src="@img/serhii/prince.png" alt="Сергій"
-									width="26" height="26" />
-								Сергій
-							</div>
-						</div>
-					</article>
-				</li>
+      <!-- Grid -->
+      <ul class="projects-page__grid" role="list" id="projects-grid">
+        <li
+          class="projects-page__loading"
+          id="projects-loading"
+          aria-live="polite"
+        >
+          Завантаження...
+        </li>
+      </ul>
 
-				<li data-author="serhii" data-tech="backend">
-					<article class="project-card project-card--green">
-						<div class="project-card__cover-placeholder" aria-hidden="true">
-							&#9881;
-						</div>
-						<div class="project-card__body">
-							<h2 class="project-card__title">JARVIS AI Assistant</h2>
-							<p class="project-card__description">
-								Голосовий AI-асистент на Claude API з розпізнаванням мови,
-								генерацією відповідей та Telegram-інтеграцією.
-							</p>
-							<ul class="project-card__tags" aria-label="Технології" role="list">
-								<li>
-									<span class="neon-badge neon-badge--green">Python</span>
-								</li>
-								<li>
-									<span class="neon-badge neon-badge--magenta">Claude API</span>
-								</li>
-								<li>
-									<span class="neon-badge neon-badge--cyan">Telegram Bot</span>
-								</li>
-							</ul>
-						</div>
-						<div class="project-card__footer">
-							<div class="project-card__links">
-								<a href="#" class="btn btn--ghost btn--sm">GitHub</a>
-								<a href="#" class="btn btn--green btn--sm">Demo</a>
-							</div>
-							<div class="project-card__author">
-								<img class="project-card__author-avatar" src="@img/serhii/prince.png" alt="Сергій"
-									width="26" height="26" />
-								Сергій
-							</div>
-						</div>
-					</article>
-				</li>
-
-				<li data-author="valeriia" data-tech="design">
-					<article class="project-card project-card--magenta">
-						<div class="project-card__cover-placeholder" aria-hidden="true">
-							&#9670;
-						</div>
-						<div class="project-card__body">
-							<h2 class="project-card__title">Brand Kit cote-lapyx</h2>
-							<p class="project-card__description">
-								Фірмовий стиль студії: логотип, кольорова палітра, типографіка
-								та анімований SVG-логотип із кіберпанк-естетикою.
-							</p>
-							<ul class="project-card__tags" aria-label="Технології" role="list">
-								<li>
-									<span class="neon-badge neon-badge--magenta">Figma</span>
-								</li>
-								<li>
-									<span class="neon-badge neon-badge--green">Branding</span>
-								</li>
-								<li><span class="neon-badge neon-badge--cyan">SVG</span></li>
-							</ul>
-						</div>
-						<div class="project-card__footer">
-							<div class="project-card__links">
-								<a href="#" class="btn btn--ghost btn--sm">GitHub</a>
-								<a href="#" class="btn btn--magenta btn--sm">Demo</a>
-							</div>
-							<div class="project-card__author">
-								<img class="project-card__author-avatar" src="@img/valerii/valerka.png" alt="Валерія"
-									width="26" height="26" />
-								Валерія
-							</div>
-						</div>
-					</article>
-				</li>
-
-				<li data-author="andrii" data-tech="backend">
-					<article class="project-card project-card--magenta">
-						<div class="project-card__cover-placeholder" aria-hidden="true">
-							&#128274;
-						</div>
-						<div class="project-card__body">
-							<h2 class="project-card__title">Auth Service API</h2>
-							<p class="project-card__description">
-								REST API сервіс авторизації на Java Spring Boot з JWT-токенами,
-								bcrypt-хешуванням та Swagger-документацією.
-							</p>
-							<ul class="project-card__tags" aria-label="Технології" role="list">
-								<li>
-									<span class="neon-badge neon-badge--magenta">Java</span>
-								</li>
-								<li>
-									<span class="neon-badge neon-badge--magenta">Spring Boot</span>
-								</li>
-								<li><span class="neon-badge neon-badge--green">JWT</span></li>
-								<li>
-									<span class="neon-badge neon-badge--cyan">Swagger</span>
-								</li>
-							</ul>
-						</div>
-						<div class="project-card__footer">
-							<div class="project-card__links">
-								<a href="#" class="btn btn--ghost btn--sm">GitHub</a>
-							</div>
-							<div class="project-card__author">
-								<img class="project-card__author-avatar" src="@img/andrii/coteAndrii.png" alt="Андрій"
-									width="26" height="26" />
-								Андрій
-							</div>
-						</div>
-					</article>
-				</li>
-
-				<li data-author="serhii" data-tech="frontend">
-					<article class="project-card project-card--cyan">
-						<div class="project-card__cover-placeholder" aria-hidden="true">
-							&#128247;
-						</div>
-						<div class="project-card__body">
-							<h2 class="project-card__title">FLS Portfolio Template</h2>
-							<p class="project-card__description">
-								Шаблон портфоліо для фрілансерів на базі FLS + Vite. Адаптивний,
-								з анімаціями та підтримкою тем.
-							</p>
-							<ul class="project-card__tags" aria-label="Технології" role="list">
-								<li><span class="neon-badge neon-badge--cyan">HTML</span></li>
-								<li><span class="neon-badge neon-badge--cyan">SCSS</span></li>
-								<li><span class="neon-badge neon-badge--green">Vite</span></li>
-							</ul>
-						</div>
-						<div class="project-card__footer">
-							<div class="project-card__links">
-								<a href="#" class="btn btn--ghost btn--sm">GitHub</a>
-								<a href="#" class="btn btn--cyan btn--sm">Demo</a>
-							</div>
-							<div class="project-card__author">
-								<img class="project-card__author-avatar" src="@img/serhii/prince.png" alt="Сергій"
-									width="26" height="26" />
-								Сергій
-							</div>
-						</div>
-					</article>
-				</li>
-
-				<li data-author="andrii" data-tech="backend">
-					<article class="project-card project-card--green">
-						<div class="project-card__cover-placeholder" aria-hidden="true">
-							&#127760;
-						</div>
-						<div class="project-card__body">
-							<h2 class="project-card__title">Telegram Channel Bot</h2>
-							<p class="project-card__description">
-								Публічний бот для Telegram-каналу @cotelapyx на Gemini API.
-								Автопостинг, генерація контенту та модерація.
-							</p>
-							<ul class="project-card__tags" aria-label="Технології" role="list">
-								<li>
-									<span class="neon-badge neon-badge--green">Python</span>
-								</li>
-								<li>
-									<span class="neon-badge neon-badge--magenta">Gemini API</span>
-								</li>
-								<li>
-									<span class="neon-badge neon-badge--cyan">Telegram</span>
-								</li>
-							</ul>
-						</div>
-						<div class="project-card__footer">
-							<div class="project-card__links">
-								<a href="#" class="btn btn--ghost btn--sm">GitHub</a>
-							</div>
-							<div class="project-card__author">
-								<img class="project-card__author-avatar" src="@img/andrii/coteAndrii.png" alt="Андрій"
-									width="26" height="26" />
-								Андрій
-							</div>
-						</div>
-					</article>
-				</li>
-			</ul>
-		</div>
-	</section>
+      <!-- Load more -->
+      <div class="blog-page__more" id="projects-more-wrap" hidden>
+        <button type="button" class="btn btn--ghost" id="projects-load-more">
+          Завантажити ще
+        </button>
+      </div>
+    </div>
+  </section>
 </main>

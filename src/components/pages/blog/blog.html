@@ -48,7 +48,18 @@
       </div>
 
       <!-- Grid -->
-      <ul class="blog-page__grid" id="blog-list" role="list"></ul>
+      <ul class="blog-page__grid" id="blog-list" role="list">
+        <li class="blog-page__loading" id="blog-loading" aria-live="polite">
+          Завантаження...
+        </li>
+      </ul>
+
+      <!-- Load more -->
+      <div class="blog-page__more" id="blog-more-wrap" hidden>
+        <button type="button" class="btn btn--ghost" id="blog-load-more">
+          Завантажити ще
+        </button>
+      </div>
     </div>
   </section>
 </main>
