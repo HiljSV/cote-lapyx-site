@@ -572,8 +572,25 @@
 }
 
 .dash-list__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   color: $text-primary;
   font-weight: 500;
+}
+
+.dash-list__thumb {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  object-fit: cover;
+  display: block;
+  border: 1px solid rgba($neon-cyan, 0.2);
+
+  &--empty {
+    background: rgba($neon-cyan, 0.06);
+  }
 }
 
 .dash-list__empty {

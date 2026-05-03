@@ -208,6 +208,28 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // Overview panel — edit/delete buttons for recent posts
+  document
+    .getElementById("overview-posts-body")
+    ?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-action]");
+      if (!btn) return;
+      const { action, slug, title } = btn.dataset;
+      if (action === "edit") openPostModal(slug);
+      else if (action === "delete") deletePost(slug, title);
+    });
+
+  // Overview panel — edit/delete buttons for recent projects
+  document
+    .getElementById("overview-projects-body")
+    ?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-action]");
+      if (!btn) return;
+      const { action, slug, title } = btn.dataset;
+      if (action === "edit") openProjectModal(slug);
+      else if (action === "delete") deleteProject(slug, title);
+    });
+
   // ---------------------------------------------------------------------------
   // Logout
   // ---------------------------------------------------------------------------
@@ -283,14 +305,19 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
     const sClass = STATUS_CLASS[post.status] || "draft";
     const sLabel = STATUS_LABEL[post.status] || post.status;
+    const thumb = post.coverImage
+      ? `<img class="dash-list__thumb" src="${escHtml(post.coverImage)}" alt="" aria-hidden="true" />`
+      : `<div class="dash-list__thumb dash-list__thumb--empty" aria-hidden="true"></div>`;
     return `<div class="dash-list__row">
-      <div class="dash-list__title" data-label="Заголовок">${escHtml(post.title)}</div>
+      <div class="dash-list__title" data-label="Заголовок">
+        ${thumb}${escHtml(post.title)}
+      </div>
       <div data-label="Категорія"><span class="neon-badge neon-badge--${badgeColor}">${typeLabel}</span></div>
       <div class="dash-list__date" data-label="Дата">${fmtDate(post.createdAt)}</div>
       <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
       <div class="dash-list__actions" data-label="Дії">
-        <button type="button" class="btn btn--ghost btn--sm">Редагувати</button>
-        <button type="button" class="btn btn--magenta btn--sm">Видалити</button>
+        <button type="button" class="btn btn--ghost btn--sm" data-action="edit" data-slug="${escHtml(post.slug)}">Редагувати</button>
+        <button type="button" class="btn btn--magenta btn--sm" data-action="delete" data-slug="${escHtml(post.slug)}" data-title="${escHtml(post.title)}">Видалити</button>
       </div>
     </div>`;
   }
@@ -310,8 +337,8 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="dash-list__tech" data-label="Технології">${techs || "—"}</div>
       <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
       <div class="dash-list__actions" data-label="Дії">
-        <button type="button" class="btn btn--ghost btn--sm">Редагувати</button>
-        <button type="button" class="btn btn--magenta btn--sm">Видалити</button>
+        <button type="button" class="btn btn--ghost btn--sm" data-action="edit" data-slug="${escHtml(project.slug)}">Редагувати</button>
+        <button type="button" class="btn btn--magenta btn--sm" data-action="delete" data-slug="${escHtml(project.slug)}" data-title="${escHtml(project.title)}">Видалити</button>
       </div>
     </div>`;
   }
@@ -568,9 +595,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (pagination) pagination.innerHTML = "";
 
     const statusParam = status ? `&status=${status}` : "";
+    const authorParam = myUserId ? `&authorId=${myUserId}` : "";
     try {
       const res = await fetchWithAuth(
-        `${API}/admin/posts?authorId=${myUserId}&size=20&sort=createdAt,desc&page=${page}${statusParam}`,
+        `${API}/admin/posts?size=20&sort=createdAt,desc&page=${page}${statusParam}${authorParam}`,
       );
       if (!res.ok) {
         listBody.innerHTML =
@@ -729,7 +757,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function deletePost(slug, title) {
     if (!confirm(`Видалити публікацію "${title}"?`)) return;
     try {
-      const res = await fetchWithAuth(`${API}/admin/posts/${slug}`, {
+      const res = await fetchWithAuth(`${API}/posts/${slug}`, {
         method: "DELETE",
       });
       if (res.ok || res.status === 204) {
@@ -819,9 +847,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (pagination) pagination.innerHTML = "";
 
     const statusParam = status ? `&status=${status}` : "";
+    const authorParam = myUserId ? `&authorId=${myUserId}` : "";
     try {
       const res = await fetchWithAuth(
-        `${API}/admin/projects?authorId=${myUserId}&size=20&sort=createdAt,desc&page=${page}${statusParam}`,
+        `${API}/admin/projects?size=20&sort=createdAt,desc&page=${page}${statusParam}${authorParam}`,
       );
       if (!res.ok) {
         listBody.innerHTML =
