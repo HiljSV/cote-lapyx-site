@@ -403,3 +403,14 @@
     border-color: rgba($neon-cyan, 0.5);
   }
 }
+
+// Registration success banner
+.auth-form__success {
+  padding: 12px 16px;
+  background: rgba($neon-green, 0.1);
+  border: 1px solid rgba($neon-green, 0.4);
+  border-radius: 8px;
+  color: $neon-green;
+  font-size: 0.875rem;
+  margin-bottom: 16px;
+}

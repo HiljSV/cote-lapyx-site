@@ -74,8 +74,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       myUserId = user.id;
 
-      // Load overview stats + recent content for OWNER users
+      // Reveal OWNER-only nav items and load overview stats
       if (user.role === "OWNER") {
+        document
+          .querySelectorAll("[data-owner-nav]")
+          .forEach((el) => el.removeAttribute("hidden"));
         loadOverviewStats(user.id);
       }
 

@@ -291,20 +291,27 @@ function initRegisterForm() {
     setLoading(submitBtn, "Зачекайте...");
 
     try {
-      const res = await fetch("https://api.cote-lapyx.com/api/v1/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
-      });
+      const res = await fetch(
+        "https://api.cote-lapyx.com/api/v1/auth/register",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password }),
+        },
+      );
 
       const data = await res.json();
 
       if (res.ok && data.accessToken) {
-        window.location.href = "/login.html?registered=1";
+        localStorage.setItem("cl_access", data.accessToken);
+        localStorage.setItem("cl_refresh", data.refreshToken);
+        window.location.href = "/dashboard.html";
       } else {
         showServerError(
           serverError,
-          data.detail ?? data.message ?? "Помилка реєстрації. Спробуйте ще раз.",
+          data.detail ??
+            data.message ??
+            "Помилка реєстрації. Спробуйте ще раз.",
         );
       }
     } catch {
@@ -326,4 +333,10 @@ document.addEventListener("DOMContentLoaded", () => {
   initPasswordToggles();
   initLoginForm();
   initRegisterForm();
+
+  // Show registration success banner when arriving from register page
+  if (new URLSearchParams(window.location.search).get("registered") === "1") {
+    const banner = document.getElementById("login-reg-success");
+    if (banner) banner.removeAttribute("hidden");
+  }
 });
