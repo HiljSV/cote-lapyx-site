@@ -75,9 +75,13 @@ document.addEventListener("DOMContentLoaded", () => {
         loadOverviewStats(user.id);
       }
 
-      // If user navigated to posts panel before this fetch resolved
+      // Load data for whichever panel the user may have navigated to
+      // before this /users/me fetch resolved (race condition guard)
       if (document.querySelector('[data-panel="posts"]:not([hidden])')) {
         loadPosts(0, postsStatusFilter);
+      }
+      if (document.querySelector('[data-panel="projects"]:not([hidden])')) {
+        loadProjects(0, projectsStatusFilter);
       }
     } catch (_) {}
   })();
@@ -589,7 +593,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.style.overflow = "hidden";
 
     if (slug) {
-      fetchWithAuth(`${API}/admin/posts/${slug}`)
+      fetchWithAuth(`${API}/posts/${slug}`)
         .then((r) => (r.ok ? r.json() : null))
         .then((post) => {
           if (!post) return;
@@ -657,7 +661,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const res = await fetchWithAuth(
-        slug ? `${API}/admin/posts/${slug}` : `${API}/admin/posts`,
+        slug ? `${API}/posts/${slug}` : `${API}/posts`,
         {
           method: slug ? "PATCH" : "POST",
           headers: { "Content-Type": "application/json" },

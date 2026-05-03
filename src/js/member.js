@@ -1,3 +1,6 @@
+import membersData from "../data/members.json";
+import postsData from "../data/posts.json";
+
 const SOCIAL_ICONS = {
   github: {
     label: "GitHub",
@@ -144,14 +147,12 @@ function renderCta(member) {
   }
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(window.location.search);
   const memberId = params.get("id") || "valeriia";
 
-  const [members, posts] = await Promise.all([
-    fetch("data/members.json").then((r) => r.json()),
-    fetch("data/posts.json").then((r) => r.json()),
-  ]);
+  const members = membersData;
+  const posts = postsData;
 
   const member = members.find((m) => m.id === memberId);
   if (!member) {
