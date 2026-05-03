@@ -1052,7 +1052,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Subscribers panel
   // ---------------------------------------------------------------------------
 
-  const SUB_TYPE_LABEL = { EMAIL: "Email", PUSH: "Push", ALL: "Всі" };
+  const SUB_TYPE_LABEL = { GENERAL: "Загальне", PERSONAL: "Особисте" };
   const SUB_STATUS_LABEL = {
     ACTIVE: "Активна",
     CANCELLED: "Скасована",
