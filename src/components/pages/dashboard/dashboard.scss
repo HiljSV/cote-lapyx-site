@@ -698,6 +698,36 @@
   }
 }
 
+// -----------------------------------------------------------------------------
+// Password form hint text and inline feedback
+// -----------------------------------------------------------------------------
+
+// Hint below input — e.g. "Мінімум 8 символів"
+.dash-profile-form__hint {
+  margin: 4px 0 0;
+  font-size: 0.75rem;
+  color: rgba(232, 237, 245, 0.45);
+}
+
+// Inline feedback message (success / error)
+.dash-profile-form__feedback {
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+
+  &--success {
+    background: rgba(57, 255, 20, 0.08);
+    border: 1px solid rgba(57, 255, 20, 0.3);
+    color: #39ff14;
+  }
+
+  &--error {
+    background: rgba(224, 64, 251, 0.08);
+    border: 1px solid rgba(224, 64, 251, 0.3);
+    color: #e040fb;
+  }
+}
+
 // Admin panel link (shown only to admins)
 .dash-sidebar__admin-link {
   display: flex;

@@ -193,4 +193,82 @@ document.addEventListener("DOMContentLoaded", () => {
       }, 2500);
     });
   }
+
+  // ---------------------------------------------------------------------------
+  // Password change form
+  // ---------------------------------------------------------------------------
+
+  const passwordForm = document.getElementById("dash-password-form");
+  const pwdFeedback = document.getElementById("pwd-feedback");
+  const pwdSubmitBtn = document.getElementById("pwd-submit-btn");
+
+  /**
+   * Display an inline feedback message inside the password form.
+   * @param {string} message - Text to display
+   * @param {"success"|"error"} type - Modifier suffix for BEM class
+   */
+  function showPwdFeedback(message, type) {
+    pwdFeedback.innerHTML = `<p class="dash-profile-form__feedback dash-profile-form__feedback--${type}">${message}</p>`;
+    pwdFeedback.removeAttribute("hidden");
+  }
+
+  passwordForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const currentPwd = document.getElementById("pwd-current").value;
+    const newPwd = document.getElementById("pwd-new").value;
+    const confirmPwd = document.getElementById("pwd-confirm").value;
+
+    // Hide any previous feedback before re-validation
+    pwdFeedback.setAttribute("hidden", "");
+
+    if (newPwd.length < 8) {
+      showPwdFeedback("Новий пароль має бути не менше 8 символів.", "error");
+      return;
+    }
+
+    if (newPwd !== confirmPwd) {
+      showPwdFeedback("Паролі не збігаються.", "error");
+      return;
+    }
+
+    const originalHTML = pwdSubmitBtn.innerHTML;
+    pwdSubmitBtn.disabled = true;
+    pwdSubmitBtn.textContent = "Збереження...";
+
+    try {
+      const res = await fetch(
+        "https://api.cote-lapyx.com/api/v1/users/me/password",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("cl_access")}`,
+          },
+          body: JSON.stringify({
+            currentPassword: currentPwd,
+            newPassword: newPwd,
+          }),
+        },
+      );
+
+      if (res.status === 204) {
+        showPwdFeedback(
+          "Пароль успішно змінено. На вашу пошту надіслано сповіщення.",
+          "success",
+        );
+        passwordForm.reset();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        const msg =
+          data.message || "Помилка зміни пароля. Перевірте поточний пароль.";
+        showPwdFeedback(msg, "error");
+      }
+    } catch {
+      showPwdFeedback("Помилка з'єднання. Спробуйте ще раз.", "error");
+    } finally {
+      pwdSubmitBtn.disabled = false;
+      pwdSubmitBtn.innerHTML = originalHTML;
+    }
+  });
 });

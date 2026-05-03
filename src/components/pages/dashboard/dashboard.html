@@ -881,6 +881,100 @@ Frontend Developer із захопленням до cyberpunk-естетики �
           </div>
         </form>
       </section>
+
+      <!-- ===== PASSWORD CHANGE SECTION ===== -->
+      <section
+        class="dash-section dash-section--password"
+        aria-label="Зміна пароля"
+      >
+        <div class="dash-section__header">
+          <h2 class="dash-section__title">Зміна пароля</h2>
+        </div>
+
+        <form
+          class="dash-profile-form"
+          id="dash-password-form"
+          novalidate
+          aria-label="Форма зміни пароля"
+        >
+          <!-- Current password -->
+          <div class="dash-profile-form__group">
+            <label class="dash-profile-form__label" for="pwd-current"
+              >Поточний пароль</label
+            >
+            <input
+              class="dash-profile-form__input"
+              type="password"
+              id="pwd-current"
+              name="currentPassword"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <!-- New password -->
+          <div class="dash-profile-form__group">
+            <label class="dash-profile-form__label" for="pwd-new"
+              >Новий пароль</label
+            >
+            <input
+              class="dash-profile-form__input"
+              type="password"
+              id="pwd-new"
+              name="newPassword"
+              autocomplete="new-password"
+              minlength="8"
+              required
+            />
+            <p class="dash-profile-form__hint">Мінімум 8 символів</p>
+          </div>
+
+          <!-- Confirm new password -->
+          <div class="dash-profile-form__group">
+            <label class="dash-profile-form__label" for="pwd-confirm"
+              >Підтвердіть пароль</label
+            >
+            <input
+              class="dash-profile-form__input"
+              type="password"
+              id="pwd-confirm"
+              name="confirmPassword"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+
+          <!-- Feedback message -->
+          <div
+            class="dash-profile-form__group dash-profile-form__group--full"
+            id="pwd-feedback"
+            hidden
+            role="alert"
+            aria-live="polite"
+          ></div>
+
+          <!-- Submit -->
+          <div
+            class="dash-profile-form__group dash-profile-form__group--full dash-profile-form__actions"
+          >
+            <button type="submit" class="btn btn--cyan" id="pwd-submit-btn">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+                />
+              </svg>
+              Змінити пароль
+            </button>
+          </div>
+        </form>
+      </section>
+      <!-- /password change section -->
     </div>
     <!-- /profile panel -->
   </main>
