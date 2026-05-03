@@ -256,7 +256,7 @@
               />
             </svg>
           </div>
-          <p class="dash-stat-card__value">24</p>
+          <p class="dash-stat-card__value" id="admin-stat-users">—</p>
           <p class="dash-stat-card__label">Користувачів</p>
         </div>
 
@@ -275,7 +275,7 @@
               />
             </svg>
           </div>
-          <p class="dash-stat-card__value">18</p>
+          <p class="dash-stat-card__value" id="admin-stat-posts">—</p>
           <p class="dash-stat-card__label">Публікацій</p>
         </div>
 
@@ -294,7 +294,7 @@
               />
             </svg>
           </div>
-          <p class="dash-stat-card__value">7</p>
+          <p class="dash-stat-card__value" id="admin-stat-comments">—</p>
           <p class="dash-stat-card__label">Нових коментарів</p>
         </div>
 
@@ -313,7 +313,7 @@
               />
             </svg>
           </div>
-          <p class="dash-stat-card__value">5</p>
+          <p class="dash-stat-card__value" id="admin-stat-projects">—</p>
           <p class="dash-stat-card__label">Активних проектів</p>
         </div>
       </section>
@@ -395,50 +395,13 @@
           class="dash-list dash-list--admin-reg"
           aria-label="Таблиця останніх реєстрацій"
         >
-          <!-- Header row — hidden on mobile -->
           <div class="dash-list__head" aria-hidden="true">
             <div>Ім'я</div>
             <div>Email</div>
             <div>Роль</div>
             <div>Дата</div>
-            <div>Статус</div>
           </div>
-          <!-- Row 1 -->
-          <div class="dash-list__row">
-            <div data-label="Ім'я">Валерія О.</div>
-            <div data-label="Email">valeriia@cote-lapyx.com</div>
-            <div data-label="Роль">
-              <span class="neon-badge neon-badge--cyan">member</span>
-            </div>
-            <div class="dash-list__date" data-label="Дата">01 бер 2025</div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--published">Активний</span>
-            </div>
-          </div>
-          <!-- Row 2 -->
-          <div class="dash-list__row">
-            <div data-label="Ім'я">user_01</div>
-            <div data-label="Email">user01@example.com</div>
-            <div data-label="Роль">
-              <span class="neon-badge neon-badge--green">subscriber</span>
-            </div>
-            <div class="dash-list__date" data-label="Дата">15 квіт 2025</div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--published">Активний</span>
-            </div>
-          </div>
-          <!-- Row 3 -->
-          <div class="dash-list__row">
-            <div data-label="Ім'я">dev_neon</div>
-            <div data-label="Email">devneon@example.com</div>
-            <div data-label="Роль">
-              <span class="neon-badge neon-badge--green">subscriber</span>
-            </div>
-            <div class="dash-list__date" data-label="Дата">20 бер 2025</div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--draft">Заблокований</span>
-            </div>
-          </div>
+          <div id="admin-recent-users-body"></div>
         </div>
       </section>
       <!-- /recent registrations -->
@@ -463,155 +426,10 @@
             <div>Email</div>
             <div>Роль</div>
             <div>Зареєстрований</div>
-            <div>Статус</div>
-            <div>Дії</div>
           </div>
-          <div class="dash-list__row">
-            <div class="dash-list__title" data-label="Ім'я">Сергій К.</div>
-            <div data-label="Email">hiljsv@gmail.com</div>
-            <div data-label="Роль">
-              <span class="neon-badge neon-badge--magenta">admin</span>
-            </div>
-            <div class="dash-list__date" data-label="Зареєстрований">
-              01 лют 2025
-            </div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--published">Активний</span>
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--ghost btn--sm"
-                aria-label="Редагувати Сергій К."
-              >
-                Редагувати
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Заблокувати Сергій К."
-              >
-                Заблокувати
-              </button>
-            </div>
-          </div>
-          <div class="dash-list__row">
-            <div class="dash-list__title" data-label="Ім'я">Андрій М.</div>
-            <div data-label="Email">andrii@cote-lapyx.com</div>
-            <div data-label="Роль">
-              <span class="neon-badge neon-badge--cyan">member</span>
-            </div>
-            <div class="dash-list__date" data-label="Зареєстрований">
-              15 лют 2025
-            </div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--published">Активний</span>
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--ghost btn--sm"
-                aria-label="Редагувати Андрій М."
-              >
-                Редагувати
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Заблокувати Андрій М."
-              >
-                Заблокувати
-              </button>
-            </div>
-          </div>
-          <div class="dash-list__row">
-            <div class="dash-list__title" data-label="Ім'я">Валерія О.</div>
-            <div data-label="Email">valeriia@cote-lapyx.com</div>
-            <div data-label="Роль">
-              <span class="neon-badge neon-badge--cyan">member</span>
-            </div>
-            <div class="dash-list__date" data-label="Зареєстрований">
-              01 бер 2025
-            </div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--published">Активний</span>
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--ghost btn--sm"
-                aria-label="Редагувати Валерія О."
-              >
-                Редагувати
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Заблокувати Валерія О."
-              >
-                Заблокувати
-              </button>
-            </div>
-          </div>
-          <div class="dash-list__row">
-            <div class="dash-list__title" data-label="Ім'я">user_01</div>
-            <div data-label="Email">user01@example.com</div>
-            <div data-label="Роль">
-              <span class="neon-badge neon-badge--green">subscriber</span>
-            </div>
-            <div class="dash-list__date" data-label="Зареєстрований">
-              15 квіт 2025
-            </div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--published">Активний</span>
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--ghost btn--sm"
-                aria-label="Редагувати user_01"
-              >
-                Редагувати
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Заблокувати user_01"
-              >
-                Заблокувати
-              </button>
-            </div>
-          </div>
-          <div class="dash-list__row">
-            <div class="dash-list__title" data-label="Ім'я">dev_neon</div>
-            <div data-label="Email">devneon@example.com</div>
-            <div data-label="Роль">
-              <span class="neon-badge neon-badge--green">subscriber</span>
-            </div>
-            <div class="dash-list__date" data-label="Зареєстрований">
-              20 бер 2025
-            </div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--draft">Заблокований</span>
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--ghost btn--sm"
-                aria-label="Редагувати dev_neon"
-              >
-                Редагувати
-              </button>
-              <button
-                type="button"
-                class="btn btn--cyan btn--sm"
-                aria-label="Розблокувати dev_neon"
-              >
-                Розблокувати
-              </button>
-            </div>
-          </div>
+          <div id="admin-users-body"></div>
         </div>
+        <div class="dash-pagination" id="admin-users-pagination"></div>
       </section>
     </div>
     <!-- /panel: users -->
@@ -632,163 +450,13 @@
           <div class="dash-list__head" aria-hidden="true">
             <div>Заголовок</div>
             <div>Автор</div>
-            <div>Категорія</div>
             <div>Дата</div>
             <div>Статус</div>
             <div>Дії</div>
           </div>
-          <div class="dash-list__row">
-            <div class="dash-list__title" data-label="Заголовок">
-              Cyberpunk SCSS: neon-система
-            </div>
-            <div data-label="Автор">Сергій К.</div>
-            <div data-label="Категорія">
-              <span class="neon-badge neon-badge--cyan">Frontend</span>
-            </div>
-            <div class="dash-list__date" data-label="Дата">10 квіт 2025</div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--published"
-                >Опубліковано</span
-              >
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--ghost btn--sm"
-                aria-label="Зняти з публікації: Cyberpunk SCSS"
-              >
-                Зняти
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Видалити: Cyberpunk SCSS"
-              >
-                Видалити
-              </button>
-            </div>
-          </div>
-          <div class="dash-list__row">
-            <div class="dash-list__title" data-label="Заголовок">
-              REST API: практичний гайд
-            </div>
-            <div data-label="Автор">Андрій М.</div>
-            <div data-label="Категорія">
-              <span class="neon-badge neon-badge--magenta">Backend</span>
-            </div>
-            <div class="dash-list__date" data-label="Дата">22 бер 2025</div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--published"
-                >Опубліковано</span
-              >
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--ghost btn--sm"
-                aria-label="Зняти з публікації: REST API"
-              >
-                Зняти
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Видалити: REST API"
-              >
-                Видалити
-              </button>
-            </div>
-          </div>
-          <div class="dash-list__row">
-            <div class="dash-list__title" data-label="Заголовок">
-              Brand Kit: cyberpunk-система
-            </div>
-            <div data-label="Автор">Валерія О.</div>
-            <div data-label="Категорія">
-              <span class="neon-badge neon-badge--green">Design</span>
-            </div>
-            <div class="dash-list__date" data-label="Дата">05 бер 2025</div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--draft">Чернетка</span>
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--cyan btn--sm"
-                aria-label="Опублікувати: Brand Kit"
-              >
-                Опублікувати
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Видалити: Brand Kit"
-              >
-                Видалити
-              </button>
-            </div>
-          </div>
-          <div class="dash-list__row">
-            <div class="dash-list__title" data-label="Заголовок">
-              Vite + SCSS: швидкий старт
-            </div>
-            <div data-label="Автор">Сергій К.</div>
-            <div data-label="Категорія">
-              <span class="neon-badge neon-badge--cyan">Frontend</span>
-            </div>
-            <div class="dash-list__date" data-label="Дата">18 лют 2025</div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--published"
-                >Опубліковано</span
-              >
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--ghost btn--sm"
-                aria-label="Зняти з публікації: Vite + SCSS"
-              >
-                Зняти
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Видалити: Vite + SCSS"
-              >
-                Видалити
-              </button>
-            </div>
-          </div>
-          <div class="dash-list__row">
-            <div class="dash-list__title" data-label="Заголовок">
-              Docker для фронтендера
-            </div>
-            <div data-label="Автор">Андрій М.</div>
-            <div data-label="Категорія">
-              <span class="neon-badge neon-badge--magenta">DevOps</span>
-            </div>
-            <div class="dash-list__date" data-label="Дата">02 лют 2025</div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--draft">Чернетка</span>
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--cyan btn--sm"
-                aria-label="Опублікувати: Docker для фронтендера"
-              >
-                Опублікувати
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Видалити: Docker для фронтендера"
-              >
-                Видалити
-              </button>
-            </div>
-          </div>
+          <div id="admin-posts-body"></div>
         </div>
+        <div class="dash-pagination" id="admin-posts-pagination"></div>
       </section>
     </div>
     <!-- /panel: posts -->
@@ -811,95 +479,10 @@
             <div>Автор</div>
             <div>Технології</div>
             <div>Статус</div>
-            <div>Дії</div>
           </div>
-          <div class="dash-list__row">
-            <div class="dash-list__title" data-label="Назва">
-              cote-lapyx.com
-            </div>
-            <div data-label="Автор">Сергій К.</div>
-            <div class="dash-list__tech" data-label="Технології">
-              <span class="neon-badge neon-badge--cyan">HTML</span>
-              <span class="neon-badge neon-badge--magenta">SCSS</span>
-              <span class="neon-badge neon-badge--green">JS</span>
-            </div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--published">Активний</span>
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--ghost btn--sm"
-                aria-label="Редагувати cote-lapyx.com"
-              >
-                Редагувати
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Видалити cote-lapyx.com"
-              >
-                Видалити
-              </button>
-            </div>
-          </div>
-          <div class="dash-list__row">
-            <div class="dash-list__title" data-label="Назва">
-              Component Library
-            </div>
-            <div data-label="Автор">Сергій К.</div>
-            <div class="dash-list__tech" data-label="Технології">
-              <span class="neon-badge neon-badge--cyan">SCSS</span>
-              <span class="neon-badge neon-badge--magenta">Storybook</span>
-            </div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--draft">В розробці</span>
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--ghost btn--sm"
-                aria-label="Редагувати Component Library"
-              >
-                Редагувати
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Видалити Component Library"
-              >
-                Видалити
-              </button>
-            </div>
-          </div>
-          <div class="dash-list__row">
-            <div class="dash-list__title" data-label="Назва">API Gateway</div>
-            <div data-label="Автор">Андрій М.</div>
-            <div class="dash-list__tech" data-label="Технології">
-              <span class="neon-badge neon-badge--magenta">Node.js</span>
-              <span class="neon-badge neon-badge--cyan">REST</span>
-            </div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--published">Активний</span>
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--ghost btn--sm"
-                aria-label="Редагувати API Gateway"
-              >
-                Редагувати
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Видалити API Gateway"
-              >
-                Видалити
-              </button>
-            </div>
-          </div>
+          <div id="admin-projects-body"></div>
         </div>
+        <div class="dash-pagination" id="admin-projects-pagination"></div>
       </section>
     </div>
     <!-- /panel: projects -->
@@ -913,7 +496,7 @@
           <h2 class="dash-section__title">Модерація коментарів</h2>
         </div>
 
-        <!-- Filter tabs: Всі / Очікують / Спам -->
+        <!-- Filter tabs: Всі / Очікують / Відхилені -->
         <div
           class="admin-filter-tabs"
           role="tablist"
@@ -924,7 +507,7 @@
             class="admin-filter-tab is-active"
             role="tab"
             aria-selected="true"
-            data-filter="all"
+            data-comment-filter=""
           >
             Всі
           </button>
@@ -933,7 +516,7 @@
             class="admin-filter-tab"
             role="tab"
             aria-selected="false"
-            data-filter="pending"
+            data-comment-filter="PENDING"
           >
             Очікують
           </button>
@@ -942,9 +525,9 @@
             class="admin-filter-tab"
             role="tab"
             aria-selected="false"
-            data-filter="spam"
+            data-comment-filter="REJECTED"
           >
-            Спам
+            Відхилені
           </button>
         </div>
 
@@ -960,114 +543,9 @@
             <div>Статус</div>
             <div>Дії</div>
           </div>
-          <div class="dash-list__row">
-            <div data-label="Автор">user_01</div>
-            <div data-label="Коментар">Відмінна стаття!</div>
-            <div class="dash-list__title" data-label="Пост">Cyberpunk SCSS</div>
-            <div class="dash-list__date" data-label="Дата">12 квіт</div>
-            <div data-label="Статус">
-              <span class="admin-status admin-status--approved">Схвалено</span>
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--ghost btn--sm"
-                aria-label="Відхилити коментар user_01"
-              >
-                Відхилити
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Видалити коментар user_01"
-              >
-                Видалити
-              </button>
-            </div>
-          </div>
-          <div class="dash-list__row">
-            <div data-label="Автор">dev_neon</div>
-            <div data-label="Коментар">Можна приклад?</div>
-            <div class="dash-list__title" data-label="Пост">Cyberpunk SCSS</div>
-            <div class="dash-list__date" data-label="Дата">11 квіт</div>
-            <div data-label="Статус">
-              <span class="admin-status admin-status--approved">Схвалено</span>
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--ghost btn--sm"
-                aria-label="Відхилити коментар dev_neon"
-              >
-                Відхилити
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Видалити коментар dev_neon"
-              >
-                Видалити
-              </button>
-            </div>
-          </div>
-          <div class="dash-list__row">
-            <div data-label="Автор">anon_42</div>
-            <div data-label="Коментар">купити підписку…</div>
-            <div class="dash-list__title" data-label="Пост">REST API</div>
-            <div class="dash-list__date" data-label="Дата">09 квіт</div>
-            <div data-label="Статус">
-              <span class="admin-status admin-status--spam">Спам</span>
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--cyan btn--sm"
-                aria-label="Схвалити коментар anon_42"
-              >
-                Схвалити
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Видалити коментар anon_42"
-              >
-                Видалити
-              </button>
-            </div>
-          </div>
-          <div class="dash-list__row">
-            <div data-label="Автор">alphacode</div>
-            <div data-label="Коментар">Дуже корисно!</div>
-            <div class="dash-list__title" data-label="Пост">REST API</div>
-            <div class="dash-list__date" data-label="Дата">24 бер</div>
-            <div data-label="Статус">
-              <span class="admin-status admin-status--pending">Очікує</span>
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--cyan btn--sm"
-                aria-label="Схвалити коментар alphacode"
-              >
-                Схвалити
-              </button>
-              <button
-                type="button"
-                class="btn btn--ghost btn--sm"
-                aria-label="Відхилити коментар alphacode"
-              >
-                Відхилити
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Видалити коментар alphacode"
-              >
-                Видалити
-              </button>
-            </div>
-          </div>
+          <div id="admin-comments-body"></div>
         </div>
+        <div class="dash-pagination" id="admin-comments-pagination"></div>
       </section>
     </div>
     <!-- /panel: comments -->

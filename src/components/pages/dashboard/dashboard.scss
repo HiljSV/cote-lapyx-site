@@ -772,6 +772,295 @@
   }
 }
 
+// -----------------------------------------------------------------------------
+// Posts filter bar
+// -----------------------------------------------------------------------------
+
+.dash-posts-filter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+// Cyberpunk-styled select for filter controls
+.dash-filter-select {
+  padding: 8px 12px;
+  background: rgba($bg-dark, 0.9);
+  border: 1px solid $border-cyan;
+  border-radius: 4px;
+  color: $text-secondary;
+  font-family: $fontHeading;
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  appearance: none;
+  // Arrow chevron via background svg
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a6080' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+
+  option {
+    background: $bg-surface;
+    color: $text-primary;
+  }
+
+  &:hover {
+    border-color: rgba($neon-cyan, 0.5);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $neon-cyan;
+    box-shadow: 0 0 6px rgba($neon-cyan, 0.35);
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Pagination
+// -----------------------------------------------------------------------------
+
+.dash-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+
+  // Individual page button
+  &__btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    background: transparent;
+    border: 1px solid $border-cyan;
+    border-radius: 4px;
+    color: $text-secondary;
+    font-family: $fontHeading;
+    font-size: 13px;
+    cursor: pointer;
+    transition:
+      color 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease;
+
+    &:hover {
+      color: $neon-cyan;
+      border-color: rgba($neon-cyan, 0.5);
+    }
+
+    &:focus-visible {
+      outline: 2px solid $neon-cyan;
+      outline-offset: 2px;
+    }
+
+    // Active / current page
+    &.is-active {
+      color: $neon-cyan;
+      border-color: $neon-cyan;
+      background: rgba($neon-cyan, 0.08);
+      box-shadow: 0 0 8px rgba($neon-cyan, 0.25);
+      pointer-events: none;
+    }
+
+    // Disabled state (prev/next at boundary)
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Post create / edit modal
+// -----------------------------------------------------------------------------
+
+// Overlay wrapper — fixed, centred, hidden via [hidden] attr
+.dash-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &[hidden] {
+    display: none;
+  }
+
+  // Blurred dark backdrop
+  &__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+  }
+
+  // The dialog box itself — on top of backdrop
+  &__box {
+    position: relative;
+    z-index: 1;
+    @include glass-card;
+    width: 90vw;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 32px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba($neon-cyan, 0.2) transparent;
+
+    @media (max-width: toEm($mobile)) {
+      padding: 24px 20px;
+    }
+  }
+
+  // Header: title + close button
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  // Modal title — neon cyan
+  &__title {
+    font-family: $fontHeading;
+    font-size: 18px;
+    font-weight: 700;
+    color: $neon-cyan;
+    text-shadow: 0 0 8px rgba($neon-cyan, 0.5);
+  }
+
+  // Close ✕ button
+  &__close {
+    background: transparent;
+    border: none;
+    color: $text-muted;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: $neon-cyan;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $neon-cyan;
+      outline-offset: 2px;
+    }
+  }
+
+  // Field wrapper
+  &__field {
+    margin-bottom: 16px;
+  }
+
+  // Label above each input
+  &__label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: $text-muted;
+    margin-bottom: 6px;
+  }
+
+  // Input / select / textarea — shared base
+  &__input {
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(0, 14, 26, 0.6);
+    border: 1px solid $border-cyan;
+    border-radius: 4px;
+    color: $text-primary;
+    font-family: $fontFamily;
+    font-size: 14px;
+    outline: none;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+
+    &::placeholder {
+      color: $text-muted;
+    }
+
+    &:focus {
+      border-color: $neon-cyan;
+      box-shadow: 0 0 6px rgba($neon-cyan, 0.35);
+    }
+
+    // Style <select> options
+    option {
+      background: $bg-surface;
+      color: $text-primary;
+    }
+  }
+
+  // Large textarea — post content
+  &__textarea {
+    resize: vertical;
+    min-height: 160px;
+    line-height: 1.6;
+  }
+
+  // Small textarea — excerpt
+  &__textarea--sm {
+    resize: vertical;
+    min-height: 60px;
+    line-height: 1.6;
+  }
+
+  // Inline validation error
+  &__error {
+    display: block;
+    color: $neon-magenta;
+    font-size: 12px;
+    margin-top: 4px;
+    min-height: 16px; // reserve space so layout doesn't jump
+  }
+
+  // Action buttons row
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  // Submit feedback (success / error)
+  &__feedback {
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+
+    &[hidden] {
+      display: none;
+    }
+
+    &--success {
+      background: rgba($neon-green, 0.08);
+      border: 1px solid rgba($neon-green, 0.3);
+      color: $neon-green;
+    }
+
+    &--error {
+      background: rgba($neon-magenta, 0.08);
+      border: 1px solid rgba($neon-magenta, 0.3);
+      color: $neon-magenta;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
 // Admin panel link (shown only to admins)
 .dash-sidebar__admin-link {
   display: flex;

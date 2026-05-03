@@ -361,90 +361,46 @@
 
     <!-- ===== SECTION: POSTS ===== -->
     <div class="dash-section-panel" data-panel="posts" hidden>
-      <section class="dash-section" aria-label="Всі публікації">
+      <section class="dash-section">
         <div class="dash-section__header">
           <h2 class="dash-section__title">Всі публікації</h2>
+          <button
+            type="button"
+            class="btn btn--cyan btn--sm"
+            id="post-create-btn"
+          >
+            + Нова публікація
+          </button>
         </div>
-        <div
-          class="dash-list dash-list--posts"
-          aria-label="Таблиця всіх публікацій"
-        >
+
+        <!-- Filter bar -->
+        <div class="dash-posts-filter">
+          <select id="post-filter-status" class="dash-filter-select">
+            <option value="">Всі статуси</option>
+            <option value="PUBLISHED">Опубліковані</option>
+            <option value="DRAFT">Чернетки</option>
+            <option value="ARCHIVED">Архів</option>
+          </select>
+        </div>
+
+        <!-- Posts list -->
+        <div class="dash-list dash-list--posts" aria-label="Таблиця публікацій">
           <!-- Header row — hidden on mobile -->
           <div class="dash-list__head" aria-hidden="true">
             <div>Заголовок</div>
-            <div>Категорія</div>
+            <div>Тип</div>
             <div>Дата</div>
             <div>Статус</div>
             <div>Дії</div>
           </div>
-          <!-- Row 1 -->
-          <div class="dash-list__row">
-            <div class="dash-list__title" data-label="Заголовок">
-              Cyberpunk SCSS: neon-система
-            </div>
-            <div data-label="Категорія">
-              <span class="neon-badge neon-badge--cyan">Frontend</span>
-            </div>
-            <div class="dash-list__date" data-label="Дата">10 квіт 2025</div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--published"
-                >Опубліковано</span
-              >
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button type="button" class="btn btn--ghost btn--sm">
-                Редагувати
-              </button>
-              <button type="button" class="btn btn--magenta btn--sm">
-                Видалити
-              </button>
-            </div>
-          </div>
-          <!-- Row 2 -->
-          <div class="dash-list__row">
-            <div class="dash-list__title" data-label="Заголовок">
-              REST API: практичний гайд
-            </div>
-            <div data-label="Категорія">
-              <span class="neon-badge neon-badge--magenta">Backend</span>
-            </div>
-            <div class="dash-list__date" data-label="Дата">22 бер 2025</div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--published"
-                >Опубліковано</span
-              >
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button type="button" class="btn btn--ghost btn--sm">
-                Редагувати
-              </button>
-              <button type="button" class="btn btn--magenta btn--sm">
-                Видалити
-              </button>
-            </div>
-          </div>
-          <!-- Row 3 -->
-          <div class="dash-list__row">
-            <div class="dash-list__title" data-label="Заголовок">
-              Brand Kit: cyberpunk-система
-            </div>
-            <div data-label="Категорія">
-              <span class="neon-badge neon-badge--green">Design</span>
-            </div>
-            <div class="dash-list__date" data-label="Дата">05 бер 2025</div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--draft">Чернетка</span>
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button type="button" class="btn btn--ghost btn--sm">
-                Редагувати
-              </button>
-              <button type="button" class="btn btn--magenta btn--sm">
-                Видалити
-              </button>
-            </div>
+          <!-- Rows injected by JS -->
+          <div id="posts-list-body">
+            <div class="dash-list__empty">Завантаження...</div>
           </div>
         </div>
+
+        <!-- Pagination -->
+        <div class="dash-pagination" id="posts-pagination"></div>
       </section>
     </div>
     <!-- /posts panel -->
@@ -454,6 +410,21 @@
       <section class="dash-section" aria-label="Всі проекти">
         <div class="dash-section__header">
           <h2 class="dash-section__title">Всі проекти</h2>
+          <button
+            type="button"
+            class="btn btn--cyan btn--sm"
+            id="project-create-btn"
+          >
+            + Новий проект
+          </button>
+        </div>
+        <div class="dash-posts-filter">
+          <select id="project-filter-status" class="dash-filter-select">
+            <option value="">Всі статуси</option>
+            <option value="DRAFT">Чернетка</option>
+            <option value="PUBLISHED">Опубліковано</option>
+            <option value="ARCHIVED">Архів</option>
+          </select>
         </div>
         <div
           class="dash-list dash-list--projects"
@@ -466,50 +437,9 @@
             <div>Статус</div>
             <div>Дії</div>
           </div>
-          <!-- Row 1 -->
-          <div class="dash-list__row">
-            <div class="dash-list__title" data-label="Назва">
-              cote-lapyx.com
-            </div>
-            <div class="dash-list__tech" data-label="Технології">
-              <span class="neon-badge neon-badge--cyan">HTML</span>
-              <span class="neon-badge neon-badge--magenta">SCSS</span>
-              <span class="neon-badge neon-badge--green">JS</span>
-            </div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--published">Активний</span>
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button type="button" class="btn btn--ghost btn--sm">
-                Редагувати
-              </button>
-              <button type="button" class="btn btn--magenta btn--sm">
-                Видалити
-              </button>
-            </div>
-          </div>
-          <!-- Row 2 -->
-          <div class="dash-list__row">
-            <div class="dash-list__title" data-label="Назва">
-              Component Library
-            </div>
-            <div class="dash-list__tech" data-label="Технології">
-              <span class="neon-badge neon-badge--cyan">SCSS</span>
-              <span class="neon-badge neon-badge--magenta">Storybook</span>
-            </div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--draft">В розробці</span>
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button type="button" class="btn btn--ghost btn--sm">
-                Редагувати
-              </button>
-              <button type="button" class="btn btn--magenta btn--sm">
-                Видалити
-              </button>
-            </div>
-          </div>
+          <div id="projects-list-body"></div>
         </div>
+        <div class="dash-pagination" id="projects-pagination"></div>
       </section>
     </div>
     <!-- /projects panel -->
@@ -913,5 +843,298 @@ Frontend Developer із захопленням до cyberpunk-естетики �
     <!-- /profile panel -->
   </main>
   <!-- /dash-main -->
+
+  <!-- ===== POST CREATE / EDIT MODAL ===== -->
+  <div
+    class="dash-modal"
+    id="post-modal"
+    hidden
+    aria-modal="true"
+    role="dialog"
+    aria-labelledby="post-modal-title"
+  >
+    <div class="dash-modal__backdrop" id="post-modal-backdrop"></div>
+    <div class="dash-modal__box">
+      <div class="dash-modal__header">
+        <h3 class="dash-modal__title" id="post-modal-title">Нова публікація</h3>
+        <button
+          type="button"
+          class="dash-modal__close"
+          id="post-modal-close"
+          aria-label="Закрити"
+        >
+          ✕
+        </button>
+      </div>
+
+      <form class="dash-modal__form" id="post-form" novalidate>
+        <!-- Hidden slug — populated when editing -->
+        <input type="hidden" id="post-edit-slug" />
+
+        <!-- Title -->
+        <div class="dash-modal__field">
+          <label class="dash-modal__label" for="post-title">Заголовок *</label>
+          <input
+            class="dash-modal__input"
+            type="text"
+            id="post-title"
+            name="title"
+            maxlength="255"
+            required
+          />
+          <span class="dash-modal__error" id="post-title-error"></span>
+        </div>
+
+        <!-- Type -->
+        <div class="dash-modal__field">
+          <label class="dash-modal__label" for="post-type">Тип *</label>
+          <select class="dash-modal__input" id="post-type" name="type" required>
+            <option value="GENERAL">Загальне (для команди)</option>
+            <option value="PERSONAL">Особисте</option>
+          </select>
+        </div>
+
+        <!-- Excerpt -->
+        <div class="dash-modal__field">
+          <label class="dash-modal__label" for="post-excerpt"
+            >Короткий опис</label
+          >
+          <textarea
+            class="dash-modal__input dash-modal__textarea--sm"
+            id="post-excerpt"
+            name="excerpt"
+            maxlength="500"
+            rows="2"
+          ></textarea>
+        </div>
+
+        <!-- Content -->
+        <div class="dash-modal__field">
+          <label class="dash-modal__label" for="post-content">Зміст *</label>
+          <textarea
+            class="dash-modal__input dash-modal__textarea"
+            id="post-content"
+            name="content"
+            rows="8"
+            required
+          ></textarea>
+          <span class="dash-modal__error" id="post-content-error"></span>
+        </div>
+
+        <!-- Cover image URL -->
+        <div class="dash-modal__field">
+          <label class="dash-modal__label" for="post-cover"
+            >Обкладинка (URL)</label
+          >
+          <input
+            class="dash-modal__input"
+            type="url"
+            id="post-cover"
+            name="coverImage"
+          />
+        </div>
+
+        <!-- Status -->
+        <div class="dash-modal__field">
+          <label class="dash-modal__label" for="post-status">Статус</label>
+          <select class="dash-modal__input" id="post-status" name="status">
+            <option value="DRAFT">Чернетка</option>
+            <option value="PUBLISHED">Опубліковано</option>
+            <option value="ARCHIVED">Архів</option>
+          </select>
+        </div>
+
+        <!-- Actions -->
+        <div class="dash-modal__actions">
+          <button
+            type="button"
+            class="btn btn--ghost btn--sm"
+            id="post-modal-cancel"
+          >
+            Скасувати
+          </button>
+          <button
+            type="submit"
+            class="btn btn--cyan btn--sm"
+            id="post-form-submit"
+          >
+            Зберегти
+          </button>
+        </div>
+
+        <!-- Feedback (success / error) -->
+        <div
+          class="dash-modal__feedback"
+          id="post-form-feedback"
+          hidden
+          role="alert"
+          aria-live="polite"
+        ></div>
+      </form>
+    </div>
+  </div>
+  <!-- /post-modal -->
+
+  <!-- ===== PROJECT MODAL ===== -->
+  <div
+    class="dash-modal"
+    id="project-modal"
+    hidden
+    aria-modal="true"
+    role="dialog"
+    aria-labelledby="project-modal-title"
+  >
+    <div class="dash-modal__backdrop" id="project-modal-backdrop"></div>
+    <div class="dash-modal__box">
+      <div class="dash-modal__header">
+        <h3 class="dash-modal__title" id="project-modal-title">Новий проект</h3>
+        <button
+          type="button"
+          class="dash-modal__close"
+          id="project-modal-close"
+          aria-label="Закрити"
+        >
+          ✕
+        </button>
+      </div>
+
+      <form class="dash-modal__form" id="project-form" novalidate>
+        <!-- Hidden slug — populated when editing -->
+        <input type="hidden" id="project-edit-slug" />
+
+        <!-- Title -->
+        <div class="dash-modal__field">
+          <label class="dash-modal__label" for="project-title">Назва *</label>
+          <input
+            class="dash-modal__input"
+            type="text"
+            id="project-title"
+            name="title"
+            maxlength="255"
+            required
+          />
+          <span class="dash-modal__error" id="project-title-error"></span>
+        </div>
+
+        <!-- Short description -->
+        <div class="dash-modal__field">
+          <label class="dash-modal__label" for="project-short-desc"
+            >Короткий опис *</label
+          >
+          <textarea
+            class="dash-modal__input dash-modal__textarea--sm"
+            id="project-short-desc"
+            name="shortDescription"
+            maxlength="500"
+            rows="2"
+            required
+          ></textarea>
+          <span class="dash-modal__error" id="project-short-desc-error"></span>
+        </div>
+
+        <!-- Full description -->
+        <div class="dash-modal__field">
+          <label class="dash-modal__label" for="project-full-desc"
+            >Повний опис</label
+          >
+          <textarea
+            class="dash-modal__input dash-modal__textarea"
+            id="project-full-desc"
+            name="fullDescription"
+            rows="6"
+          ></textarea>
+        </div>
+
+        <!-- Technologies (comma-separated) -->
+        <div class="dash-modal__field">
+          <label class="dash-modal__label" for="project-technologies"
+            >Технології (через кому)</label
+          >
+          <input
+            class="dash-modal__input"
+            type="text"
+            id="project-technologies"
+            name="technologies"
+            placeholder="HTML, SCSS, JS, Spring Boot"
+          />
+        </div>
+
+        <!-- Cover image URL -->
+        <div class="dash-modal__field">
+          <label class="dash-modal__label" for="project-cover"
+            >Обкладинка (URL)</label
+          >
+          <input
+            class="dash-modal__input"
+            type="url"
+            id="project-cover"
+            name="coverImage"
+          />
+        </div>
+
+        <!-- Project URL -->
+        <div class="dash-modal__field">
+          <label class="dash-modal__label" for="project-url">Demo URL</label>
+          <input
+            class="dash-modal__input"
+            type="url"
+            id="project-url"
+            name="projectUrl"
+          />
+        </div>
+
+        <!-- GitHub URL -->
+        <div class="dash-modal__field">
+          <label class="dash-modal__label" for="project-github"
+            >GitHub URL</label
+          >
+          <input
+            class="dash-modal__input"
+            type="url"
+            id="project-github"
+            name="githubUrl"
+          />
+        </div>
+
+        <!-- Status -->
+        <div class="dash-modal__field">
+          <label class="dash-modal__label" for="project-status">Статус</label>
+          <select class="dash-modal__input" id="project-status" name="status">
+            <option value="DRAFT">Чернетка</option>
+            <option value="PUBLISHED">Опубліковано</option>
+            <option value="ARCHIVED">Архів</option>
+          </select>
+        </div>
+
+        <!-- Actions -->
+        <div class="dash-modal__actions">
+          <button
+            type="button"
+            class="btn btn--ghost btn--sm"
+            id="project-modal-cancel"
+          >
+            Скасувати
+          </button>
+          <button
+            type="submit"
+            class="btn btn--cyan btn--sm"
+            id="project-form-submit"
+          >
+            Зберегти
+          </button>
+        </div>
+
+        <!-- Feedback (success / error) -->
+        <div
+          class="dash-modal__feedback"
+          id="project-form-feedback"
+          hidden
+          role="alert"
+          aria-live="polite"
+        ></div>
+      </form>
+    </div>
+  </div>
+  <!-- /project-modal -->
 </div>
 <!-- /dashboard -->

@@ -25,6 +25,13 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  // Shared state — set once /users/me resolves
+  let myUserId = null;
+  let postsPage = 0;
+  let postsStatusFilter = "";
+  let projectsPage = 0;
+  let projectsStatusFilter = "";
+
   // Load user data: reveal admin link + populate profile form + update sidebar
   (async () => {
     try {
@@ -60,9 +67,16 @@ document.addEventListener("DOMContentLoaded", () => {
         initEl.textContent = initials.toUpperCase();
       }
 
+      myUserId = user.id;
+
       // Load overview stats + recent content for OWNER users
       if (user.role === "OWNER") {
         loadOverviewStats(user.id);
+      }
+
+      // If user navigated to posts panel before this fetch resolved
+      if (document.querySelector('[data-panel="posts"]:not([hidden])')) {
+        loadPosts(0, postsStatusFilter);
       }
     } catch (_) {}
   })();
@@ -154,6 +168,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const section = link.dataset.section;
       if (!section) return;
       activateSection(section);
+      if (section === "posts" && myUserId) {
+        loadPosts(0, postsStatusFilter);
+      }
+      if (section === "projects" && myUserId) {
+        loadProjects(0, projectsStatusFilter);
+      }
       // Close sidebar on mobile after navigation
       if (window.innerWidth <= 991.98) {
         closeSidebar();
@@ -482,4 +502,505 @@ document.addEventListener("DOMContentLoaded", () => {
       pwdSubmitBtn.innerHTML = originalHTML;
     }
   });
+
+  // ---------------------------------------------------------------------------
+  // Posts CRUD — full list panel
+  // ---------------------------------------------------------------------------
+
+  function postListRowHtml(post) {
+    const [badgeColor, typeLabel] = TYPE_BADGE[post.type] || [
+      "cyan",
+      post.type,
+    ];
+    const sClass = STATUS_CLASS[post.status] || "draft";
+    const sLabel = STATUS_LABEL[post.status] || post.status;
+    return `<div class="dash-list__row" data-slug="${escHtml(post.slug)}">
+      <div class="dash-list__title" data-label="Заголовок">${escHtml(post.title)}</div>
+      <div data-label="Категорія"><span class="neon-badge neon-badge--${badgeColor}">${typeLabel}</span></div>
+      <div class="dash-list__date" data-label="Дата">${fmtDate(post.createdAt)}</div>
+      <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
+      <div class="dash-list__actions" data-label="Дії">
+        <button type="button" class="btn btn--ghost btn--sm" data-action="edit" data-slug="${escHtml(post.slug)}">Редагувати</button>
+        <button type="button" class="btn btn--magenta btn--sm" data-action="delete" data-slug="${escHtml(post.slug)}" data-title="${escHtml(post.title)}">Видалити</button>
+      </div>
+    </div>`;
+  }
+
+  async function loadPosts(page, status) {
+    postsPage = page;
+    postsStatusFilter = status;
+    const listBody = document.getElementById("posts-list-body");
+    const pagination = document.getElementById("posts-pagination");
+    if (!listBody) return;
+
+    listBody.innerHTML = '<div class="dash-list__empty">Завантаження...</div>';
+    if (pagination) pagination.innerHTML = "";
+
+    const statusParam = status ? `&status=${status}` : "";
+    try {
+      const res = await fetchWithAuth(
+        `${API}/admin/posts?authorId=${myUserId}&size=20&sort=createdAt,desc&page=${page}${statusParam}`,
+      );
+      if (!res.ok) {
+        listBody.innerHTML =
+          '<div class="dash-list__empty">Помилка завантаження</div>';
+        return;
+      }
+      const data = await res.json();
+      const rows = (data.content || []).map(postListRowHtml).join("");
+      listBody.innerHTML =
+        rows || '<div class="dash-list__empty">Публікацій ще немає</div>';
+
+      // Render pagination buttons when there's more than one page
+      if (pagination && data.page && data.page.totalPages > 1) {
+        const { number, totalPages } = data.page;
+        pagination.innerHTML = Array.from({ length: totalPages }, (_, i) => {
+          const active = i === number ? " is-active" : "";
+          return `<button type="button" class="dash-pagination__btn${active}" data-page="${i}">${i + 1}</button>`;
+        }).join("");
+      }
+    } catch (err) {
+      console.error("Posts load error:", err);
+      listBody.innerHTML =
+        '<div class="dash-list__empty">Помилка завантаження</div>';
+    }
+  }
+
+  // Modal helpers
+  const postModal = document.getElementById("post-modal");
+
+  function openPostModal(slug) {
+    const form = document.getElementById("post-form");
+    const titleEl = document.getElementById("post-modal-title");
+    const feedback = document.getElementById("post-form-feedback");
+    form?.reset();
+    if (feedback) {
+      feedback.textContent = "";
+      feedback.setAttribute("hidden", "");
+    }
+    document.getElementById("post-edit-slug").value = slug || "";
+    if (titleEl)
+      titleEl.textContent = slug ? "Редагування публікації" : "Нова публікація";
+    postModal?.removeAttribute("hidden");
+    document.body.style.overflow = "hidden";
+
+    if (slug) {
+      fetchWithAuth(`${API}/admin/posts/${slug}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((post) => {
+          if (!post) return;
+          const setField = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.value = val ?? "";
+          };
+          setField("post-title", post.title);
+          setField("post-type", post.type);
+          setField("post-excerpt", post.excerpt);
+          setField("post-content", post.content);
+          setField("post-cover", post.coverImage);
+          setField("post-status", post.status);
+        })
+        .catch(() => {});
+    }
+  }
+
+  function closePostModal() {
+    postModal?.setAttribute("hidden", "");
+    document.body.style.overflow = "";
+  }
+
+  async function handlePostSubmit(e) {
+    e.preventDefault();
+    const slug = document.getElementById("post-edit-slug").value;
+    const feedback = document.getElementById("post-form-feedback");
+    const submitBtn = document.getElementById("post-form-submit");
+
+    // Client-side validation
+    const title = document.getElementById("post-title").value.trim();
+    const content = document.getElementById("post-content").value.trim();
+    const titleErr = document.getElementById("post-title-error");
+    const contentErr = document.getElementById("post-content-error");
+    let valid = true;
+
+    if (titleErr) titleErr.textContent = "";
+    if (contentErr) contentErr.textContent = "";
+    if (!title) {
+      if (titleErr) titleErr.textContent = "Заголовок обовʼязковий";
+      valid = false;
+    }
+    if (!content) {
+      if (contentErr) contentErr.textContent = "Зміст обовʼязковий";
+      valid = false;
+    }
+    if (!valid) return;
+
+    const payload = {
+      title,
+      type: document.getElementById("post-type").value,
+      excerpt: document.getElementById("post-excerpt").value.trim() || null,
+      content,
+      coverImage: document.getElementById("post-cover").value.trim() || null,
+      status: document.getElementById("post-status").value,
+    };
+
+    const originalHTML = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Збереження...";
+    if (feedback) {
+      feedback.textContent = "";
+      feedback.setAttribute("hidden", "");
+    }
+
+    try {
+      const res = await fetchWithAuth(
+        slug ? `${API}/admin/posts/${slug}` : `${API}/admin/posts`,
+        {
+          method: slug ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      if (res.ok || res.status === 201) {
+        closePostModal();
+        loadPosts(postsPage, postsStatusFilter);
+        if (myUserId) loadOverviewStats(myUserId);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        const msg = err.message || "Помилка збереження. Спробуйте ще раз.";
+        if (feedback) {
+          feedback.textContent = msg;
+          feedback.className =
+            "dash-modal__feedback dash-modal__feedback--error";
+          feedback.removeAttribute("hidden");
+        }
+      }
+    } catch {
+      if (feedback) {
+        feedback.textContent = "Помилка зʼєднання.";
+        feedback.className = "dash-modal__feedback dash-modal__feedback--error";
+        feedback.removeAttribute("hidden");
+      }
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalHTML;
+    }
+  }
+
+  async function deletePost(slug, title) {
+    if (!confirm(`Видалити публікацію "${title}"?`)) return;
+    try {
+      const res = await fetchWithAuth(`${API}/admin/posts/${slug}`, {
+        method: "DELETE",
+      });
+      if (res.ok || res.status === 204) {
+        loadPosts(postsPage, postsStatusFilter);
+        if (myUserId) loadOverviewStats(myUserId);
+      } else {
+        alert("Помилка видалення. Спробуйте ще раз.");
+      }
+    } catch {
+      alert("Помилка зʼєднання.");
+    }
+  }
+
+  // Event wiring — posts panel
+  document
+    .getElementById("post-create-btn")
+    ?.addEventListener("click", () => openPostModal(null));
+  document
+    .getElementById("post-modal-close")
+    ?.addEventListener("click", closePostModal);
+  document
+    .getElementById("post-modal-cancel")
+    ?.addEventListener("click", closePostModal);
+  document
+    .getElementById("post-modal-backdrop")
+    ?.addEventListener("click", closePostModal);
+
+  document
+    .getElementById("post-filter-status")
+    ?.addEventListener("change", (e) => {
+      loadPosts(0, e.target.value);
+    });
+
+  document.getElementById("posts-list-body")?.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-action]");
+    if (!btn) return;
+    const { action, slug, title } = btn.dataset;
+    if (action === "edit") openPostModal(slug);
+    else if (action === "delete") deletePost(slug, title);
+  });
+
+  document
+    .getElementById("posts-pagination")
+    ?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-page]");
+      if (!btn) return;
+      loadPosts(Number(btn.dataset.page), postsStatusFilter);
+    });
+
+  document
+    .getElementById("post-form")
+    ?.addEventListener("submit", handlePostSubmit);
+
+  // ---------------------------------------------------------------------------
+  // Projects CRUD — full list panel
+  // ---------------------------------------------------------------------------
+
+  function projectListRowHtml(project) {
+    const techs = (project.technologies || [])
+      .slice(0, 3)
+      .map(
+        (t, i) =>
+          `<span class="neon-badge neon-badge--${TECH_COLORS[i % 3]}">${escHtml(t)}</span>`,
+      )
+      .join("");
+    const sClass = STATUS_CLASS[project.status] || "draft";
+    const sLabel = STATUS_LABEL[project.status] || project.status;
+    return `<div class="dash-list__row" data-slug="${escHtml(project.slug)}">
+      <div class="dash-list__title" data-label="Назва">${escHtml(project.title)}</div>
+      <div class="dash-list__tech" data-label="Технології">${techs || "—"}</div>
+      <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
+      <div class="dash-list__actions" data-label="Дії">
+        <button type="button" class="btn btn--ghost btn--sm" data-action="edit" data-slug="${escHtml(project.slug)}">Редагувати</button>
+        <button type="button" class="btn btn--magenta btn--sm" data-action="delete" data-slug="${escHtml(project.slug)}" data-title="${escHtml(project.title)}">Видалити</button>
+      </div>
+    </div>`;
+  }
+
+  async function loadProjects(page, status) {
+    projectsPage = page;
+    projectsStatusFilter = status;
+    const listBody = document.getElementById("projects-list-body");
+    const pagination = document.getElementById("projects-pagination");
+    if (!listBody) return;
+
+    listBody.innerHTML = '<div class="dash-list__empty">Завантаження...</div>';
+    if (pagination) pagination.innerHTML = "";
+
+    const statusParam = status ? `&status=${status}` : "";
+    try {
+      const res = await fetchWithAuth(
+        `${API}/admin/projects?authorId=${myUserId}&size=20&sort=createdAt,desc&page=${page}${statusParam}`,
+      );
+      if (!res.ok) {
+        listBody.innerHTML =
+          '<div class="dash-list__empty">Помилка завантаження</div>';
+        return;
+      }
+      const data = await res.json();
+      const rows = (data.content || []).map(projectListRowHtml).join("");
+      listBody.innerHTML =
+        rows || '<div class="dash-list__empty">Проектів ще немає</div>';
+
+      if (pagination && data.page && data.page.totalPages > 1) {
+        const { number, totalPages } = data.page;
+        pagination.innerHTML = Array.from({ length: totalPages }, (_, i) => {
+          const active = i === number ? " is-active" : "";
+          return `<button type="button" class="dash-pagination__btn${active}" data-page="${i}">${i + 1}</button>`;
+        }).join("");
+      }
+    } catch (err) {
+      console.error("Projects load error:", err);
+      listBody.innerHTML =
+        '<div class="dash-list__empty">Помилка завантаження</div>';
+    }
+  }
+
+  const projectModal = document.getElementById("project-modal");
+
+  function openProjectModal(slug) {
+    const form = document.getElementById("project-form");
+    const titleEl = document.getElementById("project-modal-title");
+    const feedback = document.getElementById("project-form-feedback");
+    form?.reset();
+    if (feedback) {
+      feedback.textContent = "";
+      feedback.setAttribute("hidden", "");
+    }
+    document.getElementById("project-edit-slug").value = slug || "";
+    if (titleEl)
+      titleEl.textContent = slug ? "Редагування проекту" : "Новий проект";
+    projectModal?.removeAttribute("hidden");
+    document.body.style.overflow = "hidden";
+
+    if (slug) {
+      fetchWithAuth(`${API}/projects/${slug}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((project) => {
+          if (!project) return;
+          const setField = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.value = val ?? "";
+          };
+          setField("project-title", project.title);
+          setField("project-short-desc", project.shortDescription);
+          setField("project-full-desc", project.fullDescription);
+          setField(
+            "project-technologies",
+            (project.technologies || []).join(", "),
+          );
+          setField("project-cover", project.coverImage);
+          setField("project-url", project.projectUrl);
+          setField("project-github", project.githubUrl);
+          setField("project-status", project.status);
+        })
+        .catch(() => {});
+    }
+  }
+
+  function closeProjectModal() {
+    projectModal?.setAttribute("hidden", "");
+    document.body.style.overflow = "";
+  }
+
+  async function handleProjectSubmit(e) {
+    e.preventDefault();
+    const slug = document.getElementById("project-edit-slug").value;
+    const feedback = document.getElementById("project-form-feedback");
+    const submitBtn = document.getElementById("project-form-submit");
+
+    const title = document.getElementById("project-title").value.trim();
+    const shortDesc = document
+      .getElementById("project-short-desc")
+      .value.trim();
+    const titleErr = document.getElementById("project-title-error");
+    const shortDescErr = document.getElementById("project-short-desc-error");
+    let valid = true;
+
+    if (titleErr) titleErr.textContent = "";
+    if (shortDescErr) shortDescErr.textContent = "";
+    if (!title) {
+      if (titleErr) titleErr.textContent = "Назва обовʼязкова";
+      valid = false;
+    }
+    if (!shortDesc) {
+      if (shortDescErr) shortDescErr.textContent = "Короткий опис обовʼязковий";
+      valid = false;
+    }
+    if (!valid) return;
+
+    const techRaw = document.getElementById("project-technologies").value;
+    const technologies = techRaw
+      ? techRaw
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : [];
+
+    const payload = {
+      title,
+      shortDescription: shortDesc,
+      fullDescription:
+        document.getElementById("project-full-desc").value.trim() || null,
+      technologies,
+      coverImage: document.getElementById("project-cover").value.trim() || null,
+      projectUrl: document.getElementById("project-url").value.trim() || null,
+      githubUrl: document.getElementById("project-github").value.trim() || null,
+      status: document.getElementById("project-status").value,
+    };
+
+    const originalHTML = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Збереження...";
+    if (feedback) {
+      feedback.textContent = "";
+      feedback.setAttribute("hidden", "");
+    }
+
+    try {
+      const res = await fetchWithAuth(
+        slug ? `${API}/projects/${slug}` : `${API}/projects`,
+        {
+          method: slug ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      if (res.ok || res.status === 201) {
+        closeProjectModal();
+        loadProjects(projectsPage, projectsStatusFilter);
+        if (myUserId) loadOverviewStats(myUserId);
+      } else {
+        const err = await res.json().catch(() => ({}));
+        const msg = err.message || "Помилка збереження. Спробуйте ще раз.";
+        if (feedback) {
+          feedback.textContent = msg;
+          feedback.className =
+            "dash-modal__feedback dash-modal__feedback--error";
+          feedback.removeAttribute("hidden");
+        }
+      }
+    } catch {
+      if (feedback) {
+        feedback.textContent = "Помилка зʼєднання.";
+        feedback.className = "dash-modal__feedback dash-modal__feedback--error";
+        feedback.removeAttribute("hidden");
+      }
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalHTML;
+    }
+  }
+
+  async function deleteProject(slug, title) {
+    if (!confirm(`Видалити проект "${title}"?`)) return;
+    try {
+      const res = await fetchWithAuth(`${API}/projects/${slug}`, {
+        method: "DELETE",
+      });
+      if (res.ok || res.status === 204) {
+        loadProjects(projectsPage, projectsStatusFilter);
+        if (myUserId) loadOverviewStats(myUserId);
+      } else {
+        alert("Помилка видалення. Спробуйте ще раз.");
+      }
+    } catch {
+      alert("Помилка зʼєднання.");
+    }
+  }
+
+  // Event wiring — projects panel
+  document
+    .getElementById("project-create-btn")
+    ?.addEventListener("click", () => openProjectModal(null));
+  document
+    .getElementById("project-modal-close")
+    ?.addEventListener("click", closeProjectModal);
+  document
+    .getElementById("project-modal-cancel")
+    ?.addEventListener("click", closeProjectModal);
+  document
+    .getElementById("project-modal-backdrop")
+    ?.addEventListener("click", closeProjectModal);
+
+  document
+    .getElementById("project-filter-status")
+    ?.addEventListener("change", (e) => {
+      loadProjects(0, e.target.value);
+    });
+
+  document
+    .getElementById("projects-list-body")
+    ?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-action]");
+      if (!btn) return;
+      const { action, slug, title } = btn.dataset;
+      if (action === "edit") openProjectModal(slug);
+      else if (action === "delete") deleteProject(slug, title);
+    });
+
+  document
+    .getElementById("projects-pagination")
+    ?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-page]");
+      if (!btn) return;
+      loadProjects(Number(btn.dataset.page), projectsStatusFilter);
+    });
+
+  document
+    .getElementById("project-form")
+    ?.addEventListener("submit", handleProjectSubmit);
 });
