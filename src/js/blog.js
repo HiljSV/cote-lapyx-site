@@ -46,24 +46,29 @@ function buildBlogCard(post) {
     ? `<img class="blog-card__cover" src="${escHtml(post.coverImage)}" alt="" aria-hidden="true" />`
     : `<div class="blog-card__cover-placeholder" aria-hidden="true">✦</div>`;
 
+  const href = post.slug
+    ? `post.html?slug=${encodeURIComponent(post.slug)}`
+    : "#";
   return `<li>
-    <article class="blog-card">
-      ${coverHtml}
-      <div class="blog-card__body">
-        <div class="blog-card__meta">
-          <span class="blog-card__category">${category}</span>
-        </div>
-        <h2 class="blog-card__title">${escHtml(post.title)}</h2>
-        <p class="blog-card__excerpt">${escHtml(post.excerpt || "")}</p>
-        <div class="blog-card__footer">
-          <div class="blog-card__author">
-            <div class="blog-card__author-avatar" aria-hidden="true">${initials}</div>
-            ${escHtml(authorName)}
+    <a href="${href}" class="blog-card__link">
+      <article class="blog-card">
+        ${coverHtml}
+        <div class="blog-card__body">
+          <div class="blog-card__meta">
+            <span class="blog-card__category">${category}</span>
           </div>
-          <time class="blog-card__date">${fmtDate(date)}</time>
+          <h2 class="blog-card__title">${escHtml(post.title)}</h2>
+          <p class="blog-card__excerpt">${escHtml(post.excerpt || "")}</p>
+          <div class="blog-card__footer">
+            <div class="blog-card__author">
+              <div class="blog-card__author-avatar" aria-hidden="true">${initials}</div>
+              ${escHtml(authorName)}
+            </div>
+            <time class="blog-card__date">${fmtDate(date)}</time>
+          </div>
         </div>
-      </div>
-    </article>
+      </article>
+    </a>
   </li>`;
 }
 

@@ -1,0 +1,73 @@
+<!-- POST HERO -->
+<div class="page-hero post-hero">
+  <div class="page-hero__container post-hero__container">
+    <!-- Breadcrumb -->
+    <nav class="post-breadcrumb" aria-label="Навігація по сторінках">
+      <a href="blog.html" class="post-breadcrumb__link">&#8592; Блог</a>
+    </nav>
+
+    <!-- Meta: category + date -->
+    <div class="post-hero__meta">
+      <span class="post-hero__category" id="post-category"></span>
+      <time class="post-hero__date" id="post-date"></time>
+    </div>
+
+    <!-- Title -->
+    <h1 class="page-hero__heading post-hero__title" id="post-title">
+      Завантаження...
+    </h1>
+
+    <!-- Author block — rendered by JS (avatar + name) -->
+    <div
+      class="post-hero__author"
+      id="post-author-block"
+      aria-label="Автор статті"
+    ></div>
+  </div>
+</div>
+
+<main class="page" id="post-main">
+  <!-- Cover image — injected by JS, hidden until available -->
+  <div class="post-cover" id="post-cover-wrap" hidden>
+    <!-- JS injects: <img src="..." alt="..." class="post-cover__img"> -->
+  </div>
+
+  <!-- Article body -->
+  <article
+    class="section section--dark post-article"
+    aria-labelledby="post-title"
+  >
+    <div class="page__container">
+      <div class="post-article__body" id="post-content">
+        <p class="post-article__loading">Завантаження...</p>
+      </div>
+    </div>
+  </article>
+
+  <!-- Tags section — hidden until tags are available -->
+  <section
+    class="section section--surface post-tags-section"
+    id="post-tags-section"
+    hidden
+    aria-label="Теги"
+  >
+    <div class="page__container">
+      <ul class="post-tags" id="post-tags" role="list">
+        <!-- JS injects <li> tag items -->
+      </ul>
+    </div>
+  </section>
+
+  <!-- Not-found state — shown by JS when post is missing -->
+  <section
+    class="section section--dark post-not-found"
+    id="post-not-found"
+    hidden
+    aria-label="Не знайдено"
+  >
+    <div class="page__container">
+      <p class="post-not-found__msg">Статтю не знайдено.</p>
+      <a href="blog.html" class="btn btn--cyan">&#8592; Повернутись до блогу</a>
+    </div>
+  </section>
+</main>

@@ -65,7 +65,10 @@ function buildProjectCard(project, index) {
         </ul>
       </div>
       <div class="project-card__footer">
-        <div class="project-card__links">${githubBtn}${demoBtn}</div>
+        <div class="project-card__links">
+          ${project.slug ? `<a href="project.html?slug=${encodeURIComponent(project.slug)}" class="btn btn--ghost btn--sm">Детальніше</a>` : ""}
+          ${githubBtn}${demoBtn}
+        </div>
         <div class="project-card__author">
           <div class="project-card__author-avatar" aria-hidden="true">${initials}</div>
           ${escHtml(authorName)}

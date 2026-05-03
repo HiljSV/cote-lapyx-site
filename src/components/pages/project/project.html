@@ -1,0 +1,90 @@
+<!-- PROJECT DETAIL HERO -->
+<div class="page-hero project-detail-hero">
+  <div class="page-hero__container project-detail-hero__container">
+    <!-- Breadcrumb -->
+    <nav class="post-breadcrumb" aria-label="Навігація по сторінках">
+      <a href="projects.html" class="post-breadcrumb__link">&#8592; Проекти</a>
+    </nav>
+
+    <!-- Meta: status badge + date -->
+    <div class="project-detail-hero__meta">
+      <span
+        class="project-detail-hero__status"
+        id="project-status-badge"
+      ></span>
+      <time class="project-detail-hero__date" id="project-date"></time>
+    </div>
+
+    <!-- Title -->
+    <h1 class="page-hero__heading" id="project-title">Завантаження...</h1>
+
+    <!-- Short description -->
+    <p
+      class="page-hero__subheading project-detail-hero__desc"
+      id="project-short-desc"
+    ></p>
+
+    <!-- Author block — rendered by JS (avatar + name) -->
+    <div
+      class="post-hero__author"
+      id="project-author-block"
+      aria-label="Автор проекту"
+    ></div>
+
+    <!-- Links block — JS injects GitHub/Demo buttons -->
+    <div
+      class="project-detail-hero__links"
+      id="project-links"
+      aria-label="Посилання на проект"
+    ></div>
+  </div>
+</div>
+
+<main class="page" id="project-main">
+  <!-- Cover image — injected by JS, hidden until available -->
+  <div class="post-cover" id="project-cover-wrap" hidden>
+    <!-- JS injects: <img src="..." alt="..." class="post-cover__img"> -->
+  </div>
+
+  <!-- Main content + sidebar -->
+  <section
+    class="section section--dark project-detail-section"
+    aria-label="Про проект"
+  >
+    <div class="page__container project-detail-section__grid">
+      <!-- Left: article content -->
+      <div class="project-detail__content" id="project-content">
+        <p class="post-article__loading">Завантаження...</p>
+      </div>
+
+      <!-- Right: sidebar -->
+      <aside class="project-detail__sidebar" aria-label="Деталі проекту">
+        <!-- Tech stack tags — JS injects neon-badge items -->
+        <div class="project-detail__tech" id="project-tech">
+          <h2 class="project-detail__tech-title">Технології</h2>
+          <!-- JS injects tags -->
+        </div>
+
+        <!-- Additional meta (date, status, links, etc.) — JS injects key-value rows -->
+        <div class="project-detail__meta-block" id="project-meta-block">
+          <!-- JS injects <dl> key-value pairs -->
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Not-found state — shown by JS when project is missing -->
+  <section
+    class="section section--dark post-not-found"
+    id="project-not-found"
+    hidden
+    aria-label="Не знайдено"
+  >
+    <div class="page__container">
+      <p class="post-not-found__msg">Проект не знайдено.</p>
+      <a href="projects.html" class="btn btn--cyan"
+        >&#8592; Повернутись до проектів</a
+      >
+    </div>
+  </section>
+</main>

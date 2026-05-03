@@ -1,0 +1,319 @@
+// =============================================================================
+// Project detail page
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// Project detail hero — left-aligned, extends page-hero
+// -----------------------------------------------------------------------------
+
+.project-detail-hero {
+  text-align: left;
+  padding-bottom: 60px;
+
+  @media (max-width: toEm($mobile)) {
+    padding-bottom: 40px;
+  }
+
+  &__container {
+    position: relative;
+    z-index: 1;
+  }
+
+  // Status badge + date row
+  &__meta {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  // Status badge — neon-green pill for active/live projects
+  &__status {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-family: $fontHeading;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: $neon-green;
+    border: 1px solid rgba($neon-green, 0.5);
+    background: rgba($neon-green, 0.07);
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  // Date stamp
+  &__date {
+    color: $text-secondary;
+    font-size: 0.875rem;
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  // Short description — visible beneath heading
+  &__desc {
+    text-align: left;
+    margin-top: 8px;
+    margin-bottom: 20px;
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  // CTA links row — GitHub / Demo buttons injected by JS
+  &__links {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+
+    &:empty {
+      display: none;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Content + sidebar two-column layout
+// -----------------------------------------------------------------------------
+
+.project-detail-section {
+  // Override .page__container inside to become a two-column grid
+  .page__container {
+    // Alias used in HTML via project-detail-section__grid
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 48px;
+    align-items: start;
+
+    @media (max-width: toEm($tablet)) {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+
+    @media (max-width: toEm($mobile)) {
+      gap: 32px;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Project detail blocks
+// -----------------------------------------------------------------------------
+
+.project-detail {
+  // Left column: prose content (reuses post-article__body rules via shared class)
+  &__content {
+    // Prose styles mirroring post-article__body
+    h2,
+    h3,
+    h4 {
+      font-family: $fontHeading;
+      font-weight: 700;
+      color: $neon-cyan;
+      margin-top: 2em;
+      margin-bottom: 0.6em;
+      line-height: 1.3;
+    }
+
+    h2 {
+      font-size: clamp(22px, 3vw, 30px);
+    }
+
+    h3 {
+      font-size: clamp(18px, 2.5vw, 24px);
+    }
+
+    h4 {
+      font-size: clamp(16px, 2vw, 20px);
+    }
+
+    p {
+      margin-bottom: 1.5em;
+      line-height: 1.8;
+      color: $text-secondary;
+    }
+
+    a {
+      color: $neon-cyan;
+      text-decoration: underline;
+      text-decoration-color: rgba($neon-cyan, 0.4);
+      transition: text-decoration-color 0.2s ease;
+
+      &:hover {
+        text-decoration-color: $neon-cyan;
+      }
+
+      &:focus-visible {
+        outline: 2px solid $neon-cyan;
+        outline-offset: 2px;
+        border-radius: 2px;
+      }
+    }
+
+    code {
+      font-family: "Courier New", Courier, monospace;
+      font-size: 0.875em;
+      color: $neon-cyan;
+      background: $bg-surface;
+      border: 1px solid rgba($neon-cyan, 0.25);
+      border-radius: 4px;
+      padding: 2px 6px;
+    }
+
+    pre {
+      background: $bg-surface;
+      border: 1px solid rgba($neon-cyan, 0.25);
+      border-radius: 8px;
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin-bottom: 1.5em;
+
+      @media (max-width: toEm($mobile)) {
+        padding: 16px;
+      }
+
+      code {
+        background: none;
+        border: none;
+        padding: 0;
+        font-size: 0.875rem;
+        color: $text-primary;
+      }
+    }
+
+    ul,
+    ol {
+      margin-bottom: 1.5em;
+      padding-left: 1.5em;
+      color: $text-secondary;
+
+      li {
+        margin-bottom: 0.5em;
+        line-height: 1.7;
+      }
+    }
+
+    ul {
+      list-style: disc;
+    }
+
+    ol {
+      list-style: decimal;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      display: block;
+      margin: 1.5em auto;
+    }
+
+    blockquote {
+      border-left: 3px solid $neon-cyan;
+      padding-left: 16px;
+      margin: 1.5em 0;
+      color: $text-secondary;
+      font-style: italic;
+
+      p {
+        margin-bottom: 0;
+      }
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, $neon-cyan, transparent);
+      opacity: 0.3;
+      margin: 2em 0;
+    }
+  }
+
+  // Right column: sidebar wrapper
+  &__sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+
+    // Sticky on desktop so it stays visible while scrolling the content
+    @media (min-width: toEm($tablet + 1)) {
+      position: sticky;
+      top: 24px;
+    }
+  }
+
+  // Tech stack tags section
+  &__tech {
+    display: flex;
+    flex-direction: column;
+    gap: 0; // gap handled by inner elements
+  }
+
+  // "Технології" heading inside the tech block
+  &__tech-title {
+    font-family: $fontHeading;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: $neon-green;
+    margin-bottom: 12px;
+  }
+
+  // Tech tags row — JS injects neon-badge spans
+  &__tech-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  // Key-value meta block
+  &__meta-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+
+    // JS injects a <dl> with dt/dd pairs
+    dl {
+      margin: 0;
+    }
+
+    dt {
+      font-family: $fontHeading;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: $text-muted;
+      margin-bottom: 2px;
+      margin-top: 16px;
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+
+    dd {
+      margin: 0;
+      font-size: 14px;
+      color: $text-secondary;
+      line-height: 1.5;
+    }
+  }
+}

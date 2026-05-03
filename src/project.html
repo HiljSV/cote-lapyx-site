@@ -1,0 +1,24 @@
+<script type="module" src="@js/project.js"></script>
+<template
+  src="@components/templates/inner/inner.html"
+  locals='{
+  "title": "Проект — COTE-LAPYX",
+  "lang": "uk",
+  "preloader": {"enable":"false","once":"false"},
+  "keywords": "",
+  "description": "Детальна сторінка проекту команди cote-lapyx"
+}'
+>
+  <block name="header">
+    <include
+      src="@components/layout/header/header.html"
+      locals='{"active":"Projects"}'
+    ></include>
+  </block>
+  <block name="main">
+    <include src="@components/pages/project/project.html" locals="{}"></include>
+  </block>
+  <block name="footer">
+    <include src="@components/layout/footer/footer.html" locals="{}"></include>
+  </block>
+</template>
