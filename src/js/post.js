@@ -43,7 +43,7 @@ function showNotFound() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   // Guard: only run on post.html (bundle mode sends all JS to every page)
-  if (!document.getElementById("post-content")) return;
+  if (!document.getElementById("post-main")) return;
 
   const params = new URLSearchParams(window.location.search);
   const slug = params.get("slug");
