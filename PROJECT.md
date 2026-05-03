@@ -555,7 +555,8 @@ src/
 
 ## GitHub
 
-- Репо: https://github.com/HiljSV/cote-lapyx-site
+- Репо (frontend): https://github.com/HiljSV/cote-lapyx-site
+- Репо (backend): https://github.com/HiljSV/cote-lapyx-backend
 - GitHub Pages: https://hiljsv.github.io/cote-lapyx-site/
 - Font preview: https://hiljsv.github.io/cote-lapyx-site/font-preview.html
 
