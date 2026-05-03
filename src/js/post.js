@@ -128,3 +128,202 @@ document.addEventListener("DOMContentLoaded", async () => {
     showNotFound();
   }
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (!document.getElementById("post-main")) return;
+  // interactions init — runs after main block (slug already in URL)
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get("slug");
+  if (!slug) return;
+
+  const API = "https://api.cote-lapyx.com/api/v1";
+
+  function getToken() {
+    return localStorage.getItem("cl_access");
+  }
+
+  // ── Favorites ────────────────────────────────────────────────────────────
+  const favBtn = document.getElementById("post-fav-btn");
+  if (favBtn) {
+    favBtn.addEventListener("click", async () => {
+      const token = getToken();
+      if (!token) {
+        alert("Увійдіть, щоб додати в обране.");
+        return;
+      }
+      const isActive = favBtn.classList.contains("is-active");
+      try {
+        await fetch(`${API}/posts/${encodeURIComponent(slug)}/favorites`, {
+          method: isActive ? "DELETE" : "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        favBtn.classList.toggle("is-active");
+      } catch {
+        /* silent */
+      }
+    });
+  }
+
+  // ── Subscribe ─────────────────────────────────────────────────────────────
+  const subBtn = document.getElementById("post-sub-btn");
+  const subForm = document.getElementById("post-subscribe-form");
+  const subFormEl = document.getElementById("post-sub-form");
+  const subMsg = document.getElementById("post-sub-msg");
+
+  subBtn?.addEventListener("click", () => {
+    const hidden = subForm?.hasAttribute("hidden");
+    if (hidden) {
+      subForm?.removeAttribute("hidden");
+    } else {
+      subForm?.setAttribute("hidden", "");
+    }
+  });
+
+  subFormEl?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("post-sub-email")?.value.trim();
+    if (!email) return;
+    const submitBtn = document.getElementById("post-sub-submit");
+    submitBtn.disabled = true;
+    try {
+      const res = await fetch(`${API}/subscriptions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, type: "GENERAL" }),
+      });
+      if (subMsg) {
+        subMsg.textContent = res.ok
+          ? "Дякуємо! Ви підписані на оновлення."
+          : "Помилка підписки. Спробуйте ще раз.";
+        subMsg.className = `post-subscribe-form__msg ${res.ok ? "post-subscribe-form__msg--ok" : "post-subscribe-form__msg--err"}`;
+        subMsg.removeAttribute("hidden");
+      }
+      if (res.ok) subFormEl.reset();
+    } catch {
+      if (subMsg) {
+        subMsg.textContent = "Помилка з'єднання.";
+        subMsg.className =
+          "post-subscribe-form__msg post-subscribe-form__msg--err";
+        subMsg.removeAttribute("hidden");
+      }
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  // ── Comments ─────────────────────────────────────────────────────────────
+  async function loadComments() {
+    const list = document.getElementById("post-comments-list");
+    const emptyEl = document.getElementById("post-comments-empty");
+    if (!list) return;
+    try {
+      const res = await fetch(
+        `${API}/posts/${encodeURIComponent(slug)}/comments`,
+      );
+      if (!res.ok) return;
+      const data = await res.json();
+      const comments = data.content || [];
+      if (comments.length === 0) {
+        emptyEl?.removeAttribute("hidden");
+        return;
+      }
+      emptyEl?.setAttribute("hidden", "");
+      const existing = list.querySelectorAll(".post-comment");
+      existing.forEach((el) => el.remove());
+      comments.forEach((c) => {
+        const authorName = c.author?.name || "Анонім";
+        const initials = authorName
+          .trim()
+          .split(/\s+/)
+          .map((w) => w[0])
+          .slice(0, 2)
+          .join("")
+          .toUpperCase();
+        const date = c.createdAt
+          ? new Date(c.createdAt).toLocaleDateString("uk-UA", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })
+          : "";
+        const div = document.createElement("div");
+        div.className = "post-comment";
+        div.innerHTML = `
+          <div class="post-comment__avatar" aria-hidden="true">${initials}</div>
+          <div class="post-comment__body">
+            <div class="post-comment__meta">
+              <span class="post-comment__author">${authorName}</span>
+              <time class="post-comment__date">${date}</time>
+            </div>
+            <p class="post-comment__text">${String(c.content || "")
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")}</p>
+          </div>`;
+        list.appendChild(div);
+      });
+    } catch {
+      /* silent */
+    }
+  }
+
+  loadComments();
+
+  const commentForm = document.getElementById("post-comment-form");
+  const commentText = document.getElementById("post-comment-text");
+  const commentChars = document.getElementById("post-comment-chars");
+  const commentMsg = document.getElementById("post-comment-msg");
+
+  commentText?.addEventListener("input", () => {
+    if (commentChars) commentChars.textContent = commentText.value.length;
+  });
+
+  commentForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const token = getToken();
+    if (!token) {
+      if (commentMsg) {
+        commentMsg.textContent = "Увійдіть, щоб залишити коментар.";
+        commentMsg.removeAttribute("hidden");
+      }
+      return;
+    }
+    const text = commentText?.value.trim();
+    if (!text) return;
+    const submitBtn = document.getElementById("post-comment-submit");
+    submitBtn.disabled = true;
+    try {
+      const res = await fetch(
+        `${API}/posts/${encodeURIComponent(slug)}/comments`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ content: text }),
+        },
+      );
+      if (res.ok) {
+        commentForm.reset();
+        if (commentChars) commentChars.textContent = "0";
+        if (commentMsg) commentMsg.setAttribute("hidden", "");
+        await loadComments();
+      } else {
+        const err = await res.json().catch(() => ({}));
+        if (commentMsg) {
+          commentMsg.textContent =
+            err.detail || err.message || "Помилка надсилання.";
+          commentMsg.removeAttribute("hidden");
+        }
+      }
+    } catch {
+      if (commentMsg) {
+        commentMsg.textContent = "Помилка з'єднання.";
+        commentMsg.removeAttribute("hidden");
+      }
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+});

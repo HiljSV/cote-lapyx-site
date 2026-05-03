@@ -44,6 +44,138 @@
     </div>
   </article>
 
+  <!-- Post actions: like, favorite, subscribe -->
+  <section
+    class="section section--surface post-actions"
+    id="post-actions-section"
+  >
+    <div class="page__container">
+      <div class="post-actions__bar">
+        <button
+          type="button"
+          class="post-actions__btn post-actions__btn--like"
+          id="post-like-btn"
+          aria-label="Подобається"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+            />
+          </svg>
+          <span id="post-like-count">0</span>
+        </button>
+
+        <button
+          type="button"
+          class="post-actions__btn post-actions__btn--fav"
+          id="post-fav-btn"
+          aria-label="Додати в обране"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"
+            />
+          </svg>
+          <span>Обране</span>
+        </button>
+
+        <button
+          type="button"
+          class="post-actions__btn post-actions__btn--sub"
+          id="post-sub-btn"
+          aria-label="Підписатися"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+            />
+          </svg>
+          <span>Підписатися</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Subscribe form — toggled by JS -->
+  <div class="post-subscribe-form" id="post-subscribe-form" hidden>
+    <div class="page__container">
+      <form class="post-subscribe-form__inner" id="post-sub-form" novalidate>
+        <input
+          class="post-subscribe-form__input"
+          type="email"
+          id="post-sub-email"
+          placeholder="your@email.com"
+          required
+        />
+        <button
+          type="submit"
+          class="btn btn--cyan btn--sm"
+          id="post-sub-submit"
+        >
+          Підписатися
+        </button>
+      </form>
+      <p class="post-subscribe-form__msg" id="post-sub-msg" hidden></p>
+    </div>
+  </div>
+
+  <!-- Comments section -->
+  <section
+    class="section section--dark post-comments"
+    id="post-comments-section"
+  >
+    <div class="page__container">
+      <h2 class="post-comments__title">Коментарі</h2>
+
+      <form class="post-comments__form" id="post-comment-form" novalidate>
+        <textarea
+          class="post-comments__textarea"
+          id="post-comment-text"
+          placeholder="Напишіть коментар..."
+          rows="3"
+          maxlength="2000"
+        ></textarea>
+        <div class="post-comments__form-footer">
+          <span class="post-comments__char-count"
+            ><span id="post-comment-chars">0</span>/2000</span
+          >
+          <button
+            type="submit"
+            class="btn btn--cyan btn--sm"
+            id="post-comment-submit"
+          >
+            Надіслати
+          </button>
+        </div>
+        <p class="post-comments__form-msg" id="post-comment-msg" hidden></p>
+      </form>
+
+      <div class="post-comments__list" id="post-comments-list">
+        <p class="post-comments__empty" id="post-comments-empty" hidden>
+          Коментарів ще немає. Будьте першим!
+        </p>
+      </div>
+    </div>
+  </section>
+
   <!-- Tags section — hidden until tags are available -->
   <section
     class="section section--surface post-tags-section"

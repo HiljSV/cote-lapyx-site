@@ -382,3 +382,309 @@
     margin-bottom: 24px;
   }
 }
+
+// -----------------------------------------------------------------------------
+// Post actions — like / favorite / subscribe bar
+// -----------------------------------------------------------------------------
+
+.post-actions {
+  padding-top: 24px;
+  padding-bottom: 24px;
+
+  &__bar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-family: $fontHeading;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    background: transparent;
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      color 0.2s ease;
+
+    &:focus-visible {
+      outline: 2px solid $neon-cyan;
+      outline-offset: 3px;
+    }
+
+    &--like {
+      color: $neon-cyan;
+      border: 1px solid rgba($neon-cyan, 0.3);
+
+      &:hover {
+        border-color: rgba($neon-cyan, 0.7);
+        box-shadow: 0 0 8px rgba($neon-cyan, 0.25);
+      }
+
+      &.is-active {
+        background: rgba($neon-cyan, 0.15);
+        border-color: $neon-cyan;
+        box-shadow: 0 0 10px rgba($neon-cyan, 0.35);
+      }
+    }
+
+    &--fav {
+      color: $neon-magenta;
+      border: 1px solid rgba($neon-magenta, 0.3);
+
+      &:hover {
+        border-color: rgba($neon-magenta, 0.7);
+        box-shadow: 0 0 8px rgba($neon-magenta, 0.25);
+      }
+
+      &.is-active {
+        background: rgba($neon-magenta, 0.15);
+        border-color: $neon-magenta;
+        box-shadow: 0 0 10px rgba($neon-magenta, 0.35);
+      }
+    }
+
+    &--sub {
+      color: $neon-green;
+      border: 1px solid rgba($neon-green, 0.3);
+
+      &:hover {
+        border-color: rgba($neon-green, 0.7);
+        box-shadow: 0 0 8px rgba($neon-green, 0.25);
+      }
+
+      &.is-active {
+        background: rgba($neon-green, 0.15);
+        border-color: $neon-green;
+        box-shadow: 0 0 10px rgba($neon-green, 0.35);
+      }
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Post subscribe form — collapsible email form
+// -----------------------------------------------------------------------------
+
+.post-subscribe-form {
+  background: $bg-card;
+  border-top: 1px solid rgba($neon-green, 0.15);
+  border-bottom: 1px solid rgba($neon-green, 0.15);
+
+  .page__container {
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  &__inner {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  &__input {
+    flex: 1;
+    min-width: 200px;
+    height: 40px;
+    padding: 0 14px;
+    background: rgba($bg-dark, 0.8);
+    border: 1px solid rgba($neon-green, 0.3);
+    border-radius: 8px;
+    color: $text-primary;
+    font-family: $fontFamily;
+    font-size: 14px;
+    outline: none;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+
+    &::placeholder {
+      color: $text-muted;
+    }
+
+    &:focus {
+      border-color: rgba($neon-green, 0.7);
+      box-shadow: 0 0 8px rgba($neon-green, 0.2);
+    }
+  }
+
+  &__msg {
+    margin-top: 10px;
+    font-size: 13px;
+    font-weight: 600;
+
+    &--ok {
+      color: $neon-green;
+    }
+
+    &--err {
+      color: #ff4d6d;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Post comments — form + list
+// -----------------------------------------------------------------------------
+
+.post-comments {
+  &__title {
+    font-family: $fontHeading;
+    font-size: clamp(20px, 3vw, 28px);
+    font-weight: 700;
+    color: $neon-cyan;
+    margin-bottom: 28px;
+    text-shadow:
+      0 0 10px $neon-cyan,
+      0 0 20px rgba($neon-cyan, 0.4);
+  }
+
+  &__form {
+    @include glass-card;
+    padding: 20px 24px;
+    margin-bottom: 32px;
+
+    @media (max-width: toEm($mobile)) {
+      padding: 16px;
+    }
+  }
+
+  &__textarea {
+    display: block;
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba($bg-dark, 0.7);
+    border: 1px solid rgba($neon-cyan, 0.25);
+    border-radius: 8px;
+    color: $text-primary;
+    font-family: $fontFamily;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+
+    &::placeholder {
+      color: $text-muted;
+    }
+
+    &:focus {
+      border-color: rgba($neon-cyan, 0.6);
+      box-shadow: 0 0 8px rgba($neon-cyan, 0.2);
+    }
+  }
+
+  &__form-footer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  &__char-count {
+    font-size: 12px;
+    color: $text-muted;
+  }
+
+  &__form-msg {
+    margin-top: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #ff4d6d;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__empty {
+    color: $text-muted;
+    font-size: 14px;
+    text-align: center;
+    padding: 32px 0;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Post comment — single comment card
+// -----------------------------------------------------------------------------
+
+.post-comment {
+  @include glass-card;
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+  padding: 16px 20px;
+
+  @media (max-width: toEm($mobile)) {
+    padding: 14px 16px;
+  }
+
+  &__avatar {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, $neon-cyan, $neon-magenta);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: $fontHeading;
+    font-size: 14px;
+    font-weight: 700;
+    color: $bg-dark;
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__meta {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+
+  &__author {
+    font-family: $fontHeading;
+    font-size: 14px;
+    font-weight: 700;
+    color: $neon-cyan;
+  }
+
+  &__date {
+    font-size: 12px;
+    color: $text-muted;
+  }
+
+  &__text {
+    font-size: 14px;
+    line-height: 1.7;
+    color: $text-secondary;
+    margin: 0;
+    word-break: break-word;
+  }
+}
