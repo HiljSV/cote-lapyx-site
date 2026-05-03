@@ -328,10 +328,6 @@
     @extend .btn;
     @extend .btn--cyan;
     @extend .btn--sm;
-
-    @media (max-width: toEm($mobileSmall)) {
-      display: none;
-    }
   }
 
   // Hamburger
