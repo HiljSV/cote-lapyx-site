@@ -109,6 +109,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const section = link.dataset.section;
       if (!section) return;
       activateSection(section);
+      if (section === "analytics" && !analyticsLoaded) {
+        analyticsLoaded = true;
+        loadAnalytics(currentPeriod);
+      } else if (section === "analytics") {
+        loadAnalytics(currentPeriod);
+      }
       // Close sidebar drawer on mobile after navigation
       if (window.innerWidth <= 991.98) {
         closeSidebar();
@@ -160,6 +166,152 @@ document.addEventListener("DOMContentLoaded", () => {
       // Activate clicked tab
       tab.classList.add("is-active");
       tab.setAttribute("aria-selected", "true");
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Analytics panel
+  // ---------------------------------------------------------------------------
+
+  let currentPeriod = "7d";
+  let analyticsLoaded = false;
+
+  function renderChart(dataPoints) {
+    const barsEl = document.getElementById("analytics-bars");
+    const labelsEl = document.getElementById("analytics-labels");
+    if (!barsEl || !labelsEl) return;
+
+    if (!dataPoints || dataPoints.length === 0) {
+      barsEl.innerHTML =
+        '<div class="analytics-chart-loading">Немає даних</div>';
+      labelsEl.innerHTML = "";
+      return;
+    }
+
+    const max = Math.max(...dataPoints.map((d) => d.pageviews), 1);
+
+    barsEl.innerHTML = dataPoints
+      .map((d) => {
+        const pct = Math.round((d.pageviews / max) * 100);
+        return `<div class="admin-activity-chart__bar" style="height:${pct || 2}%" title="${d.date}: ${d.pageviews} переглядів"></div>`;
+      })
+      .join("");
+
+    labelsEl.innerHTML = dataPoints
+      .map((d) => {
+        const dt = new Date(d.date);
+        const label = `${dt.getDate()}.${String(dt.getMonth() + 1).padStart(2, "0")}`;
+        return `<span class="admin-activity-chart__label">${label}</span>`;
+      })
+      .join("");
+  }
+
+  function renderMetrics(containerId, items) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+
+    if (!items || items.length === 0) {
+      el.innerHTML = '<div class="analytics-chart-loading">Немає даних</div>';
+      return;
+    }
+
+    const max = items[0]?.value || 1;
+    el.innerHTML = items
+      .slice(0, 8)
+      .map((item) => {
+        const pct = Math.round((item.value / max) * 100);
+        const name = item.name || "(direct)";
+        return `<div class="analytics-metric-row">
+        <span class="analytics-metric-row__name" title="${name}">${name}</span>
+        <div class="analytics-metric-row__bar"><span style="width:${pct}%"></span></div>
+        <span class="analytics-metric-row__value">${item.value}</span>
+      </div>`;
+      })
+      .join("");
+  }
+
+  function formatDuration(seconds) {
+    if (!seconds) return "0с";
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return m > 0 ? `${m}м ${s}с` : `${s}с`;
+  }
+
+  async function loadAnalytics(period = "7d") {
+    const token = localStorage.getItem("cl_access");
+    if (!token) return;
+
+    const base = "https://api.cote-lapyx.com/api/v1/analytics";
+    const headers = { Authorization: `Bearer ${token}` };
+
+    // Set loading state
+    document.querySelectorAll(".analytics-stat-value").forEach((el) => {
+      el.textContent = "…";
+    });
+    document.getElementById("analytics-bars").innerHTML =
+      '<div class="analytics-chart-loading">Завантаження...</div>';
+    ["analytics-top-pages", "analytics-referrers"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el)
+        el.innerHTML =
+          '<div class="analytics-chart-loading">Завантаження...</div>';
+    });
+
+    try {
+      const [statsRes, pvRes, pagesRes, referrersRes] = await Promise.all([
+        fetch(`${base}/stats?period=${period}`, { headers }),
+        fetch(`${base}/pageviews?period=${period}`, { headers }),
+        fetch(`${base}/metrics?type=url&period=${period}&limit=8`, { headers }),
+        fetch(`${base}/metrics?type=referrer&period=${period}&limit=8`, {
+          headers,
+        }),
+      ]);
+
+      if (statsRes.ok) {
+        const stats = await statsRes.json();
+        const statMap = {
+          visitors: stats.visitors?.toLocaleString("uk") ?? "—",
+          pageviews: stats.pageviews?.toLocaleString("uk") ?? "—",
+          bounceRate:
+            stats.bounceRate != null ? `${Math.round(stats.bounceRate)}%` : "—",
+          avgSession:
+            stats.avgSessionDuration != null
+              ? formatDuration(stats.avgSessionDuration)
+              : "—",
+        };
+        document.querySelectorAll(".analytics-stat-value").forEach((el) => {
+          const key = el.dataset.stat;
+          if (key && statMap[key] !== undefined) el.textContent = statMap[key];
+        });
+      }
+
+      if (pvRes.ok) {
+        const pv = await pvRes.json();
+        renderChart(pv.data || []);
+      }
+
+      if (pagesRes.ok) {
+        renderMetrics("analytics-top-pages", await pagesRes.json());
+      }
+
+      if (referrersRes.ok) {
+        renderMetrics("analytics-referrers", await referrersRes.json());
+      }
+    } catch (err) {
+      console.error("Analytics load error:", err);
+      document.getElementById("analytics-bars").innerHTML =
+        '<div class="analytics-chart-loading">Помилка завантаження</div>';
+    }
+  }
+
+  document.querySelectorAll(".analytics-period-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document
+        .querySelectorAll(".analytics-period-btn")
+        .forEach((b) => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      currentPeriod = btn.dataset.period;
+      loadAnalytics(currentPeriod);
     });
   });
 
