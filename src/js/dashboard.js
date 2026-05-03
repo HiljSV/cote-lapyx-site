@@ -59,6 +59,11 @@ document.addEventListener("DOMContentLoaded", () => {
           parts.length >= 2 ? parts[0][0] + parts[1][0] : parts[0].slice(0, 2);
         initEl.textContent = initials.toUpperCase();
       }
+
+      // Load overview stats + recent content for OWNER users
+      if (user.role === "OWNER") {
+        loadOverviewStats(user.id);
+      }
     } catch (_) {}
   })();
 
@@ -184,6 +189,161 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.removeItem("cl_refresh");
       window.location.replace("/login.html");
     });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Overview stats & recent content (OWNER only)
+  // ---------------------------------------------------------------------------
+
+  const API = "https://api.cote-lapyx.com/api/v1";
+
+  function authHeaders() {
+    return { Authorization: `Bearer ${localStorage.getItem("cl_access")}` };
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return "—";
+    return new Date(iso).toLocaleDateString("uk-UA", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  }
+
+  const STATUS_LABEL = {
+    PUBLISHED: "Опубліковано",
+    DRAFT: "Чернетка",
+    ARCHIVED: "Архів",
+  };
+
+  const STATUS_CLASS = {
+    PUBLISHED: "published",
+    DRAFT: "draft",
+    ARCHIVED: "archived",
+  };
+
+  const TYPE_BADGE = {
+    GENERAL: ["cyan", "Загальне"],
+    PERSONAL: ["magenta", "Особисте"],
+  };
+
+  const TECH_COLORS = ["cyan", "magenta", "green"];
+
+  function postRowHtml(post) {
+    const [badgeColor, typeLabel] = TYPE_BADGE[post.type] || [
+      "cyan",
+      post.type,
+    ];
+    const sClass = STATUS_CLASS[post.status] || "draft";
+    const sLabel = STATUS_LABEL[post.status] || post.status;
+    return `<div class="dash-list__row">
+      <div class="dash-list__title" data-label="Заголовок">${escHtml(post.title)}</div>
+      <div data-label="Категорія"><span class="neon-badge neon-badge--${badgeColor}">${typeLabel}</span></div>
+      <div class="dash-list__date" data-label="Дата">${fmtDate(post.createdAt)}</div>
+      <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
+      <div class="dash-list__actions" data-label="Дії">
+        <button type="button" class="btn btn--ghost btn--sm">Редагувати</button>
+        <button type="button" class="btn btn--magenta btn--sm">Видалити</button>
+      </div>
+    </div>`;
+  }
+
+  function projectRowHtml(project) {
+    const techs = (project.technologies || [])
+      .slice(0, 3)
+      .map(
+        (t, i) =>
+          `<span class="neon-badge neon-badge--${TECH_COLORS[i % 3]}">${escHtml(t)}</span>`,
+      )
+      .join("");
+    const sClass = STATUS_CLASS[project.status] || "draft";
+    const sLabel = STATUS_LABEL[project.status] || project.status;
+    return `<div class="dash-list__row">
+      <div class="dash-list__title" data-label="Назва">${escHtml(project.title)}</div>
+      <div class="dash-list__tech" data-label="Технології">${techs || "—"}</div>
+      <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
+      <div class="dash-list__actions" data-label="Дії">
+        <button type="button" class="btn btn--ghost btn--sm">Редагувати</button>
+        <button type="button" class="btn btn--magenta btn--sm">Видалити</button>
+      </div>
+    </div>`;
+  }
+
+  function escHtml(str) {
+    return String(str ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  async function loadOverviewStats(authorId) {
+    const token = localStorage.getItem("cl_access");
+    if (!token) return;
+    const h = authHeaders();
+
+    try {
+      const [statsRes, postsRes, projectsRes] = await Promise.all([
+        fetch(`${API}/dashboard/stats`, { headers: h }),
+        fetch(
+          `${API}/admin/posts?authorId=${authorId}&size=5&sort=createdAt,desc`,
+          { headers: h },
+        ),
+        fetch(
+          `${API}/admin/projects?authorId=${authorId}&size=3&sort=createdAt,desc`,
+          { headers: h },
+        ),
+      ]);
+
+      // Stat cards
+      if (statsRes.ok) {
+        const stats = await statsRes.json();
+        const set = (id, val) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = val ?? "0";
+        };
+        set("stat-posts", stats.postsTotal);
+        set("stat-projects", stats.projectsTotal);
+        set("stat-comments", stats.commentsTotal);
+        set("stat-subscribers", stats.subscribersTotal);
+      }
+
+      // Recent posts
+      const postsBody = document.getElementById("overview-posts-body");
+      if (postsBody) {
+        if (postsRes.ok) {
+          const data = await postsRes.json();
+          const rows = (data.content || []).map(postRowHtml).join("");
+          postsBody.innerHTML =
+            rows || '<div class="dash-list__empty">Публікацій ще немає</div>';
+        } else {
+          postsBody.innerHTML =
+            '<div class="dash-list__empty">Помилка завантаження</div>';
+        }
+      }
+
+      // Recent projects
+      const projectsBody = document.getElementById("overview-projects-body");
+      if (projectsBody) {
+        if (projectsRes.ok) {
+          const data = await projectsRes.json();
+          const rows = (data.content || []).map(projectRowHtml).join("");
+          projectsBody.innerHTML =
+            rows || '<div class="dash-list__empty">Проектів ще немає</div>';
+        } else {
+          projectsBody.innerHTML =
+            '<div class="dash-list__empty">Помилка завантаження</div>';
+        }
+      }
+    } catch (err) {
+      console.error("Overview load error:", err);
+      document
+        .querySelectorAll("#overview-posts-body, #overview-projects-body")
+        .forEach((el) => {
+          el.innerHTML =
+            '<div class="dash-list__empty">Помилка завантаження</div>';
+        });
+    }
   }
 
   // ---------------------------------------------------------------------------

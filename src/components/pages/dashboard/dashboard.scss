@@ -570,6 +570,13 @@
   font-weight: 500;
 }
 
+.dash-list__empty {
+  padding: 20px 16px;
+  color: $text-muted;
+  font-size: 14px;
+  text-align: center;
+}
+
 .dash-list__date {
   white-space: nowrap;
   color: $text-muted;

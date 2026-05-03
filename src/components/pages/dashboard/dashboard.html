@@ -240,7 +240,7 @@
               />
             </svg>
           </div>
-          <p class="dash-stat-card__value">6</p>
+          <p class="dash-stat-card__value" id="stat-posts">—</p>
           <p class="dash-stat-card__label">Публікацій</p>
         </div>
 
@@ -259,7 +259,7 @@
               />
             </svg>
           </div>
-          <p class="dash-stat-card__value">4</p>
+          <p class="dash-stat-card__value" id="stat-projects">—</p>
           <p class="dash-stat-card__label">Проектів</p>
         </div>
 
@@ -278,7 +278,7 @@
               />
             </svg>
           </div>
-          <p class="dash-stat-card__value">12</p>
+          <p class="dash-stat-card__value" id="stat-comments">—</p>
           <p class="dash-stat-card__label">Коментарів</p>
         </div>
 
@@ -297,7 +297,7 @@
               />
             </svg>
           </div>
-          <p class="dash-stat-card__value">3</p>
+          <p class="dash-stat-card__value" id="stat-subscribers">—</p>
           <p class="dash-stat-card__label">Підписників</p>
         </div>
       </section>
@@ -320,114 +320,9 @@
             <div>Статус</div>
             <div>Дії</div>
           </div>
-          <!-- Row 1 -->
-          <div
-            class="dash-list__row"
-            data-title="Cyberpunk SCSS"
-            data-category="Frontend"
-            data-date="2025-04-10"
-            data-status="published"
-          >
-            <div class="dash-list__title" data-label="Заголовок">
-              Cyberpunk SCSS: neon-система
-            </div>
-            <div data-label="Категорія">
-              <span class="neon-badge neon-badge--cyan">Frontend</span>
-            </div>
-            <div class="dash-list__date" data-label="Дата">10 квіт 2025</div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--published"
-                >Опубліковано</span
-              >
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--ghost btn--sm"
-                aria-label="Редагувати Cyberpunk SCSS"
-              >
-                Редагувати
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Видалити Cyberpunk SCSS"
-              >
-                Видалити
-              </button>
-            </div>
-          </div>
-          <!-- Row 2 -->
-          <div
-            class="dash-list__row"
-            data-title="REST API"
-            data-category="Backend"
-            data-date="2025-03-22"
-            data-status="published"
-          >
-            <div class="dash-list__title" data-label="Заголовок">
-              REST API: практичний гайд
-            </div>
-            <div data-label="Категорія">
-              <span class="neon-badge neon-badge--magenta">Backend</span>
-            </div>
-            <div class="dash-list__date" data-label="Дата">22 бер 2025</div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--published"
-                >Опубліковано</span
-              >
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--ghost btn--sm"
-                aria-label="Редагувати REST API"
-              >
-                Редагувати
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Видалити REST API"
-              >
-                Видалити
-              </button>
-            </div>
-          </div>
-          <!-- Row 3 -->
-          <div
-            class="dash-list__row"
-            data-title="Brand Kit"
-            data-category="Design"
-            data-date="2025-03-05"
-            data-status="draft"
-          >
-            <div class="dash-list__title" data-label="Заголовок">
-              Brand Kit: cyberpunk-система
-            </div>
-            <div data-label="Категорія">
-              <span class="neon-badge neon-badge--green">Design</span>
-            </div>
-            <div class="dash-list__date" data-label="Дата">05 бер 2025</div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--draft">Чернетка</span>
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--ghost btn--sm"
-                aria-label="Редагувати Brand Kit"
-              >
-                Редагувати
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Видалити Brand Kit"
-              >
-                Видалити
-              </button>
-            </div>
+          <!-- Rows injected by JS -->
+          <div id="overview-posts-body">
+            <div class="dash-list__empty">Завантаження...</div>
           </div>
         </div>
       </section>
@@ -455,72 +350,9 @@
             <div>Статус</div>
             <div>Дії</div>
           </div>
-          <!-- Row 1 -->
-          <div
-            class="dash-list__row"
-            data-title="cote-lapyx.com"
-            data-status="active"
-          >
-            <div class="dash-list__title" data-label="Назва">
-              cote-lapyx.com
-            </div>
-            <div class="dash-list__tech" data-label="Технології">
-              <span class="neon-badge neon-badge--cyan">HTML</span>
-              <span class="neon-badge neon-badge--magenta">SCSS</span>
-              <span class="neon-badge neon-badge--green">JS</span>
-            </div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--published">Активний</span>
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--ghost btn--sm"
-                aria-label="Редагувати cote-lapyx.com"
-              >
-                Редагувати
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Видалити cote-lapyx.com"
-              >
-                Видалити
-              </button>
-            </div>
-          </div>
-          <!-- Row 2 -->
-          <div
-            class="dash-list__row"
-            data-title="Component Library"
-            data-status="draft"
-          >
-            <div class="dash-list__title" data-label="Назва">
-              Component Library
-            </div>
-            <div class="dash-list__tech" data-label="Технології">
-              <span class="neon-badge neon-badge--cyan">SCSS</span>
-              <span class="neon-badge neon-badge--magenta">Storybook</span>
-            </div>
-            <div data-label="Статус">
-              <span class="dash-status dash-status--draft">В розробці</span>
-            </div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button
-                type="button"
-                class="btn btn--ghost btn--sm"
-                aria-label="Редагувати Component Library"
-              >
-                Редагувати
-              </button>
-              <button
-                type="button"
-                class="btn btn--magenta btn--sm"
-                aria-label="Видалити Component Library"
-              >
-                Видалити
-              </button>
-            </div>
+          <!-- Rows injected by JS -->
+          <div id="overview-projects-body">
+            <div class="dash-list__empty">Завантаження...</div>
           </div>
         </div>
       </section>
