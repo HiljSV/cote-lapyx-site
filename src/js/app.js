@@ -7,6 +7,14 @@ import {
 } from "@js/common/functions.js";
 
 // =============================================================================
+// Header auth state — show "Кабінет" or "Увійти" based on localStorage token
+// =============================================================================
+if (localStorage.getItem("cl_access")) {
+  document.getElementById("header-login-btn")?.setAttribute("hidden", "");
+  document.getElementById("header-user-btn")?.removeAttribute("hidden");
+}
+
+// =============================================================================
 // Theme toggle (dark / light)
 // =============================================================================
 (function initTheme() {

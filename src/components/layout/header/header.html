@@ -81,8 +81,20 @@
         🌙
       </button>
 
-      <a href="login.html" class="header__login-btn btn btn--cyan btn--sm"
+      <!-- Shown when logged out -->
+      <a
+        href="login.html"
+        class="header__login-btn btn btn--cyan btn--sm"
+        id="header-login-btn"
         >Увійти</a
+      >
+      <!-- Shown when logged in (revealed by app.js) -->
+      <a
+        href="dashboard.html"
+        class="header__login-btn btn btn--cyan btn--sm"
+        id="header-user-btn"
+        hidden
+        >Кабінет</a
       >
 
       <button

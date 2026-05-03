@@ -2,6 +2,8 @@
 // Dashboard — Owner cabinet JS
 // =============================================================================
 
+import { fetchWithAuth } from "@js/common/auth.js";
+
 document.addEventListener("DOMContentLoaded", () => {
   // ---------------------------------------------------------------------------
   // Element refs
@@ -26,11 +28,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Load user data: reveal admin link + populate profile form + update sidebar
   (async () => {
     try {
-      const res = await fetch("https://api.cote-lapyx.com/api/v1/users/me", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("cl_access")}`,
-        },
-      });
+      const res = await fetchWithAuth(
+        "https://api.cote-lapyx.com/api/v1/users/me",
+      );
       if (!res.ok) return;
       const user = await res.json();
 
@@ -197,10 +197,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const API = "https://api.cote-lapyx.com/api/v1";
 
-  function authHeaders() {
-    return { Authorization: `Bearer ${localStorage.getItem("cl_access")}` };
-  }
-
   function fmtDate(iso) {
     if (!iso) return "—";
     return new Date(iso).toLocaleDateString("uk-UA", {
@@ -278,20 +274,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function loadOverviewStats(authorId) {
-    const token = localStorage.getItem("cl_access");
-    if (!token) return;
-    const h = authHeaders();
-
     try {
       const [statsRes, postsRes, projectsRes] = await Promise.all([
-        fetch(`${API}/dashboard/stats`, { headers: h }),
-        fetch(
+        fetchWithAuth(`${API}/dashboard/stats`),
+        fetchWithAuth(
           `${API}/admin/posts?authorId=${authorId}&size=5&sort=createdAt,desc`,
-          { headers: h },
         ),
-        fetch(
+        fetchWithAuth(
           `${API}/admin/projects?authorId=${authorId}&size=3&sort=createdAt,desc`,
-          { headers: h },
         ),
       ]);
 
@@ -391,14 +381,14 @@ document.addEventListener("DOMContentLoaded", () => {
     Object.keys(body).forEach((k) => body[k] === undefined && delete body[k]);
 
     try {
-      const res = await fetch("https://api.cote-lapyx.com/api/v1/users/me", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("cl_access")}`,
+      const res = await fetchWithAuth(
+        "https://api.cote-lapyx.com/api/v1/users/me",
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
         },
-        body: JSON.stringify(body),
-      });
+      );
 
       if (res.ok) {
         submitBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Збережено`;
@@ -461,14 +451,11 @@ document.addEventListener("DOMContentLoaded", () => {
     pwdSubmitBtn.textContent = "Збереження...";
 
     try {
-      const res = await fetch(
+      const res = await fetchWithAuth(
         "https://api.cote-lapyx.com/api/v1/users/me/password",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("cl_access")}`,
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             currentPassword: currentPwd,
             newPassword: newPwd,

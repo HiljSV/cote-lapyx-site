@@ -3,6 +3,8 @@
 // SPA-style section switching, mobile sidebar drawer, comment filter tabs
 // =============================================================================
 
+import { fetchWithAuth } from "@js/common/auth.js";
+
 document.addEventListener("DOMContentLoaded", () => {
   // ---------------------------------------------------------------------------
   // Element refs
@@ -20,9 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Admin guard — only isAdmin users may access this page
-  fetch("https://api.cote-lapyx.com/api/v1/users/me", {
-    headers: { Authorization: `Bearer ${localStorage.getItem("cl_access")}` },
-  })
+  fetchWithAuth("https://api.cote-lapyx.com/api/v1/users/me")
     .then((res) => (res.ok ? res.json() : null))
     .then((user) => {
       if (!user?.isAdmin) {
@@ -252,11 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function loadAnalytics(period = "7d") {
-    const token = localStorage.getItem("cl_access");
-    if (!token) return;
-
     const base = "https://api.cote-lapyx.com/api/v1/analytics";
-    const headers = { Authorization: `Bearer ${token}` };
 
     // Set loading state
     document.querySelectorAll(".analytics-stat-value").forEach((el) => {
@@ -273,12 +269,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const [statsRes, pvRes, pagesRes, referrersRes] = await Promise.all([
-        fetch(`${base}/stats?period=${period}`, { headers }),
-        fetch(`${base}/pageviews?period=${period}`, { headers }),
-        fetch(`${base}/metrics?type=url&period=${period}&limit=8`, { headers }),
-        fetch(`${base}/metrics?type=referrer&period=${period}&limit=8`, {
-          headers,
-        }),
+        fetchWithAuth(`${base}/stats?period=${period}`),
+        fetchWithAuth(`${base}/pageviews?period=${period}`),
+        fetchWithAuth(`${base}/metrics?type=url&period=${period}&limit=8`),
+        fetchWithAuth(`${base}/metrics?type=referrer&period=${period}&limit=8`),
       ]);
 
       if (statsRes.ok) {
