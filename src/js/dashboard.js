@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // Reveal admin link for admin users
+  // Load user data: reveal admin link + populate profile form + update sidebar
   (async () => {
     try {
       const res = await fetch("https://api.cote-lapyx.com/api/v1/users/me", {
@@ -31,11 +31,33 @@ document.addEventListener("DOMContentLoaded", () => {
           Authorization: `Bearer ${localStorage.getItem("cl_access")}`,
         },
       });
-      if (res.ok) {
-        const user = await res.json();
-        if (user.isAdmin) {
-          document.getElementById("dash-admin-link")?.removeAttribute("hidden");
-        }
+      if (!res.ok) return;
+      const user = await res.json();
+
+      // Reveal admin link for admin users
+      if (user.isAdmin) {
+        document.getElementById("dash-admin-link")?.removeAttribute("hidden");
+      }
+
+      // Populate profile form with real data
+      const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el && val) el.value = val;
+      };
+      setVal("profile-name", user.name);
+      setVal("profile-email", user.email);
+      setVal("profile-role", user.role);
+      setVal("profile-bio", user.bio);
+
+      // Update sidebar user info block
+      const nameEl = document.querySelector(".dash-sidebar__name");
+      const initEl = document.querySelector(".dash-sidebar__avatar");
+      if (nameEl && user.name) nameEl.textContent = user.name;
+      if (initEl && user.name) {
+        const parts = user.name.trim().split(" ");
+        const initials =
+          parts.length >= 2 ? parts[0][0] + parts[1][0] : parts[0].slice(0, 2);
+        initEl.textContent = initials.toUpperCase();
       }
     } catch (_) {}
   })();
@@ -165,34 +187,76 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ---------------------------------------------------------------------------
-  // Profile form — save feedback (static demo, no real API)
+  // Password visibility toggles
+  // ---------------------------------------------------------------------------
+
+  document.querySelectorAll(".pwd-toggle").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const input = document.getElementById(btn.dataset.target);
+      if (!input) return;
+      const isVisible = input.type === "text";
+      input.type = isVisible ? "password" : "text";
+      btn.querySelector(".pwd-toggle__eye").style.display = isVisible
+        ? ""
+        : "none";
+      btn.querySelector(".pwd-toggle__eye-off").style.display = isVisible
+        ? "none"
+        : "";
+      btn.setAttribute(
+        "aria-label",
+        isVisible ? "Показати пароль" : "Сховати пароль",
+      );
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Profile form — PATCH /api/v1/users/me
   // ---------------------------------------------------------------------------
 
   const profileForm = document.getElementById("dash-profile-form");
 
-  if (profileForm) {
-    profileForm.addEventListener("submit", (e) => {
-      e.preventDefault();
+  profileForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const submitBtn = profileForm.querySelector('[type="submit"]');
+    const originalHTML = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Збереження...";
 
-      const submitBtn = profileForm.querySelector('[type="submit"]');
-      const originalText = submitBtn.innerHTML;
+    const body = {
+      name: document.getElementById("profile-name")?.value?.trim() || undefined,
+      bio: document.getElementById("profile-bio")?.value?.trim() || undefined,
+    };
 
-      // Visual feedback
-      submitBtn.innerHTML = `
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-        </svg>
-        Збережено
-      `;
-      submitBtn.disabled = true;
+    // Strip keys with undefined values before sending
+    Object.keys(body).forEach((k) => body[k] === undefined && delete body[k]);
 
-      // Restore after 2.5s
-      setTimeout(() => {
-        submitBtn.innerHTML = originalText;
+    try {
+      const res = await fetch("https://api.cote-lapyx.com/api/v1/users/me", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("cl_access")}`,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        submitBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Збережено`;
+        setTimeout(() => {
+          submitBtn.innerHTML = originalHTML;
+          submitBtn.disabled = false;
+        }, 2500);
+      } else {
+        submitBtn.innerHTML = originalHTML;
         submitBtn.disabled = false;
-      }, 2500);
-    });
-  }
+        alert("Помилка збереження. Спробуйте ще раз.");
+      }
+    } catch {
+      submitBtn.innerHTML = originalHTML;
+      submitBtn.disabled = false;
+      alert("Помилка з'єднання.");
+    }
+  });
 
   // ---------------------------------------------------------------------------
   // Password change form

@@ -728,6 +728,43 @@
   }
 }
 
+// -----------------------------------------------------------------------------
+// Password input with visibility toggle
+// -----------------------------------------------------------------------------
+
+.pwd-input-wrap {
+  position: relative;
+
+  // Extra right padding so text doesn't run under the button
+  .dash-profile-form__input {
+    padding-right: 42px;
+  }
+}
+
+.pwd-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: rgba(232, 237, 245, 0.4);
+  transition: color 0.2s;
+  line-height: 0;
+
+  &:hover {
+    color: #00e5ff;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #00e5ff;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
 // Admin panel link (shown only to admins)
 .dash-sidebar__admin-link {
   display: flex;
