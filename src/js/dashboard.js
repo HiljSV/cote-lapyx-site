@@ -32,6 +32,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let projectsPage = 0;
   let projectsStatusFilter = "";
   let subscribersPage = 0;
+  let commentsPage = 0;
+  let commentsStatusFilter = "";
+  let subscribersStatusFilter = "";
+  let allSubscribersData = [];
 
   // Load user data: reveal admin link + populate profile form + update sidebar
   (async () => {
@@ -180,7 +184,10 @@ document.addEventListener("DOMContentLoaded", () => {
         loadProjects(0, projectsStatusFilter);
       }
       if (section === "subscribers") {
-        loadSubscribers(0);
+        loadSubscribers(0, subscribersStatusFilter);
+      }
+      if (section === "comments") {
+        loadComments(0, commentsStatusFilter);
       }
       // Close sidebar on mobile after navigation
       if (window.innerWidth <= 991.98) {
@@ -244,6 +251,19 @@ document.addEventListener("DOMContentLoaded", () => {
     PUBLISHED: "published",
     DRAFT: "draft",
     ARCHIVED: "archived",
+  };
+
+  const COMMENT_STATUS_LABEL = {
+    PENDING: "Очікує",
+    APPROVED: "Схвалено",
+    REJECTED: "Відхилено",
+    DELETED: "Видалено",
+  };
+  const COMMENT_STATUS_CLASS = {
+    PENDING: "draft",
+    APPROVED: "published",
+    REJECTED: "archived",
+    DELETED: "archived",
   };
 
   const TYPE_BADGE = {
@@ -607,6 +627,12 @@ document.addEventListener("DOMContentLoaded", () => {
           setField("post-content", post.content);
           setField("post-cover", post.coverImage);
           setField("post-status", post.status);
+          if (post.coverImage) {
+            showCoverPreview("post-cover-preview", post.coverImage);
+          } else {
+            const preview = document.getElementById("post-cover-preview");
+            if (preview) preview.setAttribute("hidden", "");
+          }
         })
         .catch(() => {});
     }
@@ -615,6 +641,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function closePostModal() {
     postModal?.setAttribute("hidden", "");
     document.body.style.overflow = "";
+    const preview = document.getElementById("post-cover-preview");
+    if (preview) preview.setAttribute("hidden", "");
   }
 
   async function handlePostSubmit(e) {
@@ -853,6 +881,12 @@ document.addEventListener("DOMContentLoaded", () => {
           setField("project-url", project.projectUrl);
           setField("project-github", project.githubUrl);
           setField("project-status", project.status);
+          if (project.coverImage) {
+            showCoverPreview("project-cover-preview", project.coverImage);
+          } else {
+            const preview = document.getElementById("project-cover-preview");
+            if (preview) preview.setAttribute("hidden", "");
+          }
         })
         .catch(() => {});
     }
@@ -861,6 +895,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function closeProjectModal() {
     projectModal?.setAttribute("hidden", "");
     document.body.style.overflow = "";
+    const preview = document.getElementById("project-cover-preview");
+    if (preview) preview.setAttribute("hidden", "");
   }
 
   async function handleProjectSubmit(e) {
@@ -1028,8 +1064,9 @@ document.addEventListener("DOMContentLoaded", () => {
     EXPIRED: "archived",
   };
 
-  async function loadSubscribers(page) {
+  async function loadSubscribers(page, statusFilter) {
     subscribersPage = page;
+    subscribersStatusFilter = statusFilter ?? subscribersStatusFilter;
     const listBody = document.getElementById("subscribers-list-body");
     const pagination = document.getElementById("subscribers-pagination");
     if (!listBody) return;
@@ -1037,9 +1074,12 @@ document.addEventListener("DOMContentLoaded", () => {
     listBody.innerHTML = '<div class="dash-list__empty">Завантаження...</div>';
     if (pagination) pagination.innerHTML = "";
 
+    const statusParam = subscribersStatusFilter
+      ? `&status=${subscribersStatusFilter}`
+      : "";
     try {
       const res = await fetchWithAuth(
-        `${API}/admin/subscriptions?size=20&sort=createdAt,desc&page=${page}`,
+        `${API}/admin/subscriptions?size=20&sort=createdAt,desc&page=${page}${statusParam}`,
       );
       if (!res.ok) {
         listBody.innerHTML =
@@ -1047,7 +1087,9 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       const data = await res.json();
-      const rows = (data.content || [])
+      allSubscribersData = data.content || [];
+
+      const rows = allSubscribersData
         .map((sub) => {
           const sClass = SUB_STATUS_CLASS[sub.status] || "draft";
           const sLabel = SUB_STATUS_LABEL[sub.status] || sub.status;
@@ -1057,6 +1099,9 @@ document.addEventListener("DOMContentLoaded", () => {
             <div data-label="Тип">${escHtml(typeLabel)}</div>
             <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
             <div class="dash-list__date" data-label="Дата підписки">${fmtDate(sub.createdAt)}</div>
+            <div class="dash-list__actions" data-label="Дії">
+              <button type="button" class="btn btn--magenta btn--sm" data-action="delete-sub" data-id="${sub.id}">Видалити</button>
+            </div>
           </div>`;
         })
         .join("");
@@ -1077,11 +1122,246 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  async function deleteSubscriber(id) {
+    if (!confirm("Видалити підписника?")) return;
+    try {
+      const res = await fetchWithAuth(`${API}/admin/subscriptions/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok || res.status === 204) {
+        loadSubscribers(subscribersPage, subscribersStatusFilter);
+      } else {
+        alert("Помилка видалення. Спробуйте ще раз.");
+      }
+    } catch {
+      alert("Помилка зʼєднання.");
+    }
+  }
+
+  function exportSubscribersCSV() {
+    if (!allSubscribersData.length) {
+      alert(
+        "Немає даних для експорту. Спочатку завантажте список підписників.",
+      );
+      return;
+    }
+    const header = ["Email", "Тип", "Статус", "Дата підписки"];
+    const rows = allSubscribersData.map((s) => [
+      s.email || "",
+      SUB_TYPE_LABEL[s.type] || s.type || "",
+      SUB_STATUS_LABEL[s.status] || s.status || "",
+      s.createdAt ? new Date(s.createdAt).toLocaleDateString("uk-UA") : "",
+    ]);
+    const csv = [header, ...rows]
+      .map((row) =>
+        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
+      )
+      .join("\n");
+    const blob = new Blob(["﻿" + csv], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `subscribers-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function commentRowHtml(comment) {
+    const sClass = COMMENT_STATUS_CLASS[comment.status] || "draft";
+    const sLabel = COMMENT_STATUS_LABEL[comment.status] || comment.status;
+    const content = comment.content || comment.text || "";
+    const excerpt = content.length > 80 ? content.slice(0, 80) + "…" : content;
+    const postTitle = comment.blogPost?.title || comment.postTitle || "—";
+    const authorName = comment.author?.name || comment.authorName || "—";
+
+    const approveBtn =
+      comment.status === "PENDING"
+        ? `<button type="button" class="btn btn--green btn--sm" data-action="approve-comment" data-id="${comment.id}" title="Схвалити">✓</button>`
+        : "";
+    const rejectBtn =
+      comment.status === "PENDING"
+        ? `<button type="button" class="btn btn--ghost btn--sm" data-action="reject-comment" data-id="${comment.id}" title="Відхилити">✗</button>`
+        : "";
+    const deleteBtn = `<button type="button" class="btn btn--magenta btn--sm" data-action="delete-comment" data-id="${comment.id}" title="Видалити">Видалити</button>`;
+
+    return `<div class="dash-list__row" data-id="${comment.id}">
+      <div data-label="Автор">${escHtml(authorName)}</div>
+      <div data-label="Коментар">${escHtml(excerpt)}</div>
+      <div class="dash-list__title" data-label="Пост">${escHtml(postTitle)}</div>
+      <div class="dash-list__date" data-label="Дата">${fmtDate(comment.createdAt)}</div>
+      <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
+      <div class="dash-list__actions" data-label="Дії">${approveBtn}${rejectBtn}${deleteBtn}</div>
+    </div>`;
+  }
+
+  async function loadComments(page, statusFilter) {
+    commentsPage = page;
+    commentsStatusFilter = statusFilter;
+    const listBody = document.getElementById("comments-list-body");
+    const pagination = document.getElementById("comments-pagination");
+    if (!listBody) return;
+
+    listBody.innerHTML = '<div class="dash-list__empty">Завантаження...</div>';
+    if (pagination) pagination.innerHTML = "";
+
+    const statusParam = statusFilter ? `&status=${statusFilter}` : "";
+    try {
+      const res = await fetchWithAuth(
+        `${API}/admin/comments?size=20&sort=createdAt,desc&page=${page}${statusParam}`,
+      );
+      if (!res.ok) {
+        listBody.innerHTML =
+          '<div class="dash-list__empty">Помилка завантаження</div>';
+        return;
+      }
+      const data = await res.json();
+      const rows = (data.content || []).map(commentRowHtml).join("");
+      listBody.innerHTML =
+        rows || '<div class="dash-list__empty">Коментарів ще немає</div>';
+
+      if (pagination && data.page && data.page.totalPages > 1) {
+        const { number, totalPages } = data.page;
+        pagination.innerHTML = Array.from({ length: totalPages }, (_, i) => {
+          const active = i === number ? " is-active" : "";
+          return `<button type="button" class="dash-pagination__btn${active}" data-page="${i}">${i + 1}</button>`;
+        }).join("");
+      }
+    } catch (err) {
+      console.error("Comments load error:", err);
+      listBody.innerHTML =
+        '<div class="dash-list__empty">Помилка завантаження</div>';
+    }
+  }
+
+  async function moderateComment(id, action) {
+    try {
+      const res = await fetchWithAuth(`${API}/admin/comments/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: action }),
+      });
+      if (res.ok) {
+        loadComments(commentsPage, commentsStatusFilter);
+      } else {
+        alert("Помилка модерації. Спробуйте ще раз.");
+      }
+    } catch {
+      alert("Помилка зʼєднання.");
+    }
+  }
+
+  async function deleteComment(id) {
+    if (!confirm("Видалити коментар?")) return;
+    try {
+      const res = await fetchWithAuth(`${API}/comments/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok || res.status === 204) {
+        loadComments(commentsPage, commentsStatusFilter);
+      } else {
+        alert("Помилка видалення. Спробуйте ще раз.");
+      }
+    } catch {
+      alert("Помилка зʼєднання.");
+    }
+  }
+
+  async function uploadImage(file, urlInputId, previewContainerId) {
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await fetchWithAuth(`${API}/upload/image`, {
+        method: "POST",
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const urlInput = document.getElementById(urlInputId);
+        if (urlInput) urlInput.value = data.url || data.imageUrl || "";
+        showCoverPreview(previewContainerId, data.url || data.imageUrl || "");
+      } else {
+        alert("Помилка завантаження файлу. Спробуйте ще раз.");
+      }
+    } catch {
+      alert("Помилка зʼєднання при завантаженні файлу.");
+    }
+  }
+
+  function showCoverPreview(containerId, src) {
+    const container = document.getElementById(containerId);
+    const img = document.getElementById(containerId + "-img");
+    if (!container || !img || !src) return;
+    img.src = src;
+    container.removeAttribute("hidden");
+  }
+
   document
     .getElementById("subscribers-pagination")
     ?.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-page]");
       if (!btn) return;
-      loadSubscribers(Number(btn.dataset.page));
+      loadSubscribers(Number(btn.dataset.page), subscribersStatusFilter);
+    });
+
+  document
+    .getElementById("subscribers-filter-status")
+    ?.addEventListener("change", (e) => {
+      loadSubscribers(0, e.target.value);
+    });
+
+  document
+    .getElementById("subscribers-export-csv")
+    ?.addEventListener("click", exportSubscribersCSV);
+
+  document
+    .getElementById("subscribers-list-body")
+    ?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-action]");
+      if (!btn) return;
+      if (btn.dataset.action === "delete-sub") deleteSubscriber(btn.dataset.id);
+    });
+
+  document
+    .getElementById("comment-filter-status")
+    ?.addEventListener("change", (e) => {
+      loadComments(0, e.target.value);
+    });
+
+  document
+    .getElementById("comments-list-body")
+    ?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-action]");
+      if (!btn) return;
+      const { action, id } = btn.dataset;
+      if (action === "approve-comment") moderateComment(Number(id), "APPROVED");
+      else if (action === "reject-comment")
+        moderateComment(Number(id), "REJECTED");
+      else if (action === "delete-comment") deleteComment(Number(id));
+    });
+
+  document
+    .getElementById("comments-pagination")
+    ?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-page]");
+      if (!btn) return;
+      loadComments(Number(btn.dataset.page), commentsStatusFilter);
+    });
+
+  document
+    .getElementById("post-cover-file")
+    ?.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (file) uploadImage(file, "post-cover", "post-cover-preview");
+    });
+
+  document
+    .getElementById("project-cover-file")
+    ?.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (file) uploadImage(file, "project-cover", "project-cover-preview");
     });
 });

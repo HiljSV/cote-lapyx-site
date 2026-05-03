@@ -449,40 +449,34 @@
       <section class="dash-section" aria-label="Коментарі">
         <div class="dash-section__header">
           <h2 class="dash-section__title">Коментарі</h2>
+          <div class="dash-section__controls">
+            <select
+              class="dash-list__filter"
+              id="comment-filter-status"
+              aria-label="Фільтр по статусу"
+            >
+              <option value="">Всі</option>
+              <option value="PENDING">Очікують</option>
+              <option value="APPROVED">Схвалені</option>
+              <option value="REJECTED">Відхилені</option>
+            </select>
+          </div>
         </div>
         <div
           class="dash-list dash-list--comments"
           aria-label="Таблиця коментарів"
         >
-          <!-- Header row — hidden on mobile -->
           <div class="dash-list__head" aria-hidden="true">
             <div>Автор</div>
             <div>Коментар</div>
             <div>Пост</div>
             <div>Дата</div>
+            <div>Статус</div>
+            <div>Дії</div>
           </div>
-          <!-- Row 1 -->
-          <div class="dash-list__row">
-            <div data-label="Автор">user_01</div>
-            <div data-label="Коментар">Відмінна стаття, дякую!</div>
-            <div class="dash-list__title" data-label="Пост">Cyberpunk SCSS</div>
-            <div class="dash-list__date" data-label="Дата">12 квіт 2025</div>
-          </div>
-          <!-- Row 2 -->
-          <div class="dash-list__row">
-            <div data-label="Автор">dev_neon</div>
-            <div data-label="Коментар">Можна приклад з neon-border?</div>
-            <div class="dash-list__title" data-label="Пост">Cyberpunk SCSS</div>
-            <div class="dash-list__date" data-label="Дата">11 квіт 2025</div>
-          </div>
-          <!-- Row 3 -->
-          <div class="dash-list__row">
-            <div data-label="Автор">alphacode</div>
-            <div data-label="Коментар">Дуже корисно для старту!</div>
-            <div class="dash-list__title" data-label="Пост">REST API</div>
-            <div class="dash-list__date" data-label="Дата">24 бер 2025</div>
-          </div>
+          <div id="comments-list-body"></div>
         </div>
+        <div class="dash-pagination" id="comments-pagination"></div>
       </section>
     </div>
     <!-- /comments panel -->
@@ -492,6 +486,25 @@
       <section class="dash-section" aria-label="Підписники">
         <div class="dash-section__header">
           <h2 class="dash-section__title">Підписники</h2>
+          <div class="dash-section__controls">
+            <select
+              class="dash-list__filter"
+              id="subscribers-filter-status"
+              aria-label="Фільтр по статусу"
+            >
+              <option value="">Всі</option>
+              <option value="ACTIVE">Активні</option>
+              <option value="CANCELLED">Скасовані</option>
+              <option value="EXPIRED">Закінчились</option>
+            </select>
+            <button
+              type="button"
+              class="btn btn--ghost btn--sm"
+              id="subscribers-export-csv"
+            >
+              Експорт CSV
+            </button>
+          </div>
         </div>
         <div
           class="dash-list dash-list--subscribers"
@@ -502,6 +515,7 @@
             <div>Тип</div>
             <div>Статус</div>
             <div>Дата підписки</div>
+            <div>Дії</div>
           </div>
           <div id="subscribers-list-body"></div>
         </div>
@@ -899,17 +913,32 @@ Frontend Developer із захопленням до cyberpunk-естетики �
           <span class="dash-modal__error" id="post-content-error"></span>
         </div>
 
-        <!-- Cover image URL -->
+        <!-- Cover image -->
         <div class="dash-modal__field">
-          <label class="dash-modal__label" for="post-cover"
-            >Обкладинка (URL)</label
-          >
-          <input
-            class="dash-modal__input"
-            type="url"
-            id="post-cover"
-            name="coverImage"
-          />
+          <label class="dash-modal__label">Обкладинка</label>
+          <div class="dash-modal__upload-wrap">
+            <input
+              class="dash-modal__input dash-modal__input--url"
+              type="url"
+              id="post-cover"
+              name="coverImage"
+              placeholder="https://…"
+            />
+            <label
+              class="btn btn--ghost btn--sm dash-modal__upload-btn"
+              for="post-cover-file"
+              >&#8593; Файл</label
+            >
+            <input
+              type="file"
+              id="post-cover-file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              class="dash-modal__file-input"
+            />
+          </div>
+          <div class="dash-modal__img-preview" id="post-cover-preview" hidden>
+            <img id="post-cover-preview-img" alt="Прев'ю обкладинки" />
+          </div>
         </div>
 
         <!-- Status -->
@@ -1037,17 +1066,36 @@ Frontend Developer із захопленням до cyberpunk-естетики �
           />
         </div>
 
-        <!-- Cover image URL -->
+        <!-- Cover image -->
         <div class="dash-modal__field">
-          <label class="dash-modal__label" for="project-cover"
-            >Обкладинка (URL)</label
+          <label class="dash-modal__label">Обкладинка</label>
+          <div class="dash-modal__upload-wrap">
+            <input
+              class="dash-modal__input dash-modal__input--url"
+              type="url"
+              id="project-cover"
+              name="coverImage"
+              placeholder="https://…"
+            />
+            <label
+              class="btn btn--ghost btn--sm dash-modal__upload-btn"
+              for="project-cover-file"
+              >&#8593; Файл</label
+            >
+            <input
+              type="file"
+              id="project-cover-file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              class="dash-modal__file-input"
+            />
+          </div>
+          <div
+            class="dash-modal__img-preview"
+            id="project-cover-preview"
+            hidden
           >
-          <input
-            class="dash-modal__input"
-            type="url"
-            id="project-cover"
-            name="coverImage"
-          />
+            <img id="project-cover-preview-img" alt="Прев'ю обкладинки" />
+          </div>
         </div>
 
         <!-- Project URL -->
