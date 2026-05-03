@@ -1287,7 +1287,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (urlInput) urlInput.value = data.url || data.imageUrl || "";
         showCoverPreview(previewContainerId, data.url || data.imageUrl || "");
       } else {
-        alert("Помилка завантаження файлу. Спробуйте ще раз.");
+        const err = await res.json().catch(() => ({}));
+        const msg =
+          err.detail ||
+          err.message ||
+          "Помилка завантаження файлу. Спробуйте ще раз.";
+        alert(msg);
       }
     } catch {
       alert("Помилка зʼєднання при завантаженні файлу.");
