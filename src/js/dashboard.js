@@ -23,6 +23,23 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  // Reveal admin link for admin users
+  (async () => {
+    try {
+      const res = await fetch("https://api.cote-lapyx.com/api/v1/users/me", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("cl_access")}`,
+        },
+      });
+      if (res.ok) {
+        const user = await res.json();
+        if (user.isAdmin) {
+          document.getElementById("dash-admin-link")?.removeAttribute("hidden");
+        }
+      }
+    } catch (_) {}
+  })();
+
   // ---------------------------------------------------------------------------
   // Sidebar open / close (mobile)
   // ---------------------------------------------------------------------------

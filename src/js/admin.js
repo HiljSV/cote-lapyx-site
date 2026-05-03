@@ -19,6 +19,20 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  // Admin guard — only isAdmin users may access this page
+  fetch("https://api.cote-lapyx.com/api/v1/users/me", {
+    headers: { Authorization: `Bearer ${localStorage.getItem("cl_access")}` },
+  })
+    .then((res) => (res.ok ? res.json() : null))
+    .then((user) => {
+      if (!user?.isAdmin) {
+        window.location.replace("/dashboard.html");
+      }
+    })
+    .catch(() => {
+      window.location.replace("/dashboard.html");
+    });
+
   const overlay = document.getElementById("admin-overlay");
   const mobileToggle = document.getElementById("admin-mobile-toggle");
   const closeBtn = document.getElementById("admin-sidebar-close");

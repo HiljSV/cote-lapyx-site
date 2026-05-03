@@ -697,3 +697,32 @@
     flex-wrap: wrap;
   }
 }
+
+// Admin panel link (shown only to admins)
+.dash-sidebar__admin-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 12px 12px;
+  padding: 10px 16px;
+  border: 1px solid rgba(224, 64, 251, 0.35);
+  border-radius: 6px;
+  color: #e040fb;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  background: rgba(224, 64, 251, 0.06);
+  transition: all 0.2s ease;
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    border-color: #e040fb;
+    background: rgba(224, 64, 251, 0.12);
+    box-shadow: 0 0 12px rgba(224, 64, 251, 0.2);
+  }
+}
