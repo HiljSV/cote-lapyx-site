@@ -110,6 +110,7 @@
   }
 
   &__social-link {
+    // Visual size 32px, bumped to 44px on mobile for touch target compliance
     width: 32px;
     height: 32px;
     display: flex;
@@ -121,6 +122,11 @@
     text-decoration: none;
     font-size: 15px;
     transition: all 0.2s ease;
+
+    @media (max-width: toEm($mobile)) {
+      width: 44px;
+      height: 44px;
+    }
 
     &:hover,
     &:focus-visible {

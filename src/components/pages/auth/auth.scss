@@ -321,6 +321,11 @@
   &__options {
     display: flex;
     gap: 12px;
+
+    // Stack role cards vertically on narrow mobile to avoid cramped layout
+    @media (max-width: toEm($mobileSmall)) {
+      flex-direction: column;
+    }
   }
 
   // Visually hidden native radio

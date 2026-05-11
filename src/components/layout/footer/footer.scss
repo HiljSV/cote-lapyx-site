@@ -64,7 +64,8 @@
   }
 
   &__tagline {
-    @include adaptiveValue("font-size", 16, 18);
+    // 16px desktop → 14px mobile
+    @include adaptiveValue("font-size", 16, 14);
     color: $text-muted;
     line-height: 1.6;
   }
@@ -92,7 +93,8 @@
   }
 
   &__nav-link {
-    @include adaptiveValue("font-size", 16, 18);
+    // 16px desktop → 14px mobile
+    @include adaptiveValue("font-size", 16, 14);
     color: $text-secondary;
     text-decoration: none;
     transition: color 0.2s ease;
@@ -154,6 +156,7 @@
   }
 
   &__social-link {
+    // Visual size 34px, padded to 44px touch target on mobile
     width: 34px;
     height: 34px;
     display: flex;
@@ -165,6 +168,12 @@
     text-decoration: none;
     font-size: 16px;
     transition: all 0.2s ease;
+
+    // Minimum 44px touch target on mobile
+    @media (max-width: toEm($mobile)) {
+      width: 44px;
+      height: 44px;
+    }
 
     &:hover,
     &:focus-visible {
@@ -184,8 +193,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 24px;
-    flex-wrap: nowrap;
+    gap: 12px 24px;
+    // Allow wrapping so copyright text doesn't overflow on 375px
+    flex-wrap: wrap;
     border-top: 1px solid $border-cyan;
     padding: 16px 0;
 

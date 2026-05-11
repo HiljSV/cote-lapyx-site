@@ -492,11 +492,18 @@
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
+
+    // On very narrow screens stack the input on its own line
+    @media (max-width: toEm($mobileSmall)) {
+      flex-direction: column;
+      align-items: stretch;
+    }
   }
 
   &__input {
     flex: 1;
-    min-width: 200px;
+    // Reduced min-width on mobile so the input + button fit at 375px
+    min-width: 160px;
     height: 40px;
     padding: 0 14px;
     background: rgba($bg-dark, 0.8);
@@ -506,6 +513,8 @@
     font-family: $fontFamily;
     font-size: 14px;
     outline: none;
+    // Never grow wider than its container
+    max-width: 100%;
     transition:
       border-color 0.2s ease,
       box-shadow 0.2s ease;

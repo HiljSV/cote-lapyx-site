@@ -81,6 +81,9 @@
     font-size: clamp(30px, 4vw, 48px);
     font-weight: 700;
     color: $text-primary;
+    // Prevent long names from overflowing the container on mobile
+    word-break: break-word;
+    overflow-wrap: break-word;
   }
 
   &__role {
@@ -200,9 +203,14 @@
       box-shadow: 0 0 16px rgba($neon-cyan, 0.12);
     }
 
+    // Disable horizontal shift on mobile — can cause overflow
     @media (max-width: toEm($mobile)) {
       flex-direction: column;
       align-items: flex-start;
+
+      &:hover {
+        transform: none;
+      }
     }
   }
 

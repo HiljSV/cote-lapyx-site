@@ -21,6 +21,10 @@
   position: relative;
   overflow: hidden;
   white-space: nowrap;
+  // Minimum 44px touch target on mobile for all button variants
+  @media (max-width: toEm($mobile)) {
+    min-height: 44px;
+  }
 
   &::before {
     content: "";
@@ -114,6 +118,11 @@
   &--sm {
     padding: 8px 18px;
     font-size: 12px;
+
+    // Ensure minimum 44px touch target on mobile
+    @media (max-width: toEm($mobile)) {
+      min-height: 44px;
+    }
   }
 
   &--lg {

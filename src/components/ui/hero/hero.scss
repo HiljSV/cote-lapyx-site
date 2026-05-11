@@ -306,6 +306,9 @@
     font-weight: 700;
     @include neon-text($neon-cyan);
     margin-bottom: 16px;
+    // Prevent long headings from overflowing narrow containers
+    word-break: break-word;
+    overflow-wrap: break-word;
   }
 
   &__subheading {

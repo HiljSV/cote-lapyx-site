@@ -177,6 +177,11 @@
     @media (max-width: toEm($tablet)) {
       margin-left: auto;
     }
+
+    // Tighter gap on small mobile to prevent overflow
+    @media (max-width: toEm($mobileSmall)) {
+      gap: 8px;
+    }
   }
 
   &__lang {
@@ -312,6 +317,12 @@
     cursor: pointer;
     transition: all 0.2s ease;
 
+    // Minimum 44px touch target on mobile
+    @media (max-width: toEm($mobile)) {
+      width: 44px;
+      height: 44px;
+    }
+
     &:hover {
       color: $neon-cyan;
       border-color: rgba($neon-cyan, 0.5);
@@ -336,8 +347,9 @@
     flex-direction: column;
     justify-content: center;
     gap: 5px;
-    width: 36px;
-    height: 36px;
+    // Minimum 44px touch target on mobile
+    width: 44px;
+    height: 44px;
     background: transparent;
     border: 1px solid $border-cyan;
     border-radius: 6px;

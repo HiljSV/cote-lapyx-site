@@ -18,6 +18,8 @@ body {
   color: $mainColor;
   font-family: $fontFamily;
   font-size: #{$fontSize}px;
+  // Prevent horizontal scroll caused by overflowing children
+  overflow-x: hidden;
 
   // Скролл заблоковано
   [data-fls-scrolllock] & {

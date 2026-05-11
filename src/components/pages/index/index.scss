@@ -75,7 +75,8 @@
   }
 
   &__body {
-    @include adaptiveValue("font-size", 16, 18);
+    // 16px desktop → 15px mobile (minSize must be <= startSize for correct scale)
+    @include adaptiveValue("font-size", 16, 15);
     color: $text-secondary;
     line-height: 1.8;
   }

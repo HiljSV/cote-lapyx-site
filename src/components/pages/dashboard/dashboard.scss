@@ -387,6 +387,9 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    // Wrap title + action button on small screens to avoid overflow
+    flex-wrap: wrap;
+    gap: 12px;
   }
 
   &__title {
@@ -790,6 +793,8 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 20px;
+  // Allow filters to wrap on narrow screens instead of overflowing
+  flex-wrap: wrap;
 }
 
 // Cyberpunk-styled select for filter controls
@@ -811,6 +816,8 @@
   background-repeat: no-repeat;
   background-position: right 10px center;
   padding-right: 30px;
+  // Prevent overflow on narrow screens
+  max-width: 100%;
 
   option {
     background: $bg-surface;
@@ -1042,6 +1049,8 @@
     justify-content: flex-end;
     gap: 12px;
     margin-top: 24px;
+    // Allow buttons to wrap on very narrow screens
+    flex-wrap: wrap;
   }
 
   // Submit feedback (success / error)
@@ -1128,6 +1137,8 @@
   background-repeat: no-repeat;
   background-position: right 10px center;
   padding-right: 30px;
+  // Prevent overflow on narrow screens
+  max-width: 100%;
 
   option {
     background: $bg-surface;
