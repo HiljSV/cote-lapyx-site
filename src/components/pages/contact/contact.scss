@@ -1,0 +1,366 @@
+// =============================================================================
+// Contact page — BEM component styles
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// Contact page wrapper (.contact-page)
+// Full-width section container — bg driven by .section--dark modifier
+// -----------------------------------------------------------------------------
+
+.contact-page {
+  // Section header spacing — visually-hidden h2 has no rendered height
+  // Layout lives entirely inside .contact-layout below
+}
+
+// -----------------------------------------------------------------------------
+// Two-column contact layout (.contact-layout)
+// Left: contact info cards | Right: contact form
+// Collapses to single column on mobile
+// -----------------------------------------------------------------------------
+
+.contact-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  @include adaptiveValue("gap", 64, 40);
+  align-items: start;
+
+  // Stack to single column on mobile
+  @media (max-width: toEm($mobile)) {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Contact info column (.contact-info)
+// Vertical stack of contact items with introductory text
+// -----------------------------------------------------------------------------
+
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  // Intro paragraph above the contact cards
+  &__intro {
+    @include adaptiveValue("font-size", 16, 15);
+    color: $text-secondary;
+    line-height: 1.75;
+    margin-bottom: 8px;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Individual contact item (.contact-item)
+// Anchor tag: icon circle left + label/value right
+// Variants: --cyan, --magenta, --green drive the icon color
+// -----------------------------------------------------------------------------
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  @include glass-card;
+  padding: 16px 20px;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    box-shadow 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.2s ease;
+
+  // Lift + neon glow on hover
+  &:hover {
+    transform: translateX(4px);
+    box-shadow:
+      0 0 20px rgba($neon-cyan, 0.1),
+      0 0 40px rgba($neon-cyan, 0.05);
+    border-color: rgba($neon-cyan, 0.4);
+  }
+
+  // Keyboard focus — visible outline
+  &:focus-visible {
+    outline: 2px solid $neon-cyan;
+    outline-offset: 3px;
+  }
+
+  @media (max-width: toEm($mobileSmall)) {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+
+  // ---- Icon circle ----
+
+  &__icon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: box-shadow 0.25s ease;
+
+    // Cyan variant
+    &--cyan {
+      background: rgba($neon-cyan, 0.08);
+      border: 1px solid rgba($neon-cyan, 0.35);
+      color: $neon-cyan;
+      box-shadow: 0 0 10px rgba($neon-cyan, 0.12);
+
+      .contact-item:hover & {
+        box-shadow: 0 0 14px rgba($neon-cyan, 0.3);
+      }
+    }
+
+    // Magenta variant
+    &--magenta {
+      background: rgba($neon-magenta, 0.08);
+      border: 1px solid rgba($neon-magenta, 0.35);
+      color: $neon-magenta;
+      box-shadow: 0 0 10px rgba($neon-magenta, 0.12);
+
+      .contact-item:hover & {
+        box-shadow: 0 0 14px rgba($neon-magenta, 0.3);
+      }
+    }
+
+    // Green variant
+    &--green {
+      background: rgba($neon-green, 0.06);
+      border: 1px solid rgba($neon-green, 0.3);
+      color: $neon-green;
+      box-shadow: 0 0 10px rgba($neon-green, 0.1);
+
+      .contact-item:hover & {
+        box-shadow: 0 0 14px rgba($neon-green, 0.28);
+      }
+    }
+
+    // SVG inside the icon circle
+    svg {
+      display: block;
+    }
+  }
+
+  // ---- Text body: label + value ----
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0; // prevent flex overflow on long values
+  }
+
+  // Small uppercase label ("Email", "Telegram", etc.)
+  &__label {
+    font-family: $fontHeading;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: $text-muted;
+  }
+
+  // The actual contact value / handle
+  &__value {
+    font-size: 15px;
+    font-weight: 500;
+    color: $text-primary;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.2s ease;
+
+    .contact-item:hover & {
+      color: $neon-cyan;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Form column wrapper (.contact-form-wrap)
+// Provides the glass-card container around the form
+// -----------------------------------------------------------------------------
+
+.contact-form-wrap {
+  @include glass-card;
+  padding: 40px 36px;
+
+  @media (max-width: toEm($tablet)) {
+    padding: 32px 28px;
+  }
+
+  @media (max-width: toEm($mobile)) {
+    padding: 28px 20px;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Contact form (.contact-form)
+// Full BEM form with neon inputs, validation states, banners
+// -----------------------------------------------------------------------------
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  // ---- Field group ----
+
+  &__group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  // ---- Label ----
+
+  &__label {
+    font-family: $fontHeading;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: $text-secondary;
+  }
+
+  // Required asterisk — decorative, aria-hidden on the span
+  &__required {
+    color: $neon-magenta;
+    margin-left: 2px;
+  }
+
+  // ---- Input & Textarea — shared base ----
+
+  &__input,
+  &__textarea {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba($bg-surface, 0.7);
+    border: 1px solid $border-cyan;
+    border-radius: 6px;
+    color: $text-primary;
+    font-family: $fontFamily;
+    font-size: 15px;
+    outline: none;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease;
+    appearance: none;
+
+    &::placeholder {
+      color: $text-muted;
+    }
+
+    &:hover {
+      border-color: rgba($neon-cyan, 0.45);
+    }
+
+    // Neon glow on focus — spec: 0 0 0 2px + spread glow
+    &:focus {
+      border-color: $neon-cyan;
+      box-shadow:
+        0 0 0 2px $neon-cyan,
+        0 0 12px rgba($neon-cyan, 0.3);
+      background: rgba($bg-surface, 0.9);
+    }
+
+    // Error state — red border + subtle red glow
+    &--error {
+      border-color: #ff3860;
+      box-shadow: 0 0 0 2px rgba(#ff3860, 0.25);
+
+      &:focus {
+        border-color: #ff3860;
+        box-shadow:
+          0 0 0 2px #ff3860,
+          0 0 10px rgba(#ff3860, 0.2);
+      }
+    }
+  }
+
+  // ---- Textarea specifics ----
+
+  &__textarea {
+    resize: vertical;
+    min-height: 130px;
+    line-height: 1.65;
+  }
+
+  // ---- Inline validation error message ----
+
+  &__error {
+    font-size: 12px;
+    font-weight: 600;
+    color: #ff3860;
+    line-height: 1.4;
+
+    // hidden attribute hides it; JS removes it
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  // ---- Form footer: submit + hint ----
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  // Submit button — inherits .btn .btn--cyan, no extra sizing needed
+  &__btn {
+    // Disabled state while submitting
+    &:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+  }
+
+  // "* обов'язкові поля" hint
+  &__hint {
+    font-size: 12px;
+    color: $text-muted;
+    margin: 0;
+  }
+
+  // ---- Status banners ----
+
+  &__banner {
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 15px;
+    line-height: 1.5;
+
+    // hidden attribute — JS toggles
+    &[hidden] {
+      display: none;
+    }
+
+    strong {
+      display: inline;
+    }
+
+    // Success — green neon tint
+    &--success {
+      background: rgba($neon-green, 0.08);
+      border: 1px solid rgba($neon-green, 0.4);
+      color: $neon-green;
+      box-shadow: 0 0 16px rgba($neon-green, 0.08);
+    }
+
+    // Error — red tint
+    &--error {
+      background: rgba(#ff3860, 0.08);
+      border: 1px solid rgba(#ff3860, 0.4);
+      color: #ff6b8a;
+      box-shadow: 0 0 16px rgba(#ff3860, 0.06);
+    }
+  }
+}

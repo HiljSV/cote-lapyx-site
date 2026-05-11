@@ -1,0 +1,24 @@
+<script type="module" src="@js/contact.js"></script>
+<template
+  src="@components/templates/inner/inner.html"
+  locals='{
+  "title": "Контакти — cote-lapyx | Зв'\''яжіться з нами",
+  "lang": "uk",
+  "preloader": {"enable":"false","once":"false"},
+  "keywords": "контакти cote-lapyx, зв'\''язатись з розробниками, IT студія Україна",
+  "description": "Маєш ідею або питання? Напиши нам — відповімо швидко. Telegram, LinkedIn, GitHub або форма на сайті.",
+  "canonical": "https://cote-lapyx.com/contact.html",
+  "og_type": "website",
+  "og_locale": "uk_UA"
+}'
+>
+  <block name="header">
+    <include src="@components/layout/header/header.html" locals=\'{"active":"Contact"}\'></include>
+  </block>
+  <block name="main">
+    <include src="@components/pages/contact/contact.html" locals="{}"></include>
+  </block>
+  <block name="footer">
+    <include src="@components/layout/footer/footer.html" locals="{}"></include>
+  </block>
+</template>
