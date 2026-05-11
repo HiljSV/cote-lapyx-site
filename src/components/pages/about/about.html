@@ -1,0 +1,296 @@
+<!-- ============================================================ -->
+<!-- about.html — About page component                          -->
+<!-- Sections: page-hero, mission, values, team, timeline, cta  -->
+<!-- ============================================================ -->
+
+<!-- Section 1: Page Hero -->
+<div class="page-hero">
+  <div class="page-hero__container">
+    <h1 class="page-hero__heading">Про нас</h1>
+    <p class="page-hero__subheading">
+      Від першого пікселя до фінального деплою — одна команда
+    </p>
+  </div>
+</div>
+
+<!-- Section 2: Mission — two-column: text + stats -->
+<section
+  class="section section--surface about-mission"
+  id="mission"
+  aria-labelledby="mission-title"
+>
+  <div class="about-mission__container">
+    <!-- Left column: headline + mission text -->
+    <div class="about-mission__text-col">
+      <h2 class="section-title" id="mission-title">Наша місія</h2>
+      <p class="about-mission__body">
+        Ми — cote-lapyx: команда, яку обʼєднує одне — любов до коду, дизайну і
+        продуктів, що реально працюють. Ми будуємо цифрові продукти повного
+        циклу: від концепції та дизайну до серверної логіки і підтримки.
+        Frontend, backend, UI/UX — три ролі, одна команда, один стандарт якості.
+        Програмуємо, проектуємо і запускаємо — від першого пікселя до фінального
+        деплою.
+      </p>
+    </div>
+
+    <!-- Right column: stat boxes -->
+    <div class="about-mission__stats" aria-label="Статистика команди">
+      <!-- Stat: specialists -->
+      <div class="about-mission__stat">
+        <span class="about-mission__stat-value neon-text-cyan">3</span>
+        <span class="about-mission__stat-label">Спеціалісти</span>
+      </div>
+      <!-- Stat: projects -->
+      <div class="about-mission__stat">
+        <span class="about-mission__stat-value neon-text-magenta">10+</span>
+        <span class="about-mission__stat-label">Проектів</span>
+      </div>
+      <!-- Stat: founding year -->
+      <div class="about-mission__stat">
+        <span class="about-mission__stat-value neon-text-green">2019</span>
+        <span class="about-mission__stat-label">Рік ідеї</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Section 3: Values — glass cards grid -->
+<section
+  class="section section--dark about-values"
+  id="values"
+  aria-labelledby="values-title"
+>
+  <div class="about-values__container">
+    <header class="section__header">
+      <h2 class="section-title" id="values-title">Наші цінності</h2>
+    </header>
+
+    <div class="about-values__grid">
+      <!-- Value card 1: Full cycle -->
+      <article
+        class="value-card value-card--cyan"
+        aria-label="Цінність: Повний цикл"
+      >
+        <!-- Hexagonal icon with code symbol -->
+        <div class="value-card__icon value-card__icon--cyan" aria-hidden="true">
+          <span class="value-card__icon-symbol">&lt;/&gt;</span>
+        </div>
+        <h3 class="value-card__title">
+          Повний цикл — наша зона відповідальності
+        </h3>
+        <p class="value-card__desc">
+          Ми думаємо про продукт цілісно: від wireframe до production-сервера.
+          Кожна функція, кожен компонент, кожен піксель — результат свідомого
+          рішення.
+        </p>
+      </article>
+
+      <!-- Value card 2: Constant growth -->
+      <article
+        class="value-card value-card--magenta"
+        aria-label="Цінність: Постійне зростання"
+      >
+        <!-- Hexagonal icon with growth arrow -->
+        <div
+          class="value-card__icon value-card__icon--magenta"
+          aria-hidden="true"
+        >
+          <span class="value-card__icon-symbol">&#9651;</span>
+        </div>
+        <h3 class="value-card__title">
+          Постійне зростання — не опція, а звичка
+        </h3>
+        <p class="value-card__desc">
+          Ми вчимось, експериментуємо і впроваджуємо нове — тому що стояти на
+          місці в IT означає відставати.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Section 4: Team bios — three member cards -->
+<section
+  class="section section--surface about-team"
+  id="team"
+  aria-labelledby="team-title"
+>
+  <div class="about-team__container">
+    <header class="section__header">
+      <h2 class="section-title" id="team-title">Команда</h2>
+    </header>
+
+    <div class="about-team__grid">
+      <!-- Member: Serhii — Fullstack / Frontend -->
+      <article class="about-member" aria-label="Сергій — Fullstack / Frontend">
+        <div class="about-member__photo-wrap">
+          <!-- data-member-slug links to API /team-members slug for avatar hydration -->
+          <img
+            class="about-member__photo"
+            src="@img/serhii/prince.png"
+            alt="Сергій — Fullstack / Frontend Developer"
+            width="120"
+            height="120"
+            data-member-slug="serhii"
+          />
+        </div>
+        <div class="about-member__body">
+          <h3 class="about-member__name">Сергій</h3>
+          <span class="neon-badge neon-badge--cyan about-member__badge"
+            >Fullstack / Frontend</span
+          >
+          <blockquote class="about-member__bio">
+            <p>
+              Я — Сергій, fullstack/frontend-розробник. Перетворюю ідеї на те,
+              що можна побачити і відчути в браузері. Обожнюю деталі: правильний
+              відступ, плавна анімація, верстка, що однаково виглядає і на
+              320px, і на 4K. Автор візуального стилю cote-lapyx — все, що ти
+              бачиш тут, починалось з мого екрана.
+            </p>
+          </blockquote>
+          <a
+            href="member.html?id=serhii"
+            class="btn btn--cyan btn--sm about-member__btn"
+            >Повний профіль</a
+          >
+        </div>
+      </article>
+
+      <!-- Member: Andrii — Backend Developer -->
+      <article class="about-member" aria-label="Андрій — Backend Developer">
+        <div class="about-member__photo-wrap">
+          <!-- data-member-slug links to API /team-members slug for avatar hydration -->
+          <img
+            class="about-member__photo"
+            src="@img/andrii/coteAndrii.png"
+            alt="Андрій — Backend Developer"
+            width="120"
+            height="120"
+            data-member-slug="andrii"
+          />
+        </div>
+        <div class="about-member__body">
+          <h3 class="about-member__name">Андрій</h3>
+          <span class="neon-badge neon-badge--green about-member__badge"
+            >Backend Developer</span
+          >
+          <blockquote class="about-member__bio">
+            <p>
+              Я — Андрій, backend-розробник. Будую те, чого не видно, але без
+              чого нічого не працює: серверна логіка, API, аутентифікація, бази
+              даних. Java і C# — мій основний інструментарій. Якщо система
+              тримає навантаження і не падає о третій ночі — це моя робота.
+            </p>
+          </blockquote>
+          <a
+            href="member.html?id=andrii"
+            class="btn btn--green btn--sm about-member__btn"
+            >Повний профіль</a
+          >
+        </div>
+      </article>
+
+      <!-- Member: Valeriia — UI/UX Designer -->
+      <article class="about-member" aria-label="Валерія — UI/UX Designer">
+        <div class="about-member__photo-wrap">
+          <!-- data-member-slug links to API /team-members slug for avatar hydration -->
+          <img
+            class="about-member__photo"
+            src="@img/valerii/valerka.png"
+            alt="Валерія — UI/UX Designer"
+            width="120"
+            height="120"
+            data-member-slug="valeriia"
+          />
+        </div>
+        <div class="about-member__body">
+          <h3 class="about-member__name">Валерія</h3>
+          <span class="neon-badge neon-badge--magenta about-member__badge"
+            >UI/UX Designer</span
+          >
+          <blockquote class="about-member__bio">
+            <p>
+              Я — Валерія, UI/UX дизайнер. Думаю інтерфейсами: перед тим, як
+              щось зʼявиться в коді, я вже знаю, як це виглядатиме і як це
+              відчуватиметься. Мій інструмент — Figma і гостре відчуття того, що
+              зручно, а що просто красиво. Автор бренд-кіту cote-lapyx і
+              геометричної системи логотипів.
+            </p>
+          </blockquote>
+          <a
+            href="member.html?id=valeriia"
+            class="btn btn--magenta btn--sm about-member__btn"
+            >Повний профіль</a
+          >
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Section 5: Timeline — vertical neon-accented milestones -->
+<section
+  class="section section--dark about-timeline"
+  id="timeline"
+  aria-labelledby="timeline-title"
+>
+  <div class="about-timeline__container">
+    <header class="section__header">
+      <h2 class="section-title" id="timeline-title">Наш шлях</h2>
+    </header>
+
+    <ol
+      class="about-timeline__list"
+      role="list"
+      aria-label="Хронологія проекту"
+    >
+      <!-- Timeline point: 2019 — Idea -->
+      <li class="about-timeline__item">
+        <div class="about-timeline__marker" aria-hidden="true"></div>
+        <div class="about-timeline__content">
+          <time class="about-timeline__year" datetime="2019">2019</time>
+          <h3 class="about-timeline__heading">Ідея</h3>
+          <p class="about-timeline__desc">
+            Перші розмови про власний проект, перші спільні задачі.
+          </p>
+        </div>
+      </li>
+
+      <!-- Timeline point: 2023–2025 — Development -->
+      <li class="about-timeline__item">
+        <div class="about-timeline__marker" aria-hidden="true"></div>
+        <div class="about-timeline__content">
+          <time class="about-timeline__year" datetime="2023">2023–2025</time>
+          <h3 class="about-timeline__heading">Розробка</h3>
+          <p class="about-timeline__desc">
+            Накопичення досвіду, стек, практика на реальних проектах.
+          </p>
+        </div>
+      </li>
+
+      <!-- Timeline point: 2026 — Launch -->
+      <li class="about-timeline__item about-timeline__item--active">
+        <div class="about-timeline__marker" aria-hidden="true"></div>
+        <div class="about-timeline__content">
+          <time class="about-timeline__year" datetime="2026">2026</time>
+          <h3 class="about-timeline__heading">Заснування</h3>
+          <p class="about-timeline__desc">
+            cote-lapyx офіційно стартує як IT-студія.
+          </p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- Section 6: CTA — two action buttons -->
+<section class="section section--surface about-cta" aria-label="Заклик до дії">
+  <div class="about-cta__container">
+    <div class="about-cta__actions">
+      <!-- Primary CTA: services -->
+      <a href="services.html" class="btn btn--cyan">Наші послуги</a>
+      <!-- Secondary CTA: contact -->
+      <a href="contact.html" class="btn btn--magenta">Написати нам</a>
+    </div>
+  </div>
+</section>
