@@ -94,6 +94,10 @@
     color: $neon-cyan;
     text-shadow: 0 0 10px rgba($neon-cyan, 0.8);
     flex-shrink: 0;
+    // When JS sets background-image for avatar photo
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
   }
 
   &__info {
@@ -1216,5 +1220,98 @@
   .dash-list__head,
   .dash-list__row {
     grid-template-columns: 1fr 90px 110px 130px 100px;
+  }
+}
+
+// =============================================================================
+// Avatar upload block (profile section)
+// =============================================================================
+
+.dash-avatar-block {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 20px 0 24px;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.15);
+  margin-bottom: 24px;
+
+  // ── Preview circle ────────────────────────────────────────────────────────
+  &__preview-wrap {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+  }
+
+  // Initials placeholder (visible when no avatar)
+  &__initials {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(0, 229, 255, 0.1);
+    border: 2px solid rgba(0, 229, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: #00e5ff;
+    text-transform: uppercase;
+    user-select: none;
+  }
+
+  // Actual photo (visible when avatar URL present)
+  &__img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 229, 255, 0.4);
+    object-fit: cover;
+    display: block;
+  }
+
+  // Camera-icon overlay — appears on hover
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    cursor: pointer;
+    color: #fff;
+
+    .dash-avatar-block__preview-wrap:hover & {
+      opacity: 1;
+    }
+  }
+
+  // Hidden native file input
+  &__input {
+    display: none;
+  }
+
+  // ── Action buttons ────────────────────────────────────────────────────────
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  // Hint text below buttons
+  &__hint {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
+    margin: 0;
+  }
+
+  // ── Mobile: stack vertically ──────────────────────────────────────────────
+  @media (max-width: toEm($mobileSmall)) {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
