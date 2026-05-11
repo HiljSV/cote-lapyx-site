@@ -238,12 +238,16 @@ document.addEventListener("DOMContentLoaded", () => {
     logoutBtn.addEventListener("click", async () => {
       const refreshToken = localStorage.getItem("cl_refresh");
       if (refreshToken) {
-        // Best-effort logout call — don't block redirect on failure
-        fetch("https://api.cote-lapyx.com/api/v1/auth/logout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ refreshToken }),
-        }).catch(() => {});
+        // Await logout call so the token is invalidated server-side before redirect
+        try {
+          await fetch("https://api.cote-lapyx.com/api/v1/auth/logout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ refreshToken }),
+          });
+        } catch {
+          /* best-effort — proceed to local cleanup regardless */
+        }
       }
       localStorage.removeItem("cl_access");
       localStorage.removeItem("cl_refresh");
@@ -1170,6 +1174,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  /* Prevents CSV formula injection (Excel/LibreOffice RCE via =, +, -, @) */
+  function csvCell(v) {
+    const s = String(v ?? "");
+    return /^[=+\-@\t\r]/.test(s)
+      ? `"'${s.replace(/"/g, '""')}"`
+      : `"${s.replace(/"/g, '""')}"`;
+  }
+
   function exportSubscribersCSV() {
     if (!allSubscribersData.length) {
       alert(
@@ -1185,9 +1197,7 @@ document.addEventListener("DOMContentLoaded", () => {
       s.createdAt ? new Date(s.createdAt).toLocaleDateString("uk-UA") : "",
     ]);
     const csv = [header, ...rows]
-      .map((row) =>
-        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","),
-      )
+      .map((row) => row.map(csvCell).join(","))
       .join("\n");
     const blob = new Blob(["﻿" + csv], {
       type: "text/csv;charset=utf-8;",

@@ -156,11 +156,16 @@ document.addEventListener("DOMContentLoaded", () => {
   logoutBtn?.addEventListener("click", async () => {
     const refreshToken = localStorage.getItem("cl_refresh");
     if (refreshToken) {
-      fetch("https://api.cote-lapyx.com/api/v1/auth/logout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken }),
-      }).catch(() => {});
+      // Await logout call so the token is invalidated server-side before redirect
+      try {
+        await fetch("https://api.cote-lapyx.com/api/v1/auth/logout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken }),
+        });
+      } catch {
+        /* best-effort — proceed to local cleanup regardless */
+      }
     }
     localStorage.removeItem("cl_access");
     localStorage.removeItem("cl_refresh");

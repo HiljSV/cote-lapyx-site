@@ -4,12 +4,14 @@
 
 const API = "https://api.cote-lapyx.com/api/v1";
 
+/* Sanitizes user-controlled strings before injecting into innerHTML */
 function escHtml(str) {
   return String(str ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function fmtDate(iso) {
@@ -249,10 +251,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const div = document.createElement("div");
         div.className = "post-comment";
         div.innerHTML = `
-          <div class="post-comment__avatar" aria-hidden="true">${initials}</div>
+          <div class="post-comment__avatar" aria-hidden="true">${escHtml(initials)}</div>
           <div class="post-comment__body">
             <div class="post-comment__meta">
-              <span class="post-comment__author">${authorName}</span>
+              <span class="post-comment__author">${escHtml(authorName)}</span>
               <time class="post-comment__date">${date}</time>
             </div>
             <p class="post-comment__text">${String(c.content || "")
