@@ -838,7 +838,8 @@ document.addEventListener("DOMContentLoaded", () => {
       <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
       <div class="dash-list__actions" data-label="Дії">
         <button type="button" class="btn btn--ghost btn--sm" data-action="edit" data-slug="${escHtml(project.slug)}">Редагувати</button>
-        <button type="button" class="btn btn--magenta btn--sm" data-action="delete" data-slug="${escHtml(project.slug)}" data-title="${escHtml(project.title)}">Видалити</button>
+        <button type="button" class="btn btn--magenta btn--sm" data-action="delete"
+          data-slug="${escHtml(project.slug)}" data-id="${project.id}" data-title="${escHtml(project.title)}">Видалити</button>
       </div>
     </div>`;
   }
@@ -1028,12 +1029,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  async function deleteProject(slug, title) {
+  async function deleteProject(slug, id, title) {
     if (!confirm(`Видалити проект "${title}"?`)) return;
+    // Use slug-based URL when slug exists; fall back to ID for projects with empty slug
+    const url = slug
+      ? `${API}/projects/${encodeURIComponent(slug)}`
+      : `${API}/projects/id/${id}`;
     try {
-      const res = await fetchWithAuth(`${API}/projects/${slug}`, {
-        method: "DELETE",
-      });
+      const res = await fetchWithAuth(url, { method: "DELETE" });
       if (res.ok || res.status === 204) {
         loadProjects(projectsPage, projectsStatusFilter);
         if (myUserId) loadOverviewStats(myUserId);
@@ -1070,9 +1073,9 @@ document.addEventListener("DOMContentLoaded", () => {
     ?.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-action]");
       if (!btn) return;
-      const { action, slug, title } = btn.dataset;
+      const { action, slug, id, title } = btn.dataset;
       if (action === "edit") openProjectModal(slug);
-      else if (action === "delete") deleteProject(slug, title);
+      else if (action === "delete") deleteProject(slug, id, title);
     });
 
   document
