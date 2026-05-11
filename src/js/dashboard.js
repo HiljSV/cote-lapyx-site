@@ -3,6 +3,8 @@
 // =============================================================================
 
 import { fetchWithAuth } from "@js/common/auth.js";
+import Cropper from "cropperjs";
+import "cropperjs/dist/cropper.css";
 
 document.addEventListener("DOMContentLoaded", () => {
   // ---------------------------------------------------------------------------
@@ -1419,27 +1421,89 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
   // ===========================================================================
-  // Avatar upload / delete
+  // Avatar upload / delete + Cropper.js crop modal
   // ===========================================================================
 
-  // Bind "Змінити фото" button to the hidden file input
-  document
-    .getElementById("dash-avatar-upload-btn")
-    ?.addEventListener("click", () => {
-      document.getElementById("dash-avatar-input")?.click();
-    });
+  let cropperInstance = null;
 
-  // When user picks a file — upload to POST /users/me/avatar
-  document
-    .getElementById("dash-avatar-input")
-    ?.addEventListener("change", async (e) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
+  const cropModal = document.getElementById("crop-modal");
+  const cropImage = document.getElementById("crop-image");
+  const cropSaveBtn = document.getElementById("crop-save-btn");
+  const cropCancelBtn = document.getElementById("crop-cancel-btn");
+  const cropModalClose = document.getElementById("crop-modal-close");
+  const cropModalBackdrop = document.getElementById("crop-modal-backdrop");
 
-      const fd = new FormData();
-      fd.append("file", file);
+  // Open crop modal: load file into <img>, init Cropper.js
+  function openCropModal(file) {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      // Destroy previous Cropper instance if any
+      if (cropperInstance) {
+        cropperInstance.destroy();
+        cropperInstance = null;
+      }
+      cropImage.src = ev.target.result;
+      cropModal.hidden = false;
+      // Init after the image is rendered to get correct dimensions
+      cropperInstance = new Cropper(cropImage, {
+        aspectRatio: 1,
+        viewMode: 1,
+        dragMode: "move",
+        autoCropArea: 0.8,
+        restore: false,
+        guides: true,
+        center: true,
+        highlight: false,
+        cropBoxMovable: false,
+        cropBoxResizable: false,
+        toggleDragModeOnDblclick: false,
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Close crop modal and clean up
+  function closeCropModal() {
+    cropModal.hidden = true;
+    if (cropperInstance) {
+      cropperInstance.destroy();
+      cropperInstance = null;
+    }
+    cropImage.src = "";
+    // Reset file input so same file can be re-selected
+    const input = document.getElementById("dash-avatar-input");
+    if (input) input.value = "";
+  }
+
+  if (cropCancelBtn) cropCancelBtn.addEventListener("click", closeCropModal);
+  if (cropModalClose) cropModalClose.addEventListener("click", closeCropModal);
+  if (cropModalBackdrop)
+    cropModalBackdrop.addEventListener("click", closeCropModal);
+
+  // Save: get cropped canvas blob → upload → close modal
+  if (cropSaveBtn) {
+    cropSaveBtn.addEventListener("click", async () => {
+      if (!cropperInstance) return;
+
+      cropSaveBtn.disabled = true;
+      cropSaveBtn.textContent = "Збереження…";
 
       try {
+        const canvas = cropperInstance.getCroppedCanvas({
+          width: 400,
+          height: 400,
+        });
+        const blob = await new Promise((resolve, reject) =>
+          canvas.toBlob(
+            (b) => (b ? resolve(b) : reject(new Error("Canvas error"))),
+            "image/jpeg",
+            0.92,
+          ),
+        );
+
+        const fd = new FormData();
+        fd.append("file", blob, "avatar.jpg");
+
         const res = await fetchWithAuth(
           "https://api.cote-lapyx.com/api/v1/users/me/avatar",
           { method: "POST", body: fd },
@@ -1449,12 +1513,31 @@ document.addEventListener("DOMContentLoaded", () => {
           throw new Error(msg);
         }
         const updatedUser = await res.json();
+        closeCropModal();
         initAvatarWidget(updatedUser);
       } catch (err) {
-        alert("Помилка завантаження фото: " + err.message);
+        alert("Помилка збереження фото: " + err.message);
+      } finally {
+        cropSaveBtn.disabled = false;
+        cropSaveBtn.textContent = "Зберегти фото";
       }
-      // Reset input so the same file can be picked again if needed
-      e.target.value = "";
+    });
+  }
+
+  // Bind "Змінити фото" button to the hidden file input
+  document
+    .getElementById("dash-avatar-upload-btn")
+    ?.addEventListener("click", () => {
+      document.getElementById("dash-avatar-input")?.click();
+    });
+
+  // When user picks a file — open crop modal instead of uploading directly
+  document
+    .getElementById("dash-avatar-input")
+    ?.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      openCropModal(file);
     });
 
   // Delete avatar via DELETE /users/me/avatar
