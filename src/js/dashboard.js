@@ -27,6 +27,10 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
+  // Hide content while /users/me is being verified — prevents stale-token flash
+  const wrapper = document.querySelector(".wrapper");
+  if (wrapper) wrapper.style.visibility = "hidden";
+
   // Shared state — set once /users/me resolves
   let myUserId = null;
   let postsPage = 0;
@@ -45,6 +49,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const res = await fetchWithAuth(
         "https://api.cote-lapyx.com/api/v1/users/me",
       );
+      // Reveal page — auth confirmed (or signOut already fired on 401)
+      if (wrapper) wrapper.style.visibility = "";
       if (!res.ok) return;
       const user = await res.json();
 
@@ -230,9 +236,9 @@ document.addEventListener("DOMContentLoaded", () => {
     ?.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-action]");
       if (!btn) return;
-      const { action, slug, title } = btn.dataset;
+      const { action, slug, id, title } = btn.dataset;
       if (action === "edit") openProjectModal(slug);
-      else if (action === "delete") deleteProject(slug, title);
+      else if (action === "delete") deleteProject(slug, id, title);
     });
 
   // ---------------------------------------------------------------------------
@@ -347,7 +353,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
       <div class="dash-list__actions" data-label="Дії">
         <button type="button" class="btn btn--ghost btn--sm" data-action="edit" data-slug="${escHtml(project.slug)}">Редагувати</button>
-        <button type="button" class="btn btn--magenta btn--sm" data-action="delete" data-slug="${escHtml(project.slug)}" data-title="${escHtml(project.title)}">Видалити</button>
+        <button type="button" class="btn btn--magenta btn--sm" data-action="delete" data-slug="${escHtml(project.slug)}" data-id="${project.id}" data-title="${escHtml(project.title)}">Видалити</button>
       </div>
     </div>`;
   }
