@@ -1,6 +1,6 @@
 # cote-lapyx.com — Чек-ліст прогресу
 
-> Живий документ. Відмічай що зроблено, що в роботі, що переробити. Синхронізовано з PROJECT.md станом на 2026-04-23.
+> Живий документ. Оновлено: 2026-05-03
 
 ## Легенда
 
@@ -23,9 +23,9 @@
 
 ---
 
-## Етап 1.5 — API Contract ✅ блокер знятий
+## Етап 1.5 — API Contract ✅
 
-- [x] Опис REST endpoints у форматі OpenAPI/Swagger — `docs/api-v1.yaml` v1.2.0
+- [x] Опис REST endpoints у форматі OpenAPI/Swagger — `docs/api-v1.yaml` v1.5.0
 - [x] Структура запитів/відповідей: auth (JWT access 15хв + refresh 30д)
 - [x] Структура запитів/відповідей: users
 - [x] Структура запитів/відповідей: posts (general + personal)
@@ -65,78 +65,35 @@
 - [x] Проекти — `projects.html`
 - [x] Блог — `blog.html`
 - [x] Сторінка учасника — `member.html`
+- [x] Стаття блогу — `post.html` (з лайками, вибраним, коментарями, підпискою)
+- [x] Сторінка проекту — `project.html`
 - [ ] Про нас — `about.html`
 - [ ] Послуги — `services.html`
-- [ ] Стаття блогу — `blog-post.html` (single post template)
-- [ ] Сторінка проекту — `project.html` (single project template)
 - [ ] Контакти — `contact.html`
 
 ### Авторизація
 
-#### Завдання A1 — `login.html` + `_auth.scss`
+- [x] `login.html` + `_auth.scss` — форма, cyberpunk декор, адаптив
+- [x] `register.html` — форма реєстрації, валідація, автологін після реєстрації
+- [x] Header: "Увійти" ↔ "Кабінет" залежно від JWT токена
 
-- [ ] Centered auth-card на `$bg-dark`
-- [ ] Форма: email + password
-- [ ] Кнопка "Увійти" (btn--cyan), посилання "Реєстрація"
-- [ ] Cyberpunk декор: hex-bg, bracket-кути, neon glow
-- [ ] Адаптив mobile-first
-- [ ] ⚠️ Security review перед деплоєм
+### Dashboard (Owner)
 
-#### Завдання A2 — `register.html`
+- [x] `dashboard.html` — повний single-page dashboard з sidebar і табами
+- [x] Огляд — статистика (пости, проекти, підписники), останні публікації + проекти з thumbnail
+- [x] Пости — список з Edit/Delete, фільтр статусу, пагінація
+- [x] Проекти — список з Edit/Delete, фільтр статусу, пагінація
+- [x] Коментарі — список з модерацією (approve/delete)
+- [x] Підписники — список, фільтр типу, видалення, CSV-експорт
+- [x] Профіль — редагування даних, зміна пароля
+- [x] Аналітика — Umami панель
+- [x] Завантаження обкладинки (upload + preview) для постів і проектів
+- [x] Sidebar прихований для не-адмінів (admin tab)
 
-- [ ] Той самий auth-card патерн (розширює `_auth.scss`)
-- [ ] Форма: ім'я + email + password + confirm password
-- [ ] Role hint "реєструєшся як Subscriber"
-- [ ] Посилання "Вже є акаунт? Увійти"
-- [ ] Валідація форм (frontend JS)
+### Адмінка
 
-#### Завдання A3 — `dashboard.html` shell (layout)
-
-- [ ] Sidebar навігація (owner / subscriber — два варіанти)
-- [ ] Header у dashboard-режимі
-- [ ] Основна content-зона
-- [ ] `_dashboard.scss` — базовий layout
-- [ ] Адаптив: sidebar → drawer на mobile
-
-#### Завдання A4 — Dashboard Owner-контент
-
-- [ ] Статистика: кількість постів, проектів, підписників
-- [ ] Список останніх постів
-- [ ] Сітка останніх проектів
-- [ ] Кнопка "Швидко редагувати профіль"
-
-#### Завдання A5 — Dashboard Subscriber-контент
-
-- [ ] Профіль-картка
-- [ ] Список "Мої коментарі"
-- [ ] Список "Мої підписки"
-- [ ] Список "Обране"
-
-### Dashboard підсторінки (Owner)
-
-- [ ] `dashboard/profile.html`
-- [ ] `dashboard/posts.html`
-- [ ] `dashboard/projects.html`
-- [ ] `dashboard/comments.html`
-- [ ] `dashboard/subscribers.html`
-
-### Dashboard підсторінки (Subscriber)
-
-- [ ] `dashboard/profile.html`
-- [ ] `dashboard/comments.html`
-- [ ] `dashboard/subscriptions.html`
-- [ ] `dashboard/favorites.html`
-
-### Адмінка (owner-only)
-
-- [ ] `admin.html`
-- [ ] `admin/users.html`
-- [ ] `admin/posts.html`
-- [ ] `admin/projects.html`
-- [ ] `admin/categories.html`
-- [ ] `admin/tags.html`
-- [ ] `admin/messages.html`
-- [ ] `admin/settings.html`
+- [x] `admin.html` — guard (тільки isAdmin), базові панелі
+- [ ] Окремі сторінки admin/users, admin/categories, admin/tags — не потрібні (all in dashboard)
 
 ### JavaScript
 
@@ -145,24 +102,18 @@
 - [x] Smooth scroll
 - [x] Filters (проекти, блог)
 - [x] Cursor trail
-- [ ] Валідація форм
+- [x] Hex-grid canvas анімація
+- [x] fetchWithAuth (JWT interceptor + silent refresh)
+- [x] DOM guards (bundle mode — крос-сторінкова ізоляція)
+- [ ] Валідація форм (contact, login, register — частково є)
 - [ ] i18n runtime switcher (uk/en/fr/de)
 
 ### Адаптив
 
-Брейкпоінти: $pc=1200 / $tablet=992 / $mobile=768 / $mobileSmall=480 / $minWidth=320
-
-- [x] Базовий адаптив — index, team, projects, blog, member (2026-04-24)
-- [ ] Тест Mobile 375px — index (реальний пристрій / DevTools)
-- [ ] Тест Mobile 375px — team
-- [ ] Тест Mobile 375px — projects
-- [ ] Тест Mobile 375px — blog
-- [ ] Тест Mobile 375px — member
-- [ ] Тест Tablet 768px — index
-- [ ] Тест Tablet 768px — team
-- [ ] Тест Tablet 768px — projects
-- [ ] Тест Tablet 768px — blog
-- [ ] Тест Tablet 768px — member
+- [x] Базовий адаптив — index, team, projects, blog, member
+- [x] Dashboard — sidebar → drawer на mobile, CSS Grid dash-list
+- [ ] Тест Mobile 375px — всі сторінки (реальний пристрій / DevTools)
+- [ ] Тест Tablet 768px — всі сторінки
 
 ### Мультиязичність (статичний UI)
 
@@ -191,71 +142,75 @@
 
 ---
 
-## Етап 4 — Backend (Андрій + Сергій)
+## Етап 4 — Backend ✅ (задеплоєний)
 
 ### Інфраструктура
 
-- [ ] Spring Boot проект (init)
-- [ ] PostgreSQL локально (docker-compose для dev)
-- [ ] Flyway / Liquibase міграції
+- [x] Spring Boot 3.3 + Java 21 (scaffold + пакетна структура)
+- [x] PostgreSQL 15 на сервері
+- [x] Flyway міграції (V1 — схема, V2 — seed OWNER accounts)
+- [ ] docker-compose для локальної розробки — опційно
 
-### Схема БД (див. PROJECT.md §База даних)
+### Схема БД
 
-- [ ] `users`
-- [ ] `team_members`
-- [ ] `blog_posts`
-- [ ] `categories` + `tags` + `post_categories` + `post_tags`
-- [ ] `projects`
-- [ ] `comments`
-- [ ] `subscriptions`
-- [ ] `refresh_tokens`
-- [ ] `contacts`
-- [ ] `contact_messages`
-- [ ] `translations`
+- [x] `users`
+- [x] `team_members`
+- [x] `blog_posts` + `post_categories` + `post_tags`
+- [x] `categories` + `tags`
+- [x] `projects` + `project_technologies` + `project_gallery`
+- [x] `comments`
+- [x] `favorites`
+- [x] `subscriptions`
+- [x] `refresh_tokens`
+- [x] `contacts` + `contact_messages`
+- [x] `translations`
 
-### REST API (CRUD)
+### REST API (всі ендпоінти задеплоєні)
 
-- [ ] `/api/auth` — login, register, refresh, logout
-- [ ] `/api/users`
-- [ ] `/api/team-members`
-- [ ] `/api/posts` (filter: type=general|personal)
-- [ ] `/api/projects`
-- [ ] `/api/comments`
-- [ ] `/api/categories` + `/api/tags`
-- [ ] `/api/subscriptions`
-- [ ] `/api/contact-messages`
-- [ ] `/api/translations`
+- [x] `/api/v1/auth` — register, login, refresh, logout
+- [x] `/api/v1/users` — профіль, зміна пароля
+- [x] `/api/v1/team-members`
+- [x] `/api/v1/posts` — CRUD, фільтри, slug
+- [x] `/api/v1/projects` — CRUD, фільтри, slug
+- [x] `/api/v1/comments` — create, delete, approve
+- [x] `/api/v1/categories` + `/api/v1/tags`
+- [x] `/api/v1/subscriptions`
+- [x] `/api/v1/contact` — публічна форма
+- [x] `/api/v1/translations`
+- [x] `/api/v1/upload` — завантаження файлів (10MB)
+- [x] `/api/v1/admin/**` — ROLE_OWNER: users, posts, projects, comments, dashboard, analytics
+- [x] `/api/v1/analytics/**` — Umami proxy
 
 ### Авторизація
 
-- [ ] Spring Security + JWT (access + refresh)
-- [ ] Ролі: `owner`, `subscriber`
-- [ ] `bcrypt` для паролів
-- [ ] Rate limiting на `/api/auth`
-- [ ] ⚠️ Security audit перед продом
+- [x] Spring Security + JWT (access 15хв + refresh 30д)
+- [x] Ролі: `OWNER`, `SUBSCRIBER`
+- [x] bcrypt паролі
+- [x] isAdmin flag (Сергій + Андрій)
+- [ ] Rate limiting на `/api/auth` — не реалізовано
+- [ ] ⚠️ Security audit перед прод-релізом
 
-### Документація та деплой бекенду
+### Документація та деплой
 
-- [ ] Swagger / OpenAPI на `/api/docs`
-- [ ] Dockerfile
-- [ ] `docker-compose.yml` (api + postgres + nginx)
-
-### Міграція з PHP
-
-- [ ] Перенести `src/php/register`, `sendmail`, `telegram` на Spring Boot
-- [ ] Відключити PHP коли бекенд стабільний
+- [x] Swagger / OpenAPI — `https://api.cote-lapyx.com/swagger-ui/index.html`
+- [x] GitHub Actions CI/CD deploy workflow
+- [x] systemd unit `cote-lapyx-backend.service`
+- [x] README з посиланням на frontend repo
+- [ ] Dockerfile / docker-compose — опційно
 
 ---
 
-## Етап 5 — Інтеграція Frontend ↔ Backend
+## Етап 5 — Інтеграція Frontend ↔ Backend ✅
 
-- [ ] Клієнт API на фронтенді (fetch wrapper + JWT interceptor)
-- [ ] Login / Register форми → API
-- [ ] Dashboard Owner — всі CRUD
-- [ ] Dashboard Subscriber — підписки, коментарі, обране
-- [ ] Адмінка — всі CRUD
-- [ ] Коментарі до статей (SSE або polling)
-- [ ] Мультиязичність динамічного контенту через `/api/translations`
+- [x] fetchWithAuth — JWT interceptor + silent refresh
+- [x] Login / Register форми → API
+- [x] Dashboard Owner — пости, проекти, коментарі, підписники, профіль
+- [x] Адмінка — users, guard isAdmin
+- [x] Коментарі до статей (polling)
+- [x] Лайки, вибране, підписка на пості
+- [x] Upload обкладинки (пости + проекти)
+- [ ] Dashboard Subscriber — підписки, коментарі, обране (не реалізовано для subscriber-ролі)
+- [ ] Мультиязичність через `/api/translations`
 - [ ] Контактна форма → `/api/contact-messages`
 
 ---
@@ -264,7 +219,7 @@
 
 - [ ] Функціональне тестування (вручну, всі юзер-флоу)
 - [ ] Адаптив Mobile/Tablet (реальні пристрої + DevTools)
-- [ ] Продуктивність: Lighthouse > 90 (Performance, Accessibility, SEO)
+- [ ] Продуктивність: Lighthouse > 90
 - [ ] Cross-browser (Chrome, Firefox, Safari, Edge)
 - [ ] Безпека: OWASP Top 10 (security-agent)
 - [ ] E2E тести (Playwright / Cypress) — опційно
@@ -275,37 +230,41 @@
 
 ### Поточний стан
 
-- [x] Сайт на сервері: `/var/www/cote-lapyx.com/html/` (Apache)
-- [x] SSL Let's Encrypt
-- [x] CI/CD: `.github/workflows/deploy.yml` (push main → rsync)
-- [x] SSH відновлено (2026-04-23)
-- [x] Deploy key перевірено в `~/.ssh/authorized_keys` (2026-04-24) + workflow зелений
+- [x] Frontend: `/var/www/cote-lapyx.com/html/` (Apache)
+- [x] Backend: `/opt/cote-lapyx-backend/app.jar` (systemd, порт 8082)
+- [x] Apache reverse proxy: `api.cote-lapyx.com` → Spring Boot
+- [x] Apache Alias: `/uploads/` → `/opt/cote-lapyx-backend/uploads/`
+- [x] SSL Let's Encrypt (frontend + api субдомен)
+- [x] CI/CD frontend: `.github/workflows/deploy.yml` (push main → rsync)
+- [x] CI/CD backend: GitHub Actions (push main → scp + systemctl restart)
 
-### Цільовий стек (після міграції на Spring Boot)
+### Цільовий стек (після міграції — опційно)
 
 - [ ] Nginx замість Apache
 - [ ] Docker + docker-compose (api + db + nginx)
-- [ ] Env-конфіги (dev / staging / prod)
 - [ ] Бекапи PostgreSQL (cron + off-site)
 
 ---
 
-## Технічний борг / Потрібно виправити 🔧
+## Технічний борг 🔧
 
 - [ ] Замінити MySQL → PostgreSQL у CLAUDE.md (рядок "DB: MySQL on server" застарів)
-- [ ] Прибрати `src/php/` коли бекенд мігрує на Spring Boot
-- [x] Permission-шум у git виправлено (`git config core.fileMode false`, 2026-04-24)
-- [ ] Перевірити чи Figma Make URL у PROJECT.md (`Q8XJ7EGnLCrkeP6v9Q5wX1`) ще живий — є другий `B4DeuZMrLBIU3VeG5HYL7o` в memory
+- [ ] Прибрати `src/php/` — бекенд вже на Spring Boot
+- [ ] Dashboard Subscriber (підписки, коментарі, обране) — не реалізовано
+- [ ] Rate limiting на `/api/auth`
+- [ ] Контактна форма → API (зараз без бекенду)
+- [ ] Сторінки: `about.html`, `services.html`, `contact.html`
+- [ ] SEO / OpenGraph / JSON-LD
+- [ ] i18n (мультиязичність UI)
+- [x] Permission-шум у git виправлено (`git config core.fileMode false`)
+- [x] Cross-repo посилання (frontend ↔ backend README/PROJECT.md)
 
 ---
 
 ## Синхронізація з Notion
 
-Основні задачі дзеркально створені в Notion Tasks DB, фільтр `Project = cote-lapyx`:
 https://www.notion.so/ae024f5d34f14964b5eeb829f73cf9fb
-
-Якщо задача закрита/додана тут — оновити і в Notion.
 
 ---
 
-_Оновлено: 2026-04-24_
+_Оновлено: 2026-05-03_
