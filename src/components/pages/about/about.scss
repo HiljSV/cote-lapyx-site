@@ -1,0 +1,473 @@
+// =============================================================================
+// About page — BEM component styles
+// =============================================================================
+
+// -----------------------------------------------------------------------------
+// Mission section (.about-mission)
+// Two-column: text left, stat boxes right
+// -----------------------------------------------------------------------------
+
+.about-mission {
+  // Two-column grid: text + stats
+  &__container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    @include adaptiveValue("gap", 60, 32);
+    align-items: center;
+
+    @media (max-width: toEm($mobile)) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  // Left column: title + body text
+  &__text-col {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  &__body {
+    @include adaptiveValue("font-size", 16, 15);
+    color: $text-secondary;
+    line-height: 1.8;
+  }
+
+  // Right column: three stat boxes in a row
+  &__stats {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    @media (max-width: toEm($mobile)) {
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
+  }
+
+  // Individual stat box — glass card style
+  &__stat {
+    @include glass-card;
+    padding: 24px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+    transition: box-shadow 0.25s ease;
+
+    &:hover {
+      box-shadow:
+        0 0 16px rgba($neon-cyan, 0.12),
+        0 0 32px rgba($neon-cyan, 0.06);
+    }
+
+    @media (max-width: toEm($mobile)) {
+      flex: 1 1 140px;
+      padding: 20px 16px;
+    }
+  }
+
+  // Stat number — large neon figure
+  &__stat-value {
+    font-family: $fontHeading;
+    @include adaptiveValue("font-size", 48, 32);
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  // Stat description label
+  &__stat-label {
+    font-family: $fontHeading;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: $text-muted;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Values section (.about-values)
+// Two glass cards in a grid
+// -----------------------------------------------------------------------------
+
+.about-values {
+  &__container {
+    // Container wraps header + grid
+  }
+
+  // Two-column cards grid
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+
+    @media (max-width: toEm($mobile)) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+// Value card — glass card with hexagonal icon
+.value-card {
+  @include glass-card;
+  padding: 36px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition:
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+
+  // Hover: neon border glow — modifier drives the color
+  &--cyan:hover {
+    @include neon-border($neon-cyan);
+    box-shadow:
+      0 0 20px rgba($neon-cyan, 0.1),
+      0 0 40px rgba($neon-cyan, 0.05);
+  }
+
+  &--magenta:hover {
+    @include neon-border($neon-magenta);
+    box-shadow:
+      0 0 20px rgba($neon-magenta, 0.1),
+      0 0 40px rgba($neon-magenta, 0.05);
+  }
+
+  @media (max-width: toEm($mobile)) {
+    padding: 28px 24px;
+  }
+
+  // Hexagonal icon container
+  &__icon {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    flex-shrink: 0;
+
+    // Cyan variant
+    &--cyan {
+      background: rgba($neon-cyan, 0.08);
+      border: 1px solid rgba($neon-cyan, 0.35);
+      box-shadow: 0 0 12px rgba($neon-cyan, 0.15);
+    }
+
+    // Magenta variant
+    &--magenta {
+      background: rgba($neon-magenta, 0.08);
+      border: 1px solid rgba($neon-magenta, 0.35);
+      box-shadow: 0 0 12px rgba($neon-magenta, 0.15);
+    }
+  }
+
+  // Symbol inside the icon
+  &__icon-symbol {
+    font-family: $fontHeading;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+
+    .value-card__icon--cyan & {
+      color: $neon-cyan;
+    }
+
+    .value-card__icon--magenta & {
+      color: $neon-magenta;
+    }
+  }
+
+  // Card heading
+  &__title {
+    font-family: $fontHeading;
+    @include adaptiveValue("font-size", 20, 17);
+    font-weight: 700;
+    color: $text-primary;
+    line-height: 1.3;
+  }
+
+  // Card description
+  &__desc {
+    font-size: 15px;
+    color: $text-secondary;
+    line-height: 1.7;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Team bios section (.about-team)
+// Three member cards in a grid
+// -----------------------------------------------------------------------------
+
+.about-team {
+  // Three-column grid for member cards
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+
+    @media (max-width: toEm($tablet)) {
+      grid-template-columns: repeat(2, 1fr);
+
+      // Last odd card spans full row
+      & > *:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: toEm($mobile)) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+// Individual member card (.about-member)
+.about-member {
+  @include glass-card;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  transition:
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 8px 32px rgba($neon-cyan, 0.1),
+      0 0 16px rgba($neon-cyan, 0.06);
+  }
+
+  @media (max-width: toEm($mobile)) {
+    padding: 28px 20px;
+
+    // Disable vertical lift on mobile — can cause reflow issues
+    &:hover {
+      transform: none;
+    }
+  }
+
+  // Circular photo wrapper with neon gradient ring
+  &__photo-wrap {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(135deg, $neon-cyan, $neon-magenta);
+    flex-shrink: 0;
+
+    @media (max-width: toEm($mobileSmall)) {
+      width: 100px;
+      height: 100px;
+    }
+  }
+
+  // Member portrait image
+  &__photo {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+    background: $bg-surface;
+  }
+
+  // Member full name
+  &__name {
+    font-family: $fontHeading;
+    font-size: 22px;
+    font-weight: 700;
+    color: $text-primary;
+    margin-top: 4px;
+  }
+
+  // Role badge — uses shared .neon-badge classes
+  &__badge {
+    // Spacing handled by flex gap on parent
+  }
+
+  // First-person bio quote
+  &__bio {
+    margin: 0;
+    font-size: 14px;
+    color: $text-secondary;
+    line-height: 1.7;
+    text-align: left;
+
+    p {
+      margin: 0;
+    }
+
+    // Decorative left border
+    border-left: 2px solid rgba($neon-cyan, 0.25);
+    padding-left: 14px;
+  }
+
+  // Profile button — pushed to bottom via margin
+  &__btn {
+    margin-top: 8px;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Timeline section (.about-timeline)
+// Vertical list with neon cyan left border
+// -----------------------------------------------------------------------------
+
+.about-timeline {
+  &__list {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+
+    // Continuous vertical neon line connecting all items
+    &::before {
+      content: "";
+      position: absolute;
+      top: 12px;
+      left: 11px;
+      width: 2px;
+      bottom: 12px;
+      background: linear-gradient(to bottom, $neon-cyan, rgba($neon-cyan, 0.2));
+      box-shadow: 0 0 8px rgba($neon-cyan, 0.3);
+    }
+  }
+
+  // Each timeline entry
+  &__item {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 0 0 40px 0;
+
+    &:last-child {
+      padding-bottom: 0;
+    }
+
+    @media (max-width: toEm($mobile)) {
+      gap: 16px;
+      padding-bottom: 28px;
+    }
+  }
+
+  // Neon dot marker on the vertical line
+  &__marker {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: $bg-dark;
+    border: 2px solid $neon-cyan;
+    box-shadow:
+      0 0 8px $neon-cyan,
+      0 0 16px rgba($neon-cyan, 0.4);
+    position: relative;
+    z-index: 1;
+    // Inner fill dot
+    &::after {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border-radius: 50%;
+      background: rgba($neon-cyan, 0.35);
+    }
+  }
+
+  // Active (current) item gets brighter marker
+  &__item--active &__marker {
+    background: rgba($neon-cyan, 0.15);
+    animation: neon-pulse-cyan 2.5s ease-in-out infinite;
+
+    &::after {
+      background: $neon-cyan;
+    }
+  }
+
+  // Content area beside the marker
+  &__content {
+    @include glass-card;
+    padding: 20px 24px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-left: 2px solid rgba($neon-cyan, 0.35);
+
+    @media (max-width: toEm($mobile)) {
+      padding: 16px 18px;
+    }
+  }
+
+  // Year badge
+  &__year {
+    font-family: $fontHeading;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: $neon-cyan;
+    display: block;
+  }
+
+  // Milestone heading
+  &__heading {
+    font-family: $fontHeading;
+    font-size: 18px;
+    font-weight: 700;
+    color: $text-primary;
+  }
+
+  // Milestone description
+  &__desc {
+    font-size: 14px;
+    color: $text-secondary;
+    line-height: 1.6;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// CTA section (.about-cta)
+// Centered two-button row
+// -----------------------------------------------------------------------------
+
+.about-cta {
+  // Container centers the button group
+  &__container {
+    display: flex;
+    justify-content: center;
+  }
+
+  // Button row — side by side, wraps on mobile
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    @media (max-width: toEm($mobileSmall)) {
+      flex-direction: column;
+      width: 100%;
+
+      // Full-width buttons on smallest screens
+      .btn {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+<template
+  src="@components/templates/inner/inner.html"
+  locals='{
+  "title": "Про нас — cote-lapyx | IT-студія повного циклу",
+  "lang": "uk",
+  "preloader": {"enable":"false","once":"false"},
+  "keywords": "cote-lapyx про нас, IT студія Україна, команда розробників",
+  "description": "cote-lapyx — команда frontend, backend і UI/UX фахівців. Дізнайтесь більше про нашу місію, цінності та шлях від ідеї до продукту.",
+  "canonical": "https://cote-lapyx.com/about.html",
+  "og_type": "website",
+  "og_locale": "uk_UA"
+}'
+>
+  <block name="header">
+    <include src="@components/layout/header/header.html" locals=\'{"active":"About"}\'></include>
+  </block>
+  <block name="main">
+    <include src="@components/pages/about/about.html" locals="{}"></include>
+  </block>
+  <block name="footer">
+    <include src="@components/layout/footer/footer.html" locals="{}"></include>
+  </block>
+</template>
