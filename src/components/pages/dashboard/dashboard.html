@@ -23,7 +23,14 @@
 
     <!-- User info -->
     <div class="dash-sidebar__user">
-      <div class="dash-sidebar__avatar" aria-hidden="true">СК</div>
+      <!-- Avatar: JS hydrates with photo or initials from /users/me -->
+      <div
+        class="dash-sidebar__avatar"
+        id="dash-sidebar-avatar"
+        aria-hidden="true"
+      >
+        СК
+      </div>
       <div class="dash-sidebar__info">
         <p class="dash-sidebar__name">Сергій</p>
         <p class="dash-sidebar__role">Frontend Developer</p>
@@ -530,6 +537,75 @@
         <div class="dash-section__header">
           <h2 class="dash-section__title">Профіль</h2>
         </div>
+
+        <!-- ===== AVATAR UPLOAD BLOCK ===== -->
+        <!-- JS initialises preview from user.avatar; handles upload/delete -->
+        <div class="dash-avatar-block">
+          <div class="dash-avatar-block__preview-wrap">
+            <!-- Shown when no avatar set -->
+            <div
+              class="dash-avatar-block__initials"
+              id="dash-avatar-initials"
+              aria-hidden="true"
+            >
+              СК
+            </div>
+            <!-- Shown when avatar URL present; src filled by JS -->
+            <img
+              class="dash-avatar-block__img"
+              id="dash-avatar-img"
+              src=""
+              alt="Фото профілю"
+              hidden
+            />
+            <!-- Camera icon overlay — click triggers hidden file input -->
+            <label
+              class="dash-avatar-block__overlay"
+              for="dash-avatar-input"
+              aria-label="Змінити фото"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  d="M12 15.2A3.2 3.2 0 1 0 12 8.8 3.2 3.2 0 0 0 12 15.2zM9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"
+                />
+              </svg>
+            </label>
+            <input
+              class="dash-avatar-block__input"
+              type="file"
+              id="dash-avatar-input"
+              accept="image/jpeg,image/png,image/webp"
+              aria-label="Завантажити фото профілю"
+            />
+          </div>
+          <div class="dash-avatar-block__actions">
+            <button
+              type="button"
+              class="btn btn--outline btn--sm"
+              id="dash-avatar-upload-btn"
+            >
+              Змінити фото
+            </button>
+            <button
+              type="button"
+              class="btn btn--ghost btn--sm"
+              id="dash-avatar-delete-btn"
+              hidden
+            >
+              Видалити
+            </button>
+            <p class="dash-avatar-block__hint">
+              JPEG, PNG або WebP · до 5 МБ · обрізається до 256×256
+            </p>
+          </div>
+        </div>
+        <!-- /avatar upload block -->
 
         <form
           class="dash-profile-form"

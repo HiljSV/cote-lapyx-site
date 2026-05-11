@@ -72,6 +72,9 @@ document.addEventListener("DOMContentLoaded", () => {
         initEl.textContent = initials.toUpperCase();
       }
 
+      // Hydrate avatar widget in profile section + sidebar photo
+      initAvatarWidget(user);
+
       myUserId = user.id;
 
       // Reveal OWNER-only nav items and load overview stats
@@ -1411,4 +1414,112 @@ document.addEventListener("DOMContentLoaded", () => {
       const file = e.target.files?.[0];
       if (file) uploadImage(file, "project-cover", "project-cover-preview");
     });
+
+  // ===========================================================================
+  // Avatar upload / delete
+  // ===========================================================================
+
+  // Bind "Змінити фото" button to the hidden file input
+  document
+    .getElementById("dash-avatar-upload-btn")
+    ?.addEventListener("click", () => {
+      document.getElementById("dash-avatar-input")?.click();
+    });
+
+  // When user picks a file — upload to POST /users/me/avatar
+  document
+    .getElementById("dash-avatar-input")
+    ?.addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const fd = new FormData();
+      fd.append("file", file);
+
+      try {
+        const res = await fetchWithAuth(
+          "https://api.cote-lapyx.com/api/v1/users/me/avatar",
+          { method: "POST", body: fd },
+        );
+        if (!res.ok) {
+          const msg = await res.text().catch(() => "Server error");
+          throw new Error(msg);
+        }
+        const updatedUser = await res.json();
+        initAvatarWidget(updatedUser);
+      } catch (err) {
+        alert("Помилка завантаження фото: " + err.message);
+      }
+      // Reset input so the same file can be picked again if needed
+      e.target.value = "";
+    });
+
+  // Delete avatar via DELETE /users/me/avatar
+  document
+    .getElementById("dash-avatar-delete-btn")
+    ?.addEventListener("click", async () => {
+      if (!confirm("Видалити фото профілю?")) return;
+
+      try {
+        const res = await fetchWithAuth(
+          "https://api.cote-lapyx.com/api/v1/users/me/avatar",
+          { method: "DELETE" },
+        );
+        if (!res.ok && res.status !== 204) throw new Error("Server error");
+        initAvatarWidget({
+          avatar: null,
+          name: document.querySelector(".dash-sidebar__name")?.textContent,
+        });
+      } catch (err) {
+        alert("Помилка видалення: " + err.message);
+      }
+    });
 });
+
+// =============================================================================
+// Avatar widget initialisation helper
+// Called after /users/me resolves and after successful upload/delete.
+// =============================================================================
+
+function initAvatarWidget(user) {
+  const initialsEl = document.getElementById("dash-avatar-initials");
+  const imgEl = document.getElementById("dash-avatar-img");
+  const delBtn = document.getElementById("dash-avatar-delete-btn");
+  const sidebarAvatar = document.getElementById("dash-sidebar-avatar");
+
+  if (!initialsEl || !imgEl) return;
+
+  if (user.avatar) {
+    // Show photo, hide initials
+    imgEl.src = user.avatar;
+    imgEl.hidden = false;
+    initialsEl.hidden = true;
+    if (delBtn) delBtn.hidden = false;
+  } else {
+    // Show initials, hide photo
+    imgEl.hidden = true;
+    initialsEl.hidden = false;
+    if (delBtn) delBtn.hidden = true;
+  }
+
+  // Update sidebar avatar circle: photo via background-image or initials text
+  if (sidebarAvatar) {
+    if (user.avatar) {
+      sidebarAvatar.style.backgroundImage = `url(${user.avatar})`;
+      sidebarAvatar.textContent = "";
+    } else {
+      sidebarAvatar.style.backgroundImage = "";
+      // Restore initials from displayed name
+      const name =
+        user.name ||
+        document.querySelector(".dash-sidebar__name")?.textContent ||
+        "";
+      if (name) {
+        const parts = name.trim().split(/\s+/);
+        const initials =
+          parts.length >= 2 ? parts[0][0] + parts[1][0] : parts[0].slice(0, 2);
+        sidebarAvatar.textContent = initials.toUpperCase();
+      }
+    }
+  }
+}
