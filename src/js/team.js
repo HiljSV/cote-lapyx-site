@@ -15,10 +15,14 @@
       const avatarUrl = member.user && member.user.avatar;
       if (!avatarUrl) return; // no avatar set — keep static image
 
-      // Find photo by data-member-slug matching the API slug
-      const imgEl = document.querySelector(
-        `img[data-member-slug="${member.slug}"]`,
-      );
+      // Find photo: exact slug match first, then first-segment fallback (e.g. "serhii-khil" → "serhii")
+      const firstSegment = member.slug ? member.slug.split("-")[0] : "";
+      const imgEl =
+        (member.slug &&
+          document.querySelector(`img[data-member-slug="${member.slug}"]`)) ||
+        (firstSegment &&
+          document.querySelector(`img[data-member-slug="${firstSegment}"]`)) ||
+        null;
       if (!imgEl) return;
 
       imgEl.src = avatarUrl;

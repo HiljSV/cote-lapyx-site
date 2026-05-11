@@ -147,8 +147,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const authorEl = document.getElementById("post-author-block");
     if (authorEl && post.author?.name) {
       const initials = authorInitials(post.author.name);
+      // Render avatar img if available, otherwise show initials
+      const avatarInner = post.author.avatar
+        ? `<img src="${escHtml(post.author.avatar)}" alt="" aria-hidden="true" />`
+        : escHtml(initials);
       authorEl.innerHTML = `
-        <div class="post-hero__author-avatar" aria-hidden="true">${escHtml(initials)}</div>
+        <div class="post-hero__author-avatar" aria-hidden="true">${avatarInner}</div>
         <span class="post-hero__author-name">${escHtml(post.author.name)}</span>`;
     }
 
@@ -311,10 +315,14 @@ document.addEventListener("DOMContentLoaded", () => {
               year: "numeric",
             })
           : "";
+        // Render avatar img if available, otherwise show initials
+        const commentAvatarInner = c.author?.avatar
+          ? `<img src="${escHtml(c.author.avatar)}" alt="" aria-hidden="true" />`
+          : escHtml(initials);
         const div = document.createElement("div");
         div.className = "post-comment";
         div.innerHTML = `
-          <div class="post-comment__avatar" aria-hidden="true">${escHtml(initials)}</div>
+          <div class="post-comment__avatar" aria-hidden="true">${commentAvatarInner}</div>
           <div class="post-comment__body">
             <div class="post-comment__meta">
               <span class="post-comment__author">${escHtml(authorName)}</span>
