@@ -46,6 +46,11 @@ function buildBlogCard(post) {
     ? `<img class="blog-card__cover" src="${escHtml(post.coverImage)}" alt="" aria-hidden="true" />`
     : `<div class="blog-card__cover-placeholder" aria-hidden="true">✦</div>`;
 
+  // Render avatar img if available, otherwise show initials text
+  const avatarInner = post.author?.avatar
+    ? `<img src="${escHtml(post.author.avatar)}" alt="" aria-hidden="true" />`
+    : initials;
+
   const href = post.slug
     ? `post.html?slug=${encodeURIComponent(post.slug)}`
     : "#";
@@ -61,7 +66,7 @@ function buildBlogCard(post) {
           <p class="blog-card__excerpt">${escHtml(post.excerpt || "")}</p>
           <div class="blog-card__footer">
             <div class="blog-card__author">
-              <div class="blog-card__author-avatar" aria-hidden="true">${initials}</div>
+              <div class="blog-card__author-avatar" aria-hidden="true">${avatarInner}</div>
               ${escHtml(authorName)}
             </div>
             <time class="blog-card__date">${fmtDate(date)}</time>
