@@ -88,5 +88,8 @@
   },
   "optionalDependencies": {
     "@img/sharp-win32-x64": "latest"
+  },
+  "dependencies": {
+    "cropperjs": "^1.6.2"
   }
 }
