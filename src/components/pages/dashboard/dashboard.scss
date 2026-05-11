@@ -1241,9 +1241,13 @@
     width: 80px;
     height: 80px;
     flex-shrink: 0;
+    // Prevent overflowing children from pushing the form down
+    overflow: hidden;
+    border-radius: 50%;
   }
 
-  // Initials placeholder (visible when no avatar)
+  // Initials placeholder — hidden by default; JS removes [hidden] when no avatar
+  // [hidden] override is REQUIRED: CSS display:flex beats UA [hidden]{display:none}
   &__initials {
     width: 80px;
     height: 80px;
@@ -1258,9 +1262,14 @@
     color: #00e5ff;
     text-transform: uppercase;
     user-select: none;
+
+    &[hidden] {
+      display: none !important;
+    }
   }
 
-  // Actual photo (visible when avatar URL present)
+  // Avatar photo — hidden by default; JS removes [hidden] when avatar URL exists
+  // [hidden] override is REQUIRED: CSS display:block beats UA [hidden]{display:none}
   &__img {
     width: 80px;
     height: 80px;
@@ -1268,6 +1277,10 @@
     border: 2px solid rgba(0, 229, 255, 0.4);
     object-fit: cover;
     display: block;
+
+    &[hidden] {
+      display: none !important;
+    }
   }
 
   // Camera-icon overlay — appears on hover
