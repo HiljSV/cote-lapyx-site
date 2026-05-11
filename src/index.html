@@ -1,22 +1,30 @@
-<template src="@components/templates/main/main.html" locals='{
-		"title":"COTE-LAPYX", 
-		"lang":"en",
+<template
+  src="@components/templates/main/main.html"
+  locals='{
+		"title":"COTE-LAPYX — Команда IT-розробників | Frontend, Backend, Design",
+		"lang":"uk",
 		"preloader": {
 			"enable":"false",
 			"once":"false"
 		},
-		"keywords":"", 
-		"description":""
-	}'>
-	<block name="header">
-		<include src="@components/layout/header/header.html" locals='{"active":"Home"}'></include>
-	</block>
-	<block name="main">
-		<include src="@components/pages/index/index.html" locals='{}'></include>
-	</block>
-	<block name="footer">
-		<include src="@components/layout/footer/footer.html" locals='{}'></include>
-	</block>
-	<block name="popup">
-	</block>
+		"keywords":"",
+		"description":"COTE-LAPYX — IT-студія трьох розробників з України. Веб-застосунки, REST API та UI/UX дизайн повного циклу. Від ідеї до деплою.",
+		"canonical":"https://cote-lapyx.com/",
+		"og_type":"website",
+		"og_locale":"uk_UA"
+	}'
+>
+  <block name="header">
+    <include
+      src="@components/layout/header/header.html"
+      locals='{"active":"Home"}'
+    ></include>
+  </block>
+  <block name="main">
+    <include src="@components/pages/index/index.html" locals="{}"></include>
+  </block>
+  <block name="footer">
+    <include src="@components/layout/footer/footer.html" locals="{}"></include>
+  </block>
+  <block name="popup"> </block>
 </template>

@@ -64,6 +64,69 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     document.title = `${post.title} — cote-lapyx`;
 
+    /* SEO: inject dynamic canonical, OG tags and JSON-LD BlogPosting */
+    (function injectPostSEO(post, slug) {
+      const canonical = `https://cote-lapyx.com/post.html?slug=${encodeURIComponent(slug)}`;
+
+      let canonEl = document.querySelector("link[rel='canonical']");
+      if (!canonEl) {
+        canonEl = document.createElement("link");
+        canonEl.rel = "canonical";
+        document.head.appendChild(canonEl);
+      }
+      canonEl.href = canonical;
+
+      const descEl = document.querySelector("meta[name='description']");
+      if (descEl && post.excerpt) descEl.content = post.excerpt.slice(0, 155);
+
+      const ogData = {
+        "og:title": post.title,
+        "og:description": (post.excerpt || post.title).slice(0, 155),
+        "og:image":
+          post.coverImage || "https://cote-lapyx.com/assets/img/og-image.png",
+        "og:url": canonical,
+        "og:type": "article",
+      };
+      Object.entries(ogData).forEach(([prop, val]) => {
+        let el = document.querySelector(`meta[property='${prop}']`);
+        if (!el) {
+          el = document.createElement("meta");
+          el.setAttribute("property", prop);
+          document.head.appendChild(el);
+        }
+        el.setAttribute("content", val);
+      });
+
+      const ld = {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        headline: post.title,
+        description: post.excerpt || "",
+        image:
+          post.coverImage || "https://cote-lapyx.com/assets/img/og-image.png",
+        url: canonical,
+        datePublished: post.publishedAt || post.createdAt,
+        dateModified: post.updatedAt || post.publishedAt || post.createdAt,
+        author: { "@type": "Person", name: post.author?.name || "COTE-LAPYX" },
+        publisher: {
+          "@type": "Organization",
+          name: "COTE-LAPYX",
+          logo: {
+            "@type": "ImageObject",
+            url: "https://cote-lapyx.com/assets/img/logo/cote-lapyx-new-512.png",
+          },
+        },
+        keywords: (post.tags || []).map((t) => t.name || t).join(", "),
+      };
+      let ldEl = document.querySelector("script[type='application/ld+json']");
+      if (!ldEl) {
+        ldEl = document.createElement("script");
+        ldEl.type = "application/ld+json";
+        document.head.appendChild(ldEl);
+      }
+      ldEl.textContent = JSON.stringify(ld);
+    })(post, params.get("slug") || "");
+
     // Title + meta
     const titleEl = document.getElementById("post-title");
     if (titleEl) titleEl.textContent = post.title;

@@ -165,6 +165,70 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.title = `${member.name} — cote-lapyx`;
 
+  /* SEO: inject dynamic canonical, OG tags and JSON-LD Person */
+  (function injectMemberSEO(member, memberId) {
+    const canonical = `https://cote-lapyx.com/member.html?id=${encodeURIComponent(memberId)}`;
+
+    let canonEl = document.querySelector("link[rel='canonical']");
+    if (!canonEl) {
+      canonEl = document.createElement("link");
+      canonEl.rel = "canonical";
+      document.head.appendChild(canonEl);
+    }
+    canonEl.href = canonical;
+
+    const descEl = document.querySelector("meta[name='description']");
+    if (descEl)
+      descEl.content =
+        `${member.name} — ${member.role} в команді COTE-LAPYX. ${(member.bio || "").slice(0, 80)}`.slice(
+          0,
+          155,
+        );
+
+    const ogData = {
+      "og:title": `${member.name} — ${member.role} | COTE-LAPYX`,
+      "og:description": `${member.role} в команді COTE-LAPYX. ${(member.bio || "").slice(0, 80)}`,
+      "og:image":
+        member.photo || "https://cote-lapyx.com/assets/img/og-image.png",
+      "og:url": canonical,
+      "og:type": "profile",
+    };
+    Object.entries(ogData).forEach(([prop, val]) => {
+      let el = document.querySelector(`meta[property='${prop}']`);
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute("property", prop);
+        document.head.appendChild(el);
+      }
+      el.setAttribute("content", val);
+    });
+
+    const ld = {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      name: member.name,
+      jobTitle: member.role,
+      description: member.bio || "",
+      url: canonical,
+      image:
+        member.photo ||
+        "https://cote-lapyx.com/assets/img/logo/cote-lapyx-new-512.png",
+      worksFor: {
+        "@type": "Organization",
+        name: "COTE-LAPYX",
+        url: "https://cote-lapyx.com",
+      },
+      sameAs: Object.values(member.socials || {}).filter((u) => u && u !== "#"),
+    };
+    let ldEl = document.querySelector("script[type='application/ld+json']");
+    if (!ldEl) {
+      ldEl = document.createElement("script");
+      ldEl.type = "application/ld+json";
+      document.head.appendChild(ldEl);
+    }
+    ldEl.textContent = JSON.stringify(ld);
+  })(member, params.get("id") || "valeriia");
+
   const nameEl = document.getElementById("member-name");
   const roleEl = document.getElementById("member-role");
   const bioEl = document.getElementById("member-bio");
