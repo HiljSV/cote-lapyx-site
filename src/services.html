@@ -1,0 +1,23 @@
+<template
+  src="@components/templates/inner/inner.html"
+  locals='{
+  "title": "Послуги — cote-lapyx | Веб-розробка, UI/UX, API, AI",
+  "lang": "uk",
+  "preloader": {"enable":"false","once":"false"},
+  "keywords": "веб-розробка Україна, REST API Spring Boot, UI UX дизайн Figma, Telegram боти, AI інтеграції",
+  "description": "Повний спектр IT-послуг: frontend, backend, дизайн, Telegram-боти, AI-інтеграції, WordPress, технічна підтримка.",
+  "canonical": "https://cote-lapyx.com/services.html",
+  "og_type": "website",
+  "og_locale": "uk_UA"
+}'
+>
+  <block name="header">
+    <include src="@components/layout/header/header.html" locals=\'{"active":"Services"}\'></include>
+  </block>
+  <block name="main">
+    <include src="@components/pages/services/services.html" locals="{}"></include>
+  </block>
+  <block name="footer">
+    <include src="@components/layout/footer/footer.html" locals="{}"></include>
+  </block>
+</template>
