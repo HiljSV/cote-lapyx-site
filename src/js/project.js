@@ -97,9 +97,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Author
     const authorEl = document.getElementById("project-author-block");
     if (authorEl && project.author?.name) {
-      const initials = authorInitials(project.author.name);
+      const avatarInner = project.author.avatar
+        ? `<img src="${escHtml(project.author.avatar)}" alt="" aria-hidden="true" />`
+        : escHtml(authorInitials(project.author.name));
       authorEl.innerHTML = `
-        <div class="post-hero__author-avatar" aria-hidden="true">${escHtml(initials)}</div>
+        <div class="post-hero__author-avatar" aria-hidden="true">${avatarInner}</div>
         <span class="post-hero__author-name">${escHtml(project.author.name)}</span>`;
     }
 

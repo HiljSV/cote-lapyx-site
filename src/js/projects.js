@@ -34,6 +34,9 @@ function buildProjectCard(project, index) {
   const color = CARD_COLORS[index % CARD_COLORS.length];
   const authorName = project.author?.name || "—";
   const initials = authorInitials(project.author?.name);
+  const authorAvatarInner = project.author?.avatar
+    ? `<img src="${escHtml(project.author.avatar)}" alt="" aria-hidden="true" />`
+    : escHtml(initials);
 
   const tags = (project.technologies || [])
     .slice(0, 5)
@@ -70,7 +73,7 @@ function buildProjectCard(project, index) {
           ${githubBtn}${demoBtn}
         </div>
         <div class="project-card__author">
-          <div class="project-card__author-avatar" aria-hidden="true">${initials}</div>
+          <div class="project-card__author-avatar" aria-hidden="true">${authorAvatarInner}</div>
           ${escHtml(authorName)}
         </div>
       </div>
