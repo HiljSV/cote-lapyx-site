@@ -248,4 +248,39 @@ document.addEventListener("DOMContentLoaded", () => {
   renderPosts(memberPosts);
 
   renderCta(member);
+
+  // Hydrate avatar from API — progressive enhancement, no auth needed
+  (async () => {
+    try {
+      const res = await fetch(
+        `https://api.cote-lapyx.com/api/v1/team-members/${encodeURIComponent(memberId)}`,
+      );
+      if (!res.ok) return;
+      const data = await res.json();
+      const apiAvatar = data.user?.avatar;
+      if (!apiAvatar) return;
+
+      // Update photo element
+      const wrap = document.getElementById("member-photo-wrap");
+      if (wrap) {
+        wrap.innerHTML = `<img class="member-hero__photo" src="${apiAvatar}" alt="${member.name} — ${member.role}" width="180" height="180" />`;
+      }
+
+      // Update og:image
+      const ogImg = document.querySelector("meta[property='og:image']");
+      if (ogImg) ogImg.setAttribute("content", apiAvatar);
+
+      // Update JSON-LD image
+      const ldEl = document.querySelector("script[type='application/ld+json']");
+      if (ldEl) {
+        try {
+          const ld = JSON.parse(ldEl.textContent);
+          ld.image = apiAvatar;
+          ldEl.textContent = JSON.stringify(ld);
+        } catch (_) {}
+      }
+    } catch (_) {
+      // API unreachable — static photo stays, no console noise
+    }
+  })();
 });
