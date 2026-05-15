@@ -115,6 +115,13 @@
   }
 
   // Sizes
+  &--xs {
+    padding: 4px 10px;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    min-height: 28px;
+  }
+
   &--sm {
     padding: 8px 18px;
     font-size: 12px;
