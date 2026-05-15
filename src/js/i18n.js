@@ -34,6 +34,9 @@ const GEO_ENDPOINT = "https://api.cote-lapyx.com/api/v1/locale";
 // localStorage key for persisted language choice
 const LS_KEY = "cl_lang";
 
+// Module-level tracker — updated by applyTranslations(), read by translate()
+let _currentLang = "en";
+
 // =============================================================================
 // detectLanguage — async, returns resolved language code
 // Priority: 1) localStorage → 2) geo-IP → 3) navigator.language → 4) "en"
@@ -70,6 +73,9 @@ export async function detectLanguage() {
 // Also sets document.documentElement.lang and persists choice to localStorage
 // =============================================================================
 export function applyTranslations(lang) {
+  // Track active language so translate() can look up values at runtime
+  _currentLang = lang;
+
   // Use requested language, fall back to English if unknown
   const t = TRANSLATIONS[lang] || TRANSLATIONS["en"];
 
@@ -94,6 +100,15 @@ export function applyTranslations(lang) {
 
   // Persist user choice to localStorage for future visits
   localStorage.setItem(LS_KEY, lang);
+}
+
+// =============================================================================
+// translate — look up a single key in the currently active language
+// Safe to call any time after applyTranslations() has run at least once
+// =============================================================================
+export function translate(key) {
+  const t = TRANSLATIONS[_currentLang] || TRANSLATIONS["en"];
+  return t[key] !== undefined ? t[key] : key;
 }
 
 // =============================================================================

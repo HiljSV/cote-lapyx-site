@@ -6,11 +6,12 @@ import {
   FLS,
 } from "@js/common/functions.js";
 
-// i18n: language detection, translation, switcher wiring
+// i18n: language detection, translation, switcher wiring, runtime lookup
 import {
   detectLanguage,
   applyTranslations,
   initI18nSwitcher,
+  translate,
 } from "@js/i18n.js";
 
 // =============================================================================
@@ -60,9 +61,10 @@ if (localStorage.getItem("cl_access")) {
     const isOpen = nav.classList.toggle("is-open");
     burger.setAttribute("aria-expanded", String(isOpen));
     header.classList.toggle("is-menu-open", isOpen);
+    // Use active translation so aria-label stays correct after language switch
     burger.setAttribute(
       "aria-label",
-      isOpen ? "Закрити меню" : "Відкрити меню",
+      isOpen ? translate("header.close_menu") : translate("header.open_menu"),
     );
     // Lock body scroll when menu is open
     document.documentElement.toggleAttribute("data-fls-scrolllock", isOpen);
