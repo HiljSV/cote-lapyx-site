@@ -137,6 +137,13 @@
       0 0 40px rgba($neon-magenta, 0.05);
   }
 
+  &--green:hover {
+    @include neon-border($neon-green);
+    box-shadow:
+      0 0 20px rgba($neon-green, 0.1),
+      0 0 40px rgba($neon-green, 0.05);
+  }
+
   @media (max-width: toEm($mobile)) {
     padding: 28px 24px;
   }
@@ -164,6 +171,13 @@
       border: 1px solid rgba($neon-magenta, 0.35);
       box-shadow: 0 0 12px rgba($neon-magenta, 0.15);
     }
+
+    // Green variant
+    &--green {
+      background: rgba($neon-green, 0.06);
+      border: 1px solid rgba($neon-green, 0.35);
+      box-shadow: 0 0 12px rgba($neon-green, 0.12);
+    }
   }
 
   // Symbol inside the icon
@@ -179,6 +193,10 @@
 
     .value-card__icon--magenta & {
       color: $neon-magenta;
+    }
+
+    .value-card__icon--green & {
+      color: $neon-green;
     }
   }
 
