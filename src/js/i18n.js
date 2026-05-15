@@ -95,6 +95,14 @@ export function applyTranslations(lang) {
     }
   });
 
+  // Apply placeholder text to all elements with data-i18n-placeholder attribute
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+    const key = el.dataset.i18nPlaceholder;
+    if (t[key] !== undefined) {
+      el.setAttribute("placeholder", t[key]);
+    }
+  });
+
   // Set the lang attribute on <html> for screen readers and SEO
   document.documentElement.lang = lang;
 

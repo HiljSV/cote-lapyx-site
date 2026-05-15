@@ -1,8 +1,10 @@
 <!-- PAGE HERO -->
 <div class="page-hero">
   <div class="page-hero__container">
-    <h1 class="page-hero__heading">Блог</h1>
-    <p class="page-hero__subheading">
+    <h1 class="page-hero__heading">
+      <span data-i18n="blog.hero.title">Блог</span>
+    </h1>
+    <p class="page-hero__subheading" data-i18n="blog.hero.subtitle">
       Думки, досвід і технічні нотатки команди cote-lapyx
     </p>
   </div>
@@ -15,9 +17,9 @@
       <div class="blog-page__filter">
         <div class="filter-bar" role="search" aria-label="Фільтр статей">
           <div class="filter-bar__group">
-            <span class="filter-bar__label">Категорія:</span>
+            <span class="filter-bar__label" data-i18n="blog.filter.category_label">Категорія:</span>
             <button class="filter-bar__btn is-active" data-filter-cat="all">
-              Всі
+              <span data-i18n="filter.all">Всі</span>
             </button>
             <button class="filter-bar__btn" data-filter-cat="frontend">
               Frontend
@@ -41,6 +43,8 @@
               type="search"
               placeholder="Пошук статей..."
               aria-label="Пошук статей"
+              data-i18n-placeholder="blog.filter.search_placeholder"
+              data-i18n-aria="blog.filter.search_aria"
               id="blog-search"
             />
           </div>
@@ -49,7 +53,7 @@
 
       <!-- Grid -->
       <ul class="blog-page__grid" id="blog-list" role="list">
-        <li class="blog-page__loading" id="blog-loading" aria-live="polite">
+        <li class="blog-page__loading" id="blog-loading" aria-live="polite" data-i18n="ui.loading">
           Завантаження...
         </li>
       </ul>
@@ -57,7 +61,7 @@
       <!-- Load more -->
       <div class="blog-page__more" id="blog-more-wrap" hidden>
         <button type="button" class="btn btn--ghost" id="blog-load-more">
-          Завантажити ще
+          <span data-i18n="ui.load_more">Завантажити ще</span>
         </button>
       </div>
     </div>
