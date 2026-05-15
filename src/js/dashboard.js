@@ -200,6 +200,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (section === "subscribers") {
         loadSubscribers(0, subscribersStatusFilter);
       }
+      if (section === "my-subscriptions") {
+        loadMySubscriptions();
+      }
       if (section === "comments") {
         loadComments(0, commentsStatusFilter);
       }
@@ -1099,6 +1102,62 @@ document.addEventListener("DOMContentLoaded", () => {
     ?.addEventListener("submit", handleProjectSubmit);
 
   // ---------------------------------------------------------------------------
+  // My Subscriptions panel — current user's own subscriptions
+  // ---------------------------------------------------------------------------
+
+  async function loadMySubscriptions() {
+    const listBody = document.getElementById("my-subscriptions-list-body");
+    if (!listBody) return;
+    listBody.innerHTML = '<div class="dash-list__empty">Завантаження...</div>';
+    try {
+      const res = await fetchWithAuth(`${API}/users/me/subscriptions`);
+      if (!res.ok) {
+        listBody.innerHTML =
+          '<div class="dash-list__empty">Помилка завантаження</div>';
+        return;
+      }
+      const subs = await res.json();
+      if (!subs.length) {
+        listBody.innerHTML =
+          '<div class="dash-list__empty">У вас ще немає підписок</div>';
+        return;
+      }
+      // SUB_TYPE_LABEL / SUB_STATUS_LABEL / SUB_STATUS_CLASS declared below in Subscribers panel section
+      listBody.innerHTML = subs
+        .map((sub) => {
+          const sClass = SUB_STATUS_CLASS[sub.status] || "draft";
+          const sLabel = SUB_STATUS_LABEL[sub.status] || sub.status;
+          const typeLabel = SUB_TYPE_LABEL[sub.type] || sub.type;
+          const cancelBtn =
+            sub.status === "ACTIVE"
+              ? `<button type="button" class="btn btn--magenta btn--sm" data-action="cancel-my-sub" data-id="${sub.id}" aria-label="Скасувати підписку">Скасувати</button>`
+              : "";
+          return `<div class="dash-list__row">
+            <div data-label="Тип">${escHtml(typeLabel)}</div>
+            <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
+            <div class="dash-list__date" data-label="Дата підписки">${fmtDate(sub.createdAt)}</div>
+            <div class="dash-list__actions" data-label="Дії">${cancelBtn}</div>
+          </div>`;
+        })
+        .join("");
+    } catch (err) {
+      console.error("My subscriptions load error:", err);
+      listBody.innerHTML =
+        '<div class="dash-list__empty">Помилка завантаження</div>';
+    }
+  }
+
+  async function cancelMySubscription(id) {
+    if (!confirm("Скасувати підписку?")) return;
+    const res = await fetchWithAuth(`${API}/subscriptions/${id}`, {
+      method: "DELETE",
+    });
+    if (res.ok || res.status === 204) {
+      loadMySubscriptions();
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // Subscribers panel
   // ---------------------------------------------------------------------------
 
@@ -1384,6 +1443,16 @@ document.addEventListener("DOMContentLoaded", () => {
       const btn = e.target.closest("[data-action]");
       if (!btn) return;
       if (btn.dataset.action === "delete-sub") deleteSubscriber(btn.dataset.id);
+    });
+
+  /* My subscriptions — cancel action */
+  document
+    .getElementById("my-subscriptions-list-body")
+    ?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-action]");
+      if (!btn) return;
+      if (btn.dataset.action === "cancel-my-sub")
+        cancelMySubscription(btn.dataset.id);
     });
 
   document

@@ -1256,6 +1256,14 @@
   }
 }
 
+// my-subscriptions: Type | Status | Date | Actions
+.dash-list--my-subscriptions {
+  .dash-list__head,
+  .dash-list__row {
+    grid-template-columns: 1fr 110px 130px 110px;
+  }
+}
+
 // =============================================================================
 // Avatar upload block (profile section)
 // =============================================================================
