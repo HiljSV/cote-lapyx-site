@@ -6,8 +6,10 @@
 <!-- Section 1: Page Hero -->
 <div class="page-hero">
   <div class="page-hero__container">
-    <h1 class="page-hero__heading">Контакти</h1>
-    <p class="page-hero__subheading">
+    <h1 class="page-hero__heading">
+      <span data-i18n="contact.hero.title">Контакти</span>
+    </h1>
+    <p class="page-hero__subheading" data-i18n="contact.hero.subtitle">
       Маєш ідею? Напиши нам — відповімо швидко
     </p>
   </div>
@@ -21,14 +23,24 @@
 >
   <div class="contact-page__container">
     <!-- Visually hidden section title for screen readers / SEO -->
-    <h2 class="visually-hidden" id="contact-title">Зв'язатися з нами</h2>
+    <h2
+      class="visually-hidden"
+      id="contact-title"
+      data-i18n="contact.section.title"
+    >
+      Зв'язатися з нами
+    </h2>
 
     <!-- Two-column layout: contact info + form -->
     <div class="contact-layout">
       <!-- Left column: contact info cards -->
-      <aside class="contact-info" aria-label="Контактна інформація">
+      <aside
+        class="contact-info"
+        aria-label="Контактна інформація"
+        data-i18n-aria="contact.info.aria"
+      >
         <!-- Intro text above the info cards -->
-        <p class="contact-info__intro">
+        <p class="contact-info__intro" data-i18n="contact.info.intro">
           Ми відкриті до нових проектів, партнерств і просто цікавих розмов.
           Обери зручний спосіб зв'язку — або заповни форму.
         </p>
@@ -38,6 +50,7 @@
           class="contact-item"
           href="mailto:contact@cote-lapyx.com"
           aria-label="Написати на email contact@cote-lapyx.com"
+          data-i18n-aria="contact.link.email_aria"
         >
           <!-- Neon icon circle — cyan -->
           <span
@@ -74,6 +87,7 @@
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Написати у Telegram @cotelapyx (відкриється в новій вкладці)"
+          data-i18n-aria="contact.link.telegram_aria"
         >
           <!-- Neon icon circle — cyan -->
           <span
@@ -107,6 +121,7 @@
           target="_blank"
           rel="noopener noreferrer"
           aria-label="GitHub репозиторій cote-lapyx-com (відкриється в новій вкладці)"
+          data-i18n-aria="contact.link.github_aria"
         >
           <!-- Neon icon circle — magenta -->
           <span
@@ -140,6 +155,7 @@
           target="_blank"
           rel="noopener noreferrer"
           aria-label="LinkedIn профіль Serhii Khilchenko (відкриється в новій вкладці)"
+          data-i18n-aria="contact.link.linkedin_aria"
         >
           <!-- Neon icon circle — magenta -->
           <span
@@ -173,6 +189,7 @@
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Facebook сторінка cote-lapyx (відкриється в новій вкладці)"
+          data-i18n-aria="contact.link.facebook_aria"
         >
           <!-- Neon icon circle — green -->
           <span
@@ -208,11 +225,12 @@
           id="contact-form"
           novalidate
           aria-label="Форма зворотного зв'язку"
+          data-i18n-aria="contact.form.aria"
         >
           <!-- Field: Name -->
           <div class="contact-form__group">
             <label class="contact-form__label" for="cf-name">
-              Ім'я
+              <span data-i18n="contact.form.name_label">Ім'я</span>
               <span class="contact-form__required" aria-hidden="true">*</span>
             </label>
             <input
@@ -221,6 +239,7 @@
               id="cf-name"
               name="name"
               placeholder="Як до вас звертатись?"
+              data-i18n-placeholder="contact.form.name_placeholder"
               required
               minlength="2"
               maxlength="100"
@@ -263,7 +282,7 @@
           <!-- Field: Message -->
           <div class="contact-form__group">
             <label class="contact-form__label" for="cf-message">
-              Повідомлення
+              <span data-i18n="contact.form.message_label">Повідомлення</span>
               <span class="contact-form__required" aria-hidden="true">*</span>
             </label>
             <textarea
@@ -271,6 +290,7 @@
               id="cf-message"
               name="message"
               placeholder="Розкажи про свій проект або задачу..."
+              data-i18n-placeholder="contact.form.message_placeholder"
               required
               minlength="10"
               maxlength="5000"
@@ -292,9 +312,11 @@
               type="submit"
               id="cf-submit"
             >
-              Надіслати
+              <span data-i18n="contact.form.submit">Надіслати</span>
             </button>
-            <p class="contact-form__hint">* обов'язкові поля</p>
+            <p class="contact-form__hint" data-i18n="contact.form.hint">
+              * обов'язкові поля
+            </p>
           </div>
 
           <!-- Success banner — hidden until 201 response -->
@@ -304,8 +326,10 @@
             hidden
             role="alert"
           >
-            <strong>Дякуємо!</strong> Ваше повідомлення отримано. Відповімо
-            найближчим часом.
+            <strong data-i18n="contact.form.success_title">Дякуємо!</strong>
+            <span data-i18n="contact.form.success_text"
+              >Ваше повідомлення отримано. Відповімо найближчим часом.</span
+            >
           </div>
 
           <!-- Error banner — hidden until error response -->
@@ -315,7 +339,8 @@
             hidden
             role="alert"
           >
-            <strong>Помилка.</strong>
+            <strong data-i18n="contact.form.error_title">Помилка.</strong>
+            <!-- cf-error-text — JS writes dynamic API error; no data-i18n to avoid overwriting on lang switch -->
             <span id="cf-error-text">Спробуйте ще раз.</span>
           </div>
         </form>

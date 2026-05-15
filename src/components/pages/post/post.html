@@ -3,7 +3,9 @@
   <div class="page-hero__container post-hero__container">
     <!-- Breadcrumb -->
     <nav class="post-breadcrumb" aria-label="Навігація по сторінках">
-      <a href="blog.html" class="post-breadcrumb__link">&#8592; Блог</a>
+      <a href="blog.html" class="post-breadcrumb__link"
+        ><span data-i18n="post.breadcrumb.back">← Блог</span></a
+      >
     </nav>
 
     <!-- Meta: category + date -->
@@ -12,7 +14,7 @@
       <time class="post-hero__date" id="post-date"></time>
     </div>
 
-    <!-- Title -->
+    <!-- Title — JS overwrites textContent with real title; no data-i18n to avoid collision on lang switch -->
     <h1 class="page-hero__heading post-hero__title" id="post-title">
       Завантаження...
     </h1>
@@ -39,7 +41,9 @@
   >
     <div class="page__container">
       <div class="post-article__body" id="post-content">
-        <p class="post-article__loading">Завантаження...</p>
+        <p class="post-article__loading" data-i18n="ui.loading">
+          Завантаження...
+        </p>
       </div>
     </div>
   </article>
@@ -56,6 +60,7 @@
           class="post-actions__btn post-actions__btn--like"
           id="post-like-btn"
           aria-label="Подобається"
+          data-i18n-aria="post.action.like_aria"
         >
           <svg
             width="20"
@@ -76,6 +81,7 @@
           class="post-actions__btn post-actions__btn--fav"
           id="post-fav-btn"
           aria-label="Додати в обране"
+          data-i18n-aria="post.action.fav_aria"
         >
           <svg
             width="20"
@@ -88,7 +94,7 @@
               d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"
             />
           </svg>
-          <span>Обране</span>
+          <span data-i18n="post.action.fav">Обране</span>
         </button>
 
         <button
@@ -96,6 +102,7 @@
           class="post-actions__btn post-actions__btn--sub"
           id="post-sub-btn"
           aria-label="Підписатися"
+          data-i18n-aria="post.action.sub_aria"
         >
           <svg
             width="20"
@@ -108,7 +115,7 @@
               d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
             />
           </svg>
-          <span>Підписатися</span>
+          <span data-i18n="post.action.sub">Підписатися</span>
         </button>
       </div>
     </div>
@@ -130,7 +137,7 @@
           class="btn btn--cyan btn--sm"
           id="post-sub-submit"
         >
-          Підписатися
+          <span data-i18n="post.subscribe.btn">Підписатися</span>
         </button>
       </form>
       <p class="post-subscribe-form__msg" id="post-sub-msg" hidden></p>
@@ -143,13 +150,16 @@
     id="post-comments-section"
   >
     <div class="page__container">
-      <h2 class="post-comments__title">Коментарі</h2>
+      <h2 class="post-comments__title" data-i18n="post.comments.title">
+        Коментарі
+      </h2>
 
       <form class="post-comments__form" id="post-comment-form" novalidate>
         <textarea
           class="post-comments__textarea"
           id="post-comment-text"
           placeholder="Напишіть коментар..."
+          data-i18n-placeholder="post.comments.placeholder"
           rows="3"
           maxlength="2000"
         ></textarea>
@@ -162,14 +172,19 @@
             class="btn btn--cyan btn--sm"
             id="post-comment-submit"
           >
-            Надіслати
+            <span data-i18n="post.comments.submit">Надіслати</span>
           </button>
         </div>
         <p class="post-comments__form-msg" id="post-comment-msg" hidden></p>
       </form>
 
       <div class="post-comments__list" id="post-comments-list">
-        <p class="post-comments__empty" id="post-comments-empty" hidden>
+        <p
+          class="post-comments__empty"
+          id="post-comments-empty"
+          hidden
+          data-i18n="post.comments.empty"
+        >
           Коментарів ще немає. Будьте першим!
         </p>
       </div>
@@ -198,8 +213,12 @@
     aria-label="Не знайдено"
   >
     <div class="page__container">
-      <p class="post-not-found__msg">Статтю не знайдено.</p>
-      <a href="blog.html" class="btn btn--cyan">&#8592; Повернутись до блогу</a>
+      <p class="post-not-found__msg" data-i18n="post.not_found">
+        Статтю не знайдено.
+      </p>
+      <a href="blog.html" class="btn btn--cyan"
+        ><span data-i18n="post.not_found.back">← Повернутись до блогу</span></a
+      >
     </div>
   </section>
 </main>

@@ -6,8 +6,10 @@
 <!-- Section 1: Page Hero -->
 <div class="page-hero">
   <div class="page-hero__container">
-    <h1 class="page-hero__heading">Про нас</h1>
-    <p class="page-hero__subheading">
+    <h1 class="page-hero__heading">
+      <span data-i18n="about.hero.title">Про нас</span>
+    </h1>
+    <p class="page-hero__subheading" data-i18n="about.hero.subtitle">
       Від першого пікселя до фінального деплою — одна команда
     </p>
   </div>
@@ -22,8 +24,8 @@
   <div class="about-mission__container">
     <!-- Left column: headline + mission text -->
     <div class="about-mission__text-col">
-      <h2 class="section-title" id="mission-title">Наша місія</h2>
-      <p class="about-mission__body">
+      <h2 class="section-title" id="mission-title" data-i18n="about.mission.title">Наша місія</h2>
+      <p class="about-mission__body" data-i18n="about.mission.body">
         Ми — cote-lapyx: команда, яку обʼєднує одне — любов до коду, дизайну і
         продуктів, що реально працюють. Ми будуємо цифрові продукти повного
         циклу: від концепції та дизайну до серверної логіки і підтримки.
@@ -38,17 +40,17 @@
       <!-- Stat: specialists -->
       <div class="about-mission__stat">
         <span class="about-mission__stat-value neon-text-cyan">3</span>
-        <span class="about-mission__stat-label">Спеціалісти</span>
+        <span class="about-mission__stat-label" data-i18n="about.stat.specialists">Спеціалісти</span>
       </div>
       <!-- Stat: projects -->
       <div class="about-mission__stat">
         <span class="about-mission__stat-value neon-text-magenta">10+</span>
-        <span class="about-mission__stat-label">Проектів</span>
+        <span class="about-mission__stat-label" data-i18n="about.stat.projects">Проектів</span>
       </div>
       <!-- Stat: founding year -->
       <div class="about-mission__stat">
         <span class="about-mission__stat-value neon-text-green">2019</span>
-        <span class="about-mission__stat-label">Рік ідеї</span>
+        <span class="about-mission__stat-label" data-i18n="about.stat.founding_year">Рік ідеї</span>
       </div>
     </div>
   </div>
@@ -62,7 +64,7 @@
 >
   <div class="about-values__container">
     <header class="section__header">
-      <h2 class="section-title" id="values-title">Наші цінності</h2>
+      <h2 class="section-title" id="values-title" data-i18n="about.values.title">Наші цінності</h2>
     </header>
 
     <div class="about-values__grid">
@@ -75,10 +77,10 @@
         <div class="value-card__icon value-card__icon--cyan" aria-hidden="true">
           <span class="value-card__icon-symbol">&lt;/&gt;</span>
         </div>
-        <h3 class="value-card__title">
+        <h3 class="value-card__title" data-i18n="about.value1.title">
           Повний цикл — наша зона відповідальності
         </h3>
-        <p class="value-card__desc">
+        <p class="value-card__desc" data-i18n="about.value1.desc">
           Ми думаємо про продукт цілісно: від wireframe до production-сервера.
           Кожна функція, кожен компонент, кожен піксель — результат свідомого
           рішення.
@@ -97,10 +99,10 @@
         >
           <span class="value-card__icon-symbol">&#9651;</span>
         </div>
-        <h3 class="value-card__title">
+        <h3 class="value-card__title" data-i18n="about.value2.title">
           Постійне зростання — не опція, а звичка
         </h3>
-        <p class="value-card__desc">
+        <p class="value-card__desc" data-i18n="about.value2.desc">
           Ми вчимось, експериментуємо і впроваджуємо нове — тому що стояти на
           місці в IT означає відставати.
         </p>
@@ -118,8 +120,8 @@
         >
           <span class="value-card__icon-symbol">{ }</span>
         </div>
-        <h3 class="value-card__title">Код — це ремесло</h3>
-        <p class="value-card__desc">
+        <h3 class="value-card__title" data-i18n="about.value3.title">Код — це ремесло</h3>
+        <p class="value-card__desc" data-i18n="about.value3.desc">
           Ми ставимось до кожного рядка коду як до продуманого рішення.
           Читабельність, тестованість, архітектура — не бонус, а мінімальний
           стандарт.
@@ -135,8 +137,8 @@
         <div class="value-card__icon value-card__icon--cyan" aria-hidden="true">
           <span class="value-card__icon-symbol">&#9674;</span>
         </div>
-        <h3 class="value-card__title">Команда сильніша за суму її учасників</h3>
-        <p class="value-card__desc">
+        <h3 class="value-card__title" data-i18n="about.value4.title">Команда сильніша за суму її учасників</h3>
+        <p class="value-card__desc" data-i18n="about.value4.desc">
           Frontend, backend і дизайн — єдиний організм, де рішення приймаються
           разом. Три ролі, одна відповідальність, один результат.
         </p>
@@ -153,7 +155,7 @@
 >
   <div class="about-team__container">
     <header class="section__header">
-      <h2 class="section-title" id="team-title">Команда</h2>
+      <h2 class="section-title" id="team-title" data-i18n="about.team.title">Команда</h2>
     </header>
 
     <div class="about-team__grid">
@@ -187,7 +189,7 @@
           <a
             href="member.html?id=serhii"
             class="btn btn--cyan btn--sm about-member__btn"
-            >Повний профіль</a
+            ><span data-i18n="btn.view_profile">Повний профіль</span></a
           >
         </div>
       </article>
@@ -221,7 +223,7 @@
           <a
             href="member.html?id=andrii"
             class="btn btn--green btn--sm about-member__btn"
-            >Повний профіль</a
+            ><span data-i18n="btn.view_profile">Повний профіль</span></a
           >
         </div>
       </article>
@@ -256,7 +258,7 @@
           <a
             href="member.html?id=valeriia"
             class="btn btn--magenta btn--sm about-member__btn"
-            >Повний профіль</a
+            ><span data-i18n="btn.view_profile">Повний профіль</span></a
           >
         </div>
       </article>
@@ -272,7 +274,7 @@
 >
   <div class="about-timeline__container">
     <header class="section__header">
-      <h2 class="section-title" id="timeline-title">Наш шлях</h2>
+      <h2 class="section-title" id="timeline-title" data-i18n="about.timeline.title">Наш шлях</h2>
     </header>
 
     <ol
@@ -285,8 +287,8 @@
         <div class="about-timeline__marker" aria-hidden="true"></div>
         <div class="about-timeline__content">
           <time class="about-timeline__year" datetime="2019">2019</time>
-          <h3 class="about-timeline__heading">Ідея</h3>
-          <p class="about-timeline__desc">
+          <h3 class="about-timeline__heading" data-i18n="about.timeline.2019.heading">Ідея</h3>
+          <p class="about-timeline__desc" data-i18n="about.timeline.2019.desc">
             Перші розмови про власний проект, перші спільні задачі.
           </p>
         </div>
@@ -297,8 +299,8 @@
         <div class="about-timeline__marker" aria-hidden="true"></div>
         <div class="about-timeline__content">
           <time class="about-timeline__year" datetime="2023">2023–2025</time>
-          <h3 class="about-timeline__heading">Розробка</h3>
-          <p class="about-timeline__desc">
+          <h3 class="about-timeline__heading" data-i18n="about.timeline.2023.heading">Розробка</h3>
+          <p class="about-timeline__desc" data-i18n="about.timeline.2023.desc">
             Накопичення досвіду, стек, практика на реальних проектах.
           </p>
         </div>
@@ -309,8 +311,8 @@
         <div class="about-timeline__marker" aria-hidden="true"></div>
         <div class="about-timeline__content">
           <time class="about-timeline__year" datetime="2026">2026</time>
-          <h3 class="about-timeline__heading">Заснування</h3>
-          <p class="about-timeline__desc">
+          <h3 class="about-timeline__heading" data-i18n="about.timeline.2026.heading">Заснування</h3>
+          <p class="about-timeline__desc" data-i18n="about.timeline.2026.desc">
             cote-lapyx офіційно стартує як IT-студія.
           </p>
         </div>
@@ -324,9 +326,9 @@
   <div class="about-cta__container">
     <div class="about-cta__actions">
       <!-- Primary CTA: services -->
-      <a href="services.html" class="btn btn--cyan">Наші послуги</a>
+      <a href="services.html" class="btn btn--cyan"><span data-i18n="btn.our_services">Наші послуги</span></a>
       <!-- Secondary CTA: contact -->
-      <a href="contact.html" class="btn btn--magenta">Написати нам</a>
+      <a href="contact.html" class="btn btn--magenta"><span data-i18n="btn.write_us">Написати нам</span></a>
     </div>
   </div>
 </section>
