@@ -45,6 +45,22 @@
       }
     }
   }
+
+  // Unread count badge — shown next to nav item label
+  .dash-sidebar__badge-count {
+    margin-left: auto;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: $neon-magenta;
+    color: $bg-dark;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+    display: inline-block;
+  }
 }
 
 // -----------------------------------------------------------------------------
