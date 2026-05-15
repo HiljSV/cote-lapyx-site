@@ -84,6 +84,28 @@
           </a>
         </li>
 
+        <!-- My Subscriptions (all authenticated users) -->
+        <li class="dash-sidebar__nav-item">
+          <a
+            href="#"
+            class="dash-sidebar__nav-link"
+            data-section="my-subscriptions"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"
+              />
+            </svg>
+            Мої підписки
+          </a>
+        </li>
+
         <!-- Posts (OWNER only) -->
         <li class="dash-sidebar__nav-item" data-owner-nav hidden>
           <a href="#" class="dash-sidebar__nav-link" data-section="posts">
@@ -530,6 +552,30 @@
       </section>
     </div>
     <!-- /subscribers panel -->
+
+    <!-- ===== SECTION: MY SUBSCRIPTIONS ===== -->
+    <!-- Panel for all users: shows their own active/cancelled subscriptions -->
+    <div class="dash-section-panel" data-panel="my-subscriptions" hidden>
+      <section class="dash-section" aria-label="Мої підписки">
+        <div class="dash-section__header">
+          <h2 class="dash-section__title">Мої підписки</h2>
+        </div>
+        <!-- List: Type, Status, Date, Cancel action -->
+        <div
+          class="dash-list dash-list--my-subscriptions"
+          aria-label="Таблиця підписок"
+        >
+          <div class="dash-list__head" aria-hidden="true">
+            <div>Тип</div>
+            <div>Статус</div>
+            <div>Дата підписки</div>
+            <div>Дії</div>
+          </div>
+          <div id="my-subscriptions-list-body"></div>
+        </div>
+      </section>
+    </div>
+    <!-- /my-subscriptions panel -->
 
     <!-- ===== SECTION: PROFILE ===== -->
     <div class="dash-section-panel" data-panel="profile" hidden>
