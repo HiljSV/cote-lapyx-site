@@ -14,6 +14,9 @@ let searchTimer = null;
 const CARD_COLORS = ["cyan", "magenta", "green"];
 const TECH_COLORS = ["cyan", "magenta", "green"];
 
+// userId → team member slug, populated by initMemberSlugs() before first render
+const memberSlugMap = new Map();
+
 function escHtml(str) {
   return String(str ?? "")
     .replace(/&/g, "&amp;")
@@ -28,6 +31,22 @@ function authorInitials(name) {
   return parts.length >= 2
     ? (parts[0][0] + parts[1][0]).toUpperCase()
     : parts[0].slice(0, 2).toUpperCase();
+}
+
+// Fetches /api/v1/team-members and builds a userId→slug lookup map.
+// Must complete before buildProjectCard is called so author links resolve correctly.
+async function initMemberSlugs() {
+  try {
+    const res = await fetch(`${API}/team-members`);
+    if (!res.ok) return;
+    const members = await res.json();
+    // Populate map: userId → slug for member profile links
+    members.forEach((m) => {
+      if (m.userId && m.slug) memberSlugMap.set(m.userId, m.slug);
+    });
+  } catch (_) {
+    // Silently fail — author blocks fall back to plain div without link
+  }
 }
 
 function buildProjectCard(project, index) {
@@ -72,10 +91,19 @@ function buildProjectCard(project, index) {
           ${project.slug ? `<a href="project.html?slug=${encodeURIComponent(project.slug)}" class="btn btn--ghost btn--sm">Детальніше</a>` : ""}
           ${githubBtn}${demoBtn}
         </div>
-        <div class="project-card__author">
-          <div class="project-card__author-avatar" aria-hidden="true">${authorAvatarInner}</div>
-          ${escHtml(authorName)}
-        </div>
+        ${
+          /* Author block: link to member profile if slug is known, plain div otherwise */
+          (() => {
+            const slug =
+              project.author?.id != null
+                ? memberSlugMap.get(project.author.id)
+                : null;
+            const inner = `<div class="project-card__author-avatar" aria-hidden="true">${authorAvatarInner}</div>${escHtml(authorName)}`;
+            return slug
+              ? `<a href="member.html?id=${encodeURIComponent(slug)}" class="project-card__author" aria-label="Профіль ${escHtml(authorName)}">${inner}</a>`
+              : `<div class="project-card__author">${inner}</div>`;
+          })()
+        }
       </div>
     </article>
   </li>`;
@@ -136,9 +164,12 @@ async function loadProjects(page, append = false) {
   }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const gridEl = document.getElementById("projects-grid");
   if (!gridEl) return;
+
+  // Pre-fetch member slugs before rendering so author links are ready on first load
+  await initMemberSlugs();
 
   // Initial load
   loadProjects(0);
