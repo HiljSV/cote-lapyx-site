@@ -1,0 +1,37 @@
+{
+  "nav.home": "Accueil",
+  "nav.about": "À propos",
+  "nav.team": "Équipe",
+  "nav.services": "Services",
+  "nav.projects": "Projets",
+  "nav.blog": "Blog",
+  "nav.contact": "Contact",
+
+  "header.login": "Connexion",
+  "header.dashboard": "Tableau de bord",
+  "header.open_menu": "Ouvrir le menu",
+  "header.close_menu": "Fermer le menu",
+  "header.theme_toggle": "Changer le thème",
+
+  "footer.tagline": "Studio IT full-cycle — frontend, backend, design. Nous transformons les idées en produits.",
+  "footer.nav_title": "Navigation",
+  "footer.contacts_title": "Contacts",
+  "footer.copyright": "© 2019–2026 cote-lapyx. Tous droits réservés.",
+  "footer.powered": "Propulsé par",
+
+  "btn.view_profile": "Voir le profil",
+  "btn.our_services": "Nos services",
+  "btn.projects": "Projets",
+  "btn.connect": "Nous contacter",
+  "btn.all_projects": "Tous les projets",
+  "btn.read_more": "Lire la suite",
+
+  "index.about.title": "À propos",
+  "index.team.title": "Équipe",
+  "index.team.subtitle": "Trois spécialistes — un résultat",
+  "index.services.title": "Services",
+  "index.services.subtitle": "Ce que nous faisons et proposons",
+  "index.projects.title": "Projets sélectionnés",
+  "index.projects.subtitle": "Une partie de ce que nous avons construit",
+  "index.blog.title": "Blog de l'équipe"
+}

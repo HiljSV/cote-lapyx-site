@@ -7,7 +7,8 @@
         <a href="/" class="footer__logo" aria-label="cote-lapyx — на головну">
           <p class="footer__nav-title">COTE-LAPYX</p>
         </a>
-        <p class="footer__tagline">
+        <!-- Footer: tagline — translatable -->
+        <p class="footer__tagline" data-i18n="footer.tagline">
           IT-студія повного циклу — frontend, backend, дизайн. Перетворюємо ідеї
           на продукти.
         </p>
@@ -108,23 +109,62 @@
         </div>
       </div>
 
-      <!-- Navigation -->
+      <!-- Footer: navigation column — data-i18n on title and each link -->
       <div class="footer__col">
-        <p class="footer__nav-title">Навігація</p>
+        <!-- Navigation column title -->
+        <p class="footer__nav-title" data-i18n="footer.nav_title">Навігація</p>
         <ul class="footer__nav-list" role="list">
-          <li><a href="/" class="footer__nav-link">Головна</a></li>
-          <li><a href="/#about" class="footer__nav-link">Про нас</a></li>
-          <li><a href="team.html" class="footer__nav-link">Команда</a></li>
-          <li><a href="/#services" class="footer__nav-link">Послуги</a></li>
-          <li><a href="projects.html" class="footer__nav-link">Проекти</a></li>
-          <li><a href="blog.html" class="footer__nav-link">Блог</a></li>
-          <li><a href="/#contact" class="footer__nav-link">Контакт</a></li>
+          <!-- Footer nav: Home -->
+          <li>
+            <a href="/" class="footer__nav-link"
+              ><span data-i18n="nav.home">Головна</span></a
+            >
+          </li>
+          <!-- Footer nav: About -->
+          <li>
+            <a href="/#about" class="footer__nav-link"
+              ><span data-i18n="nav.about">Про нас</span></a
+            >
+          </li>
+          <!-- Footer nav: Team -->
+          <li>
+            <a href="team.html" class="footer__nav-link"
+              ><span data-i18n="nav.team">Команда</span></a
+            >
+          </li>
+          <!-- Footer nav: Services -->
+          <li>
+            <a href="/#services" class="footer__nav-link"
+              ><span data-i18n="nav.services">Послуги</span></a
+            >
+          </li>
+          <!-- Footer nav: Projects -->
+          <li>
+            <a href="projects.html" class="footer__nav-link"
+              ><span data-i18n="nav.projects">Проекти</span></a
+            >
+          </li>
+          <!-- Footer nav: Blog -->
+          <li>
+            <a href="blog.html" class="footer__nav-link"
+              ><span data-i18n="nav.blog">Блог</span></a
+            >
+          </li>
+          <!-- Footer nav: Contact -->
+          <li>
+            <a href="/#contact" class="footer__nav-link"
+              ><span data-i18n="nav.contact">Контакт</span></a
+            >
+          </li>
         </ul>
       </div>
 
-      <!-- Contacts -->
+      <!-- Footer: contacts column — data-i18n on title -->
       <div class="footer__col footer__col--contacts">
-        <p class="footer__nav-title">Контакти</p>
+        <!-- Contacts column title -->
+        <p class="footer__nav-title" data-i18n="footer.contacts_title">
+          Контакти
+        </p>
         <a href="mailto:hello@cote-lapyx.com" class="footer__contact-item">
           <svg
             width="14"
@@ -183,11 +223,13 @@
       </div>
     </div>
 
-    <!-- Bottom bar -->
+    <!-- Footer: bottom bar — copyright and powered-by -->
     <div class="footer__bottom">
-      <p class="footer__copyright">
-        &copy; 2024 cote-lapyx. Всі права захищені.
+      <!-- Copyright — full text including © symbol is in JSON value -->
+      <p class="footer__copyright" data-i18n="footer.copyright">
+        © 2019–2026 cote-lapyx. Всі права захищені.
       </p>
+      <!-- Powered by — static text, not translated -->
       <p class="footer__powered">Powered by <span>cote-lapyx team</span></p>
     </div>
   </div>

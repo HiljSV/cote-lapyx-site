@@ -22,10 +22,17 @@
         Від ідеї до готового продукту.
       </p>
 
+      <!-- Hero: CTA buttons — data-i18n on button text -->
       <div class="hero__actions">
-        <a href="#services" class="btn btn--cyan">Наші послуги</a>
-        <a href="projects.html" class="btn btn--magenta">Проекти</a>
-        <a href="#contact" class="btn btn--green">Зв'язатись</a>
+        <a href="#services" class="btn btn--cyan"
+          ><span data-i18n="btn.our_services">Наші послуги</span></a
+        >
+        <a href="projects.html" class="btn btn--magenta"
+          ><span data-i18n="btn.projects">Проекти</span></a
+        >
+        <a href="#contact" class="btn btn--green"
+          ><span data-i18n="btn.connect">Зв'язатись</span></a
+        >
       </div>
     </div>
 
@@ -55,8 +62,11 @@
   aria-labelledby="about-title"
 >
   <div class="page__container">
+    <!-- About: section header — data-i18n on title -->
     <div class="section__header">
-      <h2 class="section-title" id="about-title">Про нас</h2>
+      <h2 class="section-title" id="about-title">
+        <span data-i18n="index.about.title">Про нас</span>
+      </h2>
     </div>
     <div class="about__container">
       <div class="about__text-col">
@@ -123,9 +133,14 @@
      ============================================================ -->
 <section class="section section--dark" id="team" aria-labelledby="team-heading">
   <div class="page__container">
+    <!-- Team: section header — data-i18n on title and subtitle -->
     <div class="section__header">
-      <h2 class="section-title" id="team-heading">Команда</h2>
-      <p class="section__subtitle">Три спеціалісти — один результат</p>
+      <h2 class="section-title" id="team-heading">
+        <span data-i18n="index.team.title">Команда</span>
+      </h2>
+      <p class="section__subtitle" data-i18n="index.team.subtitle">
+        Три спеціалісти — один результат
+      </p>
     </div>
 
     <ul class="team-grid" role="list">
@@ -226,8 +241,9 @@
             </div>
           </div>
           <div class="team-card__footer">
+            <!-- Team card footer: view profile button — data-i18n on text -->
             <a href="member.html?id=serhii" class="btn btn--cyan btn--sm"
-              >Переглянути профіль</a
+              ><span data-i18n="btn.view_profile">Переглянути профіль</span></a
             >
           </div>
         </article>
@@ -326,9 +342,10 @@
               </a>
             </div>
           </div>
+          <!-- Team card footer: view profile button — data-i18n on text -->
           <div class="team-card__footer">
             <a href="member.html?id=andrii" class="btn btn--cyan btn--sm"
-              >Переглянути профіль</a
+              ><span data-i18n="btn.view_profile">Переглянути профіль</span></a
             >
           </div>
         </article>
@@ -431,9 +448,10 @@
               </a>
             </div>
           </div>
+          <!-- Team card footer: view profile button — data-i18n on text -->
           <div class="team-card__footer">
             <a href="member.html?id=valeriia" class="btn btn--cyan btn--sm"
-              >Переглянути профіль</a
+              ><span data-i18n="btn.view_profile">Переглянути профіль</span></a
             >
           </div>
         </article>
@@ -453,9 +471,14 @@
   aria-labelledby="services-heading"
 >
   <div class="page__container">
+    <!-- Services: section header — data-i18n on title and subtitle -->
     <div class="section__header">
-      <h2 class="section-title" id="services-heading">Послуги</h2>
-      <p class="section__subtitle">Що ми вміємо і пропонуємо</p>
+      <h2 class="section-title" id="services-heading">
+        <span data-i18n="index.services.title">Послуги</span>
+      </h2>
+      <p class="section__subtitle" data-i18n="index.services.subtitle">
+        Що ми вміємо і пропонуємо
+      </p>
     </div>
 
     <ul class="services-grid" role="list">
@@ -532,9 +555,14 @@
   aria-labelledby="projects-heading"
 >
   <div class="page__container">
+    <!-- Projects: section header — data-i18n on title and subtitle -->
     <div class="section__header">
-      <h2 class="section-title" id="projects-heading">Вибрані проекти</h2>
-      <p class="section__subtitle">Частина того, що ми побудували</p>
+      <h2 class="section-title" id="projects-heading">
+        <span data-i18n="index.projects.title">Вибрані проекти</span>
+      </h2>
+      <p class="section__subtitle" data-i18n="index.projects.subtitle">
+        Частина того, що ми побудували
+      </p>
     </div>
 
     <ul class="projects-grid" role="list">
@@ -685,8 +713,11 @@
       </li>
     </ul>
 
+    <!-- Projects: all projects CTA button — data-i18n on text -->
     <div style="text-align: center; margin-top: 40px">
-      <a href="projects.html" class="btn btn--ghost">Всі проекти</a>
+      <a href="projects.html" class="btn btn--ghost"
+        ><span data-i18n="btn.all_projects">Всі проекти</span></a
+      >
     </div>
   </div>
 </section>
@@ -702,8 +733,11 @@
   aria-labelledby="blog-heading"
 >
   <div class="page__container">
+    <!-- Blog: section header — data-i18n on title (subtitle not in translation scope) -->
     <div class="section__header">
-      <h2 class="section-title" id="blog-heading">Спільний блог</h2>
+      <h2 class="section-title" id="blog-heading">
+        <span data-i18n="index.blog.title">Спільний блог</span>
+      </h2>
       <p class="section__subtitle">Думки, досвід та технічні нотатки команди</p>
     </div>
 

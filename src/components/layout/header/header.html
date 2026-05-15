@@ -10,35 +10,49 @@
       />
     </a>
 
+    <!-- Header: main navigation — data-i18n on each link text span -->
     <nav class="header__nav" id="main-nav" aria-label="Основна навігація">
       <ul class="header__nav-list" role="list">
+        <!-- Nav: Home -->
         <li class="header__nav-item">
-          <a href="/" class="header__nav-link" data-nav-link>Головна</a>
+          <a href="/" class="header__nav-link" data-nav-link
+            ><span data-i18n="nav.home">Головна</span></a
+          >
         </li>
+        <!-- Nav: About -->
         <li class="header__nav-item">
           <a href="about.html" class="header__nav-link" data-nav-link
-            >Про нас</a
+            ><span data-i18n="nav.about">Про нас</span></a
           >
         </li>
+        <!-- Nav: Team -->
         <li class="header__nav-item">
-          <a href="team.html" class="header__nav-link" data-nav-link>Команда</a>
+          <a href="team.html" class="header__nav-link" data-nav-link
+            ><span data-i18n="nav.team">Команда</span></a
+          >
         </li>
+        <!-- Nav: Services -->
         <li class="header__nav-item">
           <a href="services.html" class="header__nav-link" data-nav-link
-            >Послуги</a
+            ><span data-i18n="nav.services">Послуги</span></a
           >
         </li>
+        <!-- Nav: Projects -->
         <li class="header__nav-item">
           <a href="projects.html" class="header__nav-link" data-nav-link
-            >Проекти</a
+            ><span data-i18n="nav.projects">Проекти</span></a
           >
         </li>
+        <!-- Nav: Blog -->
         <li class="header__nav-item">
-          <a href="blog.html" class="header__nav-link" data-nav-link>Блог</a>
+          <a href="blog.html" class="header__nav-link" data-nav-link
+            ><span data-i18n="nav.blog">Блог</span></a
+          >
         </li>
+        <!-- Nav: Contact -->
         <li class="header__nav-item">
           <a href="contact.html" class="header__nav-link" data-nav-link
-            >Контакт</a
+            ><span data-i18n="nav.contact">Контакт</span></a
           >
         </li>
       </ul>
@@ -56,13 +70,15 @@
           <span class="header__lang-current">UA</span>
           <span class="header__lang-chevron">▾</span>
         </button>
+        <!-- Lang dropdown: data-lang uses ISO 639-1 codes (uk, not ua) -->
         <div class="header__lang-dropdown" id="lang-dropdown" role="listbox">
+          <!-- Ukrainian — was data-lang="ua", fixed to ISO 639-1 "uk" -->
           <button
             class="header__lang-btn is-active"
             aria-pressed="true"
-            data-lang="ua"
+            data-lang="uk"
           >
-            UA
+            UK
           </button>
           <button class="header__lang-btn" aria-pressed="false" data-lang="en">
             EN
@@ -85,26 +101,28 @@
         🌙
       </button>
 
-      <!-- Shown when logged out -->
+      <!-- Shown when logged out — data-i18n on button text -->
       <a
         href="login.html"
         class="header__login-btn btn btn--cyan btn--sm"
         id="header-login-btn"
-        >Увійти</a
+        ><span data-i18n="header.login">Увійти</span></a
       >
-      <!-- Shown when logged in (revealed by app.js) -->
+      <!-- Shown when logged in (revealed by app.js) — data-i18n on button text -->
       <a
         href="dashboard.html"
         class="header__login-btn btn btn--cyan btn--sm"
         id="header-user-btn"
         hidden
-        >Кабінет</a
+        ><span data-i18n="header.dashboard">Кабінет</span></a
       >
 
+      <!-- Burger button: data-i18n-aria for aria-label translation -->
       <button
         class="header__burger"
         id="burger-btn"
         aria-label="Відкрити меню"
+        data-i18n-aria="header.open_menu"
         aria-expanded="false"
         aria-controls="main-nav"
       >

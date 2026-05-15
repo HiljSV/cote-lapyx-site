@@ -6,6 +6,13 @@ import {
   FLS,
 } from "@js/common/functions.js";
 
+// i18n: language detection, translation, switcher wiring
+import {
+  detectLanguage,
+  applyTranslations,
+  initI18nSwitcher,
+} from "@js/i18n.js";
+
 // =============================================================================
 // Header auth state — show "Кабінет" or "Увійти" based on localStorage token
 // =============================================================================
@@ -138,52 +145,51 @@ if (localStorage.getItem("cl_access")) {
 })();
 
 // =============================================================================
-// Language switcher (UI only — no actual i18n in prototype)
+// i18n — language detection + translation + switcher
+// Replaces the old UI-only initLangSwitcher prototype block
 // =============================================================================
-(function initLangSwitcher() {
-  const btns = document.querySelectorAll(".header__lang-btn");
+async function initI18n() {
+  // Detect language: localStorage → geo-IP → navigator → "en"
+  const lang = await detectLanguage();
+
+  // Apply translations to all [data-i18n] / [data-i18n-aria] elements
+  applyTranslations(lang);
+
+  // Wire switcher buttons with active state and click handlers
+  initI18nSwitcher(lang);
+
+  // Mobile dropdown toggle for the lang switcher widget
   const toggle = document.getElementById("lang-toggle");
-  const currentLabel = document.querySelector(".header__lang-current");
   const wrapper = document.getElementById("lang-switcher");
 
-  // Mobile dropdown toggle
   if (toggle && wrapper) {
+    // Open/close the dropdown on toggle button click
     toggle.addEventListener("click", (e) => {
       e.stopPropagation();
       const isOpen = wrapper.classList.toggle("is-open");
       toggle.setAttribute("aria-expanded", String(isOpen));
     });
 
+    // Close dropdown when clicking outside the widget
     document.addEventListener("click", (e) => {
       if (!wrapper.contains(e.target)) {
         wrapper.classList.remove("is-open");
         toggle.setAttribute("aria-expanded", "false");
       }
     });
-  }
 
-  btns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      btns.forEach((b) => {
-        b.classList.remove("is-active");
-        b.setAttribute("aria-pressed", "false");
-      });
-      btn.classList.add("is-active");
-      btn.setAttribute("aria-pressed", "true");
-
-      // Update mobile toggle label
-      if (currentLabel) {
-        currentLabel.textContent = btn.dataset.lang.toUpperCase();
-      }
-
-      // Close dropdown
-      if (wrapper && toggle) {
+    // Close dropdown after a language button is clicked
+    wrapper.querySelectorAll(".header__lang-btn[data-lang]").forEach((btn) => {
+      btn.addEventListener("click", () => {
         wrapper.classList.remove("is-open");
         toggle.setAttribute("aria-expanded", "false");
-      }
+      });
     });
-  });
-})();
+  }
+}
+
+// Run i18n init immediately (async — does not block other scripts)
+initI18n();
 
 // =============================================================================
 // Filter bar — projects page

@@ -1,0 +1,37 @@
+{
+  "nav.home": "Головна",
+  "nav.about": "Про нас",
+  "nav.team": "Команда",
+  "nav.services": "Послуги",
+  "nav.projects": "Проекти",
+  "nav.blog": "Блог",
+  "nav.contact": "Контакт",
+
+  "header.login": "Увійти",
+  "header.dashboard": "Кабінет",
+  "header.open_menu": "Відкрити меню",
+  "header.close_menu": "Закрити меню",
+  "header.theme_toggle": "Перемкнути тему",
+
+  "footer.tagline": "IT-студія повного циклу — frontend, backend, дизайн. Перетворюємо ідеї на продукти.",
+  "footer.nav_title": "Навігація",
+  "footer.contacts_title": "Контакти",
+  "footer.copyright": "© 2019–2026 cote-lapyx. Всі права захищені.",
+  "footer.powered": "Powered by",
+
+  "btn.view_profile": "Переглянути профіль",
+  "btn.our_services": "Наші послуги",
+  "btn.projects": "Проекти",
+  "btn.connect": "Зв'язатись",
+  "btn.all_projects": "Всі проекти",
+  "btn.read_more": "Читати далі",
+
+  "index.about.title": "Про нас",
+  "index.team.title": "Команда",
+  "index.team.subtitle": "Три спеціалісти — один результат",
+  "index.services.title": "Послуги",
+  "index.services.subtitle": "Що ми вміємо і пропонуємо",
+  "index.projects.title": "Вибрані проекти",
+  "index.projects.subtitle": "Частина того, що ми побудували",
+  "index.blog.title": "Спільний блог"
+}
