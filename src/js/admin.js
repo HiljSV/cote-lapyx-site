@@ -133,6 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (section === "posts") loadAdminPosts(0);
       if (section === "projects") loadAdminProjects(0);
       if (section === "comments") loadAdminComments(0, adminCommentsFilter);
+      if (section === "contacts") loadAdminContacts(0, adminContactsFilter);
       // Close sidebar drawer on mobile after navigation
       if (window.innerWidth <= 991.98) {
         closeSidebar();
@@ -177,10 +178,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // ---------------------------------------------------------------------------
 
   let adminCommentsFilter = "";
+  let adminContactsFilter = "";
   let adminUsersPage = 0;
   let adminPostsPage = 0;
   let adminProjectsPage = 0;
   let adminCommentsPage = 0;
+  let adminContactsPage = 0;
 
   const filterTabs = document.querySelectorAll(".admin-filter-tab");
 
@@ -443,6 +446,18 @@ document.addEventListener("DOMContentLoaded", () => {
       set("admin-stat-posts", stats.postsTotal);
       set("admin-stat-comments", stats.commentsPending);
       set("admin-stat-projects", stats.projectsPublished);
+      set("admin-stat-contacts", stats.messagesUnread);
+      // Update nav badge for unread contacts
+      const badge = document.getElementById("nav-contacts-badge");
+      if (badge) {
+        const count = Number(stats.messagesUnread ?? 0);
+        if (count > 0) {
+          badge.textContent = count;
+          badge.hidden = false;
+        } else {
+          badge.hidden = true;
+        }
+      }
     } catch (err) {
       console.error("Admin stats error:", err);
     }
@@ -744,6 +759,127 @@ document.addEventListener("DOMContentLoaded", () => {
       if (action === "approve" || action === "reject")
         moderateComment(Number(id), action);
       else if (action === "delete-comment") deleteComment(Number(id));
+    });
+
+  // ---------------------------------------------------------------------------
+  // Contact messages filter tabs
+  // ---------------------------------------------------------------------------
+
+  const contactFilterTabs = document.querySelectorAll(".admin-contact-tab");
+
+  contactFilterTabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      contactFilterTabs.forEach((t) => {
+        t.classList.remove("is-active");
+        t.setAttribute("aria-selected", "false");
+      });
+      tab.classList.add("is-active");
+      tab.setAttribute("aria-selected", "true");
+      adminContactsFilter = tab.dataset.contactFilter ?? "";
+      loadAdminContacts(0, adminContactsFilter);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Admin — contact messages panel
+  // ---------------------------------------------------------------------------
+
+  const CONTACT_STATUS_LABEL = {
+    NEW: "Нове",
+    READ: "Прочитано",
+    REPLIED: "Відповіли",
+  };
+  const CONTACT_STATUS_COLOR = {
+    NEW: "magenta",
+    READ: "cyan",
+    REPLIED: "green",
+  };
+
+  async function loadAdminContacts(page, status = "") {
+    adminContactsPage = page;
+    const body = document.getElementById("admin-contacts-body");
+    if (!body) return;
+    body.innerHTML = '<div class="dash-list__empty">Завантаження...</div>';
+
+    const statusParam = status ? `&status=${status}` : "";
+    try {
+      const res = await fetchWithAuth(
+        `${ADMIN_API}/admin/contact-messages?size=20&sort=createdAt,desc&page=${page}${statusParam}`,
+      );
+      if (!res.ok) {
+        body.innerHTML =
+          '<div class="dash-list__empty">Помилка завантаження</div>';
+        return;
+      }
+      const data = await res.json();
+      const rows = (data.content || [])
+        .map((m) => {
+          const statusColor = CONTACT_STATUS_COLOR[m.status] || "cyan";
+          const statusLabel = CONTACT_STATUS_LABEL[m.status] || m.status;
+          // Truncate message to 80 chars for preview
+          const preview =
+            escHtml(m.message || "").slice(0, 80) +
+            (m.message?.length > 80 ? "…" : "");
+          return `<div class="dash-list__row">
+            <div class="dash-list__title" data-label="Ім'я">${escHtml(m.name)}</div>
+            <div data-label="Email"><a href="mailto:${escHtml(m.email)}" class="dash-list__link">${escHtml(m.email)}</a></div>
+            <div data-label="Повідомлення" class="dash-list__preview">${preview}</div>
+            <div class="dash-list__date" data-label="Дата">${fmtDate(m.createdAt)}</div>
+            <div data-label="Статус"><span class="neon-badge neon-badge--${statusColor}">${statusLabel}</span></div>
+            <div class="dash-list__actions" data-label="Дії">
+              ${m.status === "NEW" ? `<button type="button" class="btn btn--ghost btn--xs" data-contact-action="read" data-id="${m.id}" title="Позначити прочитаним">✓</button>` : ""}
+              <button type="button" class="btn btn--ghost btn--xs" data-contact-action="reply" data-email="${escHtml(m.email)}" data-name="${escHtml(m.name)}" title="Відповісти">✉</button>
+            </div>
+          </div>`;
+        })
+        .join("");
+      body.innerHTML =
+        rows || '<div class="dash-list__empty">Звернень немає</div>';
+      renderPagination(
+        "admin-contacts-pagination",
+        data.number,
+        data.totalPages,
+        (p) => loadAdminContacts(p, adminContactsFilter),
+      );
+    } catch (err) {
+      console.error("Admin contacts error:", err);
+      body.innerHTML =
+        '<div class="dash-list__empty">Помилка завантаження</div>';
+    }
+  }
+
+  async function markContactRead(id) {
+    try {
+      const res = await fetchWithAuth(
+        `${ADMIN_API}/admin/contact-messages/${id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "READ" }),
+        },
+      );
+      if (res.ok) {
+        // Refresh list and stats (unread count changes)
+        loadAdminContacts(adminContactsPage, adminContactsFilter);
+        loadAdminStats();
+      }
+    } catch {
+      console.error("Failed to mark contact as read");
+    }
+  }
+
+  // Delegate click on contacts body — read and reply actions
+  document
+    .getElementById("admin-contacts-body")
+    ?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-contact-action]");
+      if (!btn) return;
+      const action = btn.dataset.contactAction;
+      if (action === "read") markContactRead(Number(btn.dataset.id));
+      else if (action === "reply") {
+        // Opens native mail client — no confirm dialog needed
+        window.location.href = `mailto:${btn.dataset.email}?subject=Re: cote-lapyx contact`;
+      }
     });
 
   // Load overview data on init

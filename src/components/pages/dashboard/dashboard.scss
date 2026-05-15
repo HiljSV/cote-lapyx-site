@@ -685,6 +685,34 @@
   }
 }
 
+// admin contacts: Name | Email | Preview | Date | Status | Actions
+.dash-list--admin-contacts {
+  .dash-list__head,
+  .dash-list__row {
+    grid-template-columns: 110px 1fr 1fr 90px 110px 110px;
+  }
+}
+
+// Message preview — truncated single line
+.dash-list__preview {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: $text-secondary;
+  font-size: 13px;
+}
+
+// Email link inside list rows
+.dash-list__link {
+  color: $neon-cyan;
+  text-decoration: none;
+  font-size: 13px;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 // --- Mobile: single-column card layout ---
 
 @media (max-width: toEm($mobile)) {
