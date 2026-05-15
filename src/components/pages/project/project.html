@@ -3,7 +3,9 @@
   <div class="page-hero__container project-detail-hero__container">
     <!-- Breadcrumb -->
     <nav class="post-breadcrumb" aria-label="Навігація по сторінках">
-      <a href="projects.html" class="post-breadcrumb__link"><span data-i18n="project.breadcrumb.back">← Проекти</span></a>
+      <a href="projects.html" class="post-breadcrumb__link"
+        ><span data-i18n="project.breadcrumb.back">← Проекти</span></a
+      >
     </nav>
 
     <!-- Meta: status badge + date -->
@@ -15,8 +17,8 @@
       <time class="project-detail-hero__date" id="project-date"></time>
     </div>
 
-    <!-- Title -->
-    <h1 class="page-hero__heading" id="project-title" data-i18n="ui.loading">Завантаження...</h1>
+    <!-- Title — JS overwrites textContent with real title; no data-i18n to avoid collision on lang switch -->
+    <h1 class="page-hero__heading" id="project-title">Завантаження...</h1>
 
     <!-- Short description -->
     <p
@@ -54,14 +56,21 @@
     <div class="page__container project-detail-section__grid">
       <!-- Left: article content -->
       <div class="project-detail__content" id="project-content">
-        <p class="post-article__loading" data-i18n="ui.loading">Завантаження...</p>
+        <p class="post-article__loading" data-i18n="ui.loading">
+          Завантаження...
+        </p>
       </div>
 
       <!-- Right: sidebar -->
       <aside class="project-detail__sidebar" aria-label="Деталі проекту">
         <!-- Tech stack tags — JS injects neon-badge items -->
         <div class="project-detail__tech" id="project-tech">
-          <h2 class="project-detail__tech-title" data-i18n="project.sidebar.tech_title">Технології</h2>
+          <h2
+            class="project-detail__tech-title"
+            data-i18n="project.sidebar.tech_title"
+          >
+            Технології
+          </h2>
           <!-- JS injects tags -->
         </div>
 
@@ -81,9 +90,13 @@
     aria-label="Не знайдено"
   >
     <div class="page__container">
-      <p class="post-not-found__msg" data-i18n="project.not_found">Проект не знайдено.</p>
+      <p class="post-not-found__msg" data-i18n="project.not_found">
+        Проект не знайдено.
+      </p>
       <a href="projects.html" class="btn btn--cyan"
-        ><span data-i18n="project.not_found.back">← Повернутись до проектів</span></a
+        ><span data-i18n="project.not_found.back"
+          >← Повернутись до проектів</span
+        ></a
       >
     </div>
   </section>

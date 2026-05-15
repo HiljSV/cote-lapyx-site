@@ -23,12 +23,22 @@
 >
   <div class="contact-page__container">
     <!-- Visually hidden section title for screen readers / SEO -->
-    <h2 class="visually-hidden" id="contact-title" data-i18n="contact.section.title">Зв'язатися з нами</h2>
+    <h2
+      class="visually-hidden"
+      id="contact-title"
+      data-i18n="contact.section.title"
+    >
+      Зв'язатися з нами
+    </h2>
 
     <!-- Two-column layout: contact info + form -->
     <div class="contact-layout">
       <!-- Left column: contact info cards -->
-      <aside class="contact-info" aria-label="Контактна інформація" data-i18n-aria="contact.info.aria">
+      <aside
+        class="contact-info"
+        aria-label="Контактна інформація"
+        data-i18n-aria="contact.info.aria"
+      >
         <!-- Intro text above the info cards -->
         <p class="contact-info__intro" data-i18n="contact.info.intro">
           Ми відкриті до нових проектів, партнерств і просто цікавих розмов.
@@ -304,7 +314,9 @@
             >
               <span data-i18n="contact.form.submit">Надіслати</span>
             </button>
-            <p class="contact-form__hint" data-i18n="contact.form.hint">* обов'язкові поля</p>
+            <p class="contact-form__hint" data-i18n="contact.form.hint">
+              * обов'язкові поля
+            </p>
           </div>
 
           <!-- Success banner — hidden until 201 response -->
@@ -315,7 +327,9 @@
             role="alert"
           >
             <strong data-i18n="contact.form.success_title">Дякуємо!</strong>
-            <span data-i18n="contact.form.success_text">Ваше повідомлення отримано. Відповімо найближчим часом.</span>
+            <span data-i18n="contact.form.success_text"
+              >Ваше повідомлення отримано. Відповімо найближчим часом.</span
+            >
           </div>
 
           <!-- Error banner — hidden until error response -->
@@ -326,7 +340,8 @@
             role="alert"
           >
             <strong data-i18n="contact.form.error_title">Помилка.</strong>
-            <span id="cf-error-text" data-i18n="contact.form.error_text">Спробуйте ще раз.</span>
+            <!-- cf-error-text — JS writes dynamic API error; no data-i18n to avoid overwriting on lang switch -->
+            <span id="cf-error-text">Спробуйте ще раз.</span>
           </div>
         </form>
       </div>

@@ -3,7 +3,9 @@
   <div class="page-hero__container post-hero__container">
     <!-- Breadcrumb -->
     <nav class="post-breadcrumb" aria-label="Навігація по сторінках">
-      <a href="blog.html" class="post-breadcrumb__link"><span data-i18n="post.breadcrumb.back">← Блог</span></a>
+      <a href="blog.html" class="post-breadcrumb__link"
+        ><span data-i18n="post.breadcrumb.back">← Блог</span></a
+      >
     </nav>
 
     <!-- Meta: category + date -->
@@ -12,8 +14,8 @@
       <time class="post-hero__date" id="post-date"></time>
     </div>
 
-    <!-- Title -->
-    <h1 class="page-hero__heading post-hero__title" id="post-title" data-i18n="ui.loading">
+    <!-- Title — JS overwrites textContent with real title; no data-i18n to avoid collision on lang switch -->
+    <h1 class="page-hero__heading post-hero__title" id="post-title">
       Завантаження...
     </h1>
 
@@ -39,7 +41,9 @@
   >
     <div class="page__container">
       <div class="post-article__body" id="post-content">
-        <p class="post-article__loading" data-i18n="ui.loading">Завантаження...</p>
+        <p class="post-article__loading" data-i18n="ui.loading">
+          Завантаження...
+        </p>
       </div>
     </div>
   </article>
@@ -146,7 +150,9 @@
     id="post-comments-section"
   >
     <div class="page__container">
-      <h2 class="post-comments__title" data-i18n="post.comments.title">Коментарі</h2>
+      <h2 class="post-comments__title" data-i18n="post.comments.title">
+        Коментарі
+      </h2>
 
       <form class="post-comments__form" id="post-comment-form" novalidate>
         <textarea
@@ -173,7 +179,12 @@
       </form>
 
       <div class="post-comments__list" id="post-comments-list">
-        <p class="post-comments__empty" id="post-comments-empty" hidden data-i18n="post.comments.empty">
+        <p
+          class="post-comments__empty"
+          id="post-comments-empty"
+          hidden
+          data-i18n="post.comments.empty"
+        >
           Коментарів ще немає. Будьте першим!
         </p>
       </div>
@@ -202,8 +213,12 @@
     aria-label="Не знайдено"
   >
     <div class="page__container">
-      <p class="post-not-found__msg" data-i18n="post.not_found">Статтю не знайдено.</p>
-      <a href="blog.html" class="btn btn--cyan"><span data-i18n="post.not_found.back">← Повернутись до блогу</span></a>
+      <p class="post-not-found__msg" data-i18n="post.not_found">
+        Статтю не знайдено.
+      </p>
+      <a href="blog.html" class="btn btn--cyan"
+        ><span data-i18n="post.not_found.back">← Повернутись до блогу</span></a
+      >
     </div>
   </section>
 </main>

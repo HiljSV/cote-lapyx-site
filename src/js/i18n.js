@@ -69,7 +69,7 @@ export async function detectLanguage() {
 }
 
 // =============================================================================
-// applyTranslations — update all [data-i18n] and [data-i18n-aria] elements
+// applyTranslations — update all [data-i18n], [data-i18n-aria], [data-i18n-placeholder] elements
 // Also sets document.documentElement.lang and persists choice to localStorage
 // =============================================================================
 export function applyTranslations(lang) {
