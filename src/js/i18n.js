@@ -69,7 +69,7 @@ export async function detectLanguage() {
 }
 
 // =============================================================================
-// applyTranslations — update all [data-i18n] and [data-i18n-aria] elements
+// applyTranslations — update all [data-i18n], [data-i18n-aria], [data-i18n-placeholder] elements
 // Also sets document.documentElement.lang and persists choice to localStorage
 // =============================================================================
 export function applyTranslations(lang) {
@@ -92,6 +92,14 @@ export function applyTranslations(lang) {
     const key = el.dataset.i18nAria;
     if (t[key] !== undefined) {
       el.setAttribute("aria-label", t[key]);
+    }
+  });
+
+  // Apply placeholder text to all elements with data-i18n-placeholder attribute
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+    const key = el.dataset.i18nPlaceholder;
+    if (t[key] !== undefined) {
+      el.setAttribute("placeholder", t[key]);
     }
   });
 

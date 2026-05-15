@@ -1,8 +1,10 @@
 <!-- PAGE HERO -->
 <div class="page-hero">
   <div class="page-hero__container">
-    <h1 class="page-hero__heading">Проекти</h1>
-    <p class="page-hero__subheading">
+    <h1 class="page-hero__heading">
+      <span data-i18n="projects.hero.title">Проекти</span>
+    </h1>
+    <p class="page-hero__subheading" data-i18n="projects.hero.subtitle">
       Що ми побудували — від ідеї до продакшену
     </p>
   </div>
@@ -15,9 +17,9 @@
       <div class="projects-page__filter">
         <div class="filter-bar" role="search" aria-label="Фільтр проектів">
           <div class="filter-bar__group">
-            <span class="filter-bar__label">Стек:</span>
+            <span class="filter-bar__label" data-i18n="projects.filter.stack_label">Стек:</span>
             <button class="filter-bar__btn is-active" data-filter-tech="">
-              Всі
+              <span data-i18n="filter.all">Всі</span>
             </button>
             <button class="filter-bar__btn" data-filter-tech="HTML">
               HTML/CSS
@@ -41,6 +43,8 @@
               type="search"
               placeholder="Пошук проектів..."
               aria-label="Пошук проектів"
+              data-i18n-placeholder="projects.filter.search_placeholder"
+              data-i18n-aria="projects.filter.search_aria"
               id="projects-search"
             />
           </div>
@@ -53,6 +57,7 @@
           class="projects-page__loading"
           id="projects-loading"
           aria-live="polite"
+          data-i18n="ui.loading"
         >
           Завантаження...
         </li>
@@ -61,7 +66,7 @@
       <!-- Load more -->
       <div class="blog-page__more" id="projects-more-wrap" hidden>
         <button type="button" class="btn btn--ghost" id="projects-load-more">
-          Завантажити ще
+          <span data-i18n="ui.load_more">Завантажити ще</span>
         </button>
       </div>
     </div>
