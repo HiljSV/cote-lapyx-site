@@ -6,25 +6,20 @@
   "nav.projects": "Projects",
   "nav.blog": "Blog",
   "nav.contact": "Contact",
-
   "header.login": "Login",
   "header.dashboard": "Dashboard",
   "header.open_menu": "Open menu",
   "header.close_menu": "Close menu",
   "header.theme_toggle": "Toggle theme",
-
   "footer.tagline": "Full-cycle IT studio — frontend, backend, design. We turn ideas into products.",
   "footer.nav_title": "Navigation",
   "footer.contacts_title": "Contacts",
   "footer.copyright": "© 2019–2026 cote-lapyx. All rights reserved.",
-
   "btn.view_profile": "View profile",
   "btn.our_services": "Our Services",
   "btn.projects": "Projects",
   "btn.connect": "Contact us",
   "btn.all_projects": "All projects",
-  "btn.read_more": "Read more",
-
   "index.about.title": "About us",
   "index.team.title": "Team",
   "index.team.subtitle": "Three specialists — one result",
@@ -33,13 +28,11 @@
   "index.projects.title": "Selected projects",
   "index.projects.subtitle": "Part of what we have built",
   "index.blog.title": "Team blog",
-
   "ui.loading": "Loading...",
   "ui.load_more": "Load more",
   "filter.all": "All",
   "btn.write_us": "Write to us",
   "btn.our_projects": "Our Projects",
-
   "about.hero.title": "About us",
   "about.hero.subtitle": "From the first pixel to the final deploy — one team",
   "about.mission.title": "Our Mission",
@@ -64,19 +57,16 @@
   "about.timeline.2023.desc": "Building experience, stack, practice on real projects.",
   "about.timeline.2026.heading": "Founded",
   "about.timeline.2026.desc": "cote-lapyx officially launches as an IT studio.",
-
   "blog.hero.title": "Blog",
   "blog.hero.subtitle": "Thoughts, experience, and technical notes from the cote-lapyx team",
   "blog.filter.category_label": "Category:",
   "blog.filter.search_placeholder": "Search articles...",
   "blog.filter.search_aria": "Search articles",
-
   "projects.hero.title": "Projects",
   "projects.hero.subtitle": "What we built — from idea to production",
   "projects.filter.stack_label": "Stack:",
   "projects.filter.search_placeholder": "Search projects...",
   "projects.filter.search_aria": "Search projects",
-
   "services.hero.title": "Our Services",
   "services.hero.subtitle": "Full development cycle — from idea to finished product",
   "services.section.title": "What we do",
@@ -106,18 +96,15 @@
   "services.pricing.btn": "Discuss project",
   "services.cta.heading": "Have an idea?",
   "services.cta.subtext": "Tell us — we will find a solution together.",
-
   "team.hero.title": "Our Team",
   "team.hero.subtitle": "Three specialists with different superpowers — one cohesive result",
   "team.skills.title": "Technical Skills",
-
   "member.skills.title": "Technical Skills",
   "member.projects.title": "Personal Projects",
   "member.posts.title": "Articles",
   "member.cta.heading": "Want to collaborate?",
   "member.cta.subheading": "Open to new projects and freelance work. Write to us — let's discuss!",
   "member.cta.btn": "Write",
-
   "post.breadcrumb.back": "← Blog",
   "post.action.like_aria": "Like",
   "post.action.fav": "Favorite",
@@ -131,12 +118,10 @@
   "post.comments.empty": "No comments yet. Be the first!",
   "post.not_found": "Article not found.",
   "post.not_found.back": "← Back to blog",
-
   "project.breadcrumb.back": "← Projects",
   "project.sidebar.tech_title": "Technologies",
   "project.not_found": "Project not found.",
   "project.not_found.back": "← Back to projects",
-
   "contact.hero.title": "Contact",
   "contact.hero.subtitle": "Have an idea? Write to us — we will respond quickly",
   "contact.section.title": "Contact us",
@@ -156,6 +141,5 @@
   "contact.form.hint": "* required fields",
   "contact.form.success_title": "Thank you!",
   "contact.form.success_text": "Your message has been received. We will respond soon.",
-  "contact.form.error_title": "Error.",
-  "contact.form.error_text": "Please try again."
+  "contact.form.error_title": "Error."
 }

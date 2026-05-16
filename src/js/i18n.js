@@ -39,14 +39,27 @@ let _currentLang = "en";
 
 // =============================================================================
 // detectLanguage — async, returns resolved language code
-// Priority: 1) localStorage → 2) geo-IP → 3) navigator.language → 4) "en"
+// Priority: 1) localStorage → 2) navigator.language → 3) geo-IP → 4) "en"
+// navigator comes before geo-IP because browser language reflects user preference
+// better than physical location (e.g. a Ukrainian user in France expects UK/EN, not FR)
 // =============================================================================
 export async function detectLanguage() {
   // 1. Previously persisted user choice takes top priority
   const saved = localStorage.getItem(LS_KEY);
   if (saved && SUPPORTED.includes(saved)) return saved;
 
-  // 2. Geo-IP detection via public backend endpoint
+  // 2. Browser language preference — navigator.languages covers all user-set langs
+  // navigator.languages returns ordered list; we take the first supported one
+  const navLangs = navigator.languages?.length
+    ? navigator.languages
+    : [navigator.language];
+  for (const l of navLangs) {
+    const code = l?.slice(0, 2).toLowerCase();
+    if (code && SUPPORTED.includes(code)) return code;
+  }
+
+  // 3. Geo-IP detection — fallback when browser language is not in our supported list
+  // (e.g. browser is set to Arabic, user is in Germany → detect DE via geo)
   try {
     const res = await fetch(GEO_ENDPOINT);
     if (res.ok) {
@@ -59,10 +72,6 @@ export async function detectLanguage() {
   } catch (_) {
     // Silent fallback — geo endpoint may be unavailable (network error, CORS, etc.)
   }
-
-  // 3. Browser language preference (first 2 characters = ISO 639-1 code)
-  const nav = navigator.language?.slice(0, 2).toLowerCase();
-  if (SUPPORTED.includes(nav)) return nav;
 
   // 4. Default fallback
   return "en";

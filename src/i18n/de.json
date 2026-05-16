@@ -6,25 +6,20 @@
   "nav.projects": "Projekte",
   "nav.blog": "Blog",
   "nav.contact": "Kontakt",
-
   "header.login": "Anmelden",
   "header.dashboard": "Dashboard",
   "header.open_menu": "Menü öffnen",
   "header.close_menu": "Menü schließen",
   "header.theme_toggle": "Design wechseln",
-
   "footer.tagline": "Full-Cycle IT-Studio — Frontend, Backend, Design. Wir machen aus Ideen Produkte.",
   "footer.nav_title": "Navigation",
   "footer.contacts_title": "Kontakte",
   "footer.copyright": "© 2019–2026 cote-lapyx. Alle Rechte vorbehalten.",
-
   "btn.view_profile": "Profil ansehen",
   "btn.our_services": "Unsere Dienste",
   "btn.projects": "Projekte",
   "btn.connect": "Kontaktieren",
   "btn.all_projects": "Alle Projekte",
-  "btn.read_more": "Weiterlesen",
-
   "index.about.title": "Über uns",
   "index.team.title": "Team",
   "index.team.subtitle": "Drei Spezialisten — ein Ergebnis",
@@ -33,13 +28,11 @@
   "index.projects.title": "Ausgewählte Projekte",
   "index.projects.subtitle": "Ein Teil von dem, was wir gebaut haben",
   "index.blog.title": "Team-Blog",
-
   "ui.loading": "Laden...",
   "ui.load_more": "Mehr laden",
   "filter.all": "Alle",
   "btn.write_us": "Schreib uns",
   "btn.our_projects": "Unsere Projekte",
-
   "about.hero.title": "Über uns",
   "about.hero.subtitle": "Vom ersten Pixel bis zum finalen Deploy — ein Team",
   "about.mission.title": "Unsere Mission",
@@ -64,19 +57,16 @@
   "about.timeline.2023.desc": "Erfahrungsaufbau, Stack, Praxis an echten Projekten.",
   "about.timeline.2026.heading": "Gründung",
   "about.timeline.2026.desc": "cote-lapyx startet offiziell als IT-Studio.",
-
   "blog.hero.title": "Blog",
   "blog.hero.subtitle": "Gedanken, Erfahrungen und technische Notizen des cote-lapyx Teams",
   "blog.filter.category_label": "Kategorie:",
   "blog.filter.search_placeholder": "Artikel suchen...",
   "blog.filter.search_aria": "Artikel suchen",
-
   "projects.hero.title": "Projekte",
   "projects.hero.subtitle": "Was wir gebaut haben — von der Idee bis zur Produktion",
   "projects.filter.stack_label": "Stack:",
   "projects.filter.search_placeholder": "Projekte suchen...",
   "projects.filter.search_aria": "Projekte suchen",
-
   "services.hero.title": "Unsere Dienstleistungen",
   "services.hero.subtitle": "Vollständiger Entwicklungszyklus — von der Idee zum fertigen Produkt",
   "services.section.title": "Was wir tun",
@@ -106,18 +96,15 @@
   "services.pricing.btn": "Projekt besprechen",
   "services.cta.heading": "Haben Sie eine Idee?",
   "services.cta.subtext": "Erzählen Sie uns — wir finden gemeinsam eine Lösung.",
-
   "team.hero.title": "Unser Team",
   "team.hero.subtitle": "Drei Spezialisten mit verschiedenen Superkräften — ein geschlossenes Ergebnis",
   "team.skills.title": "Technische Fähigkeiten",
-
   "member.skills.title": "Technische Fähigkeiten",
   "member.projects.title": "Persönliche Projekte",
   "member.posts.title": "Artikel",
   "member.cta.heading": "Möchten Sie zusammenarbeiten?",
   "member.cta.subheading": "Offen für neue Projekte und Freelance-Arbeit. Schreiben Sie uns — wir besprechen es!",
   "member.cta.btn": "Schreiben",
-
   "post.breadcrumb.back": "← Blog",
   "post.action.like_aria": "Gefällt mir",
   "post.action.fav": "Favorit",
@@ -131,12 +118,10 @@
   "post.comments.empty": "Noch keine Kommentare. Seien Sie der Erste!",
   "post.not_found": "Artikel nicht gefunden.",
   "post.not_found.back": "← Zurück zum Blog",
-
   "project.breadcrumb.back": "← Projekte",
   "project.sidebar.tech_title": "Technologien",
   "project.not_found": "Projekt nicht gefunden.",
   "project.not_found.back": "← Zurück zu den Projekten",
-
   "contact.hero.title": "Kontakt",
   "contact.hero.subtitle": "Haben Sie eine Idee? Schreiben Sie uns — wir antworten schnell",
   "contact.section.title": "Kontaktieren Sie uns",
@@ -156,6 +141,5 @@
   "contact.form.hint": "* Pflichtfelder",
   "contact.form.success_title": "Danke!",
   "contact.form.success_text": "Ihre Nachricht wurde empfangen. Wir antworten bald.",
-  "contact.form.error_title": "Fehler.",
-  "contact.form.error_text": "Bitte versuchen Sie es erneut."
+  "contact.form.error_title": "Fehler."
 }

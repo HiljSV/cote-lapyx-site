@@ -6,25 +6,20 @@
   "nav.projects": "Проекти",
   "nav.blog": "Блог",
   "nav.contact": "Контакт",
-
   "header.login": "Увійти",
   "header.dashboard": "Кабінет",
   "header.open_menu": "Відкрити меню",
   "header.close_menu": "Закрити меню",
   "header.theme_toggle": "Перемкнути тему",
-
   "footer.tagline": "IT-студія повного циклу — frontend, backend, дизайн. Перетворюємо ідеї на продукти.",
   "footer.nav_title": "Навігація",
   "footer.contacts_title": "Контакти",
   "footer.copyright": "© 2019–2026 cote-lapyx. Всі права захищені.",
-
   "btn.view_profile": "Переглянути профіль",
   "btn.our_services": "Наші послуги",
   "btn.projects": "Проекти",
   "btn.connect": "Зв'язатись",
   "btn.all_projects": "Всі проекти",
-  "btn.read_more": "Читати далі",
-
   "index.about.title": "Про нас",
   "index.team.title": "Команда",
   "index.team.subtitle": "Три спеціалісти — один результат",
@@ -33,13 +28,11 @@
   "index.projects.title": "Вибрані проекти",
   "index.projects.subtitle": "Частина того, що ми побудували",
   "index.blog.title": "Спільний блог",
-
   "ui.loading": "Завантаження...",
   "ui.load_more": "Завантажити ще",
   "filter.all": "Всі",
   "btn.write_us": "Написати нам",
   "btn.our_projects": "Наші проекти",
-
   "about.hero.title": "Про нас",
   "about.hero.subtitle": "Від першого пікселя до фінального деплою — одна команда",
   "about.mission.title": "Наша місія",
@@ -64,19 +57,16 @@
   "about.timeline.2023.desc": "Накопичення досвіду, стек, практика на реальних проектах.",
   "about.timeline.2026.heading": "Заснування",
   "about.timeline.2026.desc": "cote-lapyx офіційно стартує як IT-студія.",
-
   "blog.hero.title": "Блог",
   "blog.hero.subtitle": "Думки, досвід і технічні нотатки команди cote-lapyx",
   "blog.filter.category_label": "Категорія:",
   "blog.filter.search_placeholder": "Пошук статей...",
   "blog.filter.search_aria": "Пошук статей",
-
   "projects.hero.title": "Проекти",
   "projects.hero.subtitle": "Що ми побудували — від ідеї до продакшену",
   "projects.filter.stack_label": "Стек:",
   "projects.filter.search_placeholder": "Пошук проектів...",
   "projects.filter.search_aria": "Пошук проектів",
-
   "services.hero.title": "Наші послуги",
   "services.hero.subtitle": "Повний цикл розробки — від ідеї до готового продукту",
   "services.section.title": "Що ми робимо",
@@ -106,18 +96,15 @@
   "services.pricing.btn": "Обговорити проект",
   "services.cta.heading": "Маєш ідею?",
   "services.cta.subtext": "Розкажи нам — знайдемо рішення разом.",
-
   "team.hero.title": "Наша Команда",
   "team.hero.subtitle": "Три спеціалісти з різними суперсилами — один злагоджений результат",
   "team.skills.title": "Технічні навички",
-
   "member.skills.title": "Технічні навички",
   "member.projects.title": "Особисті проекти",
   "member.posts.title": "Статті",
   "member.cta.heading": "Хочете співпрацювати?",
   "member.cta.subheading": "Відкрита до нових проектів та фрілансу. Пишіть — обговоримо!",
   "member.cta.btn": "Написати",
-
   "post.breadcrumb.back": "← Блог",
   "post.action.like_aria": "Подобається",
   "post.action.fav": "Обране",
@@ -131,12 +118,10 @@
   "post.comments.empty": "Коментарів ще немає. Будьте першим!",
   "post.not_found": "Статтю не знайдено.",
   "post.not_found.back": "← Повернутись до блогу",
-
   "project.breadcrumb.back": "← Проекти",
   "project.sidebar.tech_title": "Технології",
   "project.not_found": "Проект не знайдено.",
   "project.not_found.back": "← Повернутись до проектів",
-
   "contact.hero.title": "Контакти",
   "contact.hero.subtitle": "Маєш ідею? Напиши нам — відповімо швидко",
   "contact.section.title": "Зв'язатися з нами",
@@ -156,6 +141,5 @@
   "contact.form.hint": "* обов'язкові поля",
   "contact.form.success_title": "Дякуємо!",
   "contact.form.success_text": "Ваше повідомлення отримано. Відповімо найближчим часом.",
-  "contact.form.error_title": "Помилка.",
-  "contact.form.error_text": "Спробуйте ще раз."
+  "contact.form.error_title": "Помилка."
 }
