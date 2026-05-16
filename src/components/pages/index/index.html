@@ -17,10 +17,14 @@
         <span class="hero__word--magenta">Digital</span> Innovation
       </h1>
 
-      <!-- Hero: subheading — data-i18n for multilingual support -->
-      <p class="hero__subheading" data-i18n="index.hero.subheading">
-        Команда IT-професіоналів — Frontend, Backend, Design.<br />
-        Від ідеї до готового продукту.
+      <!-- Hero: subheading — split into two i18n spans so <br/> is preserved -->
+      <p class="hero__subheading">
+        <span data-i18n="index.hero.subheading.line1"
+          >Команда IT-професіоналів — Frontend, Backend, Design.</span
+        ><br />
+        <span data-i18n="index.hero.subheading.line2"
+          >Від ідеї до готового продукту.</span
+        >
       </p>
 
       <!-- Hero: CTA buttons — data-i18n on button text -->
@@ -71,13 +75,10 @@
     </div>
     <div class="about__container">
       <div class="about__text-col">
-        <!-- About: subheading — data-i18n key replaces hardcoded Ukrainian -->
-        <h3
-          class="about__heading"
-          id="about-heading"
-          data-i18n="index.about.heading"
-        >
-          Хто ми і що робимо
+        <!-- About: subheading — prefix span is plain, accent span (last-child) gets neon-cyan via SCSS -->
+        <h3 class="about__heading" id="about-heading">
+          <span data-i18n="index.about.heading.prefix">Хто ми і </span
+          ><span data-i18n="index.about.heading.accent">що робимо</span>
         </h3>
         <!-- About: body paragraph 1 — translated via data-i18n -->
         <p class="about__body" data-i18n="index.about.body1">

@@ -69,7 +69,8 @@
     color: $text-primary;
     line-height: 1.2;
 
-    span {
+    /* accent span (last-child) gets neon highlight; prefix span stays plain */
+    span:last-child {
       @include neon-text($neon-cyan);
     }
   }
