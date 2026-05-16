@@ -740,8 +740,8 @@ document.addEventListener("DOMContentLoaded", () => {
   async function deleteComment(id) {
     if (!confirm("Видалити коментар?")) return;
     try {
-      // Correct endpoint: /api/v1/admin/comments/:id (not /comments/:id)
-      const res = await fetchWithAuth(`${ADMIN_API}/admin/comments/${id}`, {
+      // DELETE is in CommentController (/api/v1/comments/:id), not AdminController
+      const res = await fetchWithAuth(`${ADMIN_API}/comments/${id}`, {
         method: "DELETE",
       });
       if (res.ok || res.status === 204)

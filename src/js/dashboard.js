@@ -40,6 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Shared state — set once /users/me resolves
   let myUserId = null;
+  let currentSocialLinks = {}; // stores user.socialLinks for merge in profile PATCH
   let postsPage = 0;
   let postsStatusFilter = "";
   let projectsPage = 0;
@@ -78,6 +79,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // Hydrate social links fields from user.socialLinks if present
       setVal("profile-telegram", user.socialLinks?.telegram);
+      // Store full socialLinks for merge in profile PATCH (prevents wiping other fields)
+      currentSocialLinks = user.socialLinks ?? {};
 
       // Update sidebar user info block — name, initials, role, badge
       const nameEl = document.querySelector(".dash-sidebar__name");
@@ -96,10 +99,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         initEl.textContent = initials.toUpperCase();
       }
 
-      // Set sidebar role text (lowercase for display, e.g. "owner" → "owner")
-      if (roleEl && user.role) roleEl.textContent = user.role.toLowerCase();
-
-      // Set sidebar badge text (matches role display)
+      // Sidebar __role shows profession/title — not available in API, leave empty (JS cleared it via HTML)
+      // Sidebar badge shows the role enum (e.g. "owner")
       if (badgeEl && user.role) badgeEl.textContent = user.role.toLowerCase();
 
       // Hydrate avatar widget in profile section + sidebar photo
@@ -496,15 +497,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       bio: document.getElementById("profile-bio")?.value?.trim() || undefined,
     };
 
-    // Collect social link values (only telegram field exists in form for now)
+    // Merge socialLinks: start from server state, overlay only the fields present in the form.
+    // This prevents wiping instagram/linkedin/github that are not in the form.
     const telegram =
       document.getElementById("profile-telegram")?.value?.trim() || null;
-
-    // Attach socialLinks if any social field is present in the form
-    // null means "clear the field", so we always include it when telegram exists
-    body.socialLinks = {
-      telegram,
-    };
+    body.socialLinks = { ...currentSocialLinks, telegram };
 
     // Strip top-level keys with undefined values before sending
     Object.keys(body).forEach((k) => body[k] === undefined && delete body[k]);
