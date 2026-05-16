@@ -435,7 +435,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function loadAdminStats() {
     try {
-      const res = await fetchWithAuth(`${ADMIN_API}/dashboard/stats`);
+      // Correct endpoint: /api/v1/admin/stats (not /dashboard/stats)
+      const res = await fetchWithAuth(`${ADMIN_API}/admin/stats`);
       if (!res.ok) return;
       const stats = await res.json();
       const set = (id, val) => {
@@ -739,6 +740,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function deleteComment(id) {
     if (!confirm("Видалити коментар?")) return;
     try {
+      // DELETE is in CommentController (/api/v1/comments/:id), not AdminController
       const res = await fetchWithAuth(`${ADMIN_API}/comments/${id}`, {
         method: "DELETE",
       });

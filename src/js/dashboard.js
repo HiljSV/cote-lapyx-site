@@ -40,6 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Shared state — set once /users/me resolves
   let myUserId = null;
+  let currentSocialLinks = {}; // stores user.socialLinks for merge in profile PATCH
   let postsPage = 0;
   let postsStatusFilter = "";
   let projectsPage = 0;
@@ -66,7 +67,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("dash-admin-link")?.removeAttribute("hidden");
       }
 
-      // Populate profile form with real data
+      // Populate profile form with real data from /users/me
       const setVal = (id, val) => {
         const el = document.getElementById(id);
         if (el && val) el.value = val;
@@ -76,16 +77,31 @@ document.addEventListener("DOMContentLoaded", async () => {
       setVal("profile-role", user.role);
       setVal("profile-bio", user.bio);
 
-      // Update sidebar user info block
+      // Hydrate social links fields from user.socialLinks if present
+      setVal("profile-telegram", user.socialLinks?.telegram);
+      // Store full socialLinks for merge in profile PATCH (prevents wiping other fields)
+      currentSocialLinks = user.socialLinks ?? {};
+
+      // Update sidebar user info block — name, initials, role, badge
       const nameEl = document.querySelector(".dash-sidebar__name");
       const initEl = document.querySelector(".dash-sidebar__avatar");
+      const roleEl = document.querySelector(".dash-sidebar__role");
+      const badgeEl = document.querySelector(".dash-sidebar__badge");
+
+      // Set sidebar name text
       if (nameEl && user.name) nameEl.textContent = user.name;
+
+      // Generate initials from name parts (first letter of each word, max 2)
       if (initEl && user.name) {
         const parts = user.name.trim().split(/\s+/);
         const initials =
           parts.length >= 2 ? parts[0][0] + parts[1][0] : parts[0].slice(0, 2);
         initEl.textContent = initials.toUpperCase();
       }
+
+      // Sidebar __role shows profession/title — not available in API, leave empty (JS cleared it via HTML)
+      // Sidebar badge shows the role enum (e.g. "owner")
+      if (badgeEl && user.role) badgeEl.textContent = user.role.toLowerCase();
 
       // Hydrate avatar widget in profile section + sidebar photo
       initAvatarWidget(user);
@@ -475,12 +491,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     submitBtn.disabled = true;
     submitBtn.textContent = "Збереження...";
 
+    // Build PATCH body — only include fields with non-empty values
     const body = {
       name: document.getElementById("profile-name")?.value?.trim() || undefined,
       bio: document.getElementById("profile-bio")?.value?.trim() || undefined,
     };
 
-    // Strip keys with undefined values before sending
+    // Merge socialLinks: start from server state, overlay only the fields present in the form.
+    // This prevents wiping instagram/linkedin/github that are not in the form.
+    const telegram =
+      document.getElementById("profile-telegram")?.value?.trim() || null;
+    body.socialLinks = { ...currentSocialLinks, telegram };
+
+    // Strip top-level keys with undefined values before sending
     Object.keys(body).forEach((k) => body[k] === undefined && delete body[k]);
 
     try {

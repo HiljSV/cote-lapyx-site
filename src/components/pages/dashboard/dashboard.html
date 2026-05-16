@@ -34,16 +34,13 @@
         class="dash-sidebar__avatar"
         id="dash-sidebar-avatar"
         aria-hidden="true"
-      >
-        СК
-      </div>
+      ></div>
       <div class="dash-sidebar__info">
         <!-- Name and role filled dynamically by JS — no data-i18n here -->
-        <p class="dash-sidebar__name">Сергій</p>
-        <p class="dash-sidebar__role">Frontend Developer</p>
-        <span class="neon-badge neon-badge--cyan dash-sidebar__badge"
-          >owner</span
-        >
+        <p class="dash-sidebar__name"></p>
+        <p class="dash-sidebar__role"></p>
+        <!-- Role badge: JS sets text and color modifier from user.role -->
+        <span class="neon-badge neon-badge--cyan dash-sidebar__badge"></span>
       </div>
     </div>
 
@@ -868,12 +865,13 @@
               <!-- Label text: Name -->
               <span data-i18n="dash.profile.name">Ім'я</span>
             </label>
+            <!-- Value is empty — JS hydrates from /users/me response -->
             <input
               class="dash-profile-form__input"
               type="text"
               id="profile-name"
               name="name"
-              value="Сергій Козак"
+              value=""
               autocomplete="name"
             />
           </div>
@@ -884,12 +882,13 @@
               <!-- Label text: Email -->
               <span data-i18n="dash.profile.email">Email</span>
             </label>
+            <!-- Value is empty — JS hydrates from /users/me response -->
             <input
               class="dash-profile-form__input"
               type="email"
               id="profile-email"
               name="email"
-              value="hiljsv@gmail.com"
+              value=""
               autocomplete="email"
             />
           </div>
@@ -900,12 +899,13 @@
               <!-- Label text: Role -->
               <span data-i18n="dash.profile.role">Роль</span>
             </label>
+            <!-- Value is empty — JS hydrates from /users/me response -->
             <input
               class="dash-profile-form__input dash-profile-form__input--readonly"
               type="text"
               id="profile-role"
               name="role"
-              value="Frontend Developer / Owner"
+              value=""
               readonly
               aria-readonly="true"
             />
@@ -917,12 +917,13 @@
               <!-- Label text: Telegram (brand name — not translated) -->
               <span>Telegram</span>
             </label>
+            <!-- Value is empty — JS hydrates from /users/me socialLinks.telegram -->
             <input
               class="dash-profile-form__input"
               type="text"
               id="profile-telegram"
               name="telegram"
-              value="@cote_claude_bot"
+              value=""
               autocomplete="off"
             />
           </div>
@@ -933,6 +934,7 @@
               <!-- Label text: Biography -->
               <span data-i18n="dash.profile.bio">Біографія</span>
             </label>
+            <!-- Content is empty — JS hydrates from /users/me bio field -->
             <textarea
               class="dash-profile-form__input dash-profile-form__textarea"
               id="profile-bio"
@@ -940,9 +942,7 @@
               rows="4"
               placeholder="Розкажіть про себе..."
               data-i18n-placeholder="dash.profile.bio_placeholder"
-            >
-Frontend Developer із захопленням до cyberpunk-естетики та сучасних веб-технологій. Автор cote-lapyx.com.</textarea
-            >
+            ></textarea>
           </div>
 
           <!-- Submit button -->
