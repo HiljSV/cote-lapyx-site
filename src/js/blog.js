@@ -94,7 +94,12 @@ async function loadPosts(page, append = false) {
   if (currentCategory) params.set("categorySlug", currentCategory);
   if (currentSearch) params.set("search", currentSearch);
 
+  // Read current UI language so the backend returns translated post content
+  const lang = localStorage.getItem("cl_lang") || "en";
+  params.set("locale", lang);
+
   try {
+    // GET /api/v1/posts — public endpoint, no auth needed; locale passed for translations
     const res = await fetch(`${API}/posts?${params}`);
     if (!res.ok) throw new Error("API error");
     const data = await res.json();
@@ -133,7 +138,12 @@ async function loadLatestPosts() {
   const latestEl = document.getElementById("blog-latest");
   if (!latestEl) return;
   try {
-    const res = await fetch(`${API}/posts?size=3&sort=publishedAt,desc`);
+    // Read current UI language so the backend returns translated post content
+    const lang = localStorage.getItem("cl_lang") || "en";
+    // GET /api/v1/posts — public endpoint; locale appended for translations
+    const res = await fetch(
+      `${API}/posts?size=3&sort=publishedAt,desc&locale=${lang}`,
+    );
     if (!res.ok) return;
     const data = await res.json();
     latestEl.innerHTML = (data.content || []).map(buildBlogCard).join("");

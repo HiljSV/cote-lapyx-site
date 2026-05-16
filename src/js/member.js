@@ -252,8 +252,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // Hydrate avatar from API — progressive enhancement, no auth needed
   (async () => {
     try {
+      // Read current UI language so the backend returns translated member content
+      const lang = localStorage.getItem("cl_lang") || "en";
+      // GET /api/v1/team-members/{slug} — public endpoint; locale passed for translations
       const res = await fetch(
-        `https://api.cote-lapyx.com/api/v1/team-members/${encodeURIComponent(memberId)}`,
+        `https://api.cote-lapyx.com/api/v1/team-members/${encodeURIComponent(memberId)}?locale=${lang}`,
       );
       if (!res.ok) return;
       const data = await res.json();
