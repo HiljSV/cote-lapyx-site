@@ -21,7 +21,8 @@
     "wpbuild": "node template_modules/wordpress/terminal.js up -d && vite build -- --wp",
     "wpstop": "node template_modules/wordpress/terminal.js down",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "i18n:check": "node scripts/i18n-check.mjs"
   },
   "devDependencies": {
     "@davestewart/outliner": "latest",
