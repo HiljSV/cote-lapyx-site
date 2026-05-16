@@ -42,8 +42,10 @@ info:
     name: Proprietary
 
 servers:
-  - url: https://cote-lapyx.com/api/v1
+  # Production: Spring Boot backend runs on api subdomain (not the main domain)
+  - url: https://api.cote-lapyx.com/api/v1
     description: Production
+  # Local development: default Spring Boot port
   - url: http://localhost:8080/api/v1
     description: Local development
 
@@ -82,6 +84,9 @@ tags:
       inbox, and platform settings. All paths require `role = owner`.
   - name: Dashboard
     description: Authenticated-user views — statistics and personal data summaries.
+  # Locale tag — geo-IP country detection for frontend language auto-detection
+  - name: Locale
+    description: Geo-IP based locale detection. Returns the ISO 3166-1 alpha-2 country code inferred from the client IP address.
 
 # ---------------------------------------------------------------------------
 # Security schemes
@@ -1488,6 +1493,34 @@ components:
 # Paths
 # ===========================================================================
 paths:
+  # ---------------------------------------------------------------------------
+  # Locale — geo-IP language detection (public, no auth)
+  # ---------------------------------------------------------------------------
+
+  /locale:
+    get:
+      tags: [Locale]
+      summary: Detect language from request geo-IP
+      operationId: detectLocale
+      # Public endpoint — no authentication required
+      security: []
+      x-roles: [public]
+      description: |
+        Returns the ISO 3166-1 alpha-2 country code inferred from the client IP address.
+        Used by the frontend for automatic language selection on first visit.
+      responses:
+        "200":
+          description: Country code detected successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  # Two-letter country code, e.g. "UA", "FR", "DE"
+                  countryCode:
+                    type: string
+                    example: UA
+
   # ---------------------------------------------------------------------------
   # Auth
   # ---------------------------------------------------------------------------
