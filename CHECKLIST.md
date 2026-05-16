@@ -1,6 +1,6 @@
 # cote-lapyx.com — Чек-ліст прогресу
 
-> Живий документ. Оновлено: 2026-05-03
+> Живий документ. Оновлено: 2026-05-16
 
 ## Легенда
 
@@ -67,9 +67,9 @@
 - [x] Сторінка учасника — `member.html`
 - [x] Стаття блогу — `post.html` (з лайками, вибраним, коментарями, підпискою)
 - [x] Сторінка проекту — `project.html`
-- [ ] Про нас — `about.html`
-- [ ] Послуги — `services.html`
-- [ ] Контакти — `contact.html`
+- [x] Про нас — `about.html`
+- [x] Послуги — `services.html`
+- [x] Контакти — `contact.html`
 
 ### Авторизація
 
@@ -117,20 +117,20 @@
 
 ### Мультиязичність (статичний UI)
 
-- [ ] `/js/i18n/uk.json`
-- [ ] `/js/i18n/en.json`
-- [ ] `/js/i18n/fr.json`
-- [ ] `/js/i18n/de.json`
-- [ ] `data-i18n` атрибути в усіх шаблонах
-- [ ] Language switcher у header
+- [x] `/js/i18n/uk.json`
+- [x] `/js/i18n/en.json`
+- [x] `/js/i18n/fr.json`
+- [x] `/js/i18n/de.json`
+- [x] `data-i18n` атрибути в усіх шаблонах
+- [x] Language switcher у header
 
 ### SEO & Meta
 
 - [ ] Мета-теги per-page (title, description)
 - [ ] OpenGraph на кожній сторінці (og:title, og:image, og:url)
 - [ ] JSON-LD (Organization, Person, BlogPosting)
-- [ ] `sitemap.xml`
-- [ ] `robots.txt`
+- [x] `sitemap.xml`
+- [x] `robots.txt`
 
 ### Brand assets
 
@@ -211,7 +211,7 @@
 - [x] Upload обкладинки (пости + проекти)
 - [ ] Dashboard Subscriber — підписки, коментарі, обране (не реалізовано для subscriber-ролі)
 - [ ] Мультиязичність через `/api/translations`
-- [ ] Контактна форма → `/api/contact-messages`
+- [x] Контактна форма → `/api/contact-messages`
 
 ---
 
@@ -249,13 +249,13 @@
 ## Технічний борг 🔧
 
 - [ ] Замінити MySQL → PostgreSQL у CLAUDE.md (рядок "DB: MySQL on server" застарів)
-- [ ] Прибрати `src/php/` — бекенд вже на Spring Boot
+- [x] Прибрати `src/php/` — бекенд вже на Spring Boot (директорію `src/php` видалено)
 - [ ] Dashboard Subscriber (підписки, коментарі, обране) — не реалізовано
 - [ ] Rate limiting на `/api/auth`
-- [ ] Контактна форма → API (зараз без бекенду)
-- [ ] Сторінки: `about.html`, `services.html`, `contact.html`
+- [x] Контактна форма → API (підключено до POST /api/v1/contact)
+- [x] Сторінки: `about.html`, `services.html`, `contact.html`
 - [ ] SEO / OpenGraph / JSON-LD
-- [ ] i18n (мультиязичність UI)
+- [x] i18n (мультиязичність UI)
 - [x] Permission-шум у git виправлено (`git config core.fileMode false`)
 - [x] Cross-repo посилання (frontend ↔ backend README/PROJECT.md)
 
@@ -267,4 +267,4 @@ https://www.notion.so/ae024f5d34f14964b5eeb829f73cf9fb
 
 ---
 
-_Оновлено: 2026-05-03_
+_Оновлено: 2026-05-16_
