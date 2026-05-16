@@ -30,24 +30,7 @@
   position: sticky;
   top: 70px;
   height: calc(100vh - 70px);
-  overflow-y: auto;
-
-  // Scrollbar styling
-  scrollbar-width: thin;
-  scrollbar-color: rgba($neon-cyan, 0.2) transparent;
-
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: rgba($neon-cyan, 0.2);
-    border-radius: 2px;
-  }
+  overflow: hidden; // nav scrolls internally; sidebar itself does not scroll
 
   // Mobile: hidden drawer
   @media (max-width: toEm($tablet)) {
@@ -135,6 +118,22 @@
   &__nav {
     padding: 16px 0;
     flex: 1;
+    min-height: 0; // allow flex child to shrink below its content height
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; // smooth scroll on iOS Safari
+
+    // Inherit thin scrollbar from parent
+    scrollbar-width: thin;
+    scrollbar-color: rgba($neon-cyan, 0.2) transparent;
+
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba($neon-cyan, 0.2);
+      border-radius: 2px;
+    }
   }
 
   &__nav-list {
