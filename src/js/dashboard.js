@@ -6,7 +6,14 @@ import { fetchWithAuth } from "@js/common/auth.js";
 import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.css";
 
-document.addEventListener("DOMContentLoaded", () => {
+// i18n — language detection, translation apply, switcher wiring
+import {
+  detectLanguage,
+  applyTranslations,
+  initI18nSwitcher,
+} from "@js/i18n.js";
+
+document.addEventListener("DOMContentLoaded", async () => {
   // ---------------------------------------------------------------------------
   // Element refs
   // ---------------------------------------------------------------------------
@@ -1635,6 +1642,20 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Помилка видалення: " + err.message);
       }
     });
+
+  // ---------------------------------------------------------------------------
+  // i18n initialization — detect language and apply translations to dashboard
+  // Must run after all DOM refs are set up; async because detectLanguage() hits geo-IP
+  // ---------------------------------------------------------------------------
+
+  // Detect language: 1) localStorage → 2) navigator → 3) geo-IP → 4) "en"
+  const lang = await detectLanguage();
+
+  // Apply translations to all [data-i18n], [data-i18n-aria], [data-i18n-placeholder] elements
+  applyTranslations(lang);
+
+  // Wire language switcher buttons (header .header__lang-btn[data-lang])
+  initI18nSwitcher(lang);
 });
 
 // =============================================================================
