@@ -129,6 +129,11 @@
 // Base resets
 // -----------------------------------------------------------------------------
 
+// Ensure [hidden] always wins over any display rule (e.g. .btn { display: inline-flex })
+[hidden] {
+  display: none !important;
+}
+
 ul[role="list"],
 ol[role="list"] {
   list-style: none;
