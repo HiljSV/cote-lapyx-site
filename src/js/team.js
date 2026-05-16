@@ -42,12 +42,35 @@
       const imgEls = document.querySelectorAll(selectors);
       if (!imgEls.length) return;
 
-      // Update every matching image: src and descriptive alt
+      // Update every matching image: src and descriptive alt.
+      // Also hydrate profession (role) and bio from API for team-card elements.
       imgEls.forEach((imgEl) => {
         imgEl.src = avatarUrl;
         // Keep alt descriptive (use name + profession from API if available)
         if (member.user.name && member.profession) {
           imgEl.alt = `${member.user.name} — ${member.profession}`;
+        }
+
+        // Hydrate .team-card__role and .team-card__bio from API response.
+        // Only applies when the img is inside a .team-card (team section, team page).
+        // Project cards and member avatars elsewhere do NOT have .team-card__role.
+        const card = imgEl.closest(".team-card");
+        if (!card) return;
+
+        // Update profession label if API returned one
+        if (member.profession) {
+          const roleEl = card.querySelector(".team-card__role");
+          if (roleEl) {
+            roleEl.textContent = member.profession;
+          }
+        }
+
+        // Update short bio if API returned one
+        if (member.shortDescription) {
+          const bioEl = card.querySelector(".team-card__bio");
+          if (bioEl) {
+            bioEl.textContent = member.shortDescription;
+          }
         }
       });
     });
