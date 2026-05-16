@@ -265,7 +265,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       localStorage.removeItem("cl_access");
       localStorage.removeItem("cl_refresh");
-      window.location.replace("/login.html");
+      window.location.replace("/");
     });
   }
 
