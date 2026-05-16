@@ -126,7 +126,12 @@ async function loadProjects(page, append = false) {
   if (currentTech) params.set("technology", currentTech);
   if (currentSearch) params.set("search", currentSearch);
 
+  // Read current UI language so the backend returns translated project content
+  const lang = localStorage.getItem("cl_lang") || "en";
+  params.set("locale", lang);
+
   try {
+    // GET /api/v1/projects — public endpoint, no auth needed; locale passed for translations
     const res = await fetch(`${API}/projects?${params}`);
     if (!res.ok) throw new Error("API error");
     const data = await res.json();

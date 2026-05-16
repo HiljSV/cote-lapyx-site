@@ -6,7 +6,12 @@
 
 (async function hydrateTeamAvatars() {
   try {
-    const res = await fetch("https://api.cote-lapyx.com/api/v1/team-members");
+    // Read current UI language so the backend returns translated member content
+    const lang = localStorage.getItem("cl_lang") || "en";
+    // GET /api/v1/team-members — public endpoint; locale passed for translations
+    const res = await fetch(
+      `https://api.cote-lapyx.com/api/v1/team-members?locale=${lang}`,
+    );
     if (!res.ok) return;
 
     const members = await res.json();

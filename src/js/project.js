@@ -61,7 +61,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    const res = await fetch(`${API}/projects/${encodeURIComponent(slug)}`);
+    // Read current UI language so the backend returns translated project content
+    const lang = localStorage.getItem("cl_lang") || "en";
+    // GET /api/v1/projects/{slug} — public endpoint, no auth needed; locale passed for translations
+    const res = await fetch(
+      `${API}/projects/${encodeURIComponent(slug)}?locale=${lang}`,
+    );
     if (!res.ok) {
       showNotFound();
       return;
