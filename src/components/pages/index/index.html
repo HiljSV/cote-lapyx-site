@@ -17,7 +17,8 @@
         <span class="hero__word--magenta">Digital</span> Innovation
       </h1>
 
-      <p class="hero__subheading">
+      <!-- Hero: subheading — data-i18n for multilingual support -->
+      <p class="hero__subheading" data-i18n="index.hero.subheading">
         Команда IT-професіоналів — Frontend, Backend, Design.<br />
         Від ідеї до готового продукту.
       </p>
@@ -70,31 +71,52 @@
     </div>
     <div class="about__container">
       <div class="about__text-col">
-        <h3 class="about__heading" id="about-heading">
-          Хто ми і <span>що робимо</span>
+        <!-- About: subheading — data-i18n key replaces hardcoded Ukrainian -->
+        <h3
+          class="about__heading"
+          id="about-heading"
+          data-i18n="index.about.heading"
+        >
+          Хто ми і що робимо
         </h3>
-        <p class="about__body">
+        <!-- About: body paragraph 1 — translated via data-i18n -->
+        <p class="about__body" data-i18n="index.about.body1">
           cote-lapyx — невелика IT-студія трьох ентузіастів із різними
           спеціалізаціями. Ми розробляємо веб-застосунки, REST API та UI/UX
           дизайн, приділяючи особливу увагу якості коду та продуктивності
           інтерфейсів.
         </p>
-        <p class="about__body">
+        <!-- About: body paragraph 2 — translated via data-i18n -->
+        <p class="about__body" data-i18n="index.about.body2">
           Наш стек охоплює весь цикл розробки: від прототипу у Figma до деплою
           на сервер. Любимо цікаві задачі й не боїмося нових технологій.
         </p>
+        <!-- About: stats row — labels translated via data-i18n -->
         <div class="about__stats">
           <div class="about__stat">
             <span class="about__stat-value">3</span>
-            <span class="about__stat-label">Спеціалісти</span>
+            <!-- Stat label: specialists count -->
+            <span
+              class="about__stat-label"
+              data-i18n="index.about.stat.specialists"
+              >Спеціалісти</span
+            >
           </div>
           <div class="about__stat">
             <span class="about__stat-value">10+</span>
-            <span class="about__stat-label">Проектів</span>
+            <!-- Stat label: projects count -->
+            <span
+              class="about__stat-label"
+              data-i18n="index.about.stat.projects"
+              >Проектів</span
+            >
           </div>
           <div class="about__stat">
             <span class="about__stat-value">3</span>
-            <span class="about__stat-label">Роки досвіду</span>
+            <!-- Stat label: years of experience -->
+            <span class="about__stat-label" data-i18n="index.about.stat.years"
+              >Роки досвіду</span
+            >
           </div>
         </div>
       </div>
@@ -482,6 +504,7 @@
     </div>
 
     <ul class="services-grid" role="list">
+      <!-- Service card 1: Web development -->
       <li>
         <article class="service-card service-card--cyan">
           <div
@@ -490,16 +513,25 @@
           >
             &lt;/&gt;
           </div>
-          <h3 class="service-card__title">Web розробка</h3>
-          <p class="service-card__description">
+          <!-- Service 1: title — translated via data-i18n -->
+          <h3 class="service-card__title" data-i18n="index.service1.title">
+            Web розробка
+          </h3>
+          <!-- Service 1: description — translated via data-i18n -->
+          <p class="service-card__description" data-i18n="index.service1.desc">
             Сучасні адаптивні сайти та веб-застосунки на HTML/SCSS/JS.
             Pixel-perfect верстка з BEM-методологією та доступністю.
           </p>
-          <a href="#contact" class="service-card__link service-card__link--cyan"
+          <!-- Service 1: CTA link — translated via data-i18n -->
+          <a
+            href="#contact"
+            class="service-card__link service-card__link--cyan"
+            data-i18n="btn.learn_more"
             >Детальніше</a
           >
         </article>
       </li>
+      <!-- Service card 2: Backend & API -->
       <li>
         <article class="service-card service-card--magenta">
           <div
@@ -508,18 +540,25 @@
           >
             &#9881;
           </div>
-          <h3 class="service-card__title">Backend &amp; API</h3>
-          <p class="service-card__description">
+          <!-- Service 2: title — translated via data-i18n -->
+          <h3 class="service-card__title" data-i18n="index.service2.title">
+            Backend &amp; API
+          </h3>
+          <!-- Service 2: description — translated via data-i18n -->
+          <p class="service-card__description" data-i18n="index.service2.desc">
             Серверна логіка, REST API, системи авторизації на Java, C# та PHP.
             Надійна архітектура для будь-якого масштабу.
           </p>
+          <!-- Service 2: CTA link — translated via data-i18n -->
           <a
             href="#contact"
             class="service-card__link service-card__link--magenta"
+            data-i18n="btn.learn_more"
             >Детальніше</a
           >
         </article>
       </li>
+      <!-- Service card 3: UI/UX design -->
       <li>
         <article class="service-card service-card--green">
           <div
@@ -528,14 +567,20 @@
           >
             &#9670;
           </div>
-          <h3 class="service-card__title">UI/UX дизайн</h3>
-          <p class="service-card__description">
+          <!-- Service 3: title — translated via data-i18n -->
+          <h3 class="service-card__title" data-i18n="index.service3.title">
+            UI/UX дизайн
+          </h3>
+          <!-- Service 3: description — translated via data-i18n -->
+          <p class="service-card__description" data-i18n="index.service3.desc">
             Прототипи та дизайн-системи у Figma. Продуманий UX, брендинг та
             айдентика для вашого цифрового продукту.
           </p>
+          <!-- Service 3: CTA link — translated via data-i18n -->
           <a
             href="#contact"
             class="service-card__link service-card__link--green"
+            data-i18n="btn.learn_more"
             >Детальніше</a
           >
         </article>
@@ -573,7 +618,11 @@
           </div>
           <div class="project-card__body">
             <h3 class="project-card__title">cote-lapyx.com</h3>
-            <p class="project-card__description">
+            <!-- Project 1: description — translated via data-i18n -->
+            <p
+              class="project-card__description"
+              data-i18n="index.project1.desc"
+            >
               Офіційний сайт студії. HTML/SCSS/JS + PHP backend, Vite, Apache.
               Повний цикл від дизайну до деплою.
             </p>
@@ -629,7 +678,11 @@
           </div>
           <div class="project-card__body">
             <h3 class="project-card__title">JARVIS AI Assistant</h3>
-            <p class="project-card__description">
+            <!-- Project 2: description — translated via data-i18n -->
+            <p
+              class="project-card__description"
+              data-i18n="index.project2.desc"
+            >
               Голосовий AI-асистент на базі Claude API. Розпізнавання мови,
               генерація відповідей, інтеграція з Telegram.
             </p>
@@ -674,7 +727,11 @@
           </div>
           <div class="project-card__body">
             <h3 class="project-card__title">Brand Kit cote-lapyx</h3>
-            <p class="project-card__description">
+            <!-- Project 3: description — translated via data-i18n -->
+            <p
+              class="project-card__description"
+              data-i18n="index.project3.desc"
+            >
               Фірмовий стиль студії: логотип, кольорова палітра, типографіка.
               Кіберпанк-естетика з неоновим катом.
             </p>
@@ -756,15 +813,21 @@
      ============================================================ -->
 <section class="cta" id="contact" aria-labelledby="cta-heading">
   <div class="cta__container">
-    <h2 class="cta__heading" id="cta-heading">Є цікавий проект?</h2>
-    <p class="cta__subheading">
+    <!-- CTA: heading — translated via data-i18n -->
+    <h2 class="cta__heading" id="cta-heading" data-i18n="index.cta.heading">
+      Є цікавий проект?
+    </h2>
+    <!-- CTA: subheading — translated via data-i18n -->
+    <p class="cta__subheading" data-i18n="index.cta.subheading">
       Got an innovative project idea? Ми готові обговорити та втілити його в
       реальність.
     </p>
 
+    <!-- CTA: write-to-us button — translated via data-i18n -->
     <a
       href="mailto:hello@cote-lapyx.com"
       class="btn btn--cyan btn--lg btn--pulse-cyan"
+      data-i18n="index.cta.btn"
       >Написати нам</a
     >
 
