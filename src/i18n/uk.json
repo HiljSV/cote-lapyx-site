@@ -284,5 +284,6 @@
   "blog.category.general": "Загальне",
   "projects.empty": "Проектів ще немає. Зайдіть пізніше!",
   "projects.error_load": "Не вдалося завантажити проекти.",
-  "projects.tech_label": "Технології"
+  "projects.tech_label": "Технології",
+  "team.skill.adaptive_layout": "Адаптивна верстка"
 }

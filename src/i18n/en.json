@@ -284,5 +284,6 @@
   "blog.category.general": "General",
   "projects.empty": "No projects yet. Check back later!",
   "projects.error_load": "Failed to load projects.",
-  "projects.tech_label": "Technologies"
+  "projects.tech_label": "Technologies",
+  "team.skill.adaptive_layout": "Responsive layout"
 }
