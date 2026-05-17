@@ -1,6 +1,8 @@
 import membersData from "../data/members.json";
-import postsData from "../data/posts.json";
 
+const API = "https://api.cote-lapyx.com/api/v1";
+
+// Social link icon map — brand names never translated
 const SOCIAL_ICONS = {
   github: {
     label: "GitHub",
@@ -19,47 +21,87 @@ const SOCIAL_ICONS = {
   },
 };
 
+// Sanitize strings before injecting into innerHTML
+function escHtml(str) {
+  return String(str ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// Format ISO date with locale-aware month/day names
+function fmtDate(iso) {
+  if (!iso) return "";
+  const lang = localStorage.getItem("cl_lang") || "en";
+  return new Date(iso).toLocaleDateString(lang, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+// Return Latin displayName for non-UK locales, fall back to Cyrillic name
+function resolveDisplayName(user) {
+  if (!user) return "—";
+  const lang = localStorage.getItem("cl_lang") || "en";
+  return lang !== "uk" && user.displayName
+    ? user.displayName
+    : user.name || "—";
+}
+
+// Build SVG initials placeholder when no photo is available
 function buildInitialsPlaceholder(member) {
   const colorMap = { cyan: "#00e5ff", magenta: "#e040fb", green: "#39ff14" };
   const neon = colorMap[member.color] || "#00e5ff";
-  return `<div class="member-hero__photo-placeholder" style="width:100%;height:100%;border-radius:50%;background:linear-gradient(135deg,rgba(0,229,255,0.15),rgba(57,255,20,0.15));display:flex;align-items:center;justify-content:center;font-size:clamp(32px,5vw,64px);font-weight:700;color:${neon};border:2px solid rgba(57,255,20,0.3)" aria-label="${member.name}">${member.initial}</div>`;
+  return `<div class="member-hero__photo-placeholder" style="width:100%;height:100%;border-radius:50%;background:linear-gradient(135deg,rgba(0,229,255,0.15),rgba(57,255,20,0.15));display:flex;align-items:center;justify-content:center;font-size:clamp(32px,5vw,64px);font-weight:700;color:${neon};border:2px solid rgba(57,255,20,0.3)" aria-label="${escHtml(member.name)}">${escHtml(member.initial)}</div>`;
 }
 
-function renderPhoto(member) {
+// Render photo from URL or fall back to initials placeholder
+function renderPhoto(member, avatarUrl, displayName, role) {
   const wrap = document.getElementById("member-photo-wrap");
   if (!wrap) return;
-  if (member.photo) {
-    wrap.innerHTML = `<img class="member-hero__photo" src="${member.photo}" alt="${member.name} — ${member.role}" width="180" height="180" />`;
+  if (avatarUrl) {
+    wrap.innerHTML = `<img class="member-hero__photo" src="${escHtml(avatarUrl)}" alt="${escHtml(displayName)} — ${escHtml(role)}" width="180" height="180" />`;
   } else {
     wrap.innerHTML = buildInitialsPlaceholder(member);
   }
 }
 
+// Render neon skill badges from local JSON (badges are not in API)
 function renderBadges(member) {
   const el = document.getElementById("member-badges");
   if (!el) return;
   el.innerHTML = member.badges
     .map(
       (b) =>
-        `<li><span class="neon-badge neon-badge--${b.color}">${b.label}</span></li>`,
+        `<li><span class="neon-badge neon-badge--${escHtml(b.color)}">${escHtml(b.label)}</span></li>`,
     )
     .join("");
 }
 
-function renderSocials(member) {
+// Render social links from API socialLinks object merged with local JSON fallback
+function renderSocials(apiSocialLinks, localSocials) {
   const el = document.getElementById("member-socials");
   if (!el) return;
-  const links = Object.entries(member.socials)
+  // Prefer API social links; fall back to local JSON values for missing keys
+  const merged = {
+    github: apiSocialLinks?.github || localSocials?.github || null,
+    linkedin: apiSocialLinks?.linkedin || localSocials?.linkedin || null,
+    telegram: apiSocialLinks?.telegram || localSocials?.telegram || null,
+  };
+  const links = Object.entries(merged)
     .filter(([, url]) => url && url !== "#")
     .map(([key, url]) => {
       const icon = SOCIAL_ICONS[key];
       if (!icon) return "";
-      return `<a href="${url}" class="btn ${icon.btnClass}" target="_blank" rel="noopener" aria-label="${icon.label}">${icon.svg} ${icon.label}</a>`;
+      return `<a href="${escHtml(url)}" class="btn ${escHtml(icon.btnClass)}" target="_blank" rel="noopener" aria-label="${escHtml(icon.label)}">${icon.svg} ${escHtml(icon.label)}</a>`;
     })
     .join("");
   el.innerHTML = links;
 }
 
+// Render skill bars from local JSON (skills are not exposed in API)
 function renderSkills(member) {
   const el = document.getElementById("member-skills");
   if (!el) return;
@@ -73,19 +115,20 @@ function renderSkills(member) {
       const barsHtml = bars
         .map(
           (s) => `<div class="skill-bar">
-            <div class="skill-bar__label"><span>${s.label}</span><span>${s.pct}%</span></div>
-            <div class="skill-bar__track"><div class="skill-bar__fill ${colorMap[s.color] || ""}" style="width:${s.pct}%"></div></div>
+            <div class="skill-bar__label"><span>${escHtml(s.label)}</span><span>${escHtml(String(s.pct))}%</span></div>
+            <div class="skill-bar__track"><div class="skill-bar__fill ${colorMap[s.color] || ""}" style="width:${escHtml(String(s.pct))}%"></div></div>
           </div>`,
         )
         .join("");
       return `<div class="member-skills__group">
-        <h3 class="member-skills__group-title">${groupName}</h3>
+        <h3 class="member-skills__group-title">${escHtml(groupName)}</h3>
         <div class="member-skills__bars">${barsHtml}</div>
       </div>`;
     })
     .join("");
 }
 
+// Render project cards from local JSON (projects not yet in member API)
 function renderProjects(member) {
   const el = document.getElementById("member-projects");
   if (!el) return;
@@ -94,21 +137,21 @@ function renderProjects(member) {
       const tagsHtml = p.tags
         .map(
           (t) =>
-            `<li><span class="neon-badge neon-badge--${t.color}">${t.label}</span></li>`,
+            `<li><span class="neon-badge neon-badge--${escHtml(t.color)}">${escHtml(t.label)}</span></li>`,
         )
         .join("");
       const githubLink = p.links.github
-        ? `<a href="${p.links.github}" class="btn btn--ghost btn--sm" target="_blank" rel="noopener">GitHub</a>`
+        ? `<a href="${escHtml(p.links.github)}" class="btn btn--ghost btn--sm" target="_blank" rel="noopener">GitHub</a>`
         : "";
       const demoLink = p.links.demo
-        ? `<a href="${p.links.demo}" class="btn btn--${p.color} btn--sm" target="_blank" rel="noopener">Demo</a>`
+        ? `<a href="${escHtml(p.links.demo)}" class="btn btn--${escHtml(p.color)} btn--sm" target="_blank" rel="noopener">Demo</a>`
         : "";
       return `<li>
-        <article class="project-card project-card--${p.color}">
+        <article class="project-card project-card--${escHtml(p.color)}">
           <div class="project-card__cover-placeholder" aria-hidden="true">&lt;/&gt;</div>
           <div class="project-card__body">
-            <h3 class="project-card__title">${p.title}</h3>
-            <p class="project-card__description">${p.description}</p>
+            <h3 class="project-card__title">${escHtml(p.title)}</h3>
+            <p class="project-card__description">${escHtml(p.description)}</p>
             <ul class="project-card__tags" aria-label="Технології" role="list">${tagsHtml}</ul>
           </div>
           <div class="project-card__footer">
@@ -120,115 +163,115 @@ function renderProjects(member) {
     .join("");
 }
 
-function renderPosts(memberPosts) {
+// Render posts list from API response (locale-aware titles and dates)
+function renderPosts(posts) {
   const el = document.getElementById("member-posts");
   if (!el) return;
-  if (!memberPosts.length) {
+  if (!posts.length) {
     el.innerHTML = '<p class="member-posts__empty">Поки немає статей.</p>';
     return;
   }
-  el.innerHTML = memberPosts
-    .map(
-      (p) => `<a href="${p.url}" class="member-posts__item">
-        <time class="member-posts__date" datetime="${p.date}">${p.dateLabel}</time>
-        <span class="member-posts__title">${p.title}</span>
+  el.innerHTML = posts
+    .map((p) => {
+      const date = p.publishedAt || p.createdAt;
+      const href = p.slug
+        ? `post.html?slug=${encodeURIComponent(p.slug)}`
+        : "#";
+      return `<a href="${escHtml(href)}" class="member-posts__item">
+        <time class="member-posts__date" datetime="${escHtml(date || "")}">${escHtml(fmtDate(date))}</time>
+        <span class="member-posts__title">${escHtml(p.title || "")}</span>
         <span class="member-posts__arrow" aria-hidden="true">→</span>
-      </a>`,
-    )
+      </a>`;
+    })
     .join("");
 }
 
-function renderCta(member) {
-  const sub = document.querySelector(".cta__subheading");
-  if (!sub) return;
-  if (member.id === "serhii") {
-    sub.textContent =
-      "Відкритий до нових проектів та фрілансу. Пишіть — обговоримо!";
+// =============================================================================
+// API hydration — fetches member + posts with locale; re-runs on lang change
+// =============================================================================
+async function hydrateFromApi(memberId, member) {
+  const lang = localStorage.getItem("cl_lang") || "en";
+
+  try {
+    // GET /api/v1/team-members/{slug} — public; locale for translated content
+    const res = await fetch(
+      `${API}/team-members/${encodeURIComponent(memberId)}?locale=${lang}`,
+    );
+    if (!res.ok) return;
+    const data = await res.json();
+
+    // Resolve locale-aware display name
+    const displayName = resolveDisplayName(data.user);
+    const profession = data.profession || member.role;
+    const bio = data.user?.bio || member.bio;
+    const avatarUrl = data.user?.avatar || null;
+
+    // Update name, role (profession), bio DOM elements
+    const nameEl = document.getElementById("member-name");
+    const roleEl = document.getElementById("member-role");
+    const bioEl = document.getElementById("member-bio");
+    if (nameEl) nameEl.textContent = displayName;
+    if (roleEl) roleEl.textContent = profession;
+    if (bioEl) bioEl.textContent = bio;
+
+    // Update photo with API avatar
+    renderPhoto(member, avatarUrl, displayName, profession);
+
+    // Merge API social links over local JSON fallback
+    renderSocials(data.user?.socialLinks, member.socials);
+
+    // Update page title and OG tags with resolved name
+    document.title = `${displayName} — cote-lapyx`;
+    const ogTitle = document.querySelector("meta[property='og:title']");
+    if (ogTitle)
+      ogTitle.setAttribute(
+        "content",
+        `${displayName} — ${profession} | COTE-LAPYX`,
+      );
+    const ogImg = document.querySelector("meta[property='og:image']");
+    if (ogImg && avatarUrl) ogImg.setAttribute("content", avatarUrl);
+
+    // Load posts for this member using their userId + locale
+    if (data.userId) {
+      await hydratePosts(data.userId, lang);
+    }
+  } catch (_) {
+    // API unreachable — static data from local JSON remains visible
   }
 }
 
+// Fetch and render the member's blog posts with locale-aware titles
+async function hydratePosts(userId, lang) {
+  try {
+    // GET /api/v1/posts filtered by authorId — locale ensures translated titles
+    const res = await fetch(
+      `${API}/posts?size=10&sort=publishedAt,desc&authorId=${userId}&locale=${lang}`,
+    );
+    if (!res.ok) return;
+    const data = await res.json();
+    renderPosts(data.content || []);
+  } catch (_) {
+    // Silently fail — posts section stays empty rather than showing stale data
+  }
+}
+
+// =============================================================================
+// DOMContentLoaded — initial render from local JSON, then hydrate from API
+// =============================================================================
 document.addEventListener("DOMContentLoaded", () => {
-  // Guard: only run on member.html (bundle mode sends all JS to every page)
+  // Guard: only run on member.html
   if (!document.getElementById("member-photo-wrap")) return;
 
   const params = new URLSearchParams(window.location.search);
   const memberId = params.get("id") || "valeriia";
 
-  const members = membersData;
-  const posts = postsData;
-
-  const member = members.find((m) => m.id === memberId);
+  const member = membersData.find((m) => m.id === memberId);
   if (!member) {
     window.location.href = "team.html";
     return;
   }
 
-  document.title = `${member.name} — cote-lapyx`;
-
-  /* SEO: inject dynamic canonical, OG tags and JSON-LD Person */
-  (function injectMemberSEO(member, memberId) {
-    const canonical = `https://cote-lapyx.com/member.html?id=${encodeURIComponent(memberId)}`;
-
-    let canonEl = document.querySelector("link[rel='canonical']");
-    if (!canonEl) {
-      canonEl = document.createElement("link");
-      canonEl.rel = "canonical";
-      document.head.appendChild(canonEl);
-    }
-    canonEl.href = canonical;
-
-    const descEl = document.querySelector("meta[name='description']");
-    if (descEl)
-      descEl.content =
-        `${member.name} — ${member.role} в команді COTE-LAPYX. ${(member.bio || "").slice(0, 80)}`.slice(
-          0,
-          155,
-        );
-
-    const ogData = {
-      "og:title": `${member.name} — ${member.role} | COTE-LAPYX`,
-      "og:description": `${member.role} в команді COTE-LAPYX. ${(member.bio || "").slice(0, 80)}`,
-      "og:image":
-        member.photo || "https://cote-lapyx.com/assets/img/og-image.png",
-      "og:url": canonical,
-      "og:type": "profile",
-    };
-    Object.entries(ogData).forEach(([prop, val]) => {
-      let el = document.querySelector(`meta[property='${prop}']`);
-      if (!el) {
-        el = document.createElement("meta");
-        el.setAttribute("property", prop);
-        document.head.appendChild(el);
-      }
-      el.setAttribute("content", val);
-    });
-
-    const ld = {
-      "@context": "https://schema.org",
-      "@type": "Person",
-      name: member.name,
-      jobTitle: member.role,
-      description: member.bio || "",
-      url: canonical,
-      image:
-        member.photo ||
-        "https://cote-lapyx.com/assets/img/logo/cote-lapyx-new-512.png",
-      worksFor: {
-        "@type": "Organization",
-        name: "COTE-LAPYX",
-        url: "https://cote-lapyx.com",
-      },
-      sameAs: Object.values(member.socials || {}).filter((u) => u && u !== "#"),
-    };
-    let ldEl = document.querySelector("script[type='application/ld+json']");
-    if (!ldEl) {
-      ldEl = document.createElement("script");
-      ldEl.type = "application/ld+json";
-      document.head.appendChild(ldEl);
-    }
-    ldEl.textContent = JSON.stringify(ld);
-  })(member, params.get("id") || "valeriia");
-
+  // Initial render from local JSON — visible immediately, then overwritten by API
   const nameEl = document.getElementById("member-name");
   const roleEl = document.getElementById("member-role");
   const bioEl = document.getElementById("member-bio");
@@ -236,54 +279,35 @@ document.addEventListener("DOMContentLoaded", () => {
   if (roleEl) roleEl.textContent = member.role;
   if (bioEl) bioEl.textContent = member.bio;
 
-  renderPhoto(member);
+  renderPhoto(member, null, member.name, member.role);
   renderBadges(member);
-  renderSocials(member);
+  renderSocials(null, member.socials);
   renderSkills(member);
   renderProjects(member);
 
-  const memberPosts = posts
-    .filter((p) => p.author === member.id)
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
-  renderPosts(memberPosts);
+  // Inject SEO tags based on local data (overwritten by API when avatar resolves)
+  const canonical = `https://cote-lapyx.com/member.html?id=${encodeURIComponent(memberId)}`;
+  let canonEl = document.querySelector("link[rel='canonical']");
+  if (!canonEl) {
+    canonEl = document.createElement("link");
+    canonEl.rel = "canonical";
+    document.head.appendChild(canonEl);
+  }
+  canonEl.href = canonical;
 
-  renderCta(member);
-
-  // Hydrate avatar from API — progressive enhancement, no auth needed
-  (async () => {
-    try {
-      // Read current UI language so the backend returns translated member content
-      const lang = localStorage.getItem("cl_lang") || "en";
-      // GET /api/v1/team-members/{slug} — public endpoint; locale passed for translations
-      const res = await fetch(
-        `https://api.cote-lapyx.com/api/v1/team-members/${encodeURIComponent(memberId)}?locale=${lang}`,
+  const descEl = document.querySelector("meta[name='description']");
+  if (descEl)
+    descEl.content =
+      `${member.name} — ${member.role} в команді COTE-LAPYX. ${(member.bio || "").slice(0, 80)}`.slice(
+        0,
+        155,
       );
-      if (!res.ok) return;
-      const data = await res.json();
-      const apiAvatar = data.user?.avatar;
-      if (!apiAvatar) return;
 
-      // Update photo element
-      const wrap = document.getElementById("member-photo-wrap");
-      if (wrap) {
-        wrap.innerHTML = `<img class="member-hero__photo" src="${apiAvatar}" alt="${member.name} — ${member.role}" width="180" height="180" />`;
-      }
+  // Hydrate from API (name, role, bio, avatar, posts) with current locale
+  hydrateFromApi(memberId, member);
 
-      // Update og:image
-      const ogImg = document.querySelector("meta[property='og:image']");
-      if (ogImg) ogImg.setAttribute("content", apiAvatar);
-
-      // Update JSON-LD image
-      const ldEl = document.querySelector("script[type='application/ld+json']");
-      if (ldEl) {
-        try {
-          const ld = JSON.parse(ldEl.textContent);
-          ld.image = apiAvatar;
-          ldEl.textContent = JSON.stringify(ld);
-        } catch (_) {}
-      }
-    } catch (_) {
-      // API unreachable — static photo stays, no console noise
-    }
-  })();
+  // Re-hydrate on language switch — name, posts titles and dates update
+  document.addEventListener("cl:languagechange", () => {
+    hydrateFromApi(memberId, member);
+  });
 });
