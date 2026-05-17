@@ -251,6 +251,9 @@
   "dash.profile.role": "Rôle",
   "dash.profile.bio": "Biographie",
   "dash.profile.bio_placeholder": "Parlez-nous de vous...",
+  "dash.profile.display_name": "Nom en caractères latins",
+  "dash.profile.display_name_placeholder": "ex. Serhii Hilj",
+  "dash.profile.display_name_hint": "Affiché aux visiteurs EN/FR/DE à la place du nom cyrillique. Laissez vide pour afficher le nom principal.",
   "dash.avatar.change_aria": "Changer la photo",
   "dash.avatar.upload_aria": "Télécharger la photo de profil",
   "dash.avatar.change_btn": "Changer la photo",
@@ -301,6 +304,7 @@
   "projects.tech_title": "Technologies",
   "project.meta.date": "Date",
   "project.meta.author": "Auteur",
+  "project.no_description": "Aucune description disponible.",
 
   "auth.login_title": "Connexion",
   "auth.welcome_back": "Bienvenue sur cote-lapyx",

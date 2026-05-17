@@ -251,6 +251,9 @@
   "dash.profile.role": "Роль",
   "dash.profile.bio": "Біографія",
   "dash.profile.bio_placeholder": "Розкажіть про себе...",
+  "dash.profile.display_name": "Ім'я латиницею",
+  "dash.profile.display_name_placeholder": "напр. Serhii Hilj",
+  "dash.profile.display_name_hint": "Показується EN/FR/DE відвідувачам замість кириличного імені. Залиште порожнім, щоб показувати основне ім'я.",
   "dash.avatar.change_aria": "Змінити фото",
   "dash.avatar.upload_aria": "Завантажити фото профілю",
   "dash.avatar.change_btn": "Змінити фото",
@@ -301,6 +304,7 @@
   "projects.tech_title": "Технології",
   "project.meta.date": "Дата",
   "project.meta.author": "Автор",
+  "project.no_description": "Опис відсутній.",
 
   "auth.login_title": "Вхід",
   "auth.welcome_back": "З поверненням до cote-lapyx",

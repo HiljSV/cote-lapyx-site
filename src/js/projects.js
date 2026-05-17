@@ -35,6 +35,15 @@ function authorInitials(name) {
     : parts[0].slice(0, 2).toUpperCase();
 }
 
+// Return Latin displayName for non-UK locales, fall back to Cyrillic name
+function authorDisplayName(author) {
+  if (!author) return "—";
+  const lang = localStorage.getItem("cl_lang") || "en";
+  return lang !== "uk" && author.displayName
+    ? author.displayName
+    : author.name || "—";
+}
+
 // Fetches /api/v1/team-members and builds a userId→slug lookup map.
 // Must complete before buildProjectCard is called so author links resolve correctly.
 async function initMemberSlugs() {
@@ -53,7 +62,7 @@ async function initMemberSlugs() {
 
 function buildProjectCard(project, index) {
   const color = CARD_COLORS[index % CARD_COLORS.length];
-  const authorName = project.author?.name || "—";
+  const authorName = authorDisplayName(project.author);
   const initials = authorInitials(project.author?.name);
   const authorAvatarInner = project.author?.avatar
     ? `<img src="${escHtml(project.author.avatar)}" alt="" aria-hidden="true" />`

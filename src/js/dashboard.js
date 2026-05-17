@@ -76,6 +76,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       setVal("profile-email", user.email);
       setVal("profile-role", user.role);
       setVal("profile-bio", user.bio);
+      // Hydrate Latin display name — may be null when not yet set
+      setVal("profile-display-name", user.displayName);
 
       // Hydrate social links fields from user.socialLinks if present
       setVal("profile-telegram", user.socialLinks?.telegram);
@@ -492,9 +494,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     submitBtn.textContent = "Збереження...";
 
     // Build PATCH body — only include fields with non-empty values
+    // displayName: send empty string to clear, undefined to skip (no change)
+    const rawDisplayName =
+      document.getElementById("profile-display-name")?.value ?? null;
     const body = {
       name: document.getElementById("profile-name")?.value?.trim() || undefined,
       bio: document.getElementById("profile-bio")?.value?.trim() || undefined,
+      displayName: rawDisplayName !== null ? rawDisplayName.trim() : undefined,
     };
 
     // Merge socialLinks: start from server state, overlay only the fields present in the form.

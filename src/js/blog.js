@@ -40,8 +40,17 @@ function authorInitials(name) {
     : parts[0].slice(0, 2).toUpperCase();
 }
 
+// Return Latin displayName for non-UK locales, fall back to Cyrillic name
+function authorDisplayName(author) {
+  if (!author) return "—";
+  const lang = localStorage.getItem("cl_lang") || "en";
+  return lang !== "uk" && author.displayName
+    ? author.displayName
+    : author.name || "—";
+}
+
 function buildBlogCard(post) {
-  const authorName = post.author?.name || "—";
+  const authorName = authorDisplayName(post.author);
   const initials = authorInitials(post.author?.name);
   const category =
     post.categories?.length > 0

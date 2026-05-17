@@ -54,6 +54,15 @@ function authorInitials(name) {
     : parts[0].slice(0, 2).toUpperCase();
 }
 
+// Return Latin displayName for non-UK locales, fall back to Cyrillic name
+function authorDisplayName(author) {
+  if (!author) return "—";
+  const lang = localStorage.getItem("cl_lang") || "en";
+  return lang !== "uk" && author.displayName
+    ? author.displayName
+    : author.name || "—";
+}
+
 // Show the "project not found" state — hides content, reveals fallback block
 function showNotFound() {
   const contentSection = document.querySelector(".project-detail-section");
@@ -127,7 +136,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         : escHtml(authorInitials(project.author.name));
       authorEl.innerHTML = `
         <div class="post-hero__author-avatar" aria-hidden="true">${avatarInner}</div>
-        <span class="post-hero__author-name">${escHtml(project.author.name)}</span>`;
+        <span class="post-hero__author-name">${escHtml(authorDisplayName(project.author))}</span>`;
     }
 
     // Links (GitHub / Demo)
@@ -162,8 +171,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       } else if (project.shortDescription) {
         contentEl.innerHTML = `<p>${escHtml(project.shortDescription)}</p>`;
       } else {
-        contentEl.innerHTML =
-          '<p class="post-article__loading">Опис відсутній.</p>';
+        contentEl.innerHTML = `<p class="post-article__loading">${translate("project.no_description")}</p>`;
       }
     }
 
@@ -196,7 +204,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
       if (project.author?.name)
         rows.push(
-          `<dt>${escHtml(translate("project.meta.author"))}</dt><dd>${escHtml(project.author.name)}</dd>`,
+          `<dt>${escHtml(translate("project.meta.author"))}</dt><dd>${escHtml(authorDisplayName(project.author))}</dd>`,
         );
       if (rows.length > 0) {
         metaEl.innerHTML = `<dl class="project-detail__meta-dl">${rows.join("")}</dl>`;
@@ -251,7 +259,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           );
         if (project.author?.name)
           rows.push(
-            `<dt>${escHtml(translate("project.meta.author"))}</dt><dd>${escHtml(project.author.name)}</dd>`,
+            `<dt>${escHtml(translate("project.meta.author"))}</dt><dd>${escHtml(authorDisplayName(project.author))}</dd>`,
           );
         if (rows.length > 0) {
           metaEl.innerHTML = `<dl class="project-detail__meta-dl">${rows.join("")}</dl>`;

@@ -928,6 +928,33 @@
             />
           </div>
 
+          <!-- Display name (Latin-script) for international visitors -->
+          <div class="dash-profile-form__group">
+            <label class="dash-profile-form__label" for="profile-display-name">
+              <!-- Label text: Latin name -->
+              <span data-i18n="dash.profile.display_name">Ім'я латиницею</span>
+            </label>
+            <!-- Value is empty — JS hydrates from /users/me displayName field -->
+            <input
+              class="dash-profile-form__input"
+              type="text"
+              id="profile-display-name"
+              name="displayName"
+              value=""
+              autocomplete="name"
+              maxlength="100"
+              placeholder="напр. Serhii Hilj"
+              data-i18n-placeholder="dash.profile.display_name_placeholder"
+            />
+            <!-- Hint text for the user -->
+            <small
+              class="dash-profile-form__hint"
+              data-i18n="dash.profile.display_name_hint"
+              >Показується EN/FR/DE відвідувачам замість кириличного імені.
+              Залиште порожнім, щоб показувати основне ім'я.</small
+            >
+          </div>
+
           <!-- Bio textarea (full width) -->
           <div class="dash-profile-form__group dash-profile-form__group--full">
             <label class="dash-profile-form__label" for="profile-bio">

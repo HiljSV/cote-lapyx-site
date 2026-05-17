@@ -38,6 +38,15 @@ function authorInitials(name) {
     : parts[0].slice(0, 2).toUpperCase();
 }
 
+// Return Latin displayName for non-UK locales, fall back to Cyrillic name
+function authorDisplayName(author) {
+  if (!author) return "—";
+  const lang = localStorage.getItem("cl_lang") || "en";
+  return lang !== "uk" && author.displayName
+    ? author.displayName
+    : author.name || "—";
+}
+
 // Show the "post not found" state — hides article, reveals fallback block
 function showNotFound() {
   const article = document.querySelector(".post-article");
@@ -172,7 +181,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         : escHtml(initials);
       authorEl.innerHTML = `
         <div class="post-hero__author-avatar" aria-hidden="true">${avatarInner}</div>
-        <span class="post-hero__author-name">${escHtml(post.author.name)}</span>`;
+        <span class="post-hero__author-name">${escHtml(authorDisplayName(post.author))}</span>`;
     }
 
     // Cover image — unhide wrapper when image is present
