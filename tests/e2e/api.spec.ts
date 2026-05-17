@@ -22,20 +22,20 @@ test.describe("Public API — health", () => {
     await ctx.dispose();
   });
 
-  // Team endpoint feeds /team.html and member cards
-  test("GET /team returns members array", async ({ playwright }) => {
+  // Team members endpoint feeds /team.html and member cards
+  // Route: GET /api/v1/team-members (public, no auth required)
+  test("GET /team-members returns members array", async ({ playwright }) => {
     const ctx = await playwright.request.newContext();
-    const res = await ctx.get(`${API_BASE}/team`);
-    expect(res.status(), "team endpoint must be 200").toBe(200);
+    const res = await ctx.get(`${API_BASE}/team-members`);
+    expect(res.status(), "team-members endpoint must be 200").toBe(200);
 
     const body = await res.json();
-    // Team can be a bare array OR a wrapped object — accept either shape
-    const members = Array.isArray(body)
-      ? body
-      : (body?.content ?? body?.members);
-    expect(Array.isArray(members), "team response must yield an array").toBe(
-      true,
-    );
+    // PageResponse contract: { content: [...], page: {...} }
+    expect(body, "response must be an object").toBeTruthy();
+    expect(
+      Array.isArray(body.content),
+      "team-members response must have content array",
+    ).toBe(true);
 
     await ctx.dispose();
   });

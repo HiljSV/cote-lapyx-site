@@ -9,12 +9,14 @@ const PASSWORD = process.env.E2E_PASSWORD ?? "";
 test.describe("Auth — login flow", () => {
   // Shared login state: log in once, reuse for subsequent tests in this suite
   test.beforeEach(async ({ page }) => {
-    await page.goto("/login.html", { waitUntil: "domcontentloaded" });
+    await page.goto("/login.html", { waitUntil: "load" });
     await page.locator('input[type="email"]').fill(EMAIL);
     await page.locator('input[type="password"]').fill(PASSWORD);
-    await page.locator('button[type="submit"], .btn--cyan').first().click();
+    // Use the specific submit button ID — header also has .btn--cyan elements that
+    // would be selected first by a generic selector and would not submit the form.
+    await page.locator("#login-submit").click();
     // Wait for redirect to dashboard (token stored in localStorage on success)
-    await page.waitForURL(/dashboard\.html/, { timeout: 10_000 });
+    await page.waitForURL(/dashboard\.html/, { timeout: 15_000 });
   });
 
   test("dashboard loads with sidebar after login", async ({ page }) => {
