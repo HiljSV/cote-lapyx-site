@@ -1,10 +1,11 @@
 // =============================================================================
-// team.js — Hydrate team member photos from API avatars
-// Fetches /api/v1/team-members (public) and replaces static photo src
-// with the user's avatar URL if one is set. Falls back to static image silently.
+// team.js — Hydrate team member data from API (avatar, name, role, bio)
+// Runs on every page that has img[data-member-slug] elements:
+//   team.html (.team-card), about.html (.about-member), project/post cards.
+// Falls back gracefully when API is unreachable or member has no avatar.
 // =============================================================================
 
-// Named so it can be re-called on cl:languagechange
+// Named so it can be re-called on cl:languagechange without page reload
 async function hydrateTeamAvatars() {
   try {
     // Read current UI language so the backend returns translated member content
@@ -18,15 +19,17 @@ async function hydrateTeamAvatars() {
     const members = await res.json();
 
     members.forEach((member) => {
-      const avatarUrl = member.user && member.user.avatar;
-      if (!avatarUrl) return; // no avatar set — keep static image
+      // Resolve locale-aware display name — Latin for non-UK, Cyrillic for UK
+      const displayName =
+        lang !== "uk" && member.user?.displayName
+          ? member.user.displayName
+          : member.user?.name || "";
 
-      // Build first-segment fallback: "serhii-khil" → "serhii"
+      const avatarUrl = member.user?.avatar || null;
+
+      // Build CSS selector covering exact slug + first-segment fallback
+      // e.g. "serhii-hilj" also matches img[data-member-slug="serhii"]
       const firstSegment = member.slug ? member.slug.split("-")[0] : "";
-
-      // Build a combined CSS selector covering exact slug + first-segment fallback.
-      // This ensures ALL matching images on the page get updated — team section,
-      // project cards, about page, member page, etc. — not just the first one.
       const selectors = [
         member.slug ? `img[data-member-slug="${member.slug}"]` : "",
         firstSegment && firstSegment !== member.slug
@@ -36,64 +39,55 @@ async function hydrateTeamAvatars() {
         .filter(Boolean)
         .join(", ");
 
-      // Nothing to query — skip this member
       if (!selectors) return;
 
-      // Select ALL images that match any of the slug variants
+      // Find ALL images for this member across the current page
       const imgEls = document.querySelectorAll(selectors);
       if (!imgEls.length) return;
 
-      // Resolve display name: Latin displayName for non-UK locales, Cyrillic name otherwise
-      const displayName =
-        lang !== "uk" && member.user.displayName
-          ? member.user.displayName
-          : member.user.name || "";
-
-      // Update every matching image: src and descriptive alt.
-      // Also hydrate name, profession (role) and bio from API for team-card elements.
       imgEls.forEach((imgEl) => {
-        imgEl.src = avatarUrl;
-        // Keep alt descriptive (use resolved display name + profession from API if available)
+        // Update avatar src only if the API has a photo set
+        if (avatarUrl) {
+          imgEl.src = avatarUrl;
+        }
+        // Always update alt text with resolved display name
         if (displayName && member.profession) {
           imgEl.alt = `${displayName} — ${member.profession}`;
         }
 
-        // Hydrate .team-card__name, .team-card__role and .team-card__bio from API response.
-        // Only applies when the img is inside a .team-card (team section, team page).
-        // Project cards and member avatars elsewhere do NOT have these elements.
-        const card = imgEl.closest(".team-card");
+        // Find the parent card — works on both .team-card (team.html) and
+        // .about-member (about.html). Project cards and other img contexts are skipped.
+        const card =
+          imgEl.closest(".team-card") || imgEl.closest(".about-member");
         if (!card) return;
 
-        // Update visible name with locale-aware displayName
-        if (displayName) {
-          const nameEl = card.querySelector(".team-card__name");
-          if (nameEl) {
-            nameEl.textContent = displayName;
-          }
-        }
+        const isTeamCard = card.classList.contains("team-card");
 
-        // Update profession label if API returned one
-        if (member.profession) {
-          const roleEl = card.querySelector(".team-card__role");
-          if (roleEl) {
-            roleEl.textContent = member.profession;
-          }
-        }
+        // Name element: .team-card__name or .about-member__name
+        const nameEl = card.querySelector(
+          isTeamCard ? ".team-card__name" : ".about-member__name",
+        );
+        // Role/profession element: .team-card__role or .about-member__badge
+        const roleEl = card.querySelector(
+          isTeamCard ? ".team-card__role" : ".about-member__badge",
+        );
+        // Bio element: .team-card__bio or .about-member__bio p (first paragraph)
+        const bioEl = isTeamCard
+          ? card.querySelector(".team-card__bio")
+          : card.querySelector(".about-member__bio p");
 
-        // Update short bio if API returned one
-        if (member.shortDescription) {
-          const bioEl = card.querySelector(".team-card__bio");
-          if (bioEl) {
-            bioEl.textContent = member.shortDescription;
-          }
-        }
+        // Apply resolved values — only overwrite when API returned a value
+        if (displayName && nameEl) nameEl.textContent = displayName;
+        if (member.profession && roleEl) roleEl.textContent = member.profession;
+        if (member.shortDescription && bioEl)
+          bioEl.textContent = member.shortDescription;
       });
     });
   } catch (_) {
-    // Network failure: static photos remain visible, no user-facing error
+    // Network failure: static photos and text remain visible, no user-facing error
   }
 }
 
-// Initial hydration + re-hydrate on language switch
+// Initial hydration on page load + re-hydrate on language switch
 hydrateTeamAvatars();
 document.addEventListener("cl:languagechange", hydrateTeamAvatars);

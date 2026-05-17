@@ -23,7 +23,7 @@
         { "label": "HTML / CSS", "pct": 92, "color": "cyan" },
         { "label": "JavaScript", "pct": 88, "color": "cyan" },
         { "label": "TypeScript", "pct": 80, "color": "magenta" },
-        { "label": "Адаптивна верстка", "pct": 90, "color": "cyan" }
+        { "label": "Responsive Layout", "pct": 90, "color": "cyan" }
       ]
     },
     "projects": [
