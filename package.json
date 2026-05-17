@@ -22,11 +22,13 @@
     "wpstop": "node template_modules/wordpress/terminal.js down",
     "test": "vitest run",
     "test:watch": "vitest",
-    "i18n:check": "node scripts/i18n-check.mjs"
+    "i18n:check": "node scripts/i18n-check.mjs",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
     "@davestewart/outliner": "latest",
     "@googlemaps/js-api-loader": "latest",
+    "@playwright/test": "^1.60.0",
     "@spiriit/vite-plugin-svg-spritemap": "latest",
     "@tailwindcss/vite": "latest",
     "@vitejs/plugin-react": "^5.0.0",
