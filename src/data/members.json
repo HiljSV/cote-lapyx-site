@@ -30,6 +30,7 @@
       {
         "title": "cote-lapyx.com",
         "description": "Офіційний сайт студії. Фірмовий стиль, компонентна архітектура, CSS-анімації.",
+        "descriptionEn": "Official studio website. Brand identity, component architecture, CSS animations.",
         "tags": [
           { "label": "HTML", "color": "cyan" },
           { "label": "CSS", "color": "cyan" },
@@ -41,6 +42,7 @@
       {
         "title": "Component Library",
         "description": "Особиста бібліотека UI-компонентів у cyberpunk-стилі з CSS-анімаціями та TypeScript.",
+        "descriptionEn": "Personal UI component library in cyberpunk style with CSS animations and TypeScript.",
         "tags": [
           { "label": "HTML", "color": "cyan" },
           { "label": "CSS", "color": "cyan" },
@@ -84,6 +86,7 @@
       {
         "title": "cote-lapyx API",
         "description": "REST API backend з JWT-авторизацією, валідацією та документацією Swagger.",
+        "descriptionEn": "REST API backend with JWT authorization, validation, and Swagger documentation.",
         "tags": [
           { "label": "Java", "color": "green" },
           { "label": "C#", "color": "cyan" },
@@ -95,6 +98,7 @@
       {
         "title": "Auth Service",
         "description": "Сервіс авторизації та управління користувачами з JWT, OAuth2 та ролевою моделлю.",
+        "descriptionEn": "Authorization and user management service with JWT, OAuth2, and role-based access control.",
         "tags": [
           { "label": "Java", "color": "green" },
           { "label": "JWT", "color": "cyan" },
@@ -136,6 +140,7 @@
       {
         "title": "cote-lapyx Brand Kit",
         "description": "Фірмовий стиль студії: логотип, кольорова палітра, типографіка, cyberpunk-естетика.",
+        "descriptionEn": "Studio brand identity: logo, color palette, typography, and cyberpunk aesthetics.",
         "tags": [
           { "label": "Figma", "color": "magenta" },
           { "label": "Branding", "color": "magenta" },
@@ -147,6 +152,7 @@
       {
         "title": "Geometric Logo System",
         "description": "Система геометричних логотипів з адаптивними варіантами для різних носіїв.",
+        "descriptionEn": "Geometric logo system with adaptive variants for different media and surfaces.",
         "tags": [
           { "label": "Figma", "color": "magenta" },
           { "label": "Illustrator", "color": "magenta" },

@@ -132,8 +132,12 @@ function renderSkills(member) {
 function renderProjects(member) {
   const el = document.getElementById("member-projects");
   if (!el) return;
+  const lang = localStorage.getItem("cl_lang") || "en";
   el.innerHTML = member.projects
     .map((p) => {
+      // Use English description for non-UK locales when available
+      const desc =
+        lang !== "uk" && p.descriptionEn ? p.descriptionEn : p.description;
       const tagsHtml = p.tags
         .map(
           (t) =>
@@ -151,7 +155,7 @@ function renderProjects(member) {
           <div class="project-card__cover-placeholder" aria-hidden="true">&lt;/&gt;</div>
           <div class="project-card__body">
             <h3 class="project-card__title">${escHtml(p.title)}</h3>
-            <p class="project-card__description">${escHtml(p.description)}</p>
+            <p class="project-card__description">${escHtml(desc)}</p>
             <ul class="project-card__tags" aria-label="Технології" role="list">${tagsHtml}</ul>
           </div>
           <div class="project-card__footer">
@@ -203,7 +207,11 @@ async function hydrateFromApi(memberId, member) {
     // Resolve locale-aware display name
     const displayName = resolveDisplayName(data.user);
     const profession = data.profession || member.role;
-    const bio = data.user?.bio || member.bio;
+    // Use translated shortDescription for non-UK locales; fall back to Cyrillic bio
+    const bio =
+      lang !== "uk" && data.shortDescription
+        ? data.shortDescription
+        : data.user?.bio || member.bio;
     const avatarUrl = data.user?.avatar || null;
 
     // Update name, role (profession), bio DOM elements
@@ -306,8 +314,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Hydrate from API (name, role, bio, avatar, posts) with current locale
   hydrateFromApi(memberId, member);
 
-  // Re-hydrate on language switch — name, posts titles and dates update
+  // Re-hydrate on language switch — name, bio, posts titles, project descriptions update
   document.addEventListener("cl:languagechange", () => {
     hydrateFromApi(memberId, member);
+    renderProjects(member);
   });
 });
