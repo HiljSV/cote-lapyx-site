@@ -2,8 +2,12 @@
   <div class="auth-card" style="width: 100%; max-width: 440px">
     <!-- Header -->
     <div class="auth-card__header">
-      <h1 class="auth-card__title">Вхід</h1>
-      <p class="auth-card__subtitle">З поверненням до cote-lapyx</p>
+      <!-- Login title — translated via data-i18n -->
+      <h1 class="auth-card__title" data-i18n="auth.login_title">Вхід</h1>
+      <!-- Welcome subtitle — translated via data-i18n -->
+      <p class="auth-card__subtitle" data-i18n="auth.welcome_back">
+        З поверненням до cote-lapyx
+      </p>
     </div>
 
     <!-- Registration success banner (shown via JS when ?registered=1) -->
@@ -48,7 +52,13 @@
 
       <!-- Password field -->
       <div class="auth-form__group">
-        <label class="auth-form__label" for="login-password">Пароль</label>
+        <!-- Password label — translated via data-i18n -->
+        <label
+          class="auth-form__label"
+          for="login-password"
+          data-i18n="auth.password"
+          >Пароль</label
+        >
         <div class="auth-form__input-wrap">
           <svg
             class="auth-form__icon"
@@ -105,11 +115,12 @@
         hidden
       ></div>
 
-      <!-- Submit -->
+      <!-- Submit — translated via data-i18n -->
       <button
         type="submit"
         class="btn btn--cyan btn--lg auth-form__submit"
         id="login-submit"
+        data-i18n="auth.login_btn"
       >
         Увійти
       </button>
@@ -117,9 +128,17 @@
 
     <!-- Footer link -->
     <div class="auth-card__footer">
+      <!-- "No account?" prompt + register link — each part translated separately -->
       <p class="auth-card__footer-text">
-        Немає акаунту?
-        <a href="register.html" class="auth-card__link">Зареєструватись</a>
+        <!-- Prompt text only — does not contain the link so textContent is safe -->
+        <span data-i18n="auth.no_account">Немає акаунту?</span>
+        <!-- Register link text — translated separately -->
+        <a
+          href="register.html"
+          class="auth-card__link"
+          data-i18n="auth.register_link"
+          >Зареєструватись</a
+        >
       </p>
     </div>
   </div>

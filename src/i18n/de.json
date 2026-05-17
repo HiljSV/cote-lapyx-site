@@ -285,5 +285,30 @@
   "projects.empty": "Noch keine Projekte. Schauen Sie später vorbei!",
   "projects.error_load": "Projekte konnten nicht geladen werden.",
   "projects.tech_label": "Technologien",
-  "team.skill.adaptive_layout": "Responsives Layout"
+  "team.skill.adaptive_layout": "Responsives Layout",
+
+  "post.content_empty": "Kein Inhalt verfügbar.",
+  "post.login_for_favorites": "Melden Sie sich an, um zu den Favoriten hinzuzufügen.",
+  "post.subscribe_ok": "Danke! Sie sind für Updates angemeldet.",
+  "post.subscribe_err": "Abonnementfehler. Bitte versuchen Sie es erneut.",
+  "post.login_for_comment": "Melden Sie sich an, um einen Kommentar zu hinterlassen.",
+  "post.comment_err": "Sendungsfehler.",
+  "error.network": "Verbindungsfehler.",
+
+  "project.status.published": "Veröffentlicht",
+  "project.status.draft": "Entwurf",
+  "project.status.archived": "Archiviert",
+  "projects.tech_title": "Technologien",
+  "project.meta.date": "Datum",
+  "project.meta.author": "Autor",
+
+  "auth.login_title": "Anmelden",
+  "auth.welcome_back": "Willkommen zurück bei cote-lapyx",
+  "auth.email_placeholder": "your@email.com",
+  "auth.password": "Passwort",
+  "auth.login_btn": "Anmelden",
+  "auth.no_account": "Kein Konto?",
+  "auth.register_link": "Registrieren.",
+
+  "blog.subtitle": "Gedanken, Erfahrungen und technische Notizen des Teams"
 }

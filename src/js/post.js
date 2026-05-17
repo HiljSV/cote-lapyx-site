@@ -2,6 +2,9 @@
 // Post detail page — fetches a single post by slug from the API
 // =============================================================================
 
+// Import translate() for runtime i18n lookups on dynamically rendered strings
+import { translate } from "@js/i18n.js";
+
 const API = "https://api.cote-lapyx.com/api/v1";
 
 /* Sanitizes user-controlled strings before injecting into innerHTML */
@@ -14,15 +17,19 @@ function escHtml(str) {
     .replace(/'/g, "&#39;");
 }
 
+// Format ISO date string using the current UI language locale
 function fmtDate(iso) {
   if (!iso) return "";
-  return new Date(iso).toLocaleDateString("uk-UA", {
+  // Read active language from localStorage — same pattern as blog.js
+  const lang = localStorage.getItem("cl_lang") || "en";
+  return new Date(iso).toLocaleDateString(lang, {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
 }
 
+// Build author initials (first letter of first + last name, or first two chars)
 function authorInitials(name) {
   if (!name) return "?";
   const parts = name.trim().split(/\s+/);
@@ -31,18 +38,22 @@ function authorInitials(name) {
     : parts[0].slice(0, 2).toUpperCase();
 }
 
+// Show the "post not found" state — hides article, reveals fallback block
 function showNotFound() {
-  const main = document.getElementById("post-main");
   const article = document.querySelector(".post-article");
   const tagsSection = document.getElementById("post-tags-section");
   const notFound = document.getElementById("post-not-found");
   const titleEl = document.getElementById("post-title");
-  if (titleEl) titleEl.textContent = "Статтю не знайдено";
+  // Use translated string instead of hardcoded Ukrainian
+  if (titleEl) titleEl.textContent = translate("post.not_found");
   if (article) article.setAttribute("hidden", "");
   if (tagsSection) tagsSection.setAttribute("hidden", "");
   if (notFound) notFound.removeAttribute("hidden");
 }
 
+// =============================================================================
+// Main post loader — runs on DOMContentLoaded, fetches post by slug
+// =============================================================================
 document.addEventListener("DOMContentLoaded", async () => {
   // Guard: only run on post.html (bundle mode sends all JS to every page)
   if (!document.getElementById("post-main")) return;
@@ -143,12 +154,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (dateIso) dateEl.setAttribute("datetime", dateIso);
     }
 
+    // Category — fall back to translated "General" label
     const catEl = document.getElementById("post-category");
     const catName =
-      post.categories?.length > 0 ? post.categories[0].name : "Загальне";
+      post.categories?.length > 0
+        ? post.categories[0].name
+        : translate("blog.category.general");
     if (catEl) catEl.textContent = catName;
 
-    // Author
+    // Author block — avatar image or initials fallback
     const authorEl = document.getElementById("post-author-block");
     if (authorEl && post.author?.name) {
       const initials = authorInitials(post.author.name);
@@ -161,7 +175,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         <span class="post-hero__author-name">${escHtml(post.author.name)}</span>`;
     }
 
-    // Cover image
+    // Cover image — unhide wrapper when image is present
     if (post.coverImage) {
       const coverWrap = document.getElementById("post-cover-wrap");
       if (coverWrap) {
@@ -179,12 +193,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       } else if (post.excerpt) {
         contentEl.innerHTML = `<p>${escHtml(post.excerpt)}</p>`;
       } else {
-        contentEl.innerHTML =
-          '<p class="post-article__loading">Зміст відсутній.</p>';
+        // Translated "no content" message instead of hardcoded Ukrainian
+        contentEl.innerHTML = `<p class="post-article__loading">${escHtml(translate("post.content_empty"))}</p>`;
       }
     }
 
-    // Tags
+    // Tags section — show only when tags are present
     if (post.tags?.length > 0) {
       const tagsEl = document.getElementById("post-tags");
       const tagsSection = document.getElementById("post-tags-section");
@@ -201,8 +215,51 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch {
     showNotFound();
   }
+
+  // ── Language switch listener — re-renders translated post content on lang change ──
+  document.addEventListener("cl:languagechange", async () => {
+    // Only act when we are on the post page
+    if (!document.getElementById("post-main")) return;
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get("slug");
+    if (!slug) return;
+    const lang = localStorage.getItem("cl_lang") || "en";
+    try {
+      // Fetch post again with new locale — public endpoint, no auth needed
+      const res = await fetch(
+        `${API}/posts/${encodeURIComponent(slug)}?locale=${lang}`,
+      );
+      if (!res.ok) return;
+      const post = await res.json();
+
+      // Update title
+      const titleEl = document.getElementById("post-title");
+      if (titleEl) titleEl.textContent = post.title;
+
+      // Update category with translated fallback
+      const catEl = document.getElementById("post-category");
+      if (catEl) {
+        catEl.textContent =
+          post.categories?.length > 0
+            ? post.categories[0].name
+            : translate("blog.category.general");
+      }
+
+      // Update content area
+      const contentEl = document.getElementById("post-content");
+      if (contentEl && post.content) contentEl.innerHTML = post.content;
+      if (contentEl && post.excerpt && !post.content)
+        contentEl.innerHTML = `<p>${escHtml(post.excerpt)}</p>`;
+    } catch {
+      /* silent — best-effort language reload */
+    }
+  });
 });
 
+// =============================================================================
+// Interactions block — favorites, subscribe form, comments
+// Runs after main load block (slug already parsed from URL)
+// =============================================================================
 document.addEventListener("DOMContentLoaded", () => {
   if (!document.getElementById("post-main")) return;
   // interactions init — runs after main block (slug already in URL)
@@ -212,6 +269,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const API = "https://api.cote-lapyx.com/api/v1";
 
+  // Return stored access token (null if not logged in)
   function getToken() {
     return localStorage.getItem("cl_access");
   }
@@ -222,7 +280,8 @@ document.addEventListener("DOMContentLoaded", () => {
     favBtn.addEventListener("click", async () => {
       const token = getToken();
       if (!token) {
-        alert("Увійдіть, щоб додати в обране.");
+        // Translated "sign in" prompt instead of hardcoded Ukrainian
+        alert(translate("post.login_for_favorites"));
         return;
       }
       const isActive = favBtn.classList.contains("is-active");
@@ -238,12 +297,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ── Subscribe ─────────────────────────────────────────────────────────────
+  // ── Subscribe form ─────────────────────────────────────────────────────────
   const subBtn = document.getElementById("post-sub-btn");
   const subForm = document.getElementById("post-subscribe-form");
   const subFormEl = document.getElementById("post-sub-form");
   const subMsg = document.getElementById("post-sub-msg");
 
+  // Toggle subscribe email form visibility
   subBtn?.addEventListener("click", () => {
     const hidden = subForm?.hasAttribute("hidden");
     if (hidden) {
@@ -253,6 +313,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Handle subscribe form submission
   subFormEl?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = document.getElementById("post-sub-email")?.value.trim();
@@ -260,22 +321,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const submitBtn = document.getElementById("post-sub-submit");
     submitBtn.disabled = true;
     try {
+      // POST /api/v1/subscriptions — public endpoint, no auth needed
       const res = await fetch(`${API}/subscriptions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, type: "GENERAL" }),
       });
       if (subMsg) {
+        // Translated success/error message
         subMsg.textContent = res.ok
-          ? "Дякуємо! Ви підписані на оновлення."
-          : "Помилка підписки. Спробуйте ще раз.";
+          ? translate("post.subscribe_ok")
+          : translate("post.subscribe_err");
         subMsg.className = `post-subscribe-form__msg ${res.ok ? "post-subscribe-form__msg--ok" : "post-subscribe-form__msg--err"}`;
         subMsg.removeAttribute("hidden");
       }
       if (res.ok) subFormEl.reset();
     } catch {
+      // Network failure — translated error message
       if (subMsg) {
-        subMsg.textContent = "Помилка з'єднання.";
+        subMsg.textContent = translate("error.network");
         subMsg.className =
           "post-subscribe-form__msg post-subscribe-form__msg--err";
         subMsg.removeAttribute("hidden");
@@ -286,11 +350,14 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ── Comments ─────────────────────────────────────────────────────────────
+
+  // Load and render all comments for the current post
   async function loadComments() {
     const list = document.getElementById("post-comments-list");
     const emptyEl = document.getElementById("post-comments-empty");
     if (!list) return;
     try {
+      // GET /api/v1/posts/{slug}/comments — public endpoint
       const res = await fetch(
         `${API}/posts/${encodeURIComponent(slug)}/comments`,
       );
@@ -313,8 +380,10 @@ document.addEventListener("DOMContentLoaded", () => {
           .slice(0, 2)
           .join("")
           .toUpperCase();
+        // Format date with active UI language locale
+        const commentLang = localStorage.getItem("cl_lang") || "en";
         const date = c.createdAt
-          ? new Date(c.createdAt).toLocaleDateString("uk-UA", {
+          ? new Date(c.createdAt).toLocaleDateString(commentLang, {
               day: "numeric",
               month: "short",
               year: "numeric",
@@ -352,16 +421,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const commentChars = document.getElementById("post-comment-chars");
   const commentMsg = document.getElementById("post-comment-msg");
 
+  // Live character count for comment textarea
   commentText?.addEventListener("input", () => {
     if (commentChars) commentChars.textContent = commentText.value.length;
   });
 
+  // Handle comment form submission
   commentForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const token = getToken();
     if (!token) {
+      // Translated "sign in to comment" message
       if (commentMsg) {
-        commentMsg.textContent = "Увійдіть, щоб залишити коментар.";
+        commentMsg.textContent = translate("post.login_for_comment");
         commentMsg.removeAttribute("hidden");
       }
       return;
@@ -371,6 +443,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const submitBtn = document.getElementById("post-comment-submit");
     submitBtn.disabled = true;
     try {
+      // POST /api/v1/posts/{slug}/comments — requires auth token
       const res = await fetch(
         `${API}/posts/${encodeURIComponent(slug)}/comments`,
         {
@@ -390,14 +463,16 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         const err = await res.json().catch(() => ({}));
         if (commentMsg) {
+          // Use API error detail if available, fall back to translated generic message
           commentMsg.textContent =
-            err.detail || err.message || "Помилка надсилання.";
+            err.detail || err.message || translate("post.comment_err");
           commentMsg.removeAttribute("hidden");
         }
       }
     } catch {
+      // Network failure — translated error message
       if (commentMsg) {
-        commentMsg.textContent = "Помилка з'єднання.";
+        commentMsg.textContent = translate("error.network");
         commentMsg.removeAttribute("hidden");
       }
     } finally {

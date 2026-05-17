@@ -285,5 +285,30 @@
   "projects.empty": "Проектів ще немає. Зайдіть пізніше!",
   "projects.error_load": "Не вдалося завантажити проекти.",
   "projects.tech_label": "Технології",
-  "team.skill.adaptive_layout": "Адаптивна верстка"
+  "team.skill.adaptive_layout": "Адаптивна верстка",
+
+  "post.content_empty": "Зміст відсутній.",
+  "post.login_for_favorites": "Увійдіть, щоб додати в обране.",
+  "post.subscribe_ok": "Дякуємо! Ви підписані на оновлення.",
+  "post.subscribe_err": "Помилка підписки. Спробуйте ще раз.",
+  "post.login_for_comment": "Увійдіть, щоб залишити коментар.",
+  "post.comment_err": "Помилка надсилання.",
+  "error.network": "Помилка з'єднання.",
+
+  "project.status.published": "Опубліковано",
+  "project.status.draft": "Чернетка",
+  "project.status.archived": "Архів",
+  "projects.tech_title": "Технології",
+  "project.meta.date": "Дата",
+  "project.meta.author": "Автор",
+
+  "auth.login_title": "Вхід",
+  "auth.welcome_back": "З поверненням до cote-lapyx",
+  "auth.email_placeholder": "your@email.com",
+  "auth.password": "Пароль",
+  "auth.login_btn": "Увійти",
+  "auth.no_account": "Немає акаунту?",
+  "auth.register_link": "Зареєструватись",
+
+  "blog.subtitle": "Думки, досвід та технічні нотатки команди"
 }
