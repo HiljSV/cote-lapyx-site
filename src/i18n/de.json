@@ -278,5 +278,11 @@
   "dash.crop.title": "Foto zuschneiden",
   "dash.crop.hint": "Ziehen und skalieren Sie das Foto, um den gewünschten Bereich auszuwählen",
   "dash.crop.save_btn": "Foto speichern",
-  "dash.empty.loading": "Laden..."
+  "dash.empty.loading": "Laden...",
+  "blog.empty": "Noch keine Beiträge. Schauen Sie später vorbei!",
+  "blog.error_load": "Beiträge konnten nicht geladen werden.",
+  "blog.category.general": "Allgemein",
+  "projects.empty": "Noch keine Projekte. Schauen Sie später vorbei!",
+  "projects.error_load": "Projekte konnten nicht geladen werden.",
+  "projects.tech_label": "Technologien"
 }

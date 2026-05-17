@@ -117,6 +117,11 @@ export function applyTranslations(lang) {
 
   // Persist user choice to localStorage for future visits
   localStorage.setItem(LS_KEY, lang);
+
+  // Notify page modules that need to re-render dynamic content with the new language
+  document.dispatchEvent(
+    new CustomEvent("cl:languagechange", { detail: { lang } }),
+  );
 }
 
 // =============================================================================
