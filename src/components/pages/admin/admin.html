@@ -31,13 +31,21 @@
       </svg>
     </button>
 
-    <!-- User info block -->
+    <!-- User info block — name/avatar/badge hydrated from /users/me by admin.js -->
     <div class="dash-sidebar__user">
-      <div class="dash-sidebar__avatar" aria-hidden="true">СК</div>
+      <div
+        class="dash-sidebar__avatar"
+        id="admin-sidebar-avatar"
+        aria-hidden="true"
+      >
+        ?
+      </div>
       <div class="dash-sidebar__info">
-        <p class="dash-sidebar__name">Сергій К.</p>
-        <p class="dash-sidebar__role">Site Administrator</p>
-        <span class="neon-badge neon-badge--magenta dash-sidebar__badge"
+        <p class="dash-sidebar__name" id="admin-sidebar-name">—</p>
+        <p class="dash-sidebar__role" id="admin-sidebar-role">Administrator</p>
+        <span
+          class="neon-badge neon-badge--magenta dash-sidebar__badge"
+          id="admin-sidebar-badge"
           >admin</span
         >
       </div>

@@ -21,12 +21,41 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // Admin guard — only isAdmin users may access this page
+  // Admin guard + sidebar hydration from /users/me
   fetchWithAuth("https://api.cote-lapyx.com/api/v1/users/me")
     .then((res) => (res.ok ? res.json() : null))
     .then((user) => {
       if (!user?.isAdmin) {
         window.location.replace("/dashboard.html");
+        return;
+      }
+
+      // Hydrate sidebar name, role badge, and avatar
+      const nameEl = document.getElementById("admin-sidebar-name");
+      const badgeEl = document.getElementById("admin-sidebar-badge");
+      const avatarEl = document.getElementById("admin-sidebar-avatar");
+
+      // Show display name when set, otherwise fall back to Cyrillic name
+      const displayName =
+        user.displayName && user.displayName.trim()
+          ? user.displayName
+          : user.name || "—";
+      if (nameEl) nameEl.textContent = displayName;
+      if (badgeEl) badgeEl.textContent = (user.role || "admin").toLowerCase();
+
+      // Avatar: photo via background-image or initials fallback
+      if (avatarEl) {
+        if (user.avatar) {
+          avatarEl.style.cssText = `background-image:url(${user.avatar});background-size:cover;background-position:center;`;
+          avatarEl.textContent = "";
+        } else {
+          // Build initials from Cyrillic name (two letters)
+          const parts = (user.name || displayName).trim().split(/\s+/);
+          avatarEl.textContent =
+            parts.length >= 2
+              ? (parts[0][0] + parts[1][0]).toUpperCase()
+              : parts[0].slice(0, 2).toUpperCase();
+        }
       }
     })
     .catch(() => {
