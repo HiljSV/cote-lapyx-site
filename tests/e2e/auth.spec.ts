@@ -3,8 +3,8 @@
 // Credentials come from env vars so they can be stored as GitHub Secrets.
 import { test, expect } from "@playwright/test";
 
-const EMAIL = process.env.E2E_EMAIL ?? "cote@cote-lapyx.com";
-const PASSWORD = process.env.E2E_PASSWORD ?? "Cote2026!";
+const EMAIL = process.env.E2E_EMAIL ?? "";
+const PASSWORD = process.env.E2E_PASSWORD ?? "";
 
 test.describe("Auth — login flow", () => {
   // Shared login state: log in once, reuse for subsequent tests in this suite
