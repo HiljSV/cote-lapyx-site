@@ -31,8 +31,8 @@ test.describe("Auth — login flow", () => {
     await page.locator('[data-section="profile"]').click();
     // Name input must be visible and not stuck at empty/error state
     await expect(page.locator("#profile-name")).toBeVisible();
-    // Should NOT contain "Помилка" anywhere in the profile section
-    await expect(page.locator(".dash-section-panel")).not.toContainText(
+    // Profile panel (data-panel="profile") must not show an error state
+    await expect(page.locator('[data-panel="profile"]')).not.toContainText(
       "Помилка",
     );
   });

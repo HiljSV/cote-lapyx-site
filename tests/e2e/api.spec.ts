@@ -30,12 +30,10 @@ test.describe("Public API — health", () => {
     expect(res.status(), "team-members endpoint must be 200").toBe(200);
 
     const body = await res.json();
-    // PageResponse contract: { content: [...], page: {...} }
-    expect(body, "response must be an object").toBeTruthy();
-    expect(
-      Array.isArray(body.content),
-      "team-members response must have content array",
-    ).toBe(true);
+    // team-members returns a bare array (not a PageResponse)
+    expect(Array.isArray(body), "team-members response must be an array").toBe(
+      true,
+    );
 
     await ctx.dispose();
   });
