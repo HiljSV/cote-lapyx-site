@@ -2,6 +2,8 @@
 // Projects page — loads published projects from the API
 // =============================================================================
 
+import { translate } from "@js/i18n.js";
+
 const API = "https://api.cote-lapyx.com/api/v1";
 const PAGE_SIZE = 12;
 
@@ -82,13 +84,13 @@ function buildProjectCard(project, index) {
       <div class="project-card__body">
         <h2 class="project-card__title">${escHtml(project.title)}</h2>
         <p class="project-card__description">${escHtml(project.shortDescription || "")}</p>
-        <ul class="project-card__tags" aria-label="Технології" role="list">
+        <ul class="project-card__tags" aria-label="${translate("projects.tech_label")}" role="list">
           ${tags}
         </ul>
       </div>
       <div class="project-card__footer">
         <div class="project-card__links">
-          ${project.slug ? `<a href="project.html?slug=${encodeURIComponent(project.slug)}" class="btn btn--ghost btn--sm">Детальніше</a>` : ""}
+          ${project.slug ? `<a href="project.html?slug=${encodeURIComponent(project.slug)}" class="btn btn--ghost btn--sm">${translate("btn.learn_more")}</a>` : ""}
           ${githubBtn}${demoBtn}
         </div>
         ${
@@ -149,7 +151,7 @@ async function loadProjects(page, append = false) {
       if (loadingEl) loadingEl.setAttribute("hidden", "");
       gridEl.innerHTML =
         cards ||
-        '<li class="projects-page__empty">Проектів ще немає. Зайдіть пізніше!</li>';
+        `<li class="projects-page__empty">${translate("projects.empty")}</li>`;
     }
 
     totalPages = data.page?.totalPages ?? 1;
@@ -163,8 +165,7 @@ async function loadProjects(page, append = false) {
     console.error("Projects load error:", err);
     if (loadingEl) loadingEl.setAttribute("hidden", "");
     if (!append) {
-      gridEl.innerHTML =
-        '<li class="projects-page__empty">Не вдалося завантажити проекти.</li>';
+      gridEl.innerHTML = `<li class="projects-page__empty">${translate("projects.error_load")}</li>`;
     }
   }
 }
@@ -209,4 +210,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     ?.addEventListener("click", () => {
       loadProjects(currentPage + 1, true);
     });
+
+  // Re-render cards when user switches language so btn labels and text update
+  document.addEventListener("cl:languagechange", () => {
+    currentPage = 0;
+    loadProjects(0);
+  });
 });

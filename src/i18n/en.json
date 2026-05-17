@@ -278,5 +278,11 @@
   "dash.crop.title": "Crop photo",
   "dash.crop.hint": "Drag and scale the photo to select the desired area",
   "dash.crop.save_btn": "Save photo",
-  "dash.empty.loading": "Loading..."
+  "dash.empty.loading": "Loading...",
+  "blog.empty": "No posts yet. Check back later!",
+  "blog.error_load": "Failed to load posts.",
+  "blog.category.general": "General",
+  "projects.empty": "No projects yet. Check back later!",
+  "projects.error_load": "Failed to load projects.",
+  "projects.tech_label": "Technologies"
 }

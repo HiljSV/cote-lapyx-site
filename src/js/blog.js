@@ -2,6 +2,8 @@
 // Blog page — loads published posts from the API
 // =============================================================================
 
+import { translate } from "@js/i18n.js";
+
 const API = "https://api.cote-lapyx.com/api/v1";
 const PAGE_SIZE = 12;
 
@@ -21,7 +23,9 @@ function escHtml(str) {
 
 function fmtDate(iso) {
   if (!iso) return "";
-  return new Date(iso).toLocaleDateString("uk-UA", {
+  // Use the currently active UI language for locale-aware date formatting
+  const lang = localStorage.getItem("cl_lang") || "en";
+  return new Date(iso).toLocaleDateString(lang, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -40,7 +44,9 @@ function buildBlogCard(post) {
   const authorName = post.author?.name || "—";
   const initials = authorInitials(post.author?.name);
   const category =
-    post.categories?.length > 0 ? escHtml(post.categories[0].name) : "Загальне";
+    post.categories?.length > 0
+      ? escHtml(post.categories[0].name)
+      : translate("blog.category.general");
   const date = post.publishedAt || post.createdAt;
   const coverHtml = post.coverImage
     ? `<img class="blog-card__cover" src="${escHtml(post.coverImage)}" alt="" aria-hidden="true" />`
@@ -112,8 +118,7 @@ async function loadPosts(page, append = false) {
     } else {
       if (loadingEl) loadingEl.setAttribute("hidden", "");
       listEl.innerHTML =
-        cards ||
-        '<li class="blog-page__empty">Публікацій ще немає. Зайдіть пізніше!</li>';
+        cards || `<li class="blog-page__empty">${translate("blog.empty")}</li>`;
     }
 
     totalPages = data.page?.totalPages ?? 1;
@@ -127,8 +132,7 @@ async function loadPosts(page, append = false) {
     console.error("Blog load error:", err);
     if (loadingEl) loadingEl.setAttribute("hidden", "");
     if (!append) {
-      listEl.innerHTML =
-        '<li class="blog-page__empty">Не вдалося завантажити статті.</li>';
+      listEl.innerHTML = `<li class="blog-page__empty">${translate("blog.error_load")}</li>`;
     }
   }
 }
@@ -192,4 +196,15 @@ document.addEventListener("DOMContentLoaded", () => {
   if (latestEl) {
     loadLatestPosts();
   }
+
+  // Re-render cards when user switches language so dates and category labels update
+  document.addEventListener("cl:languagechange", () => {
+    if (listEl) {
+      currentPage = 0;
+      loadPosts(0);
+    }
+    if (latestEl) {
+      loadLatestPosts();
+    }
+  });
 });

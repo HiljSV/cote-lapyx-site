@@ -278,5 +278,11 @@
   "dash.crop.title": "Recadrer la photo",
   "dash.crop.hint": "Faites glisser et redimensionnez la photo pour sélectionner la zone souhaitée",
   "dash.crop.save_btn": "Enregistrer la photo",
-  "dash.empty.loading": "Chargement..."
+  "dash.empty.loading": "Chargement...",
+  "blog.empty": "Aucun article pour l'instant. Revenez plus tard !",
+  "blog.error_load": "Impossible de charger les articles.",
+  "blog.category.general": "Général",
+  "projects.empty": "Aucun projet pour l'instant. Revenez plus tard !",
+  "projects.error_load": "Impossible de charger les projets.",
+  "projects.tech_label": "Technologies"
 }

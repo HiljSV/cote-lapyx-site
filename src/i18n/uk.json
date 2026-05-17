@@ -278,5 +278,11 @@
   "dash.crop.title": "Обрізати фото",
   "dash.crop.hint": "Перетягуйте і масштабуйте фото, щоб підібрати потрібну ділянку",
   "dash.crop.save_btn": "Зберегти фото",
-  "dash.empty.loading": "Завантаження..."
+  "dash.empty.loading": "Завантаження...",
+  "blog.empty": "Публікацій ще немає. Зайдіть пізніше!",
+  "blog.error_load": "Не вдалося завантажити статті.",
+  "blog.category.general": "Загальне",
+  "projects.empty": "Проектів ще немає. Зайдіть пізніше!",
+  "projects.error_load": "Не вдалося завантажити проекти.",
+  "projects.tech_label": "Технології"
 }
