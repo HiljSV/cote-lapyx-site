@@ -465,12 +465,15 @@
           class="dash-list dash-list--admin-users"
           aria-label="Таблиця всіх користувачів"
         >
+          <!-- Table header — 5 columns: name, email, role, registered, actions -->
           <div class="dash-list__head" aria-hidden="true">
             <div>Ім'я</div>
             <div>Email</div>
             <div>Роль</div>
             <div>Зареєстрований</div>
+            <div>Дії</div>
           </div>
+          <!-- Rows injected by admin.js loadAdminUsers() -->
           <div id="admin-users-body"></div>
         </div>
         <div class="dash-pagination" id="admin-users-pagination"></div>
@@ -977,5 +980,103 @@ IT команда, що будує майбутнє</textarea
     <!-- /panel: analytics -->
   </main>
   <!-- /admin-main -->
+
+  <!-- ================================================================
+       USER EDIT MODAL
+       Opened by JS openUserEditModal() when "Редагувати" is clicked.
+       Reuses .dash-modal classes defined in dashboard.scss.
+       ================================================================ -->
+  <div
+    class="dash-modal"
+    id="admin-user-modal"
+    hidden
+    aria-modal="true"
+    role="dialog"
+    aria-labelledby="admin-user-modal-title"
+  >
+    <!-- Blurred backdrop — click closes modal -->
+    <div class="dash-modal__backdrop" id="admin-user-modal-backdrop"></div>
+
+    <!-- Dialog box -->
+    <div class="dash-modal__box">
+      <!-- Modal header: title + close button -->
+      <div class="dash-modal__header">
+        <h3 class="dash-modal__title" id="admin-user-modal-title">
+          Редагування користувача
+        </h3>
+        <button
+          type="button"
+          class="dash-modal__close"
+          id="admin-user-modal-close"
+          aria-label="Закрити"
+        >
+          ✕
+        </button>
+      </div>
+
+      <!-- Edit form — novalidate; validation is done in JS -->
+      <form class="dash-modal__form" id="admin-user-form" novalidate>
+        <!-- Hidden: stores the user id for the PATCH request -->
+        <input type="hidden" id="admin-user-edit-id" />
+
+        <!-- Field: display name -->
+        <div class="dash-modal__field">
+          <label class="dash-modal__label" for="admin-user-edit-name"
+            >Ім'я</label
+          >
+          <input
+            class="dash-modal__input"
+            type="text"
+            id="admin-user-edit-name"
+            name="name"
+            autocomplete="off"
+          />
+        </div>
+
+        <!-- Field: role selector — OWNER or SUBSCRIBER only -->
+        <div class="dash-modal__field">
+          <label class="dash-modal__label" for="admin-user-edit-role"
+            >Роль</label
+          >
+          <select
+            class="dash-modal__input"
+            id="admin-user-edit-role"
+            name="role"
+          >
+            <option value="OWNER">OWNER</option>
+            <option value="SUBSCRIBER">SUBSCRIBER</option>
+          </select>
+        </div>
+
+        <!-- Field: account status selector -->
+        <div class="dash-modal__field">
+          <label class="dash-modal__label" for="admin-user-edit-status"
+            >Статус</label
+          >
+          <select
+            class="dash-modal__input"
+            id="admin-user-edit-status"
+            name="status"
+          >
+            <option value="ACTIVE">ACTIVE</option>
+            <option value="BLOCKED">BLOCKED</option>
+          </select>
+        </div>
+
+        <!-- Actions row: save + cancel -->
+        <div class="dash-modal__actions">
+          <button type="submit" class="btn btn--cyan">Зберегти</button>
+          <button
+            type="button"
+            class="btn btn--ghost"
+            id="admin-user-modal-cancel"
+          >
+            Скасувати
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- /user edit modal -->
 </div>
 <!-- /dashboard -->

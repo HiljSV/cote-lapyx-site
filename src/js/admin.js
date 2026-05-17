@@ -385,9 +385,9 @@ document.addEventListener("DOMContentLoaded", () => {
     ARCHIVED: "archived",
   };
   const TECH_COLORS = ["cyan", "magenta", "green"];
+  // Role → neon-badge colour mapping (OWNER and SUBSCRIBER only — MEMBER removed from system)
   const ROLE_BADGE = {
     OWNER: "magenta",
-    MEMBER: "cyan",
     SUBSCRIBER: "green",
   };
 
@@ -406,6 +406,30 @@ document.addEventListener("DOMContentLoaded", () => {
       month: "short",
       year: "numeric",
     });
+  }
+
+  /**
+   * Return uppercase first letter of user name or email for avatar fallback.
+   * @param {{ name?: string, email?: string }} u - user object
+   * @returns {string} single uppercase character
+   */
+  function userInitial(u) {
+    return (u.name || u.email || "?")[0].toUpperCase();
+  }
+
+  /**
+   * Build the avatar HTML for a user row.
+   * Shows <img> if u.avatar exists, otherwise renders the user initial.
+   * @param {{ avatar?: string, name?: string, email?: string }} u - user object
+   * @returns {string} HTML string for .dash-list__avatar element
+   */
+  function userAvatarHtml(u) {
+    if (u.avatar) {
+      // Render real avatar image — src and alt are escaped
+      return `<span class="dash-list__avatar dash-list__avatar--img" aria-hidden="true"><img src="${escHtml(u.avatar)}" alt="" /></span>`;
+    }
+    // Fallback: display initial letter
+    return `<span class="dash-list__avatar" aria-hidden="true">${escHtml(userInitial(u))}</span>`;
   }
 
   function renderPagination(containerId, number, totalPages, onPage) {
@@ -484,8 +508,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const rows = (data.content || [])
         .map((u) => {
           const roleColor = ROLE_BADGE[u.role] || "green";
+          // Name cell: avatar (image or initial) + display name side by side
           return `<div class="dash-list__row">
-          <div class="dash-list__title" data-label="Ім'я">${escHtml(u.name || u.email)}</div>
+          <div class="dash-list__title" data-label="Ім'я">
+            <span class="dash-list__user-cell">
+              ${userAvatarHtml(u)}
+              ${escHtml(u.name || u.email)}
+            </span>
+          </div>
           <div data-label="Email">${escHtml(u.email)}</div>
           <div data-label="Роль"><span class="neon-badge neon-badge--${roleColor}">${escHtml(u.role?.toLowerCase() || "—")}</span></div>
           <div class="dash-list__date" data-label="Дата">${fmtDate(u.createdAt)}</div>
@@ -521,11 +551,27 @@ document.addEventListener("DOMContentLoaded", () => {
       const rows = (data.content || [])
         .map((u) => {
           const roleColor = ROLE_BADGE[u.role] || "green";
+          // Name cell: avatar (image or initial) + display name side by side
           return `<div class="dash-list__row">
-          <div class="dash-list__title" data-label="Ім'я">${escHtml(u.name || u.email)}</div>
+          <div class="dash-list__title" data-label="Ім'я">
+            <span class="dash-list__user-cell">
+              ${userAvatarHtml(u)}
+              ${escHtml(u.name || u.email)}
+            </span>
+          </div>
           <div data-label="Email">${escHtml(u.email)}</div>
           <div data-label="Роль"><span class="neon-badge neon-badge--${roleColor}">${escHtml(u.role?.toLowerCase() || "—")}</span></div>
           <div class="dash-list__date" data-label="Зареєстрований">${fmtDate(u.createdAt)}</div>
+          <div data-label="Дії">
+            <button type="button" class="btn btn--ghost btn--sm"
+              data-action="edit-user"
+              data-id="${escHtml(String(u.id))}"
+              data-name="${escHtml(u.name || "")}"
+              data-role="${escHtml(u.role || "")}"
+              data-status="${escHtml(u.status || "ACTIVE")}">
+              Редагувати
+            </button>
+          </div>
         </div>`;
         })
         .join("");
@@ -881,6 +927,103 @@ document.addEventListener("DOMContentLoaded", () => {
       else if (action === "reply") {
         // Opens native mail client — no confirm dialog needed
         window.location.href = `mailto:${btn.dataset.email}?subject=Re: cote-lapyx contact`;
+      }
+    });
+
+  // ---------------------------------------------------------------------------
+  // Admin users — edit modal
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Open the user-edit modal and populate its fields.
+   * @param {{ id: string, name: string, role: string, status: string }} user
+   */
+  function openUserEditModal({ id, name, role, status }) {
+    // Populate hidden id and visible fields
+    document.getElementById("admin-user-edit-id").value = id;
+    document.getElementById("admin-user-edit-name").value = name;
+    document.getElementById("admin-user-edit-role").value =
+      role || "SUBSCRIBER";
+    document.getElementById("admin-user-edit-status").value =
+      status || "ACTIVE";
+    // Show modal by removing hidden attribute
+    document.getElementById("admin-user-modal").removeAttribute("hidden");
+  }
+
+  /** Close the user-edit modal and reset the form. */
+  function closeUserEditModal() {
+    document.getElementById("admin-user-modal").setAttribute("hidden", "");
+    document.getElementById("admin-user-form").reset();
+  }
+
+  // Close button inside modal header
+  document
+    .getElementById("admin-user-modal-close")
+    ?.addEventListener("click", closeUserEditModal);
+
+  // Cancel button in modal actions row
+  document
+    .getElementById("admin-user-modal-cancel")
+    ?.addEventListener("click", closeUserEditModal);
+
+  // Click on backdrop also closes modal
+  document
+    .getElementById("admin-user-modal-backdrop")
+    ?.addEventListener("click", closeUserEditModal);
+
+  // Delegate edit-user button clicks on the full users table body
+  document
+    .getElementById("admin-users-body")
+    ?.addEventListener("click", (e) => {
+      const btn = e.target.closest('[data-action="edit-user"]');
+      if (!btn) return;
+      // Extract all fields from the button's data-* attributes
+      const { id, name, role, status } = btn.dataset;
+      openUserEditModal({ id, name, role, status });
+    });
+
+  // Submit handler — PATCH /admin/users/:id with changed fields
+  document
+    .getElementById("admin-user-form")
+    ?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      // Read form values
+      const id = document.getElementById("admin-user-edit-id").value;
+      const body = {
+        name:
+          document.getElementById("admin-user-edit-name").value.trim() ||
+          undefined,
+        role:
+          document.getElementById("admin-user-edit-role").value || undefined,
+        status:
+          document.getElementById("admin-user-edit-status").value || undefined,
+      };
+
+      // Strip keys whose value is undefined before serialising
+      Object.keys(body).forEach((k) => body[k] === undefined && delete body[k]);
+
+      const submitBtn = e.target.querySelector('[type="submit"]');
+      submitBtn.disabled = true;
+
+      try {
+        // Authenticated PATCH — fetchWithAuth handles token refresh
+        const res = await fetchWithAuth(`${ADMIN_API}/admin/users/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) throw new Error("API error");
+
+        // Close modal and reload table to reflect changes
+        closeUserEditModal();
+        loadAdminUsers(adminUsersPage);
+      } catch (err) {
+        console.error("User update error:", err);
+        alert("Помилка збереження");
+      } finally {
+        // Always re-enable button
+        submitBtn.disabled = false;
       }
     });
 
