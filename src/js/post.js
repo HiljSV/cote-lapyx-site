@@ -254,6 +254,24 @@ document.addEventListener("DOMContentLoaded", async () => {
             : translate("blog.category.general");
       }
 
+      // Update date with locale-aware formatting
+      const dateEl = document.getElementById("post-date");
+      if (dateEl) {
+        const dateIso = post.publishedAt || post.createdAt;
+        if (dateIso) dateEl.textContent = fmtDate(dateIso);
+      }
+
+      // Update author block — name uses locale-aware displayName
+      const authorEl = document.getElementById("post-author-block");
+      if (authorEl && post.author?.name) {
+        const avatarInner = post.author.avatar
+          ? `<img src="${escHtml(post.author.avatar)}" alt="" aria-hidden="true" />`
+          : escHtml(authorInitials(post.author.name));
+        authorEl.innerHTML = `
+          <div class="post-hero__author-avatar" aria-hidden="true">${avatarInner}</div>
+          <span class="post-hero__author-name">${escHtml(authorDisplayName(post.author))}</span>`;
+      }
+
       // Update content area
       const contentEl = document.getElementById("post-content");
       if (contentEl && post.content) contentEl.innerHTML = post.content;

@@ -234,10 +234,25 @@ document.addEventListener("DOMContentLoaded", async () => {
       const titleEl = document.getElementById("project-title");
       if (titleEl) titleEl.textContent = project.title;
 
+      // Update short description subtitle
+      const descEl = document.getElementById("project-short-desc");
+      if (descEl) descEl.textContent = project.shortDescription || "";
+
       // Update status badge label with new language
       const statusEl = document.getElementById("project-status-badge");
       if (statusEl && project.status) {
         statusEl.textContent = getStatusLabel(project.status);
+      }
+
+      // Update author block — name uses locale-aware displayName
+      const authorEl = document.getElementById("project-author-block");
+      if (authorEl && project.author?.name) {
+        const avatarInner = project.author.avatar
+          ? `<img src="${escHtml(project.author.avatar)}" alt="" aria-hidden="true" />`
+          : escHtml(authorInitials(project.author.name));
+        authorEl.innerHTML = `
+          <div class="post-hero__author-avatar" aria-hidden="true">${avatarInner}</div>
+          <span class="post-hero__author-name">${escHtml(authorDisplayName(project.author))}</span>`;
       }
 
       // Update content area
@@ -249,7 +264,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           contentEl.innerHTML = `<p>${escHtml(project.shortDescription)}</p>`;
       }
 
-      // Update meta sidebar with translated labels
+      // Update meta sidebar with translated labels and locale-aware author name
       const metaEl = document.getElementById("project-meta-block");
       if (metaEl) {
         const rows = [];
