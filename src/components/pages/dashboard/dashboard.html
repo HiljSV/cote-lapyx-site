@@ -1033,11 +1033,12 @@
                 autocomplete="current-password"
                 required
               />
-              <!-- Password visibility toggle button -->
+              <!-- Password visibility toggle button — i18n-aria: auth.show_password_aria -->
               <button
                 type="button"
                 class="pwd-toggle"
                 aria-label="Показати пароль"
+                data-i18n-aria="auth.show_password_aria"
                 data-target="pwd-current"
               >
                 <svg
@@ -1310,8 +1311,14 @@
     <div class="dash-modal__backdrop" id="post-modal-backdrop"></div>
     <div class="dash-modal__box">
       <div class="dash-modal__header">
-        <!-- Modal title — set by JS: "Нова публікація" or "Редагування публікації" -->
-        <h3 class="dash-modal__title" id="post-modal-title">Нова публікація</h3>
+        <!-- Modal title — set by JS: "Нова публікація" or "Редагування публікації" — i18n: dash.modal.new_post_title -->
+        <h3
+          class="dash-modal__title"
+          id="post-modal-title"
+          data-i18n="dash.modal.new_post_title"
+        >
+          Нова публікація
+        </h3>
         <!-- Close button -->
         <button
           type="button"
@@ -1493,8 +1500,14 @@
     <div class="dash-modal__backdrop" id="project-modal-backdrop"></div>
     <div class="dash-modal__box">
       <div class="dash-modal__header">
-        <!-- Modal title — set by JS: "Новий проект" or "Редагування проекту" -->
-        <h3 class="dash-modal__title" id="project-modal-title">Новий проект</h3>
+        <!-- Modal title — set by JS: "Новий проект" or "Редагування проекту" — i18n: dash.modal.new_project_title -->
+        <h3
+          class="dash-modal__title"
+          id="project-modal-title"
+          data-i18n="dash.modal.new_project_title"
+        >
+          Новий проект
+        </h3>
         <!-- Close button -->
         <button
           type="button"
