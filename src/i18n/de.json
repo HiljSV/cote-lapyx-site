@@ -314,5 +314,11 @@
   "auth.no_account": "Kein Konto?",
   "auth.register_link": "Registrieren.",
 
-  "blog.subtitle": "Gedanken, Erfahrungen und technische Notizen des Teams"
+  "blog.subtitle": "Gedanken, Erfahrungen und technische Notizen des Teams",
+
+  "dash.email.title": "E-Mail ändern",
+  "dash.email.current_pwd": "Aktuelles Passwort",
+  "dash.email.new_email": "Neue E-Mail",
+  "dash.email.submit": "E-Mail ändern",
+  "dash.email.success": "E-Mail erfolgreich geändert"
 }

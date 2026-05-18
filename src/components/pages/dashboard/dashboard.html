@@ -876,20 +876,22 @@
             />
           </div>
 
-          <!-- Email field (read-only for now, shown for reference) -->
+          <!-- Email field — readonly; email changes are handled by the separate email change section -->
           <div class="dash-profile-form__group">
             <label class="dash-profile-form__label" for="profile-email">
               <!-- Label text: Email -->
               <span data-i18n="dash.profile.email">Email</span>
             </label>
-            <!-- Value is empty — JS hydrates from /users/me response -->
+            <!-- Value is empty — JS hydrates from /users/me; readonly to prevent accidental edits -->
             <input
-              class="dash-profile-form__input"
+              class="dash-profile-form__input dash-profile-form__input--readonly"
               type="email"
               id="profile-email"
               name="email"
               value=""
               autocomplete="email"
+              readonly
+              aria-readonly="true"
             />
           </div>
 
@@ -1209,6 +1211,87 @@
         </form>
       </section>
       <!-- /password change section -->
+
+      <!-- ===== EMAIL CHANGE SECTION ===== -->
+      <!-- Separate from profile form; email change requires current password verification -->
+      <section
+        class="dash-section"
+        id="dash-email-section"
+        aria-labelledby="dash-email-title"
+      >
+        <div class="dash-section__header">
+          <!-- Section title: Change Email -->
+          <h2
+            class="dash-section__title"
+            id="dash-email-title"
+            data-i18n="dash.email.title"
+          >
+            Змінити Email
+          </h2>
+        </div>
+
+        <!-- Email change form — PATCH /api/v1/users/me/email -->
+        <form
+          class="dash-profile-form"
+          id="dash-email-form"
+          novalidate
+          aria-label="Форма зміни Email"
+        >
+          <!-- Current password for identity verification -->
+          <div class="dash-profile-form__group">
+            <label class="dash-profile-form__label" for="email-current-pwd">
+              <!-- Label text: Current password -->
+              <span data-i18n="dash.email.current_pwd">Поточний пароль</span>
+            </label>
+            <input
+              class="dash-profile-form__input"
+              type="password"
+              id="email-current-pwd"
+              name="currentPassword"
+              autocomplete="current-password"
+            />
+          </div>
+
+          <!-- New email address -->
+          <div class="dash-profile-form__group">
+            <label class="dash-profile-form__label" for="email-new">
+              <!-- Label text: New Email -->
+              <span data-i18n="dash.email.new_email">Новий Email</span>
+            </label>
+            <input
+              class="dash-profile-form__input"
+              type="email"
+              id="email-new"
+              name="newEmail"
+              autocomplete="email"
+            />
+          </div>
+
+          <!-- Inline feedback — hidden until JS sets a message -->
+          <div
+            class="dash-profile-form__group dash-profile-form__group--full"
+            id="email-feedback"
+            hidden
+            role="alert"
+            aria-live="polite"
+          ></div>
+
+          <!-- Submit button -->
+          <div
+            class="dash-profile-form__group dash-profile-form__group--full dash-profile-form__actions"
+          >
+            <button
+              type="submit"
+              class="btn btn--magenta"
+              id="email-submit"
+              data-i18n="dash.email.submit"
+            >
+              Змінити Email
+            </button>
+          </div>
+        </form>
+      </section>
+      <!-- /email change section -->
     </div>
     <!-- /profile panel -->
   </main>

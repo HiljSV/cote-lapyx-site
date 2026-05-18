@@ -314,5 +314,11 @@
   "auth.no_account": "No account?",
   "auth.register_link": "Register.",
 
-  "blog.subtitle": "Thoughts, experience and technical notes from the team"
+  "blog.subtitle": "Thoughts, experience and technical notes from the team",
+
+  "dash.email.title": "Change Email",
+  "dash.email.current_pwd": "Current password",
+  "dash.email.new_email": "New Email",
+  "dash.email.submit": "Change Email",
+  "dash.email.success": "Email changed successfully"
 }
