@@ -28,6 +28,7 @@
   "index.projects.title": "Selected projects",
   "index.projects.subtitle": "Part of what we have built",
   "index.blog.title": "Team blog",
+  "index.blog.all_articles": "All articles",
   "ui.loading": "Loading...",
   "ui.load_more": "Load more",
   "filter.all": "All",
