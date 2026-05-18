@@ -881,6 +881,13 @@ components:
             True when the comment was written by the requesting user.
             False for anonymous requests and for other users' comments.
           example: false
+        adminSeen:
+          type: boolean
+          description: |
+            True when an owner has acknowledged this comment in the admin panel
+            via `PATCH /admin/comments/{id}/seen`. Always false for non-owner callers
+            (the backend omits this flag for subscribers).
+          example: false
         updatedAt:
           type: string
           format: date-time
@@ -2416,25 +2423,19 @@ paths:
   /comments/{id}:
     patch:
       tags: [Comments]
-      summary: Edit comment text (author) or change moderation status (owner)
-      operationId: patchComment
+      summary: Edit a comment (author only)
+      operationId: editComment
       security:
         - bearerAuth: []
       x-roles: [owner, subscriber]
       description: |
-        **Two distinct roles, two distinct payloads:**
+        Allows the comment author to update their comment text. The `updatedAt` field
+        on the response is set to the time of this edit.
 
-        - **Author (subscriber or owner who wrote the comment):** Send a `CommentEditRequest`
-          body (`{ "content": "..." }`). Updates the comment text. Returns 403 if the
-          authenticated user is not the comment author. The `updatedAt` field on the
-          response will be set to the time of this edit.
+        Returns 403 if the authenticated user is not the comment author.
+        Returns 404 if the comment does not exist or is not in APPROVED status.
 
-        - **Owner (moderation):** Send a `CommentModerationRequest` body
-          (`{ "status": "approved" | "rejected" }`). Changes the moderation status.
-          Returns 403 if the caller is not an owner. Returns 409 if the comment is
-          already in a terminal state (`deleted`).
-
-        Use `DELETE /comments/{id}` for soft-deletion (available to both owners and subscribers).
+        For owner moderation (approve / reject), use `PATCH /admin/comments/{id}`.
       parameters:
         - name: id
           in: path
@@ -2447,16 +2448,10 @@ paths:
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: "#/components/schemas/CommentEditRequest"
-                - $ref: "#/components/schemas/CommentModerationRequest"
-              discriminator:
-                propertyName: _action
+              $ref: "#/components/schemas/CommentEditRequest"
       responses:
         "200":
-          description: |
-            Comment updated. Returns the full `CommentDTO` with the updated fields.
-            For edits, `updatedAt` is populated. For moderation, `status` is updated.
+          description: Comment updated. Returns the full CommentDTO with updatedAt populated.
           content:
             application/json:
               schema:
@@ -2466,9 +2461,7 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "403":
-          description: |
-            Subscriber attempting to edit another user's comment, or subscriber sending
-            a moderation payload.
+          description: Caller is not the comment author.
           content:
             application/problem+json:
               schema:
@@ -2481,12 +2474,6 @@ paths:
                 instance: /api/v1/comments/42
         "404":
           $ref: "#/components/responses/NotFound"
-        "409":
-          description: Comment is already in a terminal state (deleted); cannot be moderated.
-          content:
-            application/problem+json:
-              schema:
-                $ref: "#/components/schemas/ProblemDetail"
         "422":
           $ref: "#/components/responses/ValidationError"
 
@@ -3937,6 +3924,53 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "403":
           $ref: "#/components/responses/Forbidden"
+
+  /admin/comments/{id}:
+    patch:
+      tags: [Admin]
+      summary: Moderate a comment — approve or reject (owner only)
+      operationId: moderateComment
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Changes the moderation status of a comment to `approved` or `rejected`.
+        Returns 409 if the comment is already in `deleted` status (terminal state).
+        This endpoint is separate from `PATCH /comments/{id}`, which is for author edits.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentModerationRequest"
+      responses:
+        "200":
+          description: Comment status updated. Returns the full CommentDTO with updated status.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Comment is in a terminal state (deleted) and cannot be moderated.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
 
   # ---------------------------------------------------------------------------
   # Admin — Subscriptions
