@@ -635,6 +635,9 @@ document.addEventListener("DOMContentLoaded", () => {
               const countEl = btn.querySelector(".post-comment__like-count");
               if (countEl) countEl.textContent = respData.count ?? 0;
             }
+          } else if (res && res.status === 409 && !isActive) {
+            // 409 Conflict on POST means already liked — sync button to active state
+            btn.classList.add("is-active");
           }
         } catch {
           /* silent — graceful degradation if API not yet available */
