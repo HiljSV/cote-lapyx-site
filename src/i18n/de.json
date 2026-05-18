@@ -297,6 +297,7 @@
   "post.login_for_comment": "Melden Sie sich an, um einen Kommentar zu hinterlassen.",
   "post.comment_err": "Sendungsfehler.",
   "error.network": "Verbindungsfehler.",
+  "error.generic": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
 
   "project.status.published": "Veröffentlicht",
   "project.status.draft": "Entwurf",
@@ -314,5 +315,11 @@
   "auth.no_account": "Kein Konto?",
   "auth.register_link": "Registrieren.",
 
-  "blog.subtitle": "Gedanken, Erfahrungen und technische Notizen des Teams"
+  "blog.subtitle": "Gedanken, Erfahrungen und technische Notizen des Teams",
+
+  "dash.email.title": "E-Mail ändern",
+  "dash.email.current_pwd": "Aktuelles Passwort",
+  "dash.email.new_email": "Neue E-Mail",
+  "dash.email.submit": "E-Mail ändern",
+  "dash.email.success": "E-Mail erfolgreich geändert"
 }

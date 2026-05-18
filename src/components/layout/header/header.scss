@@ -88,7 +88,8 @@
     padding: 0;
     display: flex;
     align-items: center;
-    gap: 4px;
+    /* Min 8px gap between nav links to prevent crowding on language switch */
+    gap: 8px;
 
     @media (max-width: toEm($tablet)) {
       flex-direction: column;
@@ -208,6 +209,9 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
       padding: 4px 8px;
+      /* min-width prevents layout jump when lang code changes (UK→DE = same 2 chars) */
+      min-width: 48px;
+      white-space: nowrap;
       cursor: pointer;
       transition: border-color 0.2s ease;
 
@@ -339,6 +343,8 @@
     @extend .btn;
     @extend .btn--cyan;
     @extend .btn--sm;
+    /* min-width prevents layout jump when login button text changes on language switch */
+    min-width: 110px;
   }
 
   // Hamburger
