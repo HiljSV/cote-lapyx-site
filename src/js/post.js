@@ -286,7 +286,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // =============================================================================
-// Interactions block — favorites, subscribe form, comments
+// Interactions block — favorites, like, subscribe form, comments
 // Runs after main load block (slug already parsed from URL)
 // =============================================================================
 document.addEventListener("DOMContentLoaded", () => {
@@ -301,6 +301,36 @@ document.addEventListener("DOMContentLoaded", () => {
   // Return stored access token (null if not logged in)
   function getToken() {
     return localStorage.getItem("cl_access");
+  }
+
+  // ── JWT decode helper — read payload without verifying signature ──────────
+
+  /**
+   * Decode JWT payload and return it as an object.
+   * Used to identify the current user for comment author checks.
+   * @param {string} token - raw JWT string
+   * @returns {object|null} decoded payload or null on failure
+   */
+  function decodeJwtPayload(token) {
+    try {
+      const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+      return JSON.parse(atob(base64));
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Return the current user's email from the stored JWT.
+   * The JWT payload field is "sub" (Spring Security standard).
+   * @returns {string|null}
+   */
+  function getCurrentUserEmail() {
+    const token = getToken();
+    if (!token) return null;
+    const payload = decodeJwtPayload(token);
+    // Spring Security sets "sub" to the user's email/username
+    return payload?.sub || payload?.email || null;
   }
 
   // ── Favorites ────────────────────────────────────────────────────────────
@@ -349,6 +379,63 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } catch {
         /* silent */
+      }
+    });
+  }
+
+  // ── Post like button ──────────────────────────────────────────────────────
+
+  const likeBtn = document.getElementById("post-like-btn");
+  const likeCount = document.getElementById("post-like-count");
+
+  // Load initial like count + user's like state
+  // GET /api/v1/posts/{slug}/likes — public endpoint, no auth needed
+  if (likeBtn) {
+    (async () => {
+      try {
+        const res = await fetch(
+          `${API}/posts/${encodeURIComponent(slug)}/likes`,
+        );
+        if (res.ok) {
+          const data = await res.json();
+          // Update count display from API response
+          if (likeCount) likeCount.textContent = data.total ?? 0;
+          // Mark button as active if authenticated user already liked
+          if (data.likedByCurrentUser) likeBtn.classList.add("is-active");
+        }
+      } catch {
+        /* silent — API not yet implemented, graceful degradation */
+      }
+    })();
+  }
+
+  // Like button click handler — anonymous or authenticated toggle
+  if (likeBtn) {
+    likeBtn.addEventListener("click", async () => {
+      const isActive = likeBtn.classList.contains("is-active");
+      try {
+        const token = getToken();
+        let res;
+        if (token) {
+          // Authenticated like — use fetchWithAuth to attach user identity
+          res = await fetchWithAuth(
+            `${API}/posts/${encodeURIComponent(slug)}/likes`,
+            { method: isActive ? "DELETE" : "POST" },
+          );
+        } else {
+          // Anonymous like — plain fetch, no auth header needed
+          res = await fetch(`${API}/posts/${encodeURIComponent(slug)}/likes`, {
+            method: isActive ? "DELETE" : "POST",
+          });
+        }
+        if (res && (res.ok || res.status === 204)) {
+          likeBtn.classList.toggle("is-active");
+          // Update count from API response if available
+          const data = await res.json().catch(() => null);
+          if (data && likeCount) likeCount.textContent = data.total ?? 0;
+        }
+      } catch {
+        /* silent — graceful degradation if API not yet available */
       }
     });
   }
@@ -425,8 +512,13 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       emptyEl?.setAttribute("hidden", "");
+      // Remove existing comment elements before re-render
       const existing = list.querySelectorAll(".post-comment");
       existing.forEach((el) => el.remove());
+
+      // getCurrentUserEmail kept for legacy reference; author check now uses backend-provided isMine flag
+      const currentUserEmail = getCurrentUserEmail();
+
       comments.forEach((c) => {
         const authorName = c.author?.name || "Анонім";
         const initials = authorName
@@ -449,8 +541,36 @@ document.addEventListener("DOMContentLoaded", () => {
         const commentAvatarInner = c.author?.avatar
           ? `<img src="${escHtml(c.author.avatar)}" alt="" aria-hidden="true" />`
           : escHtml(initials);
+
+        // Comment like button — shows count, toggles liked state
+        const likedClass = c.likedByCurrentUser ? " is-active" : "";
+        const commentLikeBtn = `
+          <button class="post-comment__like-btn${likedClass}"
+                  data-comment-id="${escHtml(String(c.id))}"
+                  aria-label="${escHtml(translate("post.comment.liked_hint"))}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+            <span class="post-comment__like-count">${Number(c.likesCount) || 0}</span>
+          </button>`;
+
+        // Edit/delete buttons — only for the comment author (backend provides isMine flag)
+        const isAuthor = c.isMine === true;
+        const authorActions = isAuthor
+          ? `<button class="post-comment__edit-btn"
+                    data-id="${escHtml(String(c.id))}"
+                    title="${escHtml(translate("post.comment.edit"))}"
+                    aria-label="${escHtml(translate("post.comment.edit"))}">&#9998;</button>
+             <button class="post-comment__delete-btn"
+                    data-id="${escHtml(String(c.id))}"
+                    title="${escHtml(translate("post.comment.delete"))}"
+                    aria-label="${escHtml(translate("post.comment.delete"))}">&#128465;</button>`
+          : "";
+
         const div = document.createElement("div");
         div.className = "post-comment";
+        // Store comment id and content for inline editing
+        div.dataset.commentId = String(c.id);
         div.innerHTML = `
           <div class="post-comment__avatar" aria-hidden="true">${commentAvatarInner}</div>
           <div class="post-comment__body">
@@ -458,16 +578,181 @@ document.addEventListener("DOMContentLoaded", () => {
               <span class="post-comment__author">${escHtml(authorName)}</span>
               <time class="post-comment__date">${date}</time>
             </div>
-            <p class="post-comment__text">${String(c.content || "")
+            <p class="post-comment__text" data-original="${escHtml(c.content || "")}">${String(
+              c.content || "",
+            )
               .replace(/&/g, "&amp;")
               .replace(/</g, "&lt;")
               .replace(/>/g, "&gt;")}</p>
+            <div class="post-comment__actions">
+              ${commentLikeBtn}
+              ${authorActions}
+            </div>
           </div>`;
         list.appendChild(div);
       });
+
+      // Attach comment like button handlers after all comments are rendered
+      attachCommentLikeHandlers(list);
+      // Attach comment edit/delete handlers
+      attachCommentAuthorHandlers(list);
     } catch {
       /* silent */
     }
+  }
+
+  // ── Comment like button handlers ──────────────────────────────────────────
+
+  /**
+   * Attach click handlers to all comment like buttons in the list container.
+   * Uses anonymous or authenticated fetch depending on JWT presence.
+   * @param {HTMLElement} list - the comments list container
+   */
+  function attachCommentLikeHandlers(list) {
+    list.querySelectorAll(".post-comment__like-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const commentId = btn.dataset.commentId;
+        const isActive = btn.classList.contains("is-active");
+        try {
+          const token = getToken();
+          let res;
+          if (token) {
+            // Authenticated comment like — fetchWithAuth for user identity
+            res = await fetchWithAuth(`${API}/comments/${commentId}/likes`, {
+              method: isActive ? "DELETE" : "POST",
+            });
+          } else {
+            // Anonymous comment like — plain fetch
+            res = await fetch(`${API}/comments/${commentId}/likes`, {
+              method: isActive ? "DELETE" : "POST",
+            });
+          }
+          if (res && res.ok) {
+            btn.classList.toggle("is-active");
+            // Update count from API response if available
+            const respData = await res.json().catch(() => null);
+            if (respData) {
+              const countEl = btn.querySelector(".post-comment__like-count");
+              if (countEl) countEl.textContent = respData.count ?? 0;
+            }
+          }
+        } catch {
+          /* silent — graceful degradation if API not yet available */
+        }
+      });
+    });
+  }
+
+  // ── Comment edit/delete handlers (author only) ────────────────────────────
+
+  /**
+   * Attach click handlers to comment edit and delete buttons.
+   * Edit: replaces comment text with an editable textarea + save/cancel.
+   * Delete: calls DELETE /api/v1/comments/{id} and reloads the list.
+   * @param {HTMLElement} list - the comments list container
+   */
+  function attachCommentAuthorHandlers(list) {
+    // Edit button — replace text with inline textarea
+    list.querySelectorAll(".post-comment__edit-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const commentId = btn.dataset.id;
+        // Find the parent comment element by stored data-comment-id
+        const commentEl = list.querySelector(
+          `.post-comment[data-comment-id="${commentId}"]`,
+        );
+        if (!commentEl) return;
+        const textEl = commentEl.querySelector(".post-comment__text");
+        if (!textEl) return;
+        // Already in edit mode — do nothing
+        if (commentEl.querySelector(".post-comment__edit-area")) return;
+
+        // Read original (unescaped) text from data-original attribute
+        const originalText = textEl.dataset.original || textEl.textContent;
+
+        // Replace text paragraph with textarea + action buttons
+        textEl.setAttribute("hidden", "");
+        const actionsEl = commentEl.querySelector(".post-comment__actions");
+        if (actionsEl) actionsEl.setAttribute("hidden", "");
+
+        const editArea = document.createElement("div");
+        editArea.className = "post-comment__edit-area";
+        editArea.innerHTML = `
+          <textarea class="post-comment__edit-textarea"
+                    rows="3"
+                    maxlength="2000"
+                    aria-label="${escHtml(translate("post.comment.edit"))}">${escHtml(originalText)}</textarea>
+          <div class="post-comment__edit-footer">
+            <button type="button" class="btn btn--cyan btn--sm post-comment__save-btn"
+                    data-id="${escHtml(commentId)}">
+              ${escHtml(translate("post.comment.save"))}
+            </button>
+            <button type="button" class="btn btn--ghost btn--sm post-comment__cancel-btn">
+              ${escHtml(translate("post.comment.cancel"))}
+            </button>
+          </div>`;
+        commentEl.querySelector(".post-comment__body").appendChild(editArea);
+
+        // Focus textarea for immediate editing
+        editArea.querySelector("textarea").focus();
+
+        // Cancel — restore original state
+        editArea
+          .querySelector(".post-comment__cancel-btn")
+          .addEventListener("click", () => {
+            editArea.remove();
+            textEl.removeAttribute("hidden");
+            if (actionsEl) actionsEl.removeAttribute("hidden");
+          });
+
+        // Save — PATCH /api/v1/comments/{id} with new content
+        editArea
+          .querySelector(".post-comment__save-btn")
+          .addEventListener("click", async () => {
+            const newText = editArea.querySelector("textarea").value.trim();
+            if (!newText) return;
+            const saveBtn = editArea.querySelector(".post-comment__save-btn");
+            saveBtn.disabled = true;
+            try {
+              // PATCH comment — requires authentication via fetchWithAuth
+              const res = await fetchWithAuth(`${API}/comments/${commentId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ content: newText }),
+              });
+              if (res && res.ok) {
+                // Reload full comment list to reflect updated content
+                await loadComments();
+              } else {
+                saveBtn.disabled = false;
+              }
+            } catch {
+              /* silent */
+              saveBtn.disabled = false;
+            }
+          });
+      });
+    });
+
+    // Delete button — DELETE /api/v1/comments/{id} then reload
+    list.querySelectorAll(".post-comment__delete-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const commentId = btn.dataset.id;
+        // Native confirm dialog — no i18n needed for admin-level destructive action
+        if (!confirm(translate("post.comment.delete") + "?")) return;
+        try {
+          // DELETE comment — requires authentication via fetchWithAuth
+          const res = await fetchWithAuth(`${API}/comments/${commentId}`, {
+            method: "DELETE",
+          });
+          if (res && (res.ok || res.status === 204)) {
+            // Reload comment list after successful deletion
+            await loadComments();
+          }
+        } catch {
+          /* silent */
+        }
+      });
+    });
   }
 
   loadComments();

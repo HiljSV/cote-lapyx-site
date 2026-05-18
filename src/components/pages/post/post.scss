@@ -648,6 +648,7 @@
     padding: 14px 16px;
   }
 
+  /* Comment: avatar circle with gradient or img */
   &__avatar {
     flex-shrink: 0;
     width: 40px;
@@ -671,11 +672,13 @@
     }
   }
 
+  /* Comment: body — shrinks to fit, prevents overflow */
   &__body {
     flex: 1;
     min-width: 0;
   }
 
+  /* Comment: meta row — author + date */
   &__meta {
     display: flex;
     flex-direction: row;
@@ -685,6 +688,7 @@
     flex-wrap: wrap;
   }
 
+  /* Comment: author name — neon-cyan heading style */
   &__author {
     font-family: $fontHeading;
     font-size: 14px;
@@ -692,16 +696,158 @@
     color: $neon-cyan;
   }
 
+  /* Comment: date — muted small text */
   &__date {
     font-size: 12px;
     color: $text-muted;
   }
 
+  /* Comment: text content — secondary color, readable line-height */
   &__text {
     font-size: 14px;
     line-height: 1.7;
     color: $text-secondary;
     margin: 0;
     word-break: break-word;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Comment actions row — like button + edit/delete for authors
+  // ---------------------------------------------------------------------------
+
+  /* Comment: actions bar — flex row below the text */
+  &__actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  /* Comment: like button — inline pill with heart icon + count */
+  &__like-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
+    border: 1px solid rgba($neon-magenta, 0.3);
+    color: $text-muted;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    transition:
+      color 0.2s ease,
+      border-color 0.2s ease;
+
+    /* Like button: hover and active state — magenta accent */
+    &.is-active,
+    &:hover {
+      color: $neon-magenta;
+      border-color: $neon-magenta;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $neon-magenta;
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+  }
+
+  /* Comment: like count number */
+  &__like-count {
+    font-size: 11px;
+    line-height: 1;
+  }
+
+  /* Comment: edit button — ghost icon button, cyan on hover */
+  &__edit-btn {
+    background: transparent;
+    border: none;
+    color: $text-muted;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    line-height: 1;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: $neon-cyan;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $neon-cyan;
+      outline-offset: 2px;
+    }
+  }
+
+  /* Comment: delete button — ghost icon button, magenta on hover */
+  &__delete-btn {
+    background: transparent;
+    border: none;
+    color: $text-muted;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    line-height: 1;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: $neon-magenta;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $neon-magenta;
+      outline-offset: 2px;
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Inline edit area — textarea + save/cancel when editing a comment
+  // ---------------------------------------------------------------------------
+
+  /* Comment: inline edit area — shown instead of text while editing */
+  &__edit-area {
+    margin-top: 10px;
+  }
+
+  /* Comment: edit textarea — matches main comment textarea style */
+  &__edit-textarea {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    background: rgba($bg-dark, 0.7);
+    border: 1px solid rgba($neon-cyan, 0.25);
+    border-radius: 8px;
+    color: $text-primary;
+    font-family: $fontFamily;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: vertical;
+    outline: none;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+
+    &::placeholder {
+      color: $text-muted;
+    }
+
+    &:focus {
+      border-color: rgba($neon-cyan, 0.6);
+      box-shadow: 0 0 8px rgba($neon-cyan, 0.2);
+    }
+  }
+
+  /* Comment: edit footer — save/cancel buttons row */
+  &__edit-footer {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
   }
 }

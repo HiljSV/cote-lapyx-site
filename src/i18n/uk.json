@@ -296,6 +296,11 @@
   "post.subscribe_err": "Помилка підписки. Спробуйте ще раз.",
   "post.login_for_comment": "Увійдіть, щоб залишити коментар.",
   "post.comment_err": "Помилка надсилання.",
+  "post.comment.edit": "Редагувати",
+  "post.comment.delete": "Видалити",
+  "post.comment.save": "Зберегти",
+  "post.comment.cancel": "Скасувати",
+  "post.comment.liked_hint": "Лайк",
   "error.network": "Помилка з'єднання.",
   "error.generic": "Помилка. Спробуйте ще раз.",
 
