@@ -629,7 +629,11 @@ document.addEventListener("DOMContentLoaded", async () => {
    * @param {"success"|"error"} type - Modifier suffix for BEM class
    */
   function showEmailFeedback(message, type) {
-    emailFeedback.innerHTML = `<p class="dash-profile-form__feedback dash-profile-form__feedback--${type}">${message}</p>`;
+    /* Use textContent to avoid XSS — message may come from API error response */
+    const p = document.createElement("p");
+    p.className = `dash-profile-form__feedback dash-profile-form__feedback--${type}`;
+    p.textContent = message;
+    emailFeedback.replaceChildren(p);
     emailFeedback.removeAttribute("hidden");
   }
 
