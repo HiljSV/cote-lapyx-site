@@ -6,11 +6,12 @@ import { fetchWithAuth } from "@js/common/auth.js";
 import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.css";
 
-// i18n — language detection, translation apply, switcher wiring
+// i18n — language detection, translation apply, switcher wiring, runtime lookup
 import {
   detectLanguage,
   applyTranslations,
   initI18nSwitcher,
+  translate,
 } from "@js/i18n.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -612,6 +613,84 @@ document.addEventListener("DOMContentLoaded", async () => {
     } finally {
       pwdSubmitBtn.disabled = false;
       pwdSubmitBtn.innerHTML = originalHTML;
+    }
+  });
+
+  // ---------------------------------------------------------------------------
+  // Email change form — PATCH /api/v1/users/me/email
+  // ---------------------------------------------------------------------------
+
+  const emailForm = document.getElementById("dash-email-form");
+  const emailFeedback = document.getElementById("email-feedback");
+
+  /**
+   * Display an inline feedback message inside the email change form.
+   * @param {string} message - Text to show
+   * @param {"success"|"error"} type - Modifier suffix for BEM class
+   */
+  function showEmailFeedback(message, type) {
+    /* Use textContent to avoid XSS — message may come from API error response */
+    const p = document.createElement("p");
+    p.className = `dash-profile-form__feedback dash-profile-form__feedback--${type}`;
+    p.textContent = message;
+    emailFeedback.replaceChildren(p);
+    emailFeedback.removeAttribute("hidden");
+  }
+
+  // Email form submit handler — verifies with current password, sends new email
+  emailForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const submitBtn = document.getElementById("email-submit");
+    const currentPassword = document.getElementById("email-current-pwd")?.value;
+    const newEmail = document.getElementById("email-new")?.value?.trim();
+
+    // Hide any previous feedback message
+    if (emailFeedback) emailFeedback.setAttribute("hidden", "");
+
+    // Client-side guard: require both fields
+    if (!currentPassword || !newEmail) return;
+
+    const originalHTML = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Збереження...";
+
+    try {
+      // PATCH /api/v1/users/me/email — authenticated; requires current password
+      const res = await fetchWithAuth(`${API}/users/me/email`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newEmail }),
+      });
+
+      if (res.ok) {
+        const data = await res.json().catch(() => ({}));
+        showEmailFeedback(
+          translate("dash.email.success") || "Email успішно змінено",
+          "success",
+        );
+        emailForm.reset();
+        // Update displayed email in the profile section if response contains new email
+        const emailDisplayEl = document.getElementById("profile-email");
+        if (emailDisplayEl && data.email) emailDisplayEl.value = data.email;
+      } else {
+        const data = await res.json().catch(() => ({}));
+        showEmailFeedback(
+          data.message ||
+            data.detail ||
+            translate("error.generic") ||
+            "Помилка. Спробуйте ще раз.",
+          "error",
+        );
+      }
+    } catch {
+      showEmailFeedback(
+        translate("error.network") || "Помилка зʼєднання.",
+        "error",
+      );
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalHTML;
     }
   });
 

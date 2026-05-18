@@ -4,6 +4,8 @@
 
 // Import translate() for runtime i18n lookups on dynamically rendered strings
 import { translate } from "@js/i18n.js";
+// Import fetchWithAuth for authenticated API calls (favorites, comments)
+import { fetchWithAuth } from "@js/common/auth.js";
 
 const API = "https://api.cote-lapyx.com/api/v1";
 
@@ -302,7 +304,31 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ── Favorites ────────────────────────────────────────────────────────────
+
   const favBtn = document.getElementById("post-fav-btn");
+
+  // Load initial favorite state from /users/me/favorites if user is logged in
+  if (favBtn && getToken()) {
+    (async () => {
+      try {
+        // GET /api/v1/users/me/favorites — returns paginated list of favorited posts
+        const res = await fetchWithAuth(`${API}/users/me/favorites`);
+        if (res && res.ok) {
+          const data = await res.json();
+          // Support both paginated (data.content) and plain array responses
+          const items = data.content || data || [];
+          // Check if current post slug is in the favorites list
+          const isFaved = items.some(
+            (p) => p.slug === slug || p.post?.slug === slug,
+          );
+          if (isFaved) favBtn.classList.add("is-active");
+        }
+      } catch {
+        /* silent — best-effort initial state */
+      }
+    })();
+  }
+
   if (favBtn) {
     favBtn.addEventListener("click", async () => {
       const token = getToken();
@@ -313,11 +339,14 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       const isActive = favBtn.classList.contains("is-active");
       try {
-        await fetch(`${API}/posts/${encodeURIComponent(slug)}/favorites`, {
-          method: isActive ? "DELETE" : "POST",
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        favBtn.classList.toggle("is-active");
+        // Use fetchWithAuth — never use raw fetch with manual Authorization header
+        const res = await fetchWithAuth(
+          `${API}/posts/${encodeURIComponent(slug)}/favorites`,
+          { method: isActive ? "DELETE" : "POST" },
+        );
+        if (res && (res.ok || res.status === 204 || res.status === 200)) {
+          favBtn.classList.toggle("is-active");
+        }
       } catch {
         /* silent */
       }
@@ -470,15 +499,12 @@ document.addEventListener("DOMContentLoaded", () => {
     const submitBtn = document.getElementById("post-comment-submit");
     submitBtn.disabled = true;
     try {
-      // POST /api/v1/posts/{slug}/comments — requires auth token
-      const res = await fetch(
+      // POST /api/v1/posts/{slug}/comments — use fetchWithAuth, never raw Bearer
+      const res = await fetchWithAuth(
         `${API}/posts/${encodeURIComponent(slug)}/comments`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ content: text }),
         },
       );
