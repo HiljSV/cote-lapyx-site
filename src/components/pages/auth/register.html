@@ -2,13 +2,19 @@
   <div class="auth-card" style="width: 100%; max-width: 440px">
     <!-- Header -->
     <div class="auth-card__header">
-      <h1 class="auth-card__title">Реєстрація</h1>
-      <p class="auth-card__subtitle">Приєднуйтесь до cote-lapyx</p>
+      <h1 class="auth-card__title" data-i18n="auth.register_title">
+        Реєстрація
+      </h1>
+      <p class="auth-card__subtitle" data-i18n="auth.register_subtitle">
+        Приєднуйтесь до cote-lapyx
+      </p>
     </div>
 
     <!-- Role selector -->
     <div class="auth-role" role="group" aria-labelledby="role-label">
-      <p class="auth-role__label" id="role-label">Ви реєструєтесь як:</p>
+      <p class="auth-role__label" id="role-label" data-i18n="auth.register_as">
+        Ви реєструєтесь як:
+      </p>
       <div class="auth-role__options">
         <label class="auth-role__option">
           <input type="radio" name="role" value="subscriber" checked />
@@ -24,8 +30,10 @@
                 d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
               />
             </svg>
-            <strong>Підписник</strong>
-            <small>Читайте блог, залишайте коментарі</small>
+            <strong data-i18n="auth.role.subscriber">Підписник</strong>
+            <small data-i18n="auth.role.subscriber_desc"
+              >Читайте блог, залишайте коментарі</small
+            >
           </span>
         </label>
       </div>
@@ -35,7 +43,12 @@
     <form class="auth-form" id="register-form" novalidate>
       <!-- Name field -->
       <div class="auth-form__group">
-        <label class="auth-form__label" for="reg-name">Ім'я</label>
+        <label
+          class="auth-form__label"
+          for="reg-name"
+          data-i18n="auth.name_label"
+          >Ім'я</label
+        >
         <div class="auth-form__input-wrap">
           <svg
             class="auth-form__icon"
@@ -55,6 +68,7 @@
             id="reg-name"
             name="name"
             placeholder="Ваше ім'я"
+            data-i18n-placeholder="auth.name_placeholder"
             autocomplete="name"
             required
             minlength="2"
@@ -65,7 +79,12 @@
 
       <!-- Email field -->
       <div class="auth-form__group">
-        <label class="auth-form__label" for="reg-email">Email</label>
+        <label
+          class="auth-form__label"
+          for="reg-email"
+          data-i18n="auth.email_label"
+          >Email</label
+        >
         <div class="auth-form__input-wrap">
           <svg
             class="auth-form__icon"
@@ -94,7 +113,12 @@
 
       <!-- Password field -->
       <div class="auth-form__group">
-        <label class="auth-form__label" for="reg-password">Пароль</label>
+        <label
+          class="auth-form__label"
+          for="reg-password"
+          data-i18n="auth.password"
+          >Пароль</label
+        >
         <div class="auth-form__input-wrap">
           <svg
             class="auth-form__icon"
@@ -114,6 +138,7 @@
             id="reg-password"
             name="password"
             placeholder="Мінімум 8 символів"
+            data-i18n-placeholder="auth.password_placeholder"
             autocomplete="new-password"
             required
             minlength="8"
@@ -122,6 +147,7 @@
             type="button"
             class="auth-form__toggle-password"
             aria-label="Показати пароль"
+            data-i18n-aria="auth.show_password_aria"
             data-toggle-password="reg-password"
           >
             <svg
@@ -163,7 +189,10 @@
 
       <!-- Confirm password field -->
       <div class="auth-form__group">
-        <label class="auth-form__label" for="reg-confirm"
+        <label
+          class="auth-form__label"
+          for="reg-confirm"
+          data-i18n="auth.confirm_password"
           >Підтвердження пароля</label
         >
         <div class="auth-form__input-wrap">
@@ -185,6 +214,7 @@
             id="reg-confirm"
             name="confirm_password"
             placeholder="Повторіть пароль"
+            data-i18n-placeholder="auth.confirm_placeholder"
             autocomplete="new-password"
             required
           />
@@ -209,6 +239,7 @@
         type="submit"
         class="btn btn--cyan btn--lg auth-form__submit"
         id="reg-submit"
+        data-i18n="auth.register_btn"
       >
         Зареєструватись
       </button>
@@ -217,8 +248,10 @@
     <!-- Footer link -->
     <div class="auth-card__footer">
       <p class="auth-card__footer-text">
-        Вже маєте акаунт?
-        <a href="login.html" class="auth-card__link">Увійти</a>
+        <span data-i18n="auth.already_account">Вже маєте акаунт?</span>
+        <a href="login.html" class="auth-card__link" data-i18n="auth.login_link"
+          >Увійти</a
+        >
       </p>
     </div>
   </div>
