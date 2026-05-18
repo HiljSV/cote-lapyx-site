@@ -516,7 +516,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const existing = list.querySelectorAll(".post-comment");
       existing.forEach((el) => el.remove());
 
-      // Identify current user email for author action buttons
+      // getCurrentUserEmail kept for legacy reference; author check now uses backend-provided isMine flag
       const currentUserEmail = getCurrentUserEmail();
 
       comments.forEach((c) => {
@@ -554,11 +554,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <span class="post-comment__like-count">${Number(c.likesCount) || 0}</span>
           </button>`;
 
-        // Edit/delete buttons — only for the comment author (identified by JWT sub/email)
-        const isAuthor =
-          currentUserEmail &&
-          c.author?.email &&
-          currentUserEmail === c.author.email;
+        // Edit/delete buttons — only for the comment author (backend provides isMine flag)
+        const isAuthor = c.isMine === true;
         const authorActions = isAuthor
           ? `<button class="post-comment__edit-btn"
                     data-id="${escHtml(String(c.id))}"
