@@ -297,6 +297,7 @@
   "post.login_for_comment": "Увійдіть, щоб залишити коментар.",
   "post.comment_err": "Помилка надсилання.",
   "error.network": "Помилка з'єднання.",
+  "error.generic": "Помилка. Спробуйте ще раз.",
 
   "project.status.published": "Опубліковано",
   "project.status.draft": "Чернетка",

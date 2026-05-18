@@ -297,6 +297,7 @@
   "post.login_for_comment": "Connectez-vous pour laisser un commentaire.",
   "post.comment_err": "Erreur d'envoi.",
   "error.network": "Erreur de connexion.",
+  "error.generic": "Une erreur est survenue. Veuillez réessayer.",
 
   "project.status.published": "Publié",
   "project.status.draft": "Brouillon",

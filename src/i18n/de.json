@@ -297,6 +297,7 @@
   "post.login_for_comment": "Melden Sie sich an, um einen Kommentar zu hinterlassen.",
   "post.comment_err": "Sendungsfehler.",
   "error.network": "Verbindungsfehler.",
+  "error.generic": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
 
   "project.status.published": "Veröffentlicht",
   "project.status.draft": "Entwurf",

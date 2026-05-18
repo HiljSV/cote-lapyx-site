@@ -297,6 +297,7 @@
   "post.login_for_comment": "Sign in to leave a comment.",
   "post.comment_err": "Submission error.",
   "error.network": "Connection error.",
+  "error.generic": "Something went wrong. Please try again.",
 
   "project.status.published": "Published",
   "project.status.draft": "Draft",
