@@ -296,6 +296,12 @@
   "post.subscribe_err": "Erreur d'abonnement. Veuillez réessayer.",
   "post.login_for_comment": "Connectez-vous pour laisser un commentaire.",
   "post.comment_err": "Erreur d'envoi.",
+  "post.action.like_post": "J'aime",
+  "post.comment.edit": "Modifier",
+  "post.comment.delete": "Supprimer",
+  "post.comment.save": "Enregistrer",
+  "post.comment.cancel": "Annuler",
+  "post.comment.liked_hint": "J'aime",
   "error.network": "Erreur de connexion.",
   "error.generic": "Une erreur est survenue. Veuillez réessayer.",
 
