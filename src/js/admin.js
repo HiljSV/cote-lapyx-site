@@ -725,22 +725,35 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ---------------------------------------------------------------------------
-  // Admin comments panel (with moderation actions)
+  // Admin comments panel — shows all comments with status badges
+  // New comments auto-approve after backend task-039;
+  // Approve/Reject replaced by "Mark Seen" for APPROVED comments
   // ---------------------------------------------------------------------------
 
+  // Comment status display labels (Ukrainian)
   const COMMENT_STATUS_LABEL = {
     PENDING: "Очікує",
     APPROVED: "Схвалено",
+    SEEN: "Переглянуто",
     REJECTED: "Відхилено",
     DELETED: "Видалено",
   };
+
+  // Comment status CSS modifier for dash-status badge
   const COMMENT_STATUS_CLASS = {
     PENDING: "draft",
     APPROVED: "published",
+    SEEN: "archived",
     REJECTED: "archived",
     DELETED: "archived",
   };
 
+  /**
+   * Load admin comments with optional status filter.
+   * Shows PENDING (needs bad-words review) + APPROVED (auto-approved, not seen yet).
+   * @param {number} page - zero-based page number
+   * @param {string} statusFilter - empty string = all, or PENDING/APPROVED/SEEN/REJECTED
+   */
   async function loadAdminComments(page, statusFilter) {
     adminCommentsPage = page;
     const body = document.getElementById("admin-comments-body");
@@ -748,6 +761,7 @@ document.addEventListener("DOMContentLoaded", () => {
     body.innerHTML = '<div class="dash-list__empty">Завантаження...</div>';
     const statusParam = statusFilter ? `&status=${statusFilter}` : "";
     try {
+      // GET /api/v1/admin/comments — returns all comments for admin review
       const res = await fetchWithAuth(
         `${ADMIN_API}/admin/comments?size=20&sort=createdAt,desc&page=${page}${statusParam}`,
       );
@@ -761,23 +775,39 @@ document.addEventListener("DOMContentLoaded", () => {
         .map((c) => {
           const sClass = COMMENT_STATUS_CLASS[c.status] || "draft";
           const sLabel = COMMENT_STATUS_LABEL[c.status] || c.status;
+
+          // PENDING — show Approve + Reject (manual bad-words moderation)
           const canApprove = c.status === "PENDING" || c.status === "REJECTED";
-          const canReject = c.status === "PENDING" || c.status === "APPROVED";
+          const canReject = c.status === "PENDING";
           const approveBtn = canApprove
             ? `<button type="button" class="btn btn--cyan btn--sm" data-action="approve" data-id="${c.id}">Схвалити</button>`
             : "";
           const rejectBtn = canReject
             ? `<button type="button" class="btn btn--ghost btn--sm" data-action="reject" data-id="${c.id}">Відхилити</button>`
             : "";
+
+          // APPROVED — show "Mark Seen" button (PATCH /comments/{id}/seen)
+          const seenBtn =
+            c.status === "APPROVED"
+              ? `<button type="button" class="btn btn--ghost btn--sm" data-action="seen" data-id="${c.id}">Переглянуто</button>`
+              : "";
+
+          // Delete — available for all statuses
           const deleteBtn = `<button type="button" class="btn btn--magenta btn--sm" data-action="delete-comment" data-id="${c.id}">Видалити</button>`;
+
+          // Post link — show slug if available, fallback to postId
+          const postRef = c.postSlug
+            ? escHtml(c.postSlug)
+            : `#${escHtml(String(c.postId || "—"))}`;
+
           return `<div class="dash-list__row">
-          <div data-label="Автор">${escHtml(c.author?.name || c.author?.email || "—")}</div>
-          <div data-label="Коментар">${escHtml((c.content || "").slice(0, 60))}${(c.content || "").length > 60 ? "…" : ""}</div>
-          <div class="dash-list__title" data-label="Пост">Пост #${c.postId}</div>
-          <div class="dash-list__date" data-label="Дата">${fmtDate(c.createdAt)}</div>
-          <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
-          <div class="dash-list__actions" data-label="Дії">${approveBtn}${rejectBtn}${deleteBtn}</div>
-        </div>`;
+            <div data-label="Автор">${escHtml(c.author?.name || c.author?.email || "—")}</div>
+            <div data-label="Коментар">${escHtml((c.content || "").slice(0, 60))}${(c.content || "").length > 60 ? "…" : ""}</div>
+            <div class="dash-list__title" data-label="Пост">${postRef}</div>
+            <div class="dash-list__date" data-label="Дата">${fmtDate(c.createdAt)}</div>
+            <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
+            <div class="dash-list__actions" data-label="Дії">${approveBtn}${rejectBtn}${seenBtn}${deleteBtn}</div>
+          </div>`;
         })
         .join("");
       body.innerHTML =
@@ -797,9 +827,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  /**
+   * Approve or reject a PENDING comment via admin endpoint.
+   * @param {number} id - comment ID
+   * @param {"approve"|"reject"} action
+   */
   async function moderateComment(id, action) {
     try {
       const status = action === "approve" ? "APPROVED" : "REJECTED";
+      // PATCH /api/v1/admin/comments/{id} — set moderation status
       const res = await fetchWithAuth(`${ADMIN_API}/admin/comments/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -812,6 +848,33 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  /**
+   * Mark an APPROVED comment as seen by admin (PATCH /comments/{id}/seen).
+   * This replaces the old approve workflow for auto-approved comments.
+   * @param {number} id - comment ID
+   */
+  async function markCommentSeen(id) {
+    try {
+      // PATCH /api/v1/comments/{id}/seen — OWNER-only endpoint
+      const res = await fetchWithAuth(`${ADMIN_API}/comments/${id}/seen`, {
+        method: "PATCH",
+      });
+      if (res.ok || res.status === 204) {
+        loadAdminComments(adminCommentsPage, adminCommentsFilter);
+      } else {
+        // Graceful fallback if endpoint not yet implemented by backend
+        console.warn("Mark seen endpoint not yet available (task-039)");
+      }
+    } catch {
+      /* silent — graceful degradation */
+    }
+  }
+
+  /**
+   * Delete a comment after admin confirmation.
+   * Uses CommentController endpoint (not AdminController).
+   * @param {number} id - comment ID
+   */
   async function deleteComment(id) {
     if (!confirm("Видалити коментар?")) return;
     try {
@@ -827,15 +890,21 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Delegate click handler for all comment action buttons
   document
     .getElementById("admin-comments-body")
     ?.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-action]");
       if (!btn) return;
       const { action, id } = btn.dataset;
-      if (action === "approve" || action === "reject")
+      // Route to appropriate handler based on action type
+      if (action === "approve" || action === "reject") {
         moderateComment(Number(id), action);
-      else if (action === "delete-comment") deleteComment(Number(id));
+      } else if (action === "seen") {
+        markCommentSeen(Number(id));
+      } else if (action === "delete-comment") {
+        deleteComment(Number(id));
+      }
     });
 
   // ---------------------------------------------------------------------------

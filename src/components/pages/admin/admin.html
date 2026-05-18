@@ -543,20 +543,24 @@
     <!-- /panel: projects -->
 
     <!-- ================================================================
-         PANEL: COMMENTS (with moderation filter tabs)
+         PANEL: COMMENTS
+         Shows all comments: PENDING (bad-words review) + APPROVED (auto-approved)
+         "Mark Seen" replaces Approve/Reject for already-approved comments
          ================================================================ -->
     <div class="admin-section-panel" data-panel="comments" hidden>
-      <section class="dash-section" aria-label="Модерація коментарів">
+      <!-- Comments section: all comments with status-based action buttons -->
+      <section class="dash-section" aria-label="Коментарі">
         <div class="dash-section__header">
-          <h2 class="dash-section__title">Модерація коментарів</h2>
+          <h2 class="dash-section__title">Коментарі</h2>
         </div>
 
-        <!-- Filter tabs: Всі / Очікують / Відхилені -->
+        <!-- Filter tabs: Всі / Очікують / Схвалено / Переглянуто / Відхилені -->
         <div
           class="admin-filter-tabs"
           role="tablist"
           aria-label="Фільтр коментарів"
         >
+          <!-- Tab: all statuses -->
           <button
             type="button"
             class="admin-filter-tab is-active"
@@ -566,6 +570,7 @@
           >
             Всі
           </button>
+          <!-- Tab: PENDING — needs manual bad-words review -->
           <button
             type="button"
             class="admin-filter-tab"
@@ -575,6 +580,27 @@
           >
             Очікують
           </button>
+          <!-- Tab: APPROVED — auto-approved, admin hasn't seen yet -->
+          <button
+            type="button"
+            class="admin-filter-tab"
+            role="tab"
+            aria-selected="false"
+            data-comment-filter="APPROVED"
+          >
+            Схвалено
+          </button>
+          <!-- Tab: SEEN — admin has marked as reviewed -->
+          <button
+            type="button"
+            class="admin-filter-tab"
+            role="tab"
+            aria-selected="false"
+            data-comment-filter="SEEN"
+          >
+            Переглянуто
+          </button>
+          <!-- Tab: REJECTED — manually rejected by admin -->
           <button
             type="button"
             class="admin-filter-tab"
@@ -586,10 +612,12 @@
           </button>
         </div>
 
+        <!-- Comments table: rows rendered by admin.js loadAdminComments() -->
         <div
           class="dash-list dash-list--admin-comments"
-          aria-label="Таблиця коментарів для модерації"
+          aria-label="Таблиця коментарів"
         >
+          <!-- Table header: column labels (aria-hidden — decorative) -->
           <div class="dash-list__head" aria-hidden="true">
             <div>Автор</div>
             <div>Коментар</div>
@@ -598,8 +626,10 @@
             <div>Статус</div>
             <div>Дії</div>
           </div>
+          <!-- JS renders comment rows here -->
           <div id="admin-comments-body"></div>
         </div>
+        <!-- Pagination rendered by admin.js renderPagination() -->
         <div class="dash-pagination" id="admin-comments-pagination"></div>
       </section>
     </div>
