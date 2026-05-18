@@ -296,7 +296,6 @@
   "post.subscribe_err": "Subscription error. Please try again.",
   "post.login_for_comment": "Sign in to leave a comment.",
   "post.comment_err": "Submission error.",
-  "post.action.like_post": "Like",
   "post.comment.edit": "Edit",
   "post.comment.delete": "Delete",
   "post.comment.save": "Save",

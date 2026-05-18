@@ -296,7 +296,6 @@
   "post.subscribe_err": "Abonnementfehler. Bitte versuchen Sie es erneut.",
   "post.login_for_comment": "Melden Sie sich an, um einen Kommentar zu hinterlassen.",
   "post.comment_err": "Sendungsfehler.",
-  "post.action.like_post": "Gefällt mir",
   "post.comment.edit": "Bearbeiten",
   "post.comment.delete": "Löschen",
   "post.comment.save": "Speichern",
