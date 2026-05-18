@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Cote Lapyx API
-  version: 1.5.0
+  version: 1.7.0
   description: |
     REST API for cote-lapyx.com — a team website for Валерія, Сергій, Андрій.
 
@@ -568,6 +568,34 @@ components:
         updatedAt:
           type: string
           format: date-time
+        # Sprint 4: like counters and current-user like state
+        likesCount:
+          type: integer
+          format: int64
+          description: "Total likes (registered + anonymous). Present in both list and detail responses."
+          example: 47
+        registeredLikesCount:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Likes from registered users. Present in single-post detail responses only.
+            Null in list responses to reduce payload size.
+          example: 31
+        anonymousLikesCount:
+          type: integer
+          format: int64
+          nullable: true
+          description: |
+            Likes from anonymous visitors. Present in single-post detail responses only.
+            Null in list responses to reduce payload size.
+          example: 16
+        likedByCurrentUser:
+          type: boolean
+          description: |
+            True when the authenticated requester has liked this post.
+            False for anonymous users and for unauthenticated requests.
+          example: false
 
     BlogPostCreateRequest:
       type: object
@@ -835,6 +863,32 @@ components:
         createdAt:
           type: string
           format: date-time
+        # Sprint 4: like counts, authorship flag, and edit timestamp
+        likesCount:
+          type: integer
+          format: int64
+          description: Total number of likes on this comment.
+          example: 5
+        likedByCurrentUser:
+          type: boolean
+          description: |
+            True when the authenticated requester has liked this comment.
+            False for anonymous users and unauthenticated requests.
+          example: false
+        isMine:
+          type: boolean
+          description: |
+            True when the comment was written by the requesting user.
+            False for anonymous requests and for other users' comments.
+          example: false
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: |
+            ISO 8601 UTC timestamp of the last author edit.
+            Null if the comment has never been edited after initial submission.
+          example: "2026-05-10T08:15:00Z"
 
     CommentCreateRequest:
       type: object
@@ -1213,6 +1267,68 @@ components:
           type: string
           const: deleted
           example: deleted
+
+    # --- Post Likes ---
+
+    PostLikeResponse:
+      type: object
+      required: [total, registered, anonymous, likedByCurrentUser]
+      description: Aggregated like counts for a blog post.
+      properties:
+        total:
+          type: integer
+          format: int64
+          description: Sum of registered + anonymous likes.
+          example: 47
+        registered:
+          type: integer
+          format: int64
+          description: Likes from authenticated registered users.
+          example: 31
+        anonymous:
+          type: integer
+          format: int64
+          description: Likes from unauthenticated (anonymous) visitors.
+          example: 16
+        likedByCurrentUser:
+          type: boolean
+          description: |
+            True when the authenticated requester has already liked this post.
+            Always false for anonymous (unauthenticated) callers.
+          example: false
+
+    # --- Comment Likes ---
+
+    CommentLikeResponse:
+      type: object
+      required: [count, likedByCurrentUser]
+      description: Aggregated like count for a single comment.
+      properties:
+        count:
+          type: integer
+          format: int64
+          description: Total number of likes on this comment.
+          example: 12
+        likedByCurrentUser:
+          type: boolean
+          description: |
+            True when the authenticated requester has already liked this comment.
+            Always false for anonymous (unauthenticated) callers.
+          example: false
+
+    # --- Comment Edit ---
+
+    CommentEditRequest:
+      type: object
+      required: [content]
+      description: Request body for editing the text of an existing comment (author only).
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: Updated comment text. Must not be blank.
+          example: Updated comment text.
 
     # --- Contact ---
 
@@ -2300,14 +2416,25 @@ paths:
   /comments/{id}:
     patch:
       tags: [Comments]
-      summary: Moderate a comment — approve or reject (owner only)
-      operationId: moderateComment
+      summary: Edit comment text (author) or change moderation status (owner)
+      operationId: patchComment
       security:
         - bearerAuth: []
-      x-roles: [owner]
+      x-roles: [owner, subscriber]
       description: |
-        Changes the moderation status of a comment from `pending` to `approved` or `rejected`.
-        Use `DELETE /comments/{id}` for soft-deletion (works for both owners and subscribers).
+        **Two distinct roles, two distinct payloads:**
+
+        - **Author (subscriber or owner who wrote the comment):** Send a `CommentEditRequest`
+          body (`{ "content": "..." }`). Updates the comment text. Returns 403 if the
+          authenticated user is not the comment author. The `updatedAt` field on the
+          response will be set to the time of this edit.
+
+        - **Owner (moderation):** Send a `CommentModerationRequest` body
+          (`{ "status": "approved" | "rejected" }`). Changes the moderation status.
+          Returns 403 if the caller is not an owner. Returns 409 if the comment is
+          already in a terminal state (`deleted`).
+
+        Use `DELETE /comments/{id}` for soft-deletion (available to both owners and subscribers).
       parameters:
         - name: id
           in: path
@@ -2320,10 +2447,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CommentModerationRequest"
+              oneOf:
+                - $ref: "#/components/schemas/CommentEditRequest"
+                - $ref: "#/components/schemas/CommentModerationRequest"
+              discriminator:
+                propertyName: _action
       responses:
         "200":
-          description: Comment status updated.
+          description: |
+            Comment updated. Returns the full `CommentDTO` with the updated fields.
+            For edits, `updatedAt` is populated. For moderation, `status` is updated.
           content:
             application/json:
               schema:
@@ -2333,15 +2466,29 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
-          description: Comment is already in a terminal state (deleted).
+          description: |
+            Subscriber attempting to edit another user's comment, or subscriber sending
+            a moderation payload.
           content:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+              example:
+                type: https://cote-lapyx.com/errors/forbidden
+                title: Forbidden
+                status: 403
+                detail: You can only edit your own comments.
+                instance: /api/v1/comments/42
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Comment is already in a terminal state (deleted); cannot be moderated.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "422":
+          $ref: "#/components/responses/ValidationError"
 
     delete:
       tags: [Comments]
@@ -2380,6 +2527,271 @@ paths:
                 instance: /api/v1/comments/42
         "404":
           $ref: "#/components/responses/NotFound"
+
+  # ---------------------------------------------------------------------------
+  # Comment Likes (Sprint 4)
+  # ---------------------------------------------------------------------------
+
+  /comments/{id}/likes:
+    get:
+      tags: [Comments]
+      summary: Get like count for a comment
+      operationId: getCommentLikes
+      # Public endpoint — no authentication required
+      security: []
+      x-roles: [public]
+      description: |
+        Returns the total like count for the specified comment.
+        `likedByCurrentUser` is always `false` for unauthenticated requests.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 42
+      responses:
+        "200":
+          description: Like count for the comment.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentLikeResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    post:
+      tags: [Comments]
+      summary: Like a comment (anonymous or authenticated)
+      operationId: likeComment
+      # Auth is optional — anonymous users may like without a token
+      security:
+        - bearerAuth: []
+        - {}
+      x-roles: [public, subscriber, owner]
+      description: |
+        Records a like for the specified comment.
+        Authenticated users: like is attributed to the account (deduplicated per user).
+        Anonymous users: like is attributed to the IP address (deduplicated per IP).
+        Rate-limited to 20 requests/minute and 100 requests/hour per IP.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 42
+      responses:
+        "201":
+          description: Like recorded. Returns updated count.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentLikeResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Already liked (duplicate like from same user or IP).
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+              example:
+                type: https://cote-lapyx.com/errors/conflict
+                title: Conflict
+                status: 409
+                detail: You have already liked this comment.
+                instance: /api/v1/comments/42/likes
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+    delete:
+      tags: [Comments]
+      summary: Unlike a comment (anonymous or authenticated)
+      operationId: unlikeComment
+      # Auth is optional — anonymous users may unlike without a token
+      security:
+        - bearerAuth: []
+        - {}
+      x-roles: [public, subscriber, owner]
+      description: |
+        Removes an existing like from the specified comment.
+        Authenticated users: removes the like tied to the account.
+        Anonymous users: removes the like tied to the IP address.
+        Rate-limited to 20 requests/minute and 100 requests/hour per IP.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 42
+      responses:
+        "200":
+          description: Like removed. Returns updated count.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentLikeResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  # ---------------------------------------------------------------------------
+  # Comment Admin Seen (Sprint 4)
+  # ---------------------------------------------------------------------------
+
+  /comments/{id}/seen:
+    patch:
+      tags: [Comments]
+      summary: Mark a comment as seen by admin (owner only)
+      operationId: markCommentSeen
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Sets `adminSeen = true` on the specified comment, indicating that an owner
+        has reviewed it. Idempotent — calling this on an already-seen comment returns
+        200 with no error. Used by the dashboard comments moderation view to track
+        which comments have been reviewed.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 42
+      responses:
+        "200":
+          description: Comment marked as seen. Returns updated CommentDTO.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentDTO"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ---------------------------------------------------------------------------
+  # Post Likes (Sprint 4)
+  # ---------------------------------------------------------------------------
+
+  /posts/{slug}/likes:
+    get:
+      tags: [Posts]
+      summary: Get like counts for a post
+      operationId: getPostLikes
+      # Public endpoint — no authentication required
+      security: []
+      x-roles: [public]
+      description: |
+        Returns the total like count broken down by registered vs. anonymous likes.
+        `likedByCurrentUser` is always `false` for unauthenticated requests.
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+          example: my-first-post
+      responses:
+        "200":
+          description: Like counts for the post.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostLikeResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    post:
+      tags: [Posts]
+      summary: Like a post (anonymous or authenticated)
+      operationId: likePost
+      # Auth is optional — anonymous users may like without a token
+      security:
+        - bearerAuth: []
+        - {}
+      x-roles: [public, subscriber, owner]
+      description: |
+        Records a like for the specified post.
+        Authenticated users: like is attributed to the account (deduplicated per user).
+        Anonymous users: like is attributed to the IP address (deduplicated per IP).
+        Rate-limited to 20 requests/minute and 100 requests/hour per IP.
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+          example: my-first-post
+      responses:
+        "201":
+          description: Like recorded. Returns updated counts.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostLikeResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Already liked (duplicate like from same user or IP).
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+              example:
+                type: https://cote-lapyx.com/errors/conflict
+                title: Conflict
+                status: 409
+                detail: You have already liked this post.
+                instance: /api/v1/posts/my-first-post/likes
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+    delete:
+      tags: [Posts]
+      summary: Unlike a post (anonymous or authenticated)
+      operationId: unlikePost
+      # Auth is optional — anonymous users may unlike without a token
+      security:
+        - bearerAuth: []
+        - {}
+      x-roles: [public, subscriber, owner]
+      description: |
+        Removes an existing like from the specified post.
+        Authenticated users: removes the like tied to the account.
+        Anonymous users: removes the like tied to the IP address.
+        Rate-limited to 20 requests/minute and 100 requests/hour per IP.
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[a-z0-9-]+$"
+          example: my-first-post
+      responses:
+        "200":
+          description: Like removed. Returns updated counts.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PostLikeResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
 
   # ---------------------------------------------------------------------------
   # Post Favorites
