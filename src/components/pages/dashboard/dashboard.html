@@ -120,8 +120,18 @@
         <!-- Nav: Favorites — saved posts for current user -->
         <li class="dash-sidebar__nav-item">
           <a href="#" class="dash-sidebar__nav-link" data-section="favorites">
-            <!-- Favorites icon: star -->
-            <span class="dash-sidebar__nav-icon" aria-hidden="true">★</span>
+            <!-- Favorites icon: filled star (Material Design star path) -->
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+              />
+            </svg>
             <!-- Nav link text: Favorites -->
             <span data-i18n="dash.nav.favorites">Вибране</span>
           </a>
@@ -773,28 +783,38 @@
     <!-- ===== SECTION: FAVORITES ===== -->
     <!-- Favorites panel — saved (bookmarked) posts for the current user -->
     <div class="dash-section-panel" data-panel="favorites" hidden>
-      <div class="dash-section-panel__header">
-        <!-- Section title: Favorites -->
-        <h2 class="dash-section-panel__title" data-i18n="dash.favorites.title">
-          Вибране
-        </h2>
-      </div>
-      <!-- Favorites list table -->
-      <div class="dash-list">
-        <!-- Column headers — hidden on mobile via CSS -->
-        <div class="dash-list__header">
-          <!-- Column: Post title -->
-          <span data-i18n="dash.favorites.col.title">Публікація</span>
-          <!-- Column: Date added -->
-          <span data-i18n="dash.favorites.col.date">Додано</span>
-          <!-- Column: Actions (remove button) -->
-          <span data-i18n="dash.favorites.col.actions">Дії</span>
+      <section
+        class="dash-section"
+        aria-label="Вибране"
+        data-i18n-aria="dash.favorites.section_aria"
+      >
+        <div class="dash-section__header">
+          <!-- Section title: Favorites -->
+          <h2 class="dash-section__title" data-i18n="dash.favorites.title">
+            Вибране
+          </h2>
         </div>
-        <!-- Populated by loadFavorites() in dashboard.js -->
-        <div id="favorites-list-body"></div>
-      </div>
-      <!-- Pagination — buttons injected by loadFavorites() -->
-      <div id="favorites-pagination" class="dash-pagination"></div>
+        <!-- Favorites list table: Post title | Date added | Actions -->
+        <div
+          class="dash-list dash-list--favorites"
+          aria-label="Таблиця вибраних публікацій"
+          data-i18n-aria="dash.table.favorites_aria"
+        >
+          <!-- Header row — hidden on mobile via CSS -->
+          <div class="dash-list__head" aria-hidden="true">
+            <!-- Column: Post title -->
+            <div data-i18n="dash.favorites.col.title">Публікація</div>
+            <!-- Column: Date added -->
+            <div data-i18n="dash.favorites.col.date">Додано</div>
+            <!-- Column: Actions (remove button) -->
+            <div data-i18n="dash.favorites.col.actions">Дії</div>
+          </div>
+          <!-- Populated by loadFavorites() in dashboard.js -->
+          <div id="favorites-list-body"></div>
+        </div>
+        <!-- Pagination — buttons injected by loadFavorites() -->
+        <div id="favorites-pagination" class="dash-pagination"></div>
+      </section>
     </div>
     <!-- /favorites panel -->
 

@@ -1263,6 +1263,14 @@
   }
 }
 
+// favorites: Post title | Date added | Actions
+.dash-list--favorites {
+  .dash-list__head,
+  .dash-list__row {
+    grid-template-columns: 1fr 140px 140px;
+  }
+}
+
 // =============================================================================
 // Avatar upload block (profile section)
 // =============================================================================

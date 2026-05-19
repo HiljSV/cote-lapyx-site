@@ -226,6 +226,8 @@
   "dash.favorites.col.title": "Beitrag",
   "dash.favorites.col.date": "Hinzugefügt",
   "dash.favorites.col.actions": "Aktionen",
+  "dash.favorites.section_aria": "Favoriten",
+  "dash.table.favorites_aria": "Tabelle der Favoriten",
   "dash.profile.title": "Profil",
   "dash.profile.section_aria": "Profil bearbeiten",
   "dash.password.title": "Passwort ändern",

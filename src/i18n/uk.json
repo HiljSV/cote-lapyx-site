@@ -226,6 +226,8 @@
   "dash.favorites.col.title": "Публікація",
   "dash.favorites.col.date": "Додано",
   "dash.favorites.col.actions": "Дії",
+  "dash.favorites.section_aria": "Вибране",
+  "dash.table.favorites_aria": "Таблиця вибраних публікацій",
   "dash.profile.title": "Профіль",
   "dash.profile.section_aria": "Редагування профілю",
   "dash.password.title": "Зміна пароля",
