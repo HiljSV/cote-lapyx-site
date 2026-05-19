@@ -1316,7 +1316,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     try {
       // Authenticated request — always via fetchWithAuth, never raw fetch
       const res = await fetchWithAuth(
-        `${API}/users/me/favorites?size=20&sort=favoritedAt,desc&page=${page}`,
+        `${API}/users/me/favorites?size=20&page=${page}`,
       );
       if (!res.ok) {
         listBody.innerHTML =
