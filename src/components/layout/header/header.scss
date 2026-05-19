@@ -2,6 +2,29 @@
 // Header — Cyberpunk style
 // =============================================================================
 
+// Skip navigation link — visually hidden until keyboard focus (WCAG 2.4.1)
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 10000;
+  padding: 0.5rem 1.25rem;
+  background: $neon-cyan;
+  color: $bg-dark;
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 0 0 6px 6px;
+  text-decoration: none;
+  transition: top 0.2s ease;
+
+  // Slide into view on keyboard focus
+  &:focus {
+    top: 0;
+    outline: 2px solid $bg-dark;
+    outline-offset: 2px;
+  }
+}
+
 .header {
   position: fixed;
   top: 0;
