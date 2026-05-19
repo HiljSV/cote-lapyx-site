@@ -229,6 +229,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (section === "my-subscriptions") {
         loadMySubscriptions();
       }
+      if (section === "favorites") {
+        loadFavorites(0);
+      }
       if (section === "comments") {
         loadComments(0, commentsStatusFilter);
       }
@@ -1274,6 +1277,95 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // ---------------------------------------------------------------------------
+  // Favorites panel — saved posts for the current user
+  // ---------------------------------------------------------------------------
+
+  // Track current favorites page for reload after remove
+  let favoritesPage = 0;
+
+  // Render a single row for a favorited post entry
+  function favoriteRowHtml(fav) {
+    // Build row with post link, date added, and remove button
+    return `<div class="dash-list__row">
+      <div class="dash-list__title" data-label="Публікація">
+        <a href="/post.html?slug=${escHtml(fav.postSlug)}" class="dash-list__link" target="_blank">
+          ${escHtml(fav.postTitle)}
+        </a>
+      </div>
+      <div class="dash-list__date" data-label="Додано">${fmtDate(fav.favoritedAt)}</div>
+      <div class="dash-list__actions" data-label="Дії">
+        <button type="button" class="btn btn--magenta btn--sm"
+          data-action="remove-favorite" data-slug="${escHtml(fav.postSlug)}">
+          Видалити
+        </button>
+      </div>
+    </div>`;
+  }
+
+  // Load paginated favorites from GET /users/me/favorites
+  async function loadFavorites(page = 0) {
+    favoritesPage = page;
+    const listBody = document.getElementById("favorites-list-body");
+    const pagination = document.getElementById("favorites-pagination");
+    if (!listBody) return;
+
+    // Show loading state while request is in flight
+    listBody.innerHTML = '<div class="dash-list__empty">Завантаження...</div>';
+    if (pagination) pagination.innerHTML = "";
+
+    try {
+      // Authenticated request — always via fetchWithAuth, never raw fetch
+      const res = await fetchWithAuth(
+        `${API}/users/me/favorites?size=20&sort=favoritedAt,desc&page=${page}`,
+      );
+      if (!res.ok) {
+        listBody.innerHTML =
+          '<div class="dash-list__empty">Помилка завантаження</div>';
+        return;
+      }
+      const data = await res.json();
+      // Render rows or empty state message
+      const rows = (data.content || []).map(favoriteRowHtml).join("");
+      listBody.innerHTML =
+        rows ||
+        '<div class="dash-list__empty">У вас ще немає збережених публікацій</div>';
+
+      // Render pagination buttons only when more than one page exists
+      if (pagination && data.page && data.page.totalPages > 1) {
+        const { number, totalPages } = data.page;
+        pagination.innerHTML = Array.from({ length: totalPages }, (_, i) => {
+          const active = i === number ? " is-active" : "";
+          return `<button type="button" class="dash-pagination__btn${active}" data-page="${i}">${i + 1}</button>`;
+        }).join("");
+      }
+    } catch (err) {
+      // Log and show user-facing error on network failure
+      console.error("Favorites load error:", err);
+      listBody.innerHTML =
+        '<div class="dash-list__empty">Помилка завантаження</div>';
+    }
+  }
+
+  // Remove a post from favorites via DELETE /posts/{slug}/favorites
+  async function removeFavorite(slug) {
+    try {
+      // Authenticated delete request — uses fetchWithAuth
+      const res = await fetchWithAuth(
+        `${API}/posts/${encodeURIComponent(slug)}/favorites`,
+        { method: "DELETE" },
+      );
+      if (res.ok || res.status === 204) {
+        // Reload current page to reflect removal
+        loadFavorites(favoritesPage);
+      } else {
+        alert("Помилка видалення. Спробуйте ще раз.");
+      }
+    } catch {
+      alert("Помилка зʼєднання.");
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // Subscribers panel
   // ---------------------------------------------------------------------------
 
@@ -1569,6 +1661,27 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!btn) return;
       if (btn.dataset.action === "cancel-my-sub")
         cancelMySubscription(btn.dataset.id);
+    });
+
+  /* Favorites — remove button delegation */
+  document
+    .getElementById("favorites-list-body")
+    ?.addEventListener("click", (e) => {
+      // Find the nearest button with data-action attribute
+      const btn = e.target.closest("[data-action]");
+      if (!btn) return;
+      if (btn.dataset.action === "remove-favorite")
+        removeFavorite(btn.dataset.slug);
+    });
+
+  /* Favorites — pagination button delegation */
+  document
+    .getElementById("favorites-pagination")
+    ?.addEventListener("click", (e) => {
+      // Find the nearest button with data-page attribute
+      const btn = e.target.closest("[data-page]");
+      if (!btn) return;
+      loadFavorites(Number(btn.dataset.page));
     });
 
   document

@@ -117,6 +117,21 @@
           </a>
         </li>
 
+        <!-- Nav: Favorites — saved posts for current user -->
+        <li class="dash-sidebar__nav-item">
+          <a
+            href="#favorites"
+            class="dash-sidebar__nav-link"
+            data-section="favorites"
+            role="menuitem"
+          >
+            <!-- Favorites icon: star -->
+            <span class="dash-sidebar__nav-icon" aria-hidden="true">★</span>
+            <!-- Nav link text: Favorites -->
+            <span data-i18n="dash.nav.favorites">Вибране</span>
+          </a>
+        </li>
+
         <!-- Posts nav item (OWNER only — revealed by JS) -->
         <li class="dash-sidebar__nav-item" data-owner-nav hidden>
           <a href="#" class="dash-sidebar__nav-link" data-section="posts">
@@ -759,6 +774,34 @@
       </section>
     </div>
     <!-- /my-subscriptions panel -->
+
+    <!-- ===== SECTION: FAVORITES ===== -->
+    <!-- Favorites panel — saved (bookmarked) posts for the current user -->
+    <div class="dash-section-panel" data-panel="favorites" hidden>
+      <div class="dash-section-panel__header">
+        <!-- Section title: Favorites -->
+        <h2 class="dash-section-panel__title" data-i18n="dash.favorites.title">
+          Вибране
+        </h2>
+      </div>
+      <!-- Favorites list table -->
+      <div class="dash-list">
+        <!-- Column headers — hidden on mobile via CSS -->
+        <div class="dash-list__header">
+          <!-- Column: Post title -->
+          <span data-i18n="dash.favorites.col.title">Публікація</span>
+          <!-- Column: Date added -->
+          <span data-i18n="dash.favorites.col.date">Додано</span>
+          <!-- Column: Actions (remove button) -->
+          <span data-i18n="dash.favorites.col.actions">Дії</span>
+        </div>
+        <!-- Populated by loadFavorites() in dashboard.js -->
+        <div id="favorites-list-body"></div>
+      </div>
+      <!-- Pagination — buttons injected by loadFavorites() -->
+      <div id="favorites-pagination" class="dash-pagination"></div>
+    </div>
+    <!-- /favorites panel -->
 
     <!-- ===== SECTION: PROFILE ===== -->
     <div class="dash-section-panel" data-panel="profile" hidden>
