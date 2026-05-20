@@ -1876,6 +1876,143 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
+  /users/me/password:
+    post:
+      tags: [Users]
+      summary: Change own password
+      operationId: changeMyPassword
+      security:
+        - bearerAuth: []
+      x-roles: [owner, subscriber]
+      description: >
+        Changes the authenticated user's password.
+        Requires the current password for identity confirmation.
+        Revokes all existing refresh tokens on success.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword:
+                  type: string
+                  format: password
+                  description: Current password for identity confirmation
+                newPassword:
+                  type: string
+                  format: password
+                  minLength: 8
+                  maxLength: 100
+                  description: New password (8–100 chars)
+      responses:
+        "204":
+          description: Password changed; all refresh tokens revoked.
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /users/me/email:
+    patch:
+      tags: [Users]
+      summary: Change own email address
+      operationId: changeMyEmail
+      security:
+        - bearerAuth: []
+      x-roles: [owner, subscriber]
+      description: >
+        Changes the authenticated user's email address.
+        Requires the current password for identity confirmation.
+        Returns the updated user profile.
+        The current JWT becomes invalid after the next token refresh.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newEmail]
+              properties:
+                currentPassword:
+                  type: string
+                  format: password
+                  description: Current password for identity confirmation
+                newEmail:
+                  type: string
+                  format: email
+                  description: New email address
+      responses:
+        "200":
+          description: Updated user profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          description: Email already taken by another account.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+
+  /users/me/avatar:
+    post:
+      tags: [Users]
+      summary: Upload own avatar image
+      operationId: uploadMyAvatar
+      security:
+        - bearerAuth: []
+      x-roles: [owner, subscriber]
+      description: >
+        Uploads a new avatar image for the authenticated user.
+        Replaces the existing avatar if one is set.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Avatar image file (JPEG, PNG, WebP; max 5 MB)
+      responses:
+        "200":
+          description: Updated user profile with new avatar URL.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    delete:
+      tags: [Users]
+      summary: Delete own avatar (reset to default)
+      operationId: deleteMyAvatar
+      security:
+        - bearerAuth: []
+      x-roles: [owner, subscriber]
+      description: Removes the avatar of the authenticated user and resets it to the default.
+      responses:
+        "204":
+          description: Avatar removed; default avatar restored.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
   # ---------------------------------------------------------------------------
   # Team Members
   # ---------------------------------------------------------------------------
