@@ -42,12 +42,42 @@ Protected: dashboard (OWNER), admin (isAdmin)
 
 ## Agents
 
-- `Frontend-Dev-Agent-HTML-SCSS-JS` — layout, SCSS, HTML
-- `Senior-Frontend-Dev-Agent` — complex JS, architecture decisions
-- `backend-spring-boot` — backend features, Spring Security
+- `cote-lapyx-frontend-dev` — HTML/SCSS/JS, cote-lapyx specific rules
+- `frontend-html-scss-js` — general HTML/SCSS/JS layout (FLS, generic tasks)
+- `Senior-Frontend-Dev-Agent` — complex JS, architecture decisions (escalation)
+- `cote-lapyx-backend-dev` — Spring Boot backend, cote-lapyx specific
+- `cote-lapyx-qa-reviewer` — QA after each phase (Phase 1 component, Phase 2 integration)
+- `cote-api-contract` — OpenAPI 3.1 contract (docs/api-v1.yaml)
 - `devops-agent` — deploy, Apache config, CI/CD
 - `security-agent` — before any auth/security changes go live
-- `cote-api-contract` — OpenAPI 3.1 contract changes (docs/api-v1.yaml)
+
+## Pipeline (cote-lapyx specific)
+
+```
+Phase 1 — Component branch  feature/component-NNN-section-name
+  1. Claude writes ~/.ai-tasks/task-NNN-name.md
+  2. git checkout -b feature/component-NNN-name
+  3. codex-safe exec -C /project -s workspace-write < task-NNN.md
+  4. cote-lapyx-qa-reviewer → QA APPROVED
+  5. npm run build → exit 0
+
+Phase 2 — Integration branch  integration/NNN-page-name
+  6. git checkout -b integration/NNN-page-name
+  7. merge --no-ff all feature/* branches
+  8. cote-lapyx-qa-reviewer (full page, responsive 320/768/1280) → APPROVED
+
+Phase 3 — Merge to main + deploy
+  9. merge integration → main → push (GitHub Actions → rsync → Apache)
+```
+
+**QA checklist per phase:**
+
+- Build exits 0
+- Comments in every HTML section, SCSS block, JS function
+- fetchWithAuth() for all authenticated API calls (no raw fetch)
+- escHtml() for all innerHTML assignments
+- No **container with flex/grid (layout on **inner/\_\_grid children only)
+- Responsive: 320 / 768 / 1280 tested
 
 ## Rules
 
