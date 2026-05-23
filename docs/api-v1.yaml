@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Cote Lapyx API
-  version: 1.7.0
+  version: 1.7.1
   description: |
     REST API for cote-lapyx.com — a team website for Валерія, Сергій, Андрій.
 
@@ -418,6 +418,39 @@ components:
           enum: [active, blocked, suspended]
           description: Account status. Use `blocked` to prevent login; `suspended` for temporary restriction.
 
+    # Public-safe representation of a user — returned as the embedded `author` object
+    # on BlogPostResponse, ProjectResponse, and CommentResponse.
+    # Sensitive fields (email, role, isAdmin, timestamps) are intentionally excluded.
+    PublicUserDTO:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          description: Login name / handle (always present).
+          example: andrii
+        displayName:
+          type: string
+          nullable: true
+          description: Human-readable display name shown in the UI. Falls back to `name` when null.
+          example: Андрій
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+          example: https://cdn.cote-lapyx.com/avatars/andrii.png
+        bio:
+          type: string
+          nullable: true
+          maxLength: 1000
+          example: Backend engineer, coffee enthusiast.
+        socialLinks:
+          $ref: "#/components/schemas/SocialLinks"
+
     SocialLinks:
       type: object
       nullable: true
@@ -553,7 +586,8 @@ components:
           type: integer
           format: int64
         author:
-          $ref: "#/components/schemas/UserDTO"
+          # Slim public representation — email/role/timestamps excluded (Sprint 5)
+          $ref: "#/components/schemas/PublicUserDTO"
         categories:
           type: array
           items:
@@ -726,7 +760,8 @@ components:
           type: integer
           format: int64
         author:
-          $ref: "#/components/schemas/UserDTO"
+          # Slim public representation — email/role/timestamps excluded (Sprint 5)
+          $ref: "#/components/schemas/PublicUserDTO"
         createdAt:
           type: string
           format: date-time
@@ -838,7 +873,8 @@ components:
           type: integer
           format: int64
         author:
-          $ref: "#/components/schemas/UserDTO"
+          # Slim public representation — email/role/timestamps excluded (Sprint 5)
+          $ref: "#/components/schemas/PublicUserDTO"
         content:
           type: string
           nullable: true

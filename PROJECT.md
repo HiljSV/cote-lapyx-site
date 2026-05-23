@@ -575,12 +575,16 @@ src/
 - Frontend: like button, comment likes, edit/delete, admin Mark Seen
 - Тести: 49/49 pass
 
-## Sprint 5 — Performance + Hardening ✅ частково (2026-05-22..23)
+## Sprint 5 — Performance + Hardening ✅ COMPLETE (2026-05-23)
 
 - N+1 fix у BlogPostService/CommentService (batch-counts)
 - PATCH `/api/v1/comments/{id}` rate limit (10 edits/min per IP)
 - DeepL → LibreTranslate в docs (cleanup)
-- ⚠️ Pending: 7 Java тестів uncommitted, Umami `400 BAD_REQUEST` на `/metrics?type=url`, ContactController + LocaleController XFF parsing, blog post author email exposure у public list
+- 7 Java тестів закомічено (49/49 pass)
+- Umami `400 BAD_REQUEST` виправлено (`unit` param required by Umami API v2+)
+- ContactController + LocaleController + RateLimitFilter — manual XFF parsing видалено (Tomcat RemoteIp Valve пре-обробляє `X-Forwarded-For`, `getRemoteAddr()` повертає реальний client IP)
+- **Privacy fix:** `PublicUserResponse` DTO для public author endpoints — більше НЕ віддає email/role/isAdmin/timestamps у public list `/api/v1/posts`, `/api/v1/projects`, `/api/v1/posts/{slug}/comments` (backend `13b47db` deployed, prod verified 2026-05-23)
+- API contract `docs/api-v1.yaml` v1.7.1 — додано `PublicUserDTO` схему + 3 refs (`BlogPost.author`, `Project.author`, `Comment.author`)
 
 ## Sprint 6 — Контент Pipeline + Соцмережі (план, 2026-05-23+)
 
@@ -622,12 +626,9 @@ src/
 8. **Umami звіт** в admin: розбивка трафіку по соц-джерелах
 9. **PWA + offline** (опційно) — service worker для блогу + push для нових постів
 
-### Sprint 5 closeout (паралельно)
+### Sprint 5 closeout ✅ DONE (2026-05-23, перед стартом Sprint 6)
 
-- Закомітити 7 Java тестів
-- Виправити Umami `/metrics?type=url` 400
-- Уніфікувати XFF parsing у Contact + Locale controllers
-- Прибрати email з blog post author UserResponse у public list
+Усі pending items Sprint 5 закрито — див. секцію "Sprint 5" вище.
 
 ### Related docs
 
