@@ -562,4 +562,79 @@ src/
 
 ---
 
+## Sprint 4 — Likes + Comments System ✅ (2026-05-18)
+
+- Backend V12 Flyway: `post_likes`, `comment_likes` (anonymous + registered), `admin_seen`, `updated_at` на comments
+- Post likes API: `POST/DELETE/GET /api/v1/posts/{slug}/likes` (public)
+- Comment likes API: `POST/DELETE /api/v1/comments/{id}/likes` (public)
+- Comment auto-approve: профанний фільтр → PENDING, чисті → APPROVED
+- Comment edit/delete: PATCH (автор), DELETE (автор або OWNER)
+- Admin-seen: PATCH `/api/v1/comments/{id}/seen` (OWNER only)
+- Subscriber email на новий approved comment
+- Security: rate limit на likes (20/min, 100/hr), Tomcat RemoteIp Valve (тільки 127.0.0.1 trusted), PublicUserResponse без email, isMine flag, 90-day IP cleanup
+- Frontend: like button, comment likes, edit/delete, admin Mark Seen
+- Тести: 49/49 pass
+
+## Sprint 5 — Performance + Hardening ✅ частково (2026-05-22..23)
+
+- N+1 fix у BlogPostService/CommentService (batch-counts)
+- PATCH `/api/v1/comments/{id}` rate limit (10 edits/min per IP)
+- DeepL → LibreTranslate в docs (cleanup)
+- ⚠️ Pending: 7 Java тестів uncommitted, Umami `400 BAD_REQUEST` на `/metrics?type=url`, ContactController + LocaleController XFF parsing, blog post author email exposure у public list
+
+## Sprint 6 — Контент Pipeline + Соцмережі (план, 2026-05-23+)
+
+### Goals
+
+Перевести cote-lapyx з ізольованого блогу в **центр контент-екосистеми**, де новий пост автоматично виходить у:
+
+- Telegram @cotelapyx
+- Facebook Page (id `61589364010597`)
+- LinkedIn (особиста + Company Page)
+- Dev.to (англомовна версія з `canonical_url`)
+- (опційно) Mastodon
+
+### Architecture
+
+Хаб публікації — **один n8n workflow** `Publish New Post`, НЕ окремі боти per-platform. Деталі — `~/code/active/server-cote/docs/n8n-workflows.md` workflow #2.
+
+```
+[cote-lapyx: OWNER publishes post]
+   │ POST /api/v1/admin/posts/{slug}/publish-social
+   ▼
+[n8n: Publish New Post]
+   │ (Gemini формує 4 варіанти)
+   ├──► Telegram @cotelapyx (через cote-channel-bot publisher)
+   ├──► Facebook Page Graph API
+   ├──► LinkedIn (особиста + Company)
+   └──► Dev.to (LibreTranslate uk→en + canonical)
+```
+
+### Roadmap
+
+1. **Backend webhook endpoint** `POST /api/v1/admin/posts/{slug}/publish-social` (OWNER, idempotent)
+2. **cote-channel-bot переорієнтація** — pure publisher (`webhook.py` з `/publish`, видалити AI-команди)
+3. **n8n workflow "Publish New Post"** — стартова версія з 2 платформами (Telegram + Facebook)
+4. **Facebook Developer App** + Page Access Token (long-lived)
+5. **LinkedIn OAuth App** + створити Company Page cote-lapyx
+6. **Dev.to API integration** — uk→en через LibreTranslate (вже self-hosted на сервері)
+7. **UTM-tracking** обовʼязково: `?utm_source=<platform>&utm_medium=social&utm_campaign=blog_<slug>`
+8. **Umami звіт** в admin: розбивка трафіку по соц-джерелах
+9. **PWA + offline** (опційно) — service worker для блогу + push для нових постів
+
+### Sprint 5 closeout (паралельно)
+
+- Закомітити 7 Java тестів
+- Виправити Umami `/metrics?type=url` 400
+- Уніфікувати XFF parsing у Contact + Locale controllers
+- Прибрати email з blog post author UserResponse у public list
+
+### Related docs
+
+- API endpoints: `docs/api-v1.yaml` v1.5.0 (likes/comments додати в task-041)
+- n8n workflows: `~/code/active/server-cote/docs/n8n-workflows.md`
+- Memory: `project_social_media_integration`, `feedback_publisher_bot_strategy`, `credentials_social_media`
+
+---
+
 _Документ: PROJECT.md | Проект: cote-lapyx.com | Основна мова: Українська_
