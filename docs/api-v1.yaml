@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Cote Lapyx API
-  version: 1.7.1
+  version: 1.8.0
   description: |
     REST API for cote-lapyx.com — a team website for Валерія, Сергій, Андрій.
 
@@ -188,7 +188,7 @@ components:
 
     ContactMessageStatus:
       type: string
-      enum: [new, read, replied]
+      enum: [new, read, replied, deleted]
 
     UserRole:
       type: string
@@ -1148,6 +1148,11 @@ components:
           type: string
           minLength: 10
           maxLength: 5000
+        website:
+          type: string
+          maxLength: 255
+          description: "Honeypot field — must be left blank by legitimate clients. Non-blank value causes silent discard of the submission."
+          x-internal: true
 
     ContactMessageStatusUpdateRequest:
       type: object
@@ -3462,12 +3467,15 @@ paths:
 
     delete:
       tags: [ContactMessages]
-      summary: Delete a contact message (owner only)
+      summary: Soft-delete a contact message (owner only)
       operationId: deleteContactMessage
       security:
         - bearerAuth: []
       x-roles: [owner]
-      description: Permanently removes a contact message from the inbox.
+      description: |
+        Sets the message status to `deleted`. The message is excluded from the default
+        list (i.e. `GET /admin/contact-messages` without `?status=deleted`) but is not
+        physically removed from the database. OWNER role required.
       parameters:
         - name: id
           in: path
@@ -3477,7 +3485,7 @@ paths:
             format: int64
       responses:
         "204":
-          description: Contact message deleted.
+          description: Message soft-deleted successfully.
         "401":
           $ref: "#/components/responses/Unauthorized"
         "403":
