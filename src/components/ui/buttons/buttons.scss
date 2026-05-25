@@ -114,6 +114,24 @@
     }
   }
 
+  // Danger — red/magenta tint for destructive actions (delete)
+  &--danger {
+    color: #ff6b8a;
+    border-color: rgba(#ff3860, 0.4);
+
+    &:hover,
+    &:focus-visible {
+      color: #ff3860;
+      border-color: rgba(#ff3860, 0.7);
+      background: rgba(#ff3860, 0.08);
+    }
+
+    &:focus-visible {
+      outline: 2px solid #ff3860;
+      outline-offset: 3px;
+    }
+  }
+
   // Sizes
   &--xs {
     padding: 4px 10px;
