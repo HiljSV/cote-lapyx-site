@@ -363,4 +363,15 @@
       box-shadow: 0 0 16px rgba(#ff3860, 0.06);
     }
   }
+
+  // Honeypot — physically removed from visual flow; bots fill it, humans never see it
+  &__honeypot {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
 }
