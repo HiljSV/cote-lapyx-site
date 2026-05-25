@@ -1015,7 +1015,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  /**
+   * Soft-deletes a contact message via DELETE /admin/contact-messages/:id.
+   * Prompts for confirmation before sending the request.
+   * @param {number} id - contact message primary key
+   */
   async function deleteContact(id) {
+    if (!confirm("Видалити звернення?")) return;
     try {
       const res = await fetchWithAuth(
         `${ADMIN_API}/admin/contact-messages/${id}`,
@@ -1025,9 +1031,12 @@ document.addEventListener("DOMContentLoaded", () => {
         // Refresh list — deleted message disappears from default view
         loadAdminContacts(adminContactsPage, adminContactsFilter);
         loadAdminStats();
+      } else {
+        alert("Помилка видалення. Спробуйте ще раз.");
       }
     } catch {
       console.error("Failed to delete contact message");
+      alert("Помилка зʼєднання. Спробуйте ще раз.");
     }
   }
 
