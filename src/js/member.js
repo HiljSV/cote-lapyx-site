@@ -95,6 +95,14 @@ function renderSocials(apiSocialLinks, localSocials) {
     .map(([key, url]) => {
       const icon = SOCIAL_ICONS[key];
       if (!icon) return "";
+
+      // Fix #1 — Normalize telegram handle to full URL.
+      // Users may store @handle, handle, or t.me/handle in their dashboard.
+      // Without normalization the browser treats it as a relative path.
+      if (key === "telegram" && url && !/^https?:\/\//.test(url)) {
+        url = "https://t.me/" + url.replace(/^@/, "");
+      }
+
       return `<a href="${escHtml(url)}" class="btn ${escHtml(icon.btnClass)}" target="_blank" rel="noopener" aria-label="${escHtml(icon.label)}">${icon.svg} ${escHtml(icon.label)}</a>`;
     })
     .join("");
@@ -124,6 +132,61 @@ function renderSkills(member) {
         <h3 class="member-skills__group-title">${escHtml(groupName)}</h3>
         <div class="member-skills__bars">${barsHtml}</div>
       </div>`;
+    })
+    .join("");
+}
+
+// Render project cards from API response (ProjectDTO list).
+// Uses the same .project-card BEM structure as renderProjects().
+// Maps API fields: shortDescription, projectUrl/githubUrl, technologies array.
+// Falls back to local JSON data via renderProjects() if API call fails.
+function renderProjectsFromApi(projects) {
+  const el = document.getElementById("member-projects");
+  if (!el) return;
+
+  // Empty state — no API projects for this member
+  if (!projects.length) {
+    el.innerHTML = '<p class="member-projects__empty">Немає проектів.</p>';
+    return;
+  }
+
+  el.innerHTML = projects
+    .map((p) => {
+      // Technologies from API are plain strings — render as cyan neon badges
+      const tagsHtml = (p.technologies || [])
+        .map(
+          (t) =>
+            `<li><span class="neon-badge neon-badge--cyan">${escHtml(t)}</span></li>`,
+        )
+        .join("");
+
+      // GitHub link — optional
+      const githubLink = p.githubUrl
+        ? `<a href="${escHtml(p.githubUrl)}" class="btn btn--ghost btn--sm" target="_blank" rel="noopener">GitHub</a>`
+        : "";
+
+      // Demo link — prefer projectUrl, fall back to project detail page by slug
+      const demoHref = p.projectUrl
+        ? p.projectUrl
+        : `project.html?slug=${encodeURIComponent(p.slug)}`;
+      const demoLink = `<a href="${escHtml(demoHref)}" class="btn btn--cyan btn--sm" target="_blank" rel="noopener">Demo</a>`;
+
+      // shortDescription from API (locale-aware, already translated by backend)
+      const desc = p.shortDescription || "";
+
+      return `<li>
+        <article class="project-card project-card--cyan">
+          <div class="project-card__cover-placeholder" aria-hidden="true">&lt;/&gt;</div>
+          <div class="project-card__body">
+            <h3 class="project-card__title">${escHtml(p.title)}</h3>
+            <p class="project-card__description">${escHtml(desc)}</p>
+            <ul class="project-card__tags" aria-label="Технології" role="list">${tagsHtml}</ul>
+          </div>
+          <div class="project-card__footer">
+            <div class="project-card__links">${githubLink}${demoLink}</div>
+          </div>
+        </article>
+      </li>`;
     })
     .join("");
 }
@@ -239,9 +302,15 @@ async function hydrateFromApi(memberId, member) {
     const ogImg = document.querySelector("meta[property='og:image']");
     if (ogImg && avatarUrl) ogImg.setAttribute("content", avatarUrl);
 
-    // Load posts for this member using their userId + locale
-    if (data.userId) {
-      await hydratePosts(data.userId, lang);
+    // Fix #2 — Load posts filtered by this member's userId.
+    // TeamMemberDTO.userId is marked `required` in the API contract and is always
+    // present. The fallback to data.user?.id guards against future API changes
+    // or partial responses where the top-level field might be missing.
+    const userId = data.userId || data.user?.id;
+    if (userId) {
+      await hydratePosts(userId, lang);
+      // Fix #3 — Load projects from real API (replaces local JSON placeholder data)
+      await hydrateProjects(userId, lang);
     }
   } catch (_) {
     // API unreachable — static data from local JSON remains visible
@@ -260,6 +329,24 @@ async function hydratePosts(userId, lang) {
     renderPosts(data.content || []);
   } catch (_) {
     // Silently fail — posts section stays empty rather than showing stale data
+  }
+}
+
+// Fetch and render the member's portfolio projects from the real API.
+// On success, overwrites the local JSON placeholder rendered by renderProjects().
+// On failure, silently keeps the local JSON data visible (already rendered).
+async function hydrateProjects(userId, lang) {
+  try {
+    // GET /api/v1/projects — public endpoint; authorId filters by member; locale for translated content
+    const res = await fetch(
+      `${API}/projects?size=10&sort=createdAt,desc&authorId=${userId}&locale=${lang}`,
+    );
+    if (!res.ok) return;
+    const data = await res.json();
+    // Replace local JSON placeholder with real API data
+    renderProjectsFromApi(data.content || []);
+  } catch (_) {
+    // Silently fail — local JSON placeholder rendered by renderProjects() stays visible
   }
 }
 
@@ -314,9 +401,12 @@ document.addEventListener("DOMContentLoaded", () => {
   // Hydrate from API (name, role, bio, avatar, posts) with current locale
   hydrateFromApi(memberId, member);
 
-  // Re-hydrate on language switch — name, bio, posts titles, project descriptions update
+  // Re-hydrate on language switch — name, bio, posts titles, project descriptions update.
+  // renderProjects(member) is intentionally omitted here: hydrateFromApi already calls
+  // hydrateProjects() which overwrites the DOM with locale-translated API data.
+  // Showing local JSON first and then immediately overwriting with API data would cause
+  // a visible flash. hydrateFromApi handles the full re-render on language change.
   document.addEventListener("cl:languagechange", () => {
     hydrateFromApi(memberId, member);
-    renderProjects(member);
   });
 });
