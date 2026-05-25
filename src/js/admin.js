@@ -975,6 +975,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="dash-list__actions" data-label="Дії">
               ${m.status === "NEW" ? `<button type="button" class="btn btn--ghost btn--xs" data-contact-action="read" data-id="${m.id}" title="Позначити прочитаним">✓</button>` : ""}
               <button type="button" class="btn btn--ghost btn--xs" data-contact-action="reply" data-email="${escHtml(m.email)}" data-name="${escHtml(m.name)}" title="Відповісти">✉</button>
+              <button type="button" class="btn btn--ghost btn--xs btn--danger" data-contact-action="delete" data-id="${m.id}" title="Видалити">✕</button>
             </div>
           </div>`;
         })
@@ -1014,7 +1015,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Delegate click on contacts body — read and reply actions
+  /**
+   * Soft-deletes a contact message via DELETE /admin/contact-messages/:id.
+   * Prompts for confirmation before sending the request.
+   * @param {number} id - contact message primary key
+   */
+  async function deleteContact(id) {
+    if (!confirm("Видалити звернення?")) return;
+    try {
+      const res = await fetchWithAuth(
+        `${ADMIN_API}/admin/contact-messages/${id}`,
+        { method: "DELETE" },
+      );
+      if (res.ok) {
+        // Refresh list — deleted message disappears from default view
+        loadAdminContacts(adminContactsPage, adminContactsFilter);
+        loadAdminStats();
+      } else {
+        alert("Помилка видалення. Спробуйте ще раз.");
+      }
+    } catch {
+      console.error("Failed to delete contact message");
+      alert("Помилка зʼєднання. Спробуйте ще раз.");
+    }
+  }
+
+  // Delegate click on contacts body — read, reply, and delete actions
   document
     .getElementById("admin-contacts-body")
     ?.addEventListener("click", (e) => {
@@ -1022,6 +1048,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!btn) return;
       const action = btn.dataset.contactAction;
       if (action === "read") markContactRead(Number(btn.dataset.id));
+      else if (action === "delete") deleteContact(Number(btn.dataset.id));
       else if (action === "reply") {
         // Opens native mail client — no confirm dialog needed
         window.location.href = `mailto:${btn.dataset.email}?subject=Re: cote-lapyx contact`;

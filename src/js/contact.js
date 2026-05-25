@@ -32,6 +32,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const name = form.name.value.trim();
     const email = form.email.value.trim();
     const message = form.message.value.trim();
+    // Honeypot field — sent as-is; backend silently discards submission if non-blank
+    const website = form.website?.value ?? "";
 
     // Disable submit button while the request is in flight
     submit.disabled = true;
@@ -42,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const res = await fetch(API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, message }),
+        body: JSON.stringify({ name, email, message, website }),
       });
 
       if (res.status === 201) {

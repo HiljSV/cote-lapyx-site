@@ -305,6 +305,18 @@
             ></span>
           </div>
 
+          <!-- Honeypot — visually hidden trap for bots; humans never see or fill this -->
+          <div class="contact-form__honeypot" aria-hidden="true">
+            <label for="cf-website">Website</label>
+            <input
+              type="text"
+              id="cf-website"
+              name="website"
+              tabindex="-1"
+              autocomplete="off"
+            />
+          </div>
+
           <!-- Form footer: submit button + hint -->
           <div class="contact-form__footer">
             <button
