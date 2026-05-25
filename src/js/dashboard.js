@@ -1224,29 +1224,60 @@ document.addEventListener("DOMContentLoaded", async () => {
   // My Subscriptions panel — current user's own subscriptions
   // ---------------------------------------------------------------------------
 
+  // Label maps for subscription type — shared with Subscribers (admin) panel below
+  const SUB_TYPE_LABEL = { GENERAL: "Загальне", PERSONAL: "Особисте" };
+
+  // Human-readable status labels for subscription status enum values
+  const SUB_STATUS_LABEL = {
+    ACTIVE: "Активна",
+    CANCELLED: "Скасована",
+    EXPIRED: "Закінчилась",
+  };
+
+  // CSS modifier suffix for dash-status--* class (maps status → visual badge style)
+  const SUB_STATUS_CLASS = {
+    ACTIVE: "published",
+    CANCELLED: "draft",
+    EXPIRED: "archived",
+  };
+
+  /**
+   * Load and render current user's own subscriptions.
+   * Calls GET /api/v1/subscriptions/me — returns plain array (not paginated).
+   * Fix: was incorrectly calling /users/me/subscriptions (404 — endpoint does not exist).
+   */
   async function loadMySubscriptions() {
     const listBody = document.getElementById("my-subscriptions-list-body");
     if (!listBody) return;
+
+    // Show loading state while fetching
     listBody.innerHTML = '<div class="dash-list__empty">Завантаження...</div>';
     try {
-      const res = await fetchWithAuth(`${API}/users/me/subscriptions`);
+      // Correct endpoint: /subscriptions/me returns List<SubscriptionResponse> (plain array)
+      const res = await fetchWithAuth(`${API}/subscriptions/me`);
       if (!res.ok) {
         listBody.innerHTML =
           '<div class="dash-list__empty">Помилка завантаження</div>';
         return;
       }
       const subs = await res.json();
+
+      // Empty state — user has no subscriptions yet
       if (!subs.length) {
         listBody.innerHTML =
           '<div class="dash-list__empty">У вас ще немає підписок</div>';
         return;
       }
-      // SUB_TYPE_LABEL / SUB_STATUS_LABEL / SUB_STATUS_CLASS declared below in Subscribers panel section
+
+      // Render subscription rows with status badge and optional cancel button
       listBody.innerHTML = subs
         .map((sub) => {
+          // Map status enum to CSS modifier and human label
           const sClass = SUB_STATUS_CLASS[sub.status] || "draft";
           const sLabel = SUB_STATUS_LABEL[sub.status] || sub.status;
           const typeLabel = SUB_TYPE_LABEL[sub.type] || sub.type;
+
+          // Cancel button — only for ACTIVE subscriptions
           const cancelBtn =
             sub.status === "ACTIVE"
               ? `<button type="button" class="btn btn--magenta btn--sm" data-action="cancel-my-sub" data-id="${sub.id}" aria-label="Скасувати підписку">Скасувати</button>`
@@ -1266,11 +1297,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  /**
+   * Cancel a specific subscription by id.
+   * Calls DELETE /api/v1/subscriptions/me/{id} — user-scoped cancel endpoint.
+   * Fix: was calling /subscriptions/{id} (wrong path — admin endpoint, returns 403).
+   * @param {string|number} id - Subscription ID from data-id attribute
+   */
   async function cancelMySubscription(id) {
     if (!confirm("Скасувати підписку?")) return;
-    const res = await fetchWithAuth(`${API}/subscriptions/${id}`, {
+
+    // Correct endpoint: /subscriptions/me/{id} — user cancels their own subscription
+    const res = await fetchWithAuth(`${API}/subscriptions/me/${id}`, {
       method: "DELETE",
     });
+
+    // Reload list on success (204 No Content or 200)
     if (res.ok || res.status === 204) {
       loadMySubscriptions();
     }
@@ -1367,19 +1408,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ---------------------------------------------------------------------------
   // Subscribers panel
+  // (SUB_TYPE_LABEL / SUB_STATUS_LABEL / SUB_STATUS_CLASS are declared in My
+  //  Subscriptions section above — shared between both panels)
   // ---------------------------------------------------------------------------
-
-  const SUB_TYPE_LABEL = { GENERAL: "Загальне", PERSONAL: "Особисте" };
-  const SUB_STATUS_LABEL = {
-    ACTIVE: "Активна",
-    CANCELLED: "Скасована",
-    EXPIRED: "Закінчилась",
-  };
-  const SUB_STATUS_CLASS = {
-    ACTIVE: "published",
-    CANCELLED: "draft",
-    EXPIRED: "archived",
-  };
 
   async function loadSubscribers(page, statusFilter) {
     subscribersPage = page;

@@ -199,7 +199,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     localStorage.removeItem("cl_access");
     localStorage.removeItem("cl_refresh");
-    window.location.replace("/login.html");
+    // Manual logout — redirect to main site (not login page)
+    window.location.replace("/");
   });
 
   // ---------------------------------------------------------------------------
