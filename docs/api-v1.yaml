@@ -1697,7 +1697,7 @@ paths:
       security: []
       x-roles: [public]
       description: |
-        Creates a new account with role `subscriber`. Rate-limited to 5 requests/minute per IP.
+        Creates a new account with role `subscriber`. Rate-limited to 3 requests per 10 minutes per IP.
       requestBody:
         required: true
         content:
@@ -2708,6 +2708,7 @@ paths:
       description: |
         Returns the total like count for the specified comment.
         `likedByCurrentUser` is always `false` for unauthenticated requests.
+
       parameters:
         - name: id
           in: path
