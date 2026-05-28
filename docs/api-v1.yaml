@@ -1697,7 +1697,7 @@ paths:
       security: []
       x-roles: [public]
       description: |
-        Creates a new account with role `subscriber`. Rate-limited to 5 requests/minute per IP.
+        Creates a new account with role `subscriber`. Rate-limited to 3 requests per 10 minutes per IP.
       requestBody:
         required: true
         content:
@@ -2708,6 +2708,13 @@ paths:
       description: |
         Returns the total like count for the specified comment.
         `likedByCurrentUser` is always `false` for unauthenticated requests.
+
+        > **Note (task-041 audit):** This GET endpoint is documented here but a dedicated
+        > `@GetMapping("/{id}/likes")` is absent from `CommentController`. The like count
+        > for a comment is currently embedded in `CommentDTO.likesCount` returned by
+        > `GET /posts/{slug}/comments`. A standalone GET endpoint should be added to
+        > `CommentController` or this path should be removed from the contract.
+        > See OUT OF SCOPE FINDING in task-041 report.
       parameters:
         - name: id
           in: path
