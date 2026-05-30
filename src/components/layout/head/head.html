@@ -1,18 +1,5 @@
 <head>
-  <!-- Google tag (gtag.js) -->
-  <script
-    async
-    src="https://www.googletagmanager.com/gtag/js?id=G-72FN0TSPCG"
-  ></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() {
-      dataLayer.push(arguments);
-    }
-    gtag("js", new Date());
-    gtag("config", "G-72FN0TSPCG");
-  </script>
-
+  <!-- Analytics: Umami only (self-hosted, privacy-first). Google Analytics removed (P2-2). -->
   <!-- Umami Analytics (self-hosted, privacy-first) -->
   <script
     async
@@ -73,6 +60,34 @@
   />
   <!-- Canonical URL -->
   <link rel="canonical" href="[[canonical]]" />
+
+  <!-- Structured data: Organization + WebSite (P2-1) — helps search engines understand the brand -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://cote-lapyx.com/#organization",
+          "name": "cote-lapyx",
+          "url": "https://cote-lapyx.com",
+          "logo": "https://cote-lapyx.com/assets/img/og-image.png",
+          "email": "info@cote-lapyx.com",
+          "sameAs": [
+            "https://github.com/cote-lapyx-com",
+            "https://t.me/cotelapyx"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://cote-lapyx.com/#website",
+          "url": "https://cote-lapyx.com",
+          "name": "cote-lapyx",
+          "publisher": { "@id": "https://cote-lapyx.com/#organization" }
+        }
+      ]
+    }
+  </script>
 
   <title>[[title]]</title>
 </head>

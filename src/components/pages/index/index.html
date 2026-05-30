@@ -11,12 +11,8 @@
   <div class="hero__container">
     <div class="hero__inner">
       <div class="hero__content">
-        <!-- Hero: eyebrow — translated via data-i18n -->
-        <p
-          class="hero__eyebrow"
-          aria-hidden="true"
-          data-i18n="index.hero.eyebrow"
-        >
+        <!-- Hero: eyebrow — translated via data-i18n; readable by screen readers (P2-5) -->
+        <p class="hero__eyebrow" data-i18n="index.hero.eyebrow">
           IT Studio — Ukraine
         </p>
 
@@ -790,8 +786,8 @@
       </li>
     </ul>
 
-    <!-- Projects: all projects CTA button — data-i18n on text -->
-    <div style="text-align: center; margin-top: 40px">
+    <!-- Projects: all projects CTA button — data-i18n on text (P2-9: utility class, not inline style) -->
+    <div class="section__cta">
       <a href="projects.html" class="btn btn--ghost"
         ><span data-i18n="btn.all_projects">Всі проекти</span></a
       >
@@ -822,7 +818,7 @@
 
     <ul class="blog-grid" id="blog-latest" role="list"></ul>
 
-    <div style="text-align: center; margin-top: 40px">
+    <div class="section__cta">
       <a
         href="blog.html"
         class="btn btn--ghost"

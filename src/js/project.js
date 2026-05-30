@@ -37,7 +37,7 @@ function escHtml(str) {
 function fmtDate(iso) {
   if (!iso) return "";
   // Read active language from localStorage — same pattern as blog.js
-  const lang = localStorage.getItem("cl_lang") || "en";
+  const lang = localStorage.getItem("cl_lang") || "uk";
   return new Date(iso).toLocaleDateString(lang, {
     day: "numeric",
     month: "short",
@@ -57,7 +57,7 @@ function authorInitials(name) {
 // Return Latin displayName for non-UK locales, fall back to Cyrillic name
 function authorDisplayName(author) {
   if (!author) return "—";
-  const lang = localStorage.getItem("cl_lang") || "en";
+  const lang = localStorage.getItem("cl_lang") || "uk";
   return lang !== "uk" && author.displayName
     ? author.displayName
     : author.name || "—";
@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     // Read current UI language so the backend returns translated project content
-    const lang = localStorage.getItem("cl_lang") || "en";
+    const lang = localStorage.getItem("cl_lang") || "uk";
     // GET /api/v1/projects/{slug} — public endpoint, no auth needed; locale passed for translations
     const res = await fetch(
       `${API}/projects/${encodeURIComponent(slug)}?locale=${lang}`,
@@ -221,7 +221,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const params = new URLSearchParams(window.location.search);
     const slug = params.get("slug");
     if (!slug) return;
-    const lang = localStorage.getItem("cl_lang") || "en";
+    const lang = localStorage.getItem("cl_lang") || "uk";
     try {
       // Fetch project again with new locale — public endpoint, no auth needed
       const res = await fetch(

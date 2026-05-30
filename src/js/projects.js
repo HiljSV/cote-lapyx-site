@@ -38,7 +38,7 @@ function authorInitials(name) {
 // Return Latin displayName for non-UK locales, fall back to Cyrillic name
 function authorDisplayName(author) {
   if (!author) return "—";
-  const lang = localStorage.getItem("cl_lang") || "en";
+  const lang = localStorage.getItem("cl_lang") || "uk";
   return lang !== "uk" && author.displayName
     ? author.displayName
     : author.name || "—";
@@ -138,7 +138,7 @@ async function loadProjects(page, append = false) {
   if (currentSearch) params.set("search", currentSearch);
 
   // Read current UI language so the backend returns translated project content
-  const lang = localStorage.getItem("cl_lang") || "en";
+  const lang = localStorage.getItem("cl_lang") || "uk";
   params.set("locale", lang);
 
   try {

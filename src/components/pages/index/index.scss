@@ -377,3 +377,32 @@
     }
   }
 }
+
+// =============================================================================
+// Disabled state for links without real URLs (P0-4: replaces href="#" pattern)
+// Used on social links and project buttons when a URL is not yet available
+// =============================================================================
+.is-disabled {
+  /* Visual: muted and not-allowed cursor signals inactivity */
+  cursor: not-allowed;
+  opacity: 0.35;
+  pointer-events: none;
+
+  /* Remove hover/focus effects — element is not interactive */
+  &:hover,
+  &:focus {
+    color: inherit;
+    border-color: inherit;
+    box-shadow: none;
+  }
+}
+
+// =============================================================================
+// Section CTA block — centered button below a grid/list section (P2-9)
+// Replaces inline `style="text-align:center;margin-top:40px"`
+// =============================================================================
+.section__cta {
+  /* Center the CTA button below a grid or list */
+  text-align: center;
+  margin-top: 40px;
+}
