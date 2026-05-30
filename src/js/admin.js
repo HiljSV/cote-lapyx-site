@@ -6,6 +6,14 @@
 import { fetchWithAuth } from "@js/common/auth.js";
 import { invalidateCompanyLinksCache } from "@js/socialLinks.js";
 
+// i18n — runtime translation lookup for dynamically rendered strings
+import {
+  detectLanguage,
+  applyTranslations,
+  initI18nSwitcher,
+  translate,
+} from "@js/i18n.js";
+
 document.addEventListener("DOMContentLoaded", () => {
   // ---------------------------------------------------------------------------
   // Element refs
@@ -238,27 +246,34 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentPeriod = "7d";
   let analyticsLoaded = false;
 
+  /**
+   * Render the pageviews bar chart with real data points.
+   * Localizes the empty-state message via translate().
+   * @param {Array<{date: string, pageviews: number}>} dataPoints
+   */
   function renderChart(dataPoints) {
     const barsEl = document.getElementById("analytics-bars");
     const labelsEl = document.getElementById("analytics-labels");
     if (!barsEl || !labelsEl) return;
 
+    // Empty state — localized
     if (!dataPoints || dataPoints.length === 0) {
-      barsEl.innerHTML =
-        '<div class="analytics-chart-loading">Немає даних</div>';
+      barsEl.innerHTML = `<div class="analytics-chart-loading">${translate("admin.state.no_data")}</div>`;
       labelsEl.innerHTML = "";
       return;
     }
 
     const max = Math.max(...dataPoints.map((d) => d.pageviews), 1);
 
+    // Render bar for each data point — title attribute shows date + localized pageviews label
     barsEl.innerHTML = dataPoints
       .map((d) => {
         const pct = Math.round((d.pageviews / max) * 100);
-        return `<div class="admin-activity-chart__bar" style="height:${pct || 2}%" title="${d.date}: ${d.pageviews} переглядів"></div>`;
+        return `<div class="admin-activity-chart__bar" style="height:${pct || 2}%" title="${d.date}: ${d.pageviews} ${translate("admin.analytics.pageviews")}"></div>`;
       })
       .join("");
 
+    // Render date labels below bars
     labelsEl.innerHTML = dataPoints
       .map((d) => {
         const dt = new Date(d.date);
@@ -268,12 +283,19 @@ document.addEventListener("DOMContentLoaded", () => {
       .join("");
   }
 
+  /**
+   * Render a metrics list (top pages / referrers) with a horizontal bar per item.
+   * Localizes the empty-state message via translate().
+   * @param {string} containerId - element id to render into
+   * @param {Array<{name: string, value: number}>} items
+   */
   function renderMetrics(containerId, items) {
     const el = document.getElementById(containerId);
     if (!el) return;
 
+    // Empty state — localized
     if (!items || items.length === 0) {
-      el.innerHTML = '<div class="analytics-chart-loading">Немає даних</div>';
+      el.innerHTML = `<div class="analytics-chart-loading">${translate("admin.state.no_data")}</div>`;
       return;
     }
 
@@ -292,27 +314,36 @@ document.addEventListener("DOMContentLoaded", () => {
       .join("");
   }
 
+  /**
+   * Format seconds into a human-readable duration string (localized abbreviations).
+   * @param {number} seconds
+   * @returns {string}
+   */
   function formatDuration(seconds) {
-    if (!seconds) return "0с";
+    if (!seconds) return "0s";
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
-    return m > 0 ? `${m}м ${s}с` : `${s}с`;
+    // Use neutral "m"/"s" abbreviations — acceptable across all 4 supported langs
+    return m > 0 ? `${m}m ${s}s` : `${s}s`;
   }
 
+  /**
+   * Load analytics data for the given period and populate the analytics panel.
+   * @param {string} period - "7d" | "30d" | "90d"
+   */
   async function loadAnalytics(period = "7d") {
     const base = "https://api.cote-lapyx.com/api/v1/analytics";
 
-    // Set loading state
+    // Set loading state with localized text
     document.querySelectorAll(".analytics-stat-value").forEach((el) => {
       el.textContent = "…";
     });
     document.getElementById("analytics-bars").innerHTML =
-      '<div class="analytics-chart-loading">Завантаження...</div>';
+      `<div class="analytics-chart-loading">${translate("admin.state.loading")}</div>`;
     ["analytics-top-pages", "analytics-referrers"].forEach((id) => {
       const el = document.getElementById(id);
       if (el)
-        el.innerHTML =
-          '<div class="analytics-chart-loading">Завантаження...</div>';
+        el.innerHTML = `<div class="analytics-chart-loading">${translate("admin.state.loading")}</div>`;
     });
 
     try {
@@ -323,6 +354,7 @@ document.addEventListener("DOMContentLoaded", () => {
         fetchWithAuth(`${base}/metrics?type=referrer&period=${period}&limit=8`),
       ]);
 
+      // Populate stat cards from /analytics/stats response
       if (statsRes.ok) {
         const stats = await statsRes.json();
         const statMap = {
@@ -341,22 +373,25 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
 
+      // Render bar chart from /analytics/pageviews response
       if (pvRes.ok) {
         const pv = await pvRes.json();
         renderChart(pv.data || []);
       }
 
+      // Render top pages metrics list
       if (pagesRes.ok) {
         renderMetrics("analytics-top-pages", await pagesRes.json());
       }
 
+      // Render referrers metrics list
       if (referrersRes.ok) {
         renderMetrics("analytics-referrers", await referrersRes.json());
       }
     } catch (err) {
       console.error("Analytics load error:", err);
       document.getElementById("analytics-bars").innerHTML =
-        '<div class="analytics-chart-loading">Помилка завантаження</div>';
+        `<div class="analytics-chart-loading">${translate("admin.state.error")}</div>`;
     }
   }
 
@@ -372,31 +407,120 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ---------------------------------------------------------------------------
-  // Settings form — save feedback (static demo, no real API)
+  // Settings panel — load + save via GET/PATCH /api/v1/admin/settings (DASH-1)
   // ---------------------------------------------------------------------------
 
   const settingsForm = document.getElementById("admin-settings-form");
 
-  settingsForm?.addEventListener("submit", (e) => {
+  /**
+   * Hydrate the settings form from GET /admin/settings.
+   * Also sets the registration and maintenance toggle checked states (DASH-5).
+   * Called when the settings panel is opened and on page load if settings is active.
+   */
+  async function loadAdminSettings() {
+    try {
+      // Authenticated GET — ROLE_OWNER required
+      const res = await fetchWithAuth(`${ADMIN_API}/admin/settings`);
+      if (!res.ok) {
+        console.warn("Failed to load admin settings:", res.status);
+        return;
+      }
+      const settings = await res.json();
+
+      // Populate text fields with values from backend
+      const siteName = document.getElementById("settings-site-name");
+      const contactEmail = document.getElementById("settings-email");
+      const description = document.getElementById("settings-description");
+
+      if (siteName) siteName.value = settings.siteName ?? "";
+      if (contactEmail) contactEmail.value = settings.contactEmail ?? "";
+      if (description) description.value = settings.siteDescription ?? "";
+
+      // Populate toggle checked state from backend booleans (DASH-5)
+      const regToggle = document.getElementById("settings-toggle-registration");
+      const maintToggle = document.getElementById(
+        "settings-toggle-maintenance",
+      );
+
+      if (regToggle) {
+        regToggle.checked = settings.registrationEnabled ?? true;
+      }
+      if (maintToggle) {
+        maintToggle.checked = settings.maintenanceMode ?? false;
+      }
+    } catch (err) {
+      console.error("Admin settings load error:", err);
+    }
+  }
+
+  /**
+   * Save general settings via PATCH /admin/settings.
+   * Reads site_name, contact_email, description, registrationEnabled, maintenanceMode.
+   * Shows toast on success/error.
+   */
+  settingsForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const submitBtn = settingsForm.querySelector('[type="submit"]');
     const originalHTML = submitBtn.innerHTML;
-
-    // Visual "saved" feedback
-    submitBtn.innerHTML = `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-      </svg>
-      Збережено
-    `;
     submitBtn.disabled = true;
 
-    // Restore button after 2.5 s
-    setTimeout(() => {
-      submitBtn.innerHTML = originalHTML;
+    // Read all field values from the form
+    const siteName =
+      document.getElementById("settings-site-name")?.value.trim() || undefined;
+    const contactEmail =
+      document.getElementById("settings-email")?.value.trim() || undefined;
+    const siteDescription =
+      document.getElementById("settings-description")?.value.trim() ||
+      undefined;
+    // Read boolean toggles — checked state reflects current user intent (DASH-5)
+    const registrationEnabled =
+      document.getElementById("settings-toggle-registration")?.checked ?? true;
+    const maintenanceMode =
+      document.getElementById("settings-toggle-maintenance")?.checked ?? false;
+
+    // Build PATCH payload — only include defined fields
+    const payload = {};
+    if (siteName !== undefined) payload.siteName = siteName;
+    if (contactEmail !== undefined) payload.contactEmail = contactEmail;
+    if (siteDescription !== undefined)
+      payload.siteDescription = siteDescription;
+    payload.registrationEnabled = registrationEnabled;
+    payload.maintenanceMode = maintenanceMode;
+
+    try {
+      // Authenticated PATCH — ROLE_OWNER required
+      const res = await fetchWithAuth(`${ADMIN_API}/admin/settings`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        // Visual saved feedback — checkmark + localized "Saved" label
+        submitBtn.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+          </svg>
+          ${translate("admin.state.saved")}
+        `;
+        // Restore button label after 2.5 s
+        setTimeout(() => {
+          submitBtn.innerHTML = originalHTML;
+          submitBtn.disabled = false;
+        }, 2500);
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalHTML;
+        // Show error alert — localized
+        alert(translate("admin.state.save_error"));
+      }
+    } catch (err) {
+      console.error("Admin settings save error:", err);
       submitBtn.disabled = false;
-    }, 2500);
+      submitBtn.innerHTML = originalHTML;
+      alert(translate("error.network"));
+    }
   });
 
   // ---------------------------------------------------------------------------
@@ -405,11 +529,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const ADMIN_API = "https://api.cote-lapyx.com/api/v1";
 
-  const STATUS_LABEL = {
-    PUBLISHED: "Опубліковано",
-    DRAFT: "Чернетка",
-    ARCHIVED: "Архів",
-  };
+  // Status labels — lazily resolved via translate() so they update on language change
+  // Keys: admin.status.published / draft / archived
+  const STATUS_LABEL = () => ({
+    PUBLISHED: translate("admin.status.published"),
+    DRAFT: translate("admin.status.draft"),
+    ARCHIVED: translate("admin.status.archived"),
+  });
   const STATUS_CLASS = {
     PUBLISHED: "published",
     DRAFT: "draft",
@@ -642,10 +768,12 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       const data = await res.json();
+      // Resolve status labels at render time so they reflect the current language
+      const statusLabels = STATUS_LABEL();
       const rows = (data.content || [])
         .map((post) => {
           const sClass = STATUS_CLASS[post.status] || "draft";
-          const sLabel = STATUS_LABEL[post.status] || post.status;
+          const sLabel = statusLabels[post.status] || post.status;
           return `<div class="dash-list__row">
           <div class="dash-list__title" data-label="Заголовок">${escHtml(post.title)}</div>
           <div data-label="Автор">${escHtml(post.author?.name || "—")}</div>
@@ -690,6 +818,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       const data = await res.json();
+      // Resolve status labels at render time so they reflect the current language
+      const projStatusLabels = STATUS_LABEL();
       const rows = (data.content || [])
         .map((project) => {
           const techs = (project.technologies || [])
@@ -700,7 +830,7 @@ document.addEventListener("DOMContentLoaded", () => {
             )
             .join("");
           const sClass = STATUS_CLASS[project.status] || "draft";
-          const sLabel = STATUS_LABEL[project.status] || project.status;
+          const sLabel = projStatusLabels[project.status] || project.status;
           return `<div class="dash-list__row">
           <div class="dash-list__title" data-label="Назва">${escHtml(project.title)}</div>
           <div data-label="Автор">${escHtml(project.author?.name || "—")}</div>
@@ -732,14 +862,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // Approve/Reject replaced by "Mark Seen" for APPROVED comments
   // ---------------------------------------------------------------------------
 
-  // Comment status display labels (Ukrainian)
-  const COMMENT_STATUS_LABEL = {
-    PENDING: "Очікує",
-    APPROVED: "Схвалено",
-    SEEN: "Переглянуто",
-    REJECTED: "Відхилено",
-    DELETED: "Видалено",
-  };
+  // Comment status display labels — resolved via translate() at render time
+  // Keys: admin.comment_status.pending / approved / seen / rejected / deleted
+  const COMMENT_STATUS_LABEL = () => ({
+    PENDING: translate("admin.comment_status.pending"),
+    APPROVED: translate("admin.comment_status.approved"),
+    SEEN: translate("admin.comment_status.seen"),
+    REJECTED: translate("admin.comment_status.rejected"),
+    DELETED: translate("admin.comment_status.deleted"),
+  });
 
   // Comment status CSS modifier for dash-status badge
   const COMMENT_STATUS_CLASS = {
@@ -773,29 +904,32 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       const data = await res.json();
+      // Resolve comment status labels at render time (language-aware)
+      const commentStatusLabels = COMMENT_STATUS_LABEL();
       const rows = (data.content || [])
         .map((c) => {
           const sClass = COMMENT_STATUS_CLASS[c.status] || "draft";
-          const sLabel = COMMENT_STATUS_LABEL[c.status] || c.status;
+          const sLabel = commentStatusLabels[c.status] || c.status;
 
           // PENDING — show Approve + Reject (manual bad-words moderation)
           const canApprove = c.status === "PENDING" || c.status === "REJECTED";
           const canReject = c.status === "PENDING";
+          // Action button labels — localized
           const approveBtn = canApprove
-            ? `<button type="button" class="btn btn--cyan btn--sm" data-action="approve" data-id="${c.id}">Схвалити</button>`
+            ? `<button type="button" class="btn btn--cyan btn--sm" data-action="approve" data-id="${c.id}">${translate("admin.action.approve")}</button>`
             : "";
           const rejectBtn = canReject
-            ? `<button type="button" class="btn btn--ghost btn--sm" data-action="reject" data-id="${c.id}">Відхилити</button>`
+            ? `<button type="button" class="btn btn--ghost btn--sm" data-action="reject" data-id="${c.id}">${translate("admin.action.reject")}</button>`
             : "";
 
           // APPROVED — show "Mark Seen" button (PATCH /comments/{id}/seen)
           const seenBtn =
             c.status === "APPROVED"
-              ? `<button type="button" class="btn btn--ghost btn--sm" data-action="seen" data-id="${c.id}">Переглянуто</button>`
+              ? `<button type="button" class="btn btn--ghost btn--sm" data-action="seen" data-id="${c.id}">${translate("admin.action.mark_seen")}</button>`
               : "";
 
           // Delete — available for all statuses
-          const deleteBtn = `<button type="button" class="btn btn--magenta btn--sm" data-action="delete-comment" data-id="${c.id}">Видалити</button>`;
+          const deleteBtn = `<button type="button" class="btn btn--magenta btn--sm" data-action="delete-comment" data-id="${c.id}">${translate("admin.action.delete")}</button>`;
 
           // Post link — show slug if available, fallback to postId
           const postRef = c.postSlug
@@ -803,17 +937,18 @@ document.addEventListener("DOMContentLoaded", () => {
             : `#${escHtml(String(c.postId || "—"))}`;
 
           return `<div class="dash-list__row">
-            <div data-label="Автор">${escHtml(c.author?.name || c.author?.email || "—")}</div>
-            <div data-label="Коментар">${escHtml((c.content || "").slice(0, 60))}${(c.content || "").length > 60 ? "…" : ""}</div>
-            <div class="dash-list__title" data-label="Пост">${postRef}</div>
-            <div class="dash-list__date" data-label="Дата">${fmtDate(c.createdAt)}</div>
-            <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
-            <div class="dash-list__actions" data-label="Дії">${approveBtn}${rejectBtn}${seenBtn}${deleteBtn}</div>
+            <div data-label="${translate("admin.col.author")}">${escHtml(c.author?.name || c.author?.email || "—")}</div>
+            <div data-label="${translate("admin.col.comment")}">${escHtml((c.content || "").slice(0, 60))}${(c.content || "").length > 60 ? "…" : ""}</div>
+            <div class="dash-list__title" data-label="${translate("admin.col.post")}">${postRef}</div>
+            <div class="dash-list__date" data-label="${translate("admin.col.date")}">${fmtDate(c.createdAt)}</div>
+            <div data-label="${translate("admin.col.status")}"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
+            <div class="dash-list__actions" data-label="${translate("admin.col.actions")}">${approveBtn}${rejectBtn}${seenBtn}${deleteBtn}</div>
           </div>`;
         })
         .join("");
       body.innerHTML =
-        rows || '<div class="dash-list__empty">Коментарів ще немає</div>';
+        rows ||
+        `<div class="dash-list__empty">${translate("admin.empty.comments")}</div>`;
       if (data.page) {
         renderPagination(
           "admin-comments-pagination",
@@ -932,22 +1067,30 @@ document.addEventListener("DOMContentLoaded", () => {
   // Admin — contact messages panel
   // ---------------------------------------------------------------------------
 
-  const CONTACT_STATUS_LABEL = {
-    NEW: "Нове",
-    READ: "Прочитано",
-    REPLIED: "Відповіли",
-  };
+  // Contact status labels — resolved via translate() at render time
+  // Keys: admin.contact_status.new / read / replied
+  const CONTACT_STATUS_LABEL = () => ({
+    NEW: translate("admin.contact_status.new"),
+    READ: translate("admin.contact_status.read"),
+    REPLIED: translate("admin.contact_status.replied"),
+  });
   const CONTACT_STATUS_COLOR = {
     NEW: "magenta",
     READ: "cyan",
     REPLIED: "green",
   };
 
+  /**
+   * Load admin contact messages with optional status filter.
+   * @param {number} page - zero-based page number
+   * @param {string} status - empty string = all, or NEW/READ/REPLIED
+   */
   async function loadAdminContacts(page, status = "") {
     adminContactsPage = page;
     const body = document.getElementById("admin-contacts-body");
     if (!body) return;
-    body.innerHTML = '<div class="dash-list__empty">Завантаження...</div>';
+    // Loading state — localized
+    body.innerHTML = `<div class="dash-list__empty">${translate("admin.state.loading")}</div>`;
 
     const statusParam = status ? `&status=${status}` : "";
     try {
@@ -955,35 +1098,37 @@ document.addEventListener("DOMContentLoaded", () => {
         `${ADMIN_API}/admin/contact-messages?size=20&sort=createdAt,desc&page=${page}${statusParam}`,
       );
       if (!res.ok) {
-        body.innerHTML =
-          '<div class="dash-list__empty">Помилка завантаження</div>';
+        body.innerHTML = `<div class="dash-list__empty">${translate("admin.state.error")}</div>`;
         return;
       }
       const data = await res.json();
+      // Resolve contact status labels at render time (language-aware)
+      const contactStatusLabels = CONTACT_STATUS_LABEL();
       const rows = (data.content || [])
         .map((m) => {
           const statusColor = CONTACT_STATUS_COLOR[m.status] || "cyan";
-          const statusLabel = CONTACT_STATUS_LABEL[m.status] || m.status;
+          const statusLabel = contactStatusLabels[m.status] || m.status;
           // Truncate message to 80 chars for preview
           const preview =
             escHtml(m.message || "").slice(0, 80) +
             (m.message?.length > 80 ? "…" : "");
           return `<div class="dash-list__row">
-            <div class="dash-list__title" data-label="Ім'я">${escHtml(m.name)}</div>
-            <div data-label="Email"><a href="mailto:${escHtml(m.email)}" class="dash-list__link">${escHtml(m.email)}</a></div>
-            <div data-label="Повідомлення" class="dash-list__preview">${preview}</div>
-            <div class="dash-list__date" data-label="Дата">${fmtDate(m.createdAt)}</div>
-            <div data-label="Статус"><span class="neon-badge neon-badge--${statusColor}">${statusLabel}</span></div>
-            <div class="dash-list__actions" data-label="Дії">
-              ${m.status === "NEW" ? `<button type="button" class="btn btn--ghost btn--xs" data-contact-action="read" data-id="${m.id}" title="Позначити прочитаним">✓</button>` : ""}
-              <button type="button" class="btn btn--ghost btn--xs" data-contact-action="reply" data-email="${escHtml(m.email)}" data-name="${escHtml(m.name)}" title="Відповісти">✉</button>
-              <button type="button" class="btn btn--ghost btn--xs btn--danger" data-contact-action="delete" data-id="${m.id}" title="Видалити">✕</button>
+            <div class="dash-list__title" data-label="${translate("admin.col.name")}">${escHtml(m.name)}</div>
+            <div data-label="${translate("admin.col.email")}"><a href="mailto:${escHtml(m.email)}" class="dash-list__link">${escHtml(m.email)}</a></div>
+            <div data-label="${translate("admin.col.message")}" class="dash-list__preview">${preview}</div>
+            <div class="dash-list__date" data-label="${translate("admin.col.date")}">${fmtDate(m.createdAt)}</div>
+            <div data-label="${translate("admin.col.status")}"><span class="neon-badge neon-badge--${statusColor}">${statusLabel}</span></div>
+            <div class="dash-list__actions" data-label="${translate("admin.col.actions")}">
+              ${m.status === "NEW" ? `<button type="button" class="btn btn--ghost btn--xs" data-contact-action="read" data-id="${m.id}" title="${translate("admin.action.mark_read")}">✓</button>` : ""}
+              <button type="button" class="btn btn--ghost btn--xs" data-contact-action="reply" data-email="${escHtml(m.email)}" data-name="${escHtml(m.name)}" title="${translate("admin.action.reply")}">✉</button>
+              <button type="button" class="btn btn--ghost btn--xs btn--danger" data-contact-action="delete" data-id="${m.id}" title="${translate("admin.action.delete")}">✕</button>
             </div>
           </div>`;
         })
         .join("");
       body.innerHTML =
-        rows || '<div class="dash-list__empty">Звернень немає</div>';
+        rows ||
+        `<div class="dash-list__empty">${translate("admin.empty.contacts")}</div>`;
       renderPagination(
         "admin-contacts-pagination",
         data.number,
@@ -1155,14 +1300,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
   // ---------------------------------------------------------------------------
-  // Settings panel — load social contacts when switching to settings
+  // Settings panel — load general settings + social contacts when switching to settings
   // ---------------------------------------------------------------------------
 
-  // Wire the settings nav link to load social contacts on first open
+  // Wire the settings nav link: load both general settings and social contacts
   navLinks.forEach((link) => {
     if (link.dataset.section === "settings") {
       link.addEventListener("click", () => {
-        // Load social contacts only when the settings panel is activated
+        // Hydrate form fields from backend on every open (ensures fresh state)
+        loadAdminSettings();
+        // Load social contacts (existing behaviour — preserved)
         loadAdminSocialContacts();
       });
     }

@@ -234,13 +234,12 @@
       </ul>
     </nav>
 
-    <!-- Logout button — i18n: admin.btn.logout -->
+    <!-- Logout button — i18n label on inner span to preserve SVG sibling -->
     <button
       type="button"
       class="btn btn--ghost dash-sidebar__logout"
       id="admin-logout"
       aria-label="Вийти з адмін-панелі"
-      data-i18n="admin.btn.logout"
     >
       <svg
         width="18"
@@ -253,7 +252,8 @@
           d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"
         />
       </svg>
-      Вийти
+      <!-- Label span — i18n: admin.btn.logout -->
+      <span data-i18n="admin.btn.logout">Вийти</span>
     </button>
   </aside>
   <!-- /admin-sidebar -->
@@ -498,11 +498,12 @@
           class="dash-list dash-list--admin-reg"
           aria-label="Таблиця останніх реєстрацій"
         >
+          <!-- Column headers — localized via data-i18n -->
           <div class="dash-list__head" aria-hidden="true">
-            <div>Ім'я</div>
-            <div>Email</div>
-            <div>Роль</div>
-            <div>Дата</div>
+            <div data-i18n="admin.col.name">Ім'я</div>
+            <div data-i18n="admin.col.email">Email</div>
+            <div data-i18n="admin.col.role">Роль</div>
+            <div data-i18n="admin.col.date">Дата</div>
           </div>
           <div id="admin-recent-users-body"></div>
         </div>
@@ -527,13 +528,13 @@
           class="dash-list dash-list--admin-users"
           aria-label="Таблиця всіх користувачів"
         >
-          <!-- Table header — 5 columns: name, email, role, registered, actions -->
+          <!-- Table header — 5 columns: name, email, role, registered, actions — localized via data-i18n -->
           <div class="dash-list__head" aria-hidden="true">
-            <div>Ім'я</div>
-            <div>Email</div>
-            <div>Роль</div>
-            <div>Зареєстрований</div>
-            <div>Дії</div>
+            <div data-i18n="admin.col.name">Ім'я</div>
+            <div data-i18n="admin.col.email">Email</div>
+            <div data-i18n="admin.col.role">Роль</div>
+            <div data-i18n="admin.col.registered">Зареєстрований</div>
+            <div data-i18n="admin.col.actions">Дії</div>
           </div>
           <!-- Rows injected by admin.js loadAdminUsers() -->
           <div id="admin-users-body"></div>
@@ -559,12 +560,13 @@
           class="dash-list dash-list--admin-posts"
           aria-label="Таблиця всіх публікацій"
         >
+          <!-- Column headers — localized via data-i18n -->
           <div class="dash-list__head" aria-hidden="true">
-            <div>Заголовок</div>
-            <div>Автор</div>
-            <div>Дата</div>
-            <div>Статус</div>
-            <div>Дії</div>
+            <div data-i18n="admin.col.title">Заголовок</div>
+            <div data-i18n="admin.col.author">Автор</div>
+            <div data-i18n="admin.col.date">Дата</div>
+            <div data-i18n="admin.col.status">Статус</div>
+            <div data-i18n="admin.col.actions">Дії</div>
           </div>
           <div id="admin-posts-body"></div>
         </div>
@@ -589,11 +591,12 @@
           class="dash-list dash-list--admin-projects"
           aria-label="Таблиця всіх проектів"
         >
+          <!-- Column headers — localized via data-i18n -->
           <div class="dash-list__head" aria-hidden="true">
-            <div>Назва</div>
-            <div>Автор</div>
-            <div>Технології</div>
-            <div>Статус</div>
+            <div data-i18n="admin.col.name">Назва</div>
+            <div data-i18n="admin.col.author">Автор</div>
+            <div data-i18n="admin.col.technologies">Технології</div>
+            <div data-i18n="admin.col.status">Статус</div>
           </div>
           <div id="admin-projects-body"></div>
         </div>
@@ -685,14 +688,14 @@
           class="dash-list dash-list--admin-comments"
           aria-label="Таблиця коментарів"
         >
-          <!-- Table header: column labels (aria-hidden — decorative) -->
+          <!-- Table header: column labels — localized via data-i18n -->
           <div class="dash-list__head" aria-hidden="true">
-            <div>Автор</div>
-            <div>Коментар</div>
-            <div>Пост</div>
-            <div>Дата</div>
-            <div>Статус</div>
-            <div>Дії</div>
+            <div data-i18n="admin.col.author">Автор</div>
+            <div data-i18n="admin.col.comment">Коментар</div>
+            <div data-i18n="admin.col.post">Пост</div>
+            <div data-i18n="admin.col.date">Дата</div>
+            <div data-i18n="admin.col.status">Статус</div>
+            <div data-i18n="admin.col.actions">Дії</div>
           </div>
           <!-- JS renders comment rows here -->
           <div id="admin-comments-body"></div>
@@ -772,14 +775,14 @@
           class="dash-list dash-list--admin-contacts"
           aria-label="Таблиця звернень"
         >
-          <!-- Table header (desktop) -->
+          <!-- Table header (desktop) — localized via data-i18n -->
           <div class="dash-list__head" aria-hidden="true">
-            <div>Ім'я</div>
-            <div>Email</div>
-            <div>Повідомлення</div>
-            <div>Дата</div>
-            <div>Статус</div>
-            <div>Дії</div>
+            <div data-i18n="admin.col.name">Ім'я</div>
+            <div data-i18n="admin.col.email">Email</div>
+            <div data-i18n="admin.col.message">Повідомлення</div>
+            <div data-i18n="admin.col.date">Дата</div>
+            <div data-i18n="admin.col.status">Статус</div>
+            <div data-i18n="admin.col.actions">Дії</div>
           </div>
           <!-- Rows injected by admin.js loadAdminContacts() -->
           <div id="admin-contacts-body"></div>
@@ -827,12 +830,12 @@
                 data-i18n="admin.settings.site_name"
                 >Назва сайту</label
               >
+              <!-- value populated by admin.js loadAdminSettings() -->
               <input
                 class="dash-profile-form__input"
                 type="text"
                 id="settings-site-name"
                 name="site_name"
-                value="COTE-LAPYX"
                 autocomplete="off"
               />
             </div>
@@ -846,12 +849,12 @@
                 data-i18n="admin.settings.contact_email"
                 >Контактний email</label
               >
+              <!-- value populated by admin.js loadAdminSettings() — admin@cote-lapyx.com only as backend default, NOT hardcoded -->
               <input
                 class="dash-profile-form__input"
                 type="email"
                 id="settings-email"
                 name="contact_email"
-                value="admin@cote-lapyx.com"
                 autocomplete="email"
               />
             </div>
@@ -867,26 +870,24 @@
                 data-i18n="admin.settings.description"
                 >Опис сайту</label
               >
+              <!-- content populated by admin.js loadAdminSettings() -->
               <textarea
                 class="dash-profile-form__input dash-profile-form__textarea"
                 id="settings-description"
                 name="description"
                 rows="3"
-              >
-IT команда, що будує майбутнє</textarea
-              >
+              ></textarea>
             </div>
 
             <!-- Submit — full width, right-aligned via __actions -->
             <div
               class="dash-profile-form__group dash-profile-form__group--full dash-profile-form__actions"
             >
-              <!-- Save button — i18n: admin.btn.save_settings -->
+              <!-- Save button — data-i18n on inner span to preserve SVG sibling -->
               <button
                 type="submit"
                 class="btn btn--cyan"
                 aria-label="Зберегти загальні налаштування"
-                data-i18n="admin.btn.save_settings"
               >
                 <svg
                   width="16"
@@ -899,7 +900,10 @@ IT команда, що будує майбутнє</textarea
                     d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"
                   />
                 </svg>
-                Зберегти налаштування
+                <!-- Label span — i18n: admin.btn.save_settings -->
+                <span data-i18n="admin.btn.save_settings"
+                  >Зберегти налаштування</span
+                >
               </button>
             </div>
           </form>
@@ -1261,16 +1265,17 @@ IT команда, що будує майбутнє</textarea
             Системні перемикачі
           </h3>
 
-          <!-- Toggle: new user registration -->
+          <!-- Toggle: new user registration — state set by admin.js loadAdminSettings() -->
           <div class="admin-toggle-row">
             <div class="admin-toggle-row__info">
               <!-- Toggle label — i18n: admin.toggle.registration -->
-              <p
+              <label
                 class="admin-toggle-row__label"
+                for="settings-toggle-registration"
                 data-i18n="admin.toggle.registration"
               >
                 Реєстрація нових користувачів
-              </p>
+              </label>
               <!-- Toggle description — i18n: admin.toggle.registration_desc -->
               <p
                 class="admin-toggle-row__desc"
@@ -1279,25 +1284,31 @@ IT команда, що будує майбутнє</textarea
                 Дозволяє новим користувачам реєструватися на сайті
               </p>
             </div>
+            <!-- Checkbox id allows JS to get/set checked state; aria-label for screen readers -->
             <label
               class="admin-toggle"
               aria-label="Реєстрація нових користувачів"
             >
-              <input type="checkbox" checked aria-checked="true" />
+              <input
+                type="checkbox"
+                id="settings-toggle-registration"
+                name="registrationEnabled"
+              />
               <span class="admin-toggle__slider"></span>
             </label>
           </div>
 
-          <!-- Toggle: maintenance mode -->
+          <!-- Toggle: maintenance mode — state set by admin.js loadAdminSettings() -->
           <div class="admin-toggle-row">
             <div class="admin-toggle-row__info">
               <!-- Toggle label — i18n: admin.toggle.maintenance -->
-              <p
+              <label
                 class="admin-toggle-row__label"
+                for="settings-toggle-maintenance"
                 data-i18n="admin.toggle.maintenance"
               >
                 Режим обслуговування
-              </p>
+              </label>
               <!-- Toggle description — i18n: admin.toggle.maintenance_desc -->
               <p
                 class="admin-toggle-row__desc"
@@ -1306,8 +1317,13 @@ IT команда, що будує майбутнє</textarea
                 Показує сторінку технічних робіт для всіх відвідувачів
               </p>
             </div>
+            <!-- Checkbox id allows JS to get/set checked state; aria-label for screen readers -->
             <label class="admin-toggle" aria-label="Режим обслуговування">
-              <input type="checkbox" aria-checked="false" />
+              <input
+                type="checkbox"
+                id="settings-toggle-maintenance"
+                name="maintenanceMode"
+              />
               <span class="admin-toggle__slider"></span>
             </label>
           </div>
