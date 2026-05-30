@@ -4,6 +4,7 @@
 // =============================================================================
 
 import { fetchWithAuth } from "@js/common/auth.js";
+import { invalidateCompanyLinksCache } from "@js/socialLinks.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   // ---------------------------------------------------------------------------
@@ -1152,6 +1153,306 @@ document.addEventListener("DOMContentLoaded", () => {
         submitBtn.disabled = false;
       }
     });
+
+  // ---------------------------------------------------------------------------
+  // Settings panel — load social contacts when switching to settings
+  // ---------------------------------------------------------------------------
+
+  // Wire the settings nav link to load social contacts on first open
+  navLinks.forEach((link) => {
+    if (link.dataset.section === "settings") {
+      link.addEventListener("click", () => {
+        // Load social contacts only when the settings panel is activated
+        loadAdminSocialContacts();
+      });
+    }
+  });
+
+  // ---------------------------------------------------------------------------
+  // Admin contacts (social links) — GET / POST / PATCH / DELETE /admin/contacts
+  // ---------------------------------------------------------------------------
+
+  // Fixed 6 platform types matching the API enum; order determines display
+  const SOCIAL_PLATFORMS = [
+    "TELEGRAM",
+    "GITHUB",
+    "INSTAGRAM",
+    "FACEBOOK",
+    "LINKEDIN",
+    "EMAIL",
+  ];
+
+  // URL validation patterns — allowed protocol prefixes per platform
+  // EMAIL allows bare address (no scheme required); others need https?/tg:/t.me
+  const SOCIAL_URL_PATTERNS = {
+    TELEGRAM: /^(https?:\/\/|tg:\/\/|t\.me\/)/i,
+    GITHUB: /^https?:\/\//i,
+    INSTAGRAM: /^https?:\/\//i,
+    FACEBOOK: /^https?:\/\//i,
+    LINKEDIN: /^https?:\/\//i,
+    // Email: bare address OR mailto: scheme
+    EMAIL: /^(mailto:|[^@\s]+@[^@\s]+\.[^@\s]+$)/i,
+  };
+
+  // In-memory map of existing contacts from the API: { PLATFORM: { id, value, enabled, label, displayOrder } }
+  // Populated by loadAdminSocialContacts(); used by saveAdminSocialContacts() to decide POST vs PATCH vs DELETE
+  let adminContactsState = {};
+
+  /**
+   * Validate the URL/address value for a given platform.
+   * Returns null on success, or an error message string on failure.
+   * Empty value is always valid (means "no link" — will DELETE if id exists).
+   * @param {string} platform - uppercase enum (TELEGRAM, GITHUB, etc.)
+   * @param {string} value - raw input value
+   * @returns {string|null} error message or null
+   */
+  function validateSocialUrl(platform, value) {
+    // Empty value is valid — treated as "clear/delete"
+    if (!value.trim()) return null;
+    const pattern = SOCIAL_URL_PATTERNS[platform];
+    if (!pattern) return null;
+    if (!pattern.test(value.trim())) {
+      // Friendly error per platform type
+      if (platform === "EMAIL") {
+        return "Введіть email-адресу або mailto: посилання";
+      }
+      return "Введіть коректне URL (https://, tg:// або t.me/ для Telegram)";
+    }
+    return null;
+  }
+
+  /**
+   * Show or hide the inline validation error for a platform row.
+   * @param {string} platform - uppercase platform enum
+   * @param {string|null} message - error text or null to clear
+   */
+  function setSocialRowError(platform, message) {
+    const errorEl = document.getElementById(`social-error-${platform}`);
+    if (!errorEl) return;
+    if (message) {
+      // Use textContent (not innerHTML) — escapes user-facing error strings
+      errorEl.textContent = message;
+      errorEl.removeAttribute("hidden");
+    } else {
+      errorEl.textContent = "";
+      errorEl.setAttribute("hidden", "");
+    }
+  }
+
+  /**
+   * Show the save feedback message below the social contacts block.
+   * Auto-hides after 3 seconds on success.
+   * @param {string} message - text to show
+   * @param {"success"|"error"} type - determines colour class
+   */
+  function showSocialFeedback(message, type) {
+    const el = document.getElementById("admin-social-feedback");
+    if (!el) return;
+    // Use textContent — escapes any HTML in the message
+    el.textContent = message;
+    el.className = `admin-social-feedback admin-social-feedback--${type}`;
+    el.removeAttribute("hidden");
+    // Auto-dismiss success message after 3 s
+    if (type === "success") {
+      setTimeout(() => {
+        el.setAttribute("hidden", "");
+        el.textContent = "";
+        el.className = "admin-social-feedback";
+      }, 3000);
+    }
+  }
+
+  /**
+   * Load existing company contacts from GET /admin/contacts and populate rows.
+   * Stores result in adminContactsState for later diff in saveAdminSocialContacts().
+   */
+  async function loadAdminSocialContacts() {
+    // Guard: block only exists in the settings panel
+    const rowsEl = document.getElementById("admin-social-rows");
+    if (!rowsEl) return;
+
+    try {
+      // Authenticated GET — returns ALL contacts including disabled ones
+      const res = await fetchWithAuth(`${ADMIN_API}/admin/contacts`);
+      if (!res.ok) {
+        console.warn("Failed to load admin contacts:", res.status);
+        return;
+      }
+      const contacts = await res.json();
+
+      // Build state map: type (uppercase) → contact object
+      adminContactsState = {};
+      contacts.forEach((c) => {
+        if (c.type) {
+          adminContactsState[c.type.toUpperCase()] = {
+            id: c.id,
+            value: c.value ?? "",
+            label: c.label ?? "",
+            enabled: c.enabled ?? false,
+            displayOrder: c.displayOrder ?? 0,
+          };
+        }
+      });
+
+      // Populate each platform row from loaded state
+      SOCIAL_PLATFORMS.forEach((platform) => {
+        const state = adminContactsState[platform];
+        const inputEl = document.getElementById(`social-input-${platform}`);
+        const toggleEl = document.getElementById(`social-toggle-${platform}`);
+
+        if (inputEl) {
+          // Populate input with existing value; empty if not set
+          inputEl.value = state ? state.value : "";
+        }
+        if (toggleEl) {
+          // Check toggle if contact exists and is enabled
+          toggleEl.checked = state ? state.enabled : false;
+        }
+      });
+    } catch (err) {
+      console.error("Admin social contacts load error:", err);
+    }
+  }
+
+  /**
+   * Save all social contact rows: POST new, PATCH changed, DELETE emptied.
+   * Strategy:
+   *   - Empty URL + no existing id → skip (nothing to do)
+   *   - Non-empty URL + no existing id → POST (create new contact)
+   *   - Non-empty URL + existing id + changed → PATCH (update)
+   *   - Empty URL + existing id → DELETE (remove the contact entirely)
+   *   - Only toggle changed (URL unchanged) + existing id → PATCH enabled only
+   * After all writes succeed → invalidate public cache so frontend re-fetches.
+   */
+  async function saveAdminSocialContacts() {
+    const saveBtn = document.getElementById("admin-social-save");
+    if (saveBtn) {
+      saveBtn.disabled = true;
+    }
+
+    // Clear all prior row errors
+    SOCIAL_PLATFORMS.forEach((p) => setSocialRowError(p, null));
+
+    // Validate all rows first — collect errors before any API call
+    let hasErrors = false;
+    const rowData = SOCIAL_PLATFORMS.map((platform) => {
+      const inputEl = document.getElementById(`social-input-${platform}`);
+      const toggleEl = document.getElementById(`social-toggle-${platform}`);
+      const value = inputEl ? inputEl.value.trim() : "";
+      const enabled = toggleEl ? toggleEl.checked : false;
+
+      // Validate URL if non-empty
+      const validationError = validateSocialUrl(platform, value);
+      if (validationError) {
+        setSocialRowError(platform, validationError);
+        hasErrors = true;
+      }
+
+      return { platform, value, enabled };
+    });
+
+    if (hasErrors) {
+      // Re-enable button and show error feedback
+      if (saveBtn) saveBtn.disabled = false;
+      showSocialFeedback("Виправте помилки у полях", "error");
+      return;
+    }
+
+    // Build an array of API write operations to execute
+    const writes = [];
+
+    rowData.forEach(({ platform, value, enabled }) => {
+      const existing = adminContactsState[platform];
+
+      if (!value) {
+        // Empty URL — delete if an existing record was found
+        if (existing?.id) {
+          writes.push(
+            fetchWithAuth(`${ADMIN_API}/admin/contacts/${existing.id}`, {
+              method: "DELETE",
+            }),
+          );
+        }
+        // No existing record + empty URL → nothing to do
+      } else if (!existing?.id) {
+        // New contact — POST to create
+        writes.push(
+          fetchWithAuth(`${ADMIN_API}/admin/contacts`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: platform,
+              value,
+              label: "",
+              enabled,
+              displayOrder: SOCIAL_PLATFORMS.indexOf(platform),
+            }),
+          }),
+        );
+      } else {
+        // Existing contact — PATCH only if value or enabled changed
+        const valueChanged = value !== existing.value;
+        const enabledChanged = enabled !== existing.enabled;
+        if (valueChanged || enabledChanged) {
+          // Build partial body — only include changed fields
+          const patchBody = {};
+          if (valueChanged) patchBody.value = value;
+          if (enabledChanged) patchBody.enabled = enabled;
+          writes.push(
+            fetchWithAuth(`${ADMIN_API}/admin/contacts/${existing.id}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(patchBody),
+            }),
+          );
+        }
+      }
+    });
+
+    if (!writes.length) {
+      // No changes detected — show a neutral message
+      if (saveBtn) saveBtn.disabled = false;
+      showSocialFeedback("Змін не виявлено", "success");
+      return;
+    }
+
+    try {
+      // Execute all writes in parallel — faster and atomic enough for this use case
+      const results = await Promise.all(writes);
+
+      // Check for any failed responses
+      const failed = results.filter((r) => !r.ok && r.status !== 204);
+
+      if (failed.length) {
+        showSocialFeedback(
+          `Помилка збереження (${failed.length} запити невдалі)`,
+          "error",
+        );
+      } else {
+        // All writes succeeded — reload state and invalidate public cache
+        await loadAdminSocialContacts();
+        // Bust the 5-min localStorage cache so footer/contact render new data
+        invalidateCompanyLinksCache();
+        showSocialFeedback("Збережено — сайт оновлено", "success");
+      }
+    } catch (err) {
+      console.error("Admin social contacts save error:", err);
+      showSocialFeedback("Помилка з'єднання. Спробуйте ще раз.", "error");
+    } finally {
+      if (saveBtn) saveBtn.disabled = false;
+    }
+  }
+
+  // Wire Save button for social contacts block
+  document
+    .getElementById("admin-social-save")
+    ?.addEventListener("click", saveAdminSocialContacts);
+
+  // Load social contacts immediately if the settings panel is already active on page load
+  // (e.g. navigated via URL hash or direct link — not just on click)
+  if (document.querySelector('[data-panel="settings"]:not([hidden])')) {
+    loadAdminSocialContacts();
+  }
 
   // Load overview data on init
   loadAdminStats();

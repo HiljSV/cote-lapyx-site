@@ -80,10 +80,30 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Hydrate Latin display name — may be null when not yet set
       setVal("profile-display-name", user.displayName);
 
-      // Hydrate social links fields from user.socialLinks if present
-      setVal("profile-telegram", user.socialLinks?.telegram);
-      // Store full socialLinks for merge in profile PATCH (prevents wiping other fields)
+      // Hydrate personal social links from user.socialLinks private shape.
+      // Each platform is { url, enabled } or null/absent when never set.
+      // Store the full object for merge in profile PATCH (prevents wiping unrendered fields).
       currentSocialLinks = user.socialLinks ?? {};
+
+      // Populate URL + enabled toggle for each rendered social platform
+      const socialPlatforms = [
+        "telegram",
+        "instagram",
+        "linkedin",
+        "github",
+        "email",
+      ];
+      socialPlatforms.forEach((platform) => {
+        const entry = currentSocialLinks[platform];
+        const urlEl = document.getElementById(`profile-social-${platform}-url`);
+        const enabledEl = document.getElementById(
+          `profile-social-${platform}-enabled`,
+        );
+        // Hydrate URL field — use entry.url if present, empty string otherwise
+        if (urlEl) urlEl.value = entry?.url ?? "";
+        // Hydrate enabled toggle — default false when entry is absent
+        if (enabledEl) enabledEl.checked = entry?.enabled ?? false;
+      });
 
       // Update sidebar user info block — name, initials, role, badge
       const nameEl = document.querySelector(".dash-sidebar__name");
@@ -507,11 +527,37 @@ document.addEventListener("DOMContentLoaded", async () => {
       displayName: rawDisplayName !== null ? rawDisplayName.trim() : undefined,
     };
 
-    // Merge socialLinks: start from server state, overlay only the fields present in the form.
-    // This prevents wiping instagram/linkedin/github that are not in the form.
-    const telegram =
-      document.getElementById("profile-telegram")?.value?.trim() || null;
-    body.socialLinks = { ...currentSocialLinks, telegram };
+    // Build socialLinks payload from the per-platform URL + enabled inputs.
+    // Strategy: start from current server state (prevents wiping platforms not
+    // in the form), then overlay only the platforms rendered on this page.
+    // API shape per platform: { url: string, enabled: boolean }
+    // Empty URL string → send "" to clear the URL while keeping enabled state.
+    const SOCIAL_PLATFORMS_DASH = [
+      "telegram",
+      "instagram",
+      "linkedin",
+      "github",
+      "email",
+    ];
+    const socialLinksPayload = { ...currentSocialLinks };
+    SOCIAL_PLATFORMS_DASH.forEach((platform) => {
+      const urlEl = document.getElementById(`profile-social-${platform}-url`);
+      const enabledEl = document.getElementById(
+        `profile-social-${platform}-enabled`,
+      );
+      // Only include this platform if its input exists in the DOM
+      if (urlEl) {
+        // Send url:"" to clear; enabled defaults to false when toggle absent
+        socialLinksPayload[platform] = {
+          url: urlEl.value.trim(),
+          enabled: enabledEl ? enabledEl.checked : false,
+        };
+      }
+    });
+    body.socialLinks = socialLinksPayload;
+
+    // After save, update currentSocialLinks so subsequent saves use fresh state
+    // (the actual update happens below on res.ok)
 
     // Strip top-level keys with undefined values before sending
     Object.keys(body).forEach((k) => body[k] === undefined && delete body[k]);
@@ -527,6 +573,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       );
 
       if (res.ok) {
+        // Update local social links state so next save sees the new values
+        currentSocialLinks = body.socialLinks ?? currentSocialLinks;
         submitBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Збережено`;
         setTimeout(() => {
           submitBtn.innerHTML = originalHTML;
