@@ -179,6 +179,11 @@ async function hydrateTeamAvatars() {
         if (member.profession && roleEl) roleEl.textContent = member.profession;
         if (member.shortDescription && bioEl)
           bioEl.textContent = member.shortDescription;
+
+        // FEAT-SOCIAL: populate this card's personal social icons from the API
+        // flat socialLinks (enabled-only). No container → skip; no links → empty.
+        const socialsEl = card.querySelector("[data-member-socials]");
+        if (socialsEl) renderMemberSocials(socialsEl, member.user?.socialLinks);
       });
     });
   } catch (_) {
