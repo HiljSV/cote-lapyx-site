@@ -332,24 +332,34 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // i18n label maps — resolved at runtime via translate() so they update on
+  // language change without a full page reload.
+  // ---------------------------------------------------------------------------
+
+  // Post/project status → human-readable label (dash.status.*)
   const STATUS_LABEL = {
-    PUBLISHED: "Опубліковано",
-    DRAFT: "Чернетка",
-    ARCHIVED: "Архів",
+    PUBLISHED: translate("dash.status.published"),
+    DRAFT: translate("dash.status.draft"),
+    ARCHIVED: translate("dash.status.archived"),
   };
 
+  // Post/project status → CSS modifier suffix for dash-status--*
   const STATUS_CLASS = {
     PUBLISHED: "published",
     DRAFT: "draft",
     ARCHIVED: "archived",
   };
 
+  // Comment status → human-readable label (dash.comment_status.*)
   const COMMENT_STATUS_LABEL = {
-    PENDING: "Очікує",
-    APPROVED: "Схвалено",
-    REJECTED: "Відхилено",
-    DELETED: "Видалено",
+    PENDING: translate("dash.comment_status.pending"),
+    APPROVED: translate("dash.comment_status.approved"),
+    REJECTED: translate("dash.comment_status.rejected"),
+    DELETED: translate("dash.comment_status.deleted"),
   };
+
+  // Comment status → CSS modifier suffix
   const COMMENT_STATUS_CLASS = {
     PENDING: "draft",
     APPROVED: "published",
@@ -357,9 +367,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     DELETED: "archived",
   };
 
+  // Post type → [badge color, translated label] (dash.type.*)
   const TYPE_BADGE = {
-    GENERAL: ["cyan", "Загальне"],
-    PERSONAL: ["magenta", "Особисте"],
+    GENERAL: ["cyan", translate("dash.type.general")],
+    PERSONAL: ["magenta", translate("dash.type.personal")],
   };
 
   const TECH_COLORS = ["cyan", "magenta", "green"];
@@ -374,16 +385,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     const thumb = post.coverImage
       ? `<img class="dash-list__thumb" src="${escHtml(post.coverImage)}" alt="" aria-hidden="true" />`
       : `<div class="dash-list__thumb dash-list__thumb--empty" aria-hidden="true"></div>`;
+    // Build post row HTML — data-label attributes use translate() for responsive column headers
     return `<div class="dash-list__row">
-      <div class="dash-list__title" data-label="Заголовок">
+      <div class="dash-list__title" data-label="${translate("dash.col.title")}">
         ${thumb}${escHtml(post.title)}
       </div>
-      <div data-label="Категорія"><span class="neon-badge neon-badge--${badgeColor}">${typeLabel}</span></div>
-      <div class="dash-list__date" data-label="Дата">${fmtDate(post.createdAt)}</div>
-      <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
-      <div class="dash-list__actions" data-label="Дії">
-        <button type="button" class="btn btn--ghost btn--sm" data-action="edit" data-slug="${escHtml(post.slug)}">Редагувати</button>
-        <button type="button" class="btn btn--magenta btn--sm" data-action="delete" data-slug="${escHtml(post.slug)}" data-title="${escHtml(post.title)}">Видалити</button>
+      <div data-label="${translate("dash.col.category")}"><span class="neon-badge neon-badge--${badgeColor}">${typeLabel}</span></div>
+      <div class="dash-list__date" data-label="${translate("dash.col.date")}">${fmtDate(post.createdAt)}</div>
+      <div data-label="${translate("dash.col.status")}"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
+      <div class="dash-list__actions" data-label="${translate("dash.col.actions")}">
+        <button type="button" class="btn btn--ghost btn--sm" data-action="edit" data-slug="${escHtml(post.slug)}">${translate("dash.action.edit")}</button>
+        <button type="button" class="btn btn--magenta btn--sm" data-action="delete" data-slug="${escHtml(post.slug)}" data-title="${escHtml(post.title)}">${translate("dash.btn.delete")}</button>
       </div>
     </div>`;
   }
@@ -398,13 +410,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       .join("");
     const sClass = STATUS_CLASS[project.status] || "draft";
     const sLabel = STATUS_LABEL[project.status] || project.status;
+    // Build project row HTML — data-label attributes use translate() for responsive column headers
     return `<div class="dash-list__row">
-      <div class="dash-list__title" data-label="Назва">${escHtml(project.title)}</div>
-      <div class="dash-list__tech" data-label="Технології">${techs || "—"}</div>
-      <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
-      <div class="dash-list__actions" data-label="Дії">
-        <button type="button" class="btn btn--ghost btn--sm" data-action="edit" data-slug="${escHtml(project.slug)}">Редагувати</button>
-        <button type="button" class="btn btn--magenta btn--sm" data-action="delete" data-slug="${escHtml(project.slug)}" data-id="${project.id}" data-title="${escHtml(project.title)}">Видалити</button>
+      <div class="dash-list__title" data-label="${translate("dash.col.name")}">${escHtml(project.title)}</div>
+      <div class="dash-list__tech" data-label="${translate("dash.col.technologies")}">${techs || "—"}</div>
+      <div data-label="${translate("dash.col.status")}"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
+      <div class="dash-list__actions" data-label="${translate("dash.col.actions")}">
+        <button type="button" class="btn btn--ghost btn--sm" data-action="edit" data-slug="${escHtml(project.slug)}">${translate("dash.action.edit")}</button>
+        <button type="button" class="btn btn--magenta btn--sm" data-action="delete" data-slug="${escHtml(project.slug)}" data-id="${project.id}" data-title="${escHtml(project.title)}">${translate("dash.btn.delete")}</button>
       </div>
     </div>`;
   }
@@ -442,40 +455,40 @@ document.addEventListener("DOMContentLoaded", async () => {
         set("stat-subscribers", stats.subscribersTotal);
       }
 
-      // Recent posts
+      // Recent posts — show rows or translated empty/error state
       const postsBody = document.getElementById("overview-posts-body");
       if (postsBody) {
         if (postsRes.ok) {
           const data = await postsRes.json();
           const rows = (data.content || []).map(postRowHtml).join("");
           postsBody.innerHTML =
-            rows || '<div class="dash-list__empty">Публікацій ще немає</div>';
+            rows ||
+            `<div class="dash-list__empty">${translate("dash.empty.no_posts")}</div>`;
         } else {
-          postsBody.innerHTML =
-            '<div class="dash-list__empty">Помилка завантаження</div>';
+          postsBody.innerHTML = `<div class="dash-list__empty">${translate("dash.error.load")}</div>`;
         }
       }
 
-      // Recent projects
+      // Recent projects — show rows or translated empty/error state
       const projectsBody = document.getElementById("overview-projects-body");
       if (projectsBody) {
         if (projectsRes.ok) {
           const data = await projectsRes.json();
           const rows = (data.content || []).map(projectRowHtml).join("");
           projectsBody.innerHTML =
-            rows || '<div class="dash-list__empty">Проектів ще немає</div>';
+            rows ||
+            `<div class="dash-list__empty">${translate("dash.empty.no_projects")}</div>`;
         } else {
-          projectsBody.innerHTML =
-            '<div class="dash-list__empty">Помилка завантаження</div>';
+          projectsBody.innerHTML = `<div class="dash-list__empty">${translate("dash.error.load")}</div>`;
         }
       }
     } catch (err) {
       console.error("Overview load error:", err);
+      // Show translated error state in both overview tables
       document
         .querySelectorAll("#overview-posts-body, #overview-projects-body")
         .forEach((el) => {
-          el.innerHTML =
-            '<div class="dash-list__empty">Помилка завантаження</div>';
+          el.innerHTML = `<div class="dash-list__empty">${translate("dash.error.load")}</div>`;
         });
     }
   }
@@ -496,9 +509,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       btn.querySelector(".pwd-toggle__eye-off").style.display = isVisible
         ? "none"
         : "";
+      // Update aria-label to reflect the new toggle state — localized
       btn.setAttribute(
         "aria-label",
-        isVisible ? "Показати пароль" : "Сховати пароль",
+        isVisible
+          ? translate("dash.show_pwd.show")
+          : translate("dash.show_pwd.hide"),
       );
     });
   });
@@ -514,7 +530,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const submitBtn = profileForm.querySelector('[type="submit"]');
     const originalHTML = submitBtn.innerHTML;
     submitBtn.disabled = true;
-    submitBtn.textContent = "Збереження...";
+    // Localized saving state — shown while PATCH request is in flight
+    submitBtn.textContent = translate("dash.state.saving");
 
     // Build PATCH body — only include fields with non-empty values
     // displayName: send empty string to clear, undefined to skip (no change)
@@ -574,7 +591,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (res.ok) {
         // Update local social links state so next save sees the new values
         currentSocialLinks = body.socialLinks ?? currentSocialLinks;
-        submitBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Збережено`;
+        // Show localized saved confirmation with checkmark icon
+        submitBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> ${translate("dash.state.saved")}`;
         setTimeout(() => {
           submitBtn.innerHTML = originalHTML;
           submitBtn.disabled = false;
@@ -582,12 +600,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       } else {
         submitBtn.innerHTML = originalHTML;
         submitBtn.disabled = false;
-        alert("Помилка збереження. Спробуйте ще раз.");
+        // Show localized save error alert
+        alert(translate("dash.error.save"));
       }
     } catch {
       submitBtn.innerHTML = originalHTML;
       submitBtn.disabled = false;
-      alert("Помилка з'єднання.");
+      // Show localized network error alert
+      alert(translate("dash.error.network"));
     }
   });
 
@@ -623,19 +643,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Hide any previous feedback before re-validation
     pwdFeedback.setAttribute("hidden", "");
 
+    // Client-side validation — localized error messages
     if (newPwd.length < 8) {
-      showPwdFeedback("Новий пароль має бути не менше 8 символів.", "error");
+      showPwdFeedback(translate("dash.validation.pwd_min_length"), "error");
       return;
     }
 
     if (newPwd !== confirmPwd) {
-      showPwdFeedback("Паролі не збігаються.", "error");
+      showPwdFeedback(translate("dash.validation.pwd_mismatch"), "error");
       return;
     }
 
     const originalHTML = pwdSubmitBtn.innerHTML;
     pwdSubmitBtn.disabled = true;
-    pwdSubmitBtn.textContent = "Збереження...";
+    // Localized saving state — shown while POST request is in flight
+    pwdSubmitBtn.textContent = translate("dash.state.saving");
 
     try {
       const res = await fetchWithAuth(`${API}/users/me/password`, {
@@ -648,19 +670,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       });
 
       if (res.status === 204) {
-        showPwdFeedback(
-          "Пароль успішно змінено. На вашу пошту надіслано сповіщення.",
-          "success",
-        );
+        // Localized success feedback message
+        showPwdFeedback(translate("dash.pwd.success"), "success");
         passwordForm.reset();
       } else {
         const data = await res.json().catch(() => ({}));
-        const msg =
-          data.message || "Помилка зміни пароля. Перевірте поточний пароль.";
+        // Prefer API error message; fall back to localized generic password error
+        const msg = data.message || translate("dash.pwd.error_generic");
         showPwdFeedback(msg, "error");
       }
     } catch {
-      showPwdFeedback("Помилка з'єднання. Спробуйте ще раз.", "error");
+      // Localized network error feedback
+      showPwdFeedback(translate("dash.pwd.error_network"), "error");
     } finally {
       pwdSubmitBtn.disabled = false;
       pwdSubmitBtn.innerHTML = originalHTML;
@@ -704,7 +725,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const originalHTML = submitBtn.innerHTML;
     submitBtn.disabled = true;
-    submitBtn.textContent = "Збереження...";
+    // Localized saving state for the email change submit button
+    submitBtn.textContent = translate("dash.state.saving");
 
     try {
       // PATCH /api/v1/users/me/email — authenticated; requires current password
@@ -716,29 +738,23 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       if (res.ok) {
         const data = await res.json().catch(() => ({}));
-        showEmailFeedback(
-          translate("dash.email.success") || "Email успішно змінено",
-          "success",
-        );
+        // Localized success feedback — key is always resolved by translate()
+        showEmailFeedback(translate("dash.email.success"), "success");
         emailForm.reset();
         // Update displayed email in the profile section if response contains new email
         const emailDisplayEl = document.getElementById("profile-email");
         if (emailDisplayEl && data.email) emailDisplayEl.value = data.email;
       } else {
         const data = await res.json().catch(() => ({}));
+        // Prefer API error detail; fall back to localized generic error
         showEmailFeedback(
-          data.message ||
-            data.detail ||
-            translate("error.generic") ||
-            "Помилка. Спробуйте ще раз.",
+          data.message || data.detail || translate("error.generic"),
           "error",
         );
       }
     } catch {
-      showEmailFeedback(
-        translate("error.network") || "Помилка зʼєднання.",
-        "error",
-      );
+      // Localized network error feedback
+      showEmailFeedback(translate("error.network"), "error");
     } finally {
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalHTML;
@@ -756,14 +772,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     ];
     const sClass = STATUS_CLASS[post.status] || "draft";
     const sLabel = STATUS_LABEL[post.status] || post.status;
+    // Posts list row — data-label attributes and buttons use translate() for i18n
     return `<div class="dash-list__row" data-slug="${escHtml(post.slug)}">
-      <div class="dash-list__title" data-label="Заголовок">${escHtml(post.title)}</div>
-      <div data-label="Категорія"><span class="neon-badge neon-badge--${badgeColor}">${typeLabel}</span></div>
-      <div class="dash-list__date" data-label="Дата">${fmtDate(post.createdAt)}</div>
-      <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
-      <div class="dash-list__actions" data-label="Дії">
-        <button type="button" class="btn btn--ghost btn--sm" data-action="edit" data-slug="${escHtml(post.slug)}">Редагувати</button>
-        <button type="button" class="btn btn--magenta btn--sm" data-action="delete" data-slug="${escHtml(post.slug)}" data-title="${escHtml(post.title)}">Видалити</button>
+      <div class="dash-list__title" data-label="${translate("dash.col.title")}">${escHtml(post.title)}</div>
+      <div data-label="${translate("dash.col.category")}"><span class="neon-badge neon-badge--${badgeColor}">${typeLabel}</span></div>
+      <div class="dash-list__date" data-label="${translate("dash.col.date")}">${fmtDate(post.createdAt)}</div>
+      <div data-label="${translate("dash.col.status")}"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
+      <div class="dash-list__actions" data-label="${translate("dash.col.actions")}">
+        <button type="button" class="btn btn--ghost btn--sm" data-action="edit" data-slug="${escHtml(post.slug)}">${translate("dash.action.edit")}</button>
+        <button type="button" class="btn btn--magenta btn--sm" data-action="delete" data-slug="${escHtml(post.slug)}" data-title="${escHtml(post.title)}">${translate("dash.btn.delete")}</button>
       </div>
     </div>`;
   }
@@ -775,7 +792,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const pagination = document.getElementById("posts-pagination");
     if (!listBody) return;
 
-    listBody.innerHTML = '<div class="dash-list__empty">Завантаження...</div>';
+    // Show localized loading state while request is in flight
+    listBody.innerHTML = `<div class="dash-list__empty">${translate("dash.empty.loading")}</div>`;
     if (pagination) pagination.innerHTML = "";
 
     const statusParam = status ? `&status=${status}` : "";
@@ -785,14 +803,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         `${API}/admin/posts?size=20&sort=createdAt,desc&page=${page}${statusParam}${authorParam}`,
       );
       if (!res.ok) {
-        listBody.innerHTML =
-          '<div class="dash-list__empty">Помилка завантаження</div>';
+        listBody.innerHTML = `<div class="dash-list__empty">${translate("dash.error.load")}</div>`;
         return;
       }
       const data = await res.json();
       const rows = (data.content || []).map(postListRowHtml).join("");
       listBody.innerHTML =
-        rows || '<div class="dash-list__empty">Публікацій ще немає</div>';
+        rows ||
+        `<div class="dash-list__empty">${translate("dash.empty.no_posts")}</div>`;
 
       // Render pagination buttons when there's more than one page
       if (pagination && data.page && data.page.totalPages > 1) {
@@ -804,8 +822,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     } catch (err) {
       console.error("Posts load error:", err);
-      listBody.innerHTML =
-        '<div class="dash-list__empty">Помилка завантаження</div>';
+      listBody.innerHTML = `<div class="dash-list__empty">${translate("dash.error.load")}</div>`;
     }
   }
 
@@ -822,8 +839,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       feedback.setAttribute("hidden", "");
     }
     document.getElementById("post-edit-slug").value = slug || "";
+    // Set modal title — localized edit vs. new post label
     if (titleEl)
-      titleEl.textContent = slug ? "Редагування публікації" : "Нова публікація";
+      titleEl.textContent = slug
+        ? translate("dash.editor.edit_post")
+        : translate("dash.modal.new_post_title");
     postModal?.removeAttribute("hidden");
     document.body.style.overflow = "hidden";
 
@@ -875,12 +895,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (titleErr) titleErr.textContent = "";
     if (contentErr) contentErr.textContent = "";
+    // Localized client-side validation messages for required fields
     if (!title) {
-      if (titleErr) titleErr.textContent = "Заголовок обовʼязковий";
+      if (titleErr)
+        titleErr.textContent = translate("dash.validation.title_required");
       valid = false;
     }
     if (!content) {
-      if (contentErr) contentErr.textContent = "Зміст обовʼязковий";
+      if (contentErr)
+        contentErr.textContent = translate("dash.validation.content_required");
       valid = false;
     }
     if (!valid) return;
@@ -896,7 +919,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const originalHTML = submitBtn.innerHTML;
     submitBtn.disabled = true;
-    submitBtn.textContent = "Збереження...";
+    // Localized saving state — shown while PATCH/POST request is in flight
+    submitBtn.textContent = translate("dash.state.saving");
     if (feedback) {
       feedback.textContent = "";
       feedback.setAttribute("hidden", "");
@@ -918,7 +942,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (myUserId) loadOverviewStats(myUserId);
       } else {
         const err = await res.json().catch(() => ({}));
-        const msg = err.message || "Помилка збереження. Спробуйте ще раз.";
+        // Prefer API error message; fall back to localized save error
+        const msg = err.message || translate("dash.error.save");
         if (feedback) {
           feedback.textContent = msg;
           feedback.className =
@@ -928,7 +953,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     } catch {
       if (feedback) {
-        feedback.textContent = "Помилка зʼєднання.";
+        // Localized network error message in modal feedback
+        feedback.textContent = translate("dash.error.network");
         feedback.className = "dash-modal__feedback dash-modal__feedback--error";
         feedback.removeAttribute("hidden");
       }
@@ -939,7 +965,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   async function deletePost(slug, title) {
-    if (!confirm(`Видалити публікацію "${title}"?`)) return;
+    // Localized confirmation — title is user/API data escaped by escHtml in the button
+    if (
+      !confirm(translate("dash.confirm.delete_post").replace("{title}", title))
+    )
+      return;
     try {
       const res = await fetchWithAuth(`${API}/posts/${slug}`, {
         method: "DELETE",
@@ -948,10 +978,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         loadPosts(postsPage, postsStatusFilter);
         if (myUserId) loadOverviewStats(myUserId);
       } else {
-        alert("Помилка видалення. Спробуйте ще раз.");
+        // Localized delete-failure alert
+        alert(translate("dash.error.delete"));
       }
     } catch {
-      alert("Помилка зʼєднання.");
+      // Localized network-failure alert
+      alert(translate("dash.error.network"));
     }
   }
 
@@ -1009,14 +1041,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       .join("");
     const sClass = STATUS_CLASS[project.status] || "draft";
     const sLabel = STATUS_LABEL[project.status] || project.status;
+    // Projects list row — data-label and buttons use translate() for i18n
     return `<div class="dash-list__row" data-slug="${escHtml(project.slug)}">
-      <div class="dash-list__title" data-label="Назва">${escHtml(project.title)}</div>
-      <div class="dash-list__tech" data-label="Технології">${techs || "—"}</div>
-      <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
-      <div class="dash-list__actions" data-label="Дії">
-        <button type="button" class="btn btn--ghost btn--sm" data-action="edit" data-slug="${escHtml(project.slug)}">Редагувати</button>
+      <div class="dash-list__title" data-label="${translate("dash.col.name")}">${escHtml(project.title)}</div>
+      <div class="dash-list__tech" data-label="${translate("dash.col.technologies")}">${techs || "—"}</div>
+      <div data-label="${translate("dash.col.status")}"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
+      <div class="dash-list__actions" data-label="${translate("dash.col.actions")}">
+        <button type="button" class="btn btn--ghost btn--sm" data-action="edit" data-slug="${escHtml(project.slug)}">${translate("dash.action.edit")}</button>
         <button type="button" class="btn btn--magenta btn--sm" data-action="delete"
-          data-slug="${escHtml(project.slug)}" data-id="${project.id}" data-title="${escHtml(project.title)}">Видалити</button>
+          data-slug="${escHtml(project.slug)}" data-id="${project.id}" data-title="${escHtml(project.title)}">${translate("dash.btn.delete")}</button>
       </div>
     </div>`;
   }
@@ -1028,7 +1061,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const pagination = document.getElementById("projects-pagination");
     if (!listBody) return;
 
-    listBody.innerHTML = '<div class="dash-list__empty">Завантаження...</div>';
+    // Show localized loading state while request is in flight
+    listBody.innerHTML = `<div class="dash-list__empty">${translate("dash.empty.loading")}</div>`;
     if (pagination) pagination.innerHTML = "";
 
     const statusParam = status ? `&status=${status}` : "";
@@ -1038,14 +1072,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         `${API}/admin/projects?size=20&sort=createdAt,desc&page=${page}${statusParam}${authorParam}`,
       );
       if (!res.ok) {
-        listBody.innerHTML =
-          '<div class="dash-list__empty">Помилка завантаження</div>';
+        listBody.innerHTML = `<div class="dash-list__empty">${translate("dash.error.load")}</div>`;
         return;
       }
       const data = await res.json();
       const rows = (data.content || []).map(projectListRowHtml).join("");
       listBody.innerHTML =
-        rows || '<div class="dash-list__empty">Проектів ще немає</div>';
+        rows ||
+        `<div class="dash-list__empty">${translate("dash.empty.no_projects")}</div>`;
 
       if (pagination && data.page && data.page.totalPages > 1) {
         const { number, totalPages } = data.page;
@@ -1056,8 +1090,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     } catch (err) {
       console.error("Projects load error:", err);
-      listBody.innerHTML =
-        '<div class="dash-list__empty">Помилка завантаження</div>';
+      listBody.innerHTML = `<div class="dash-list__empty">${translate("dash.error.load")}</div>`;
     }
   }
 
@@ -1073,8 +1106,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       feedback.setAttribute("hidden", "");
     }
     document.getElementById("project-edit-slug").value = slug || "";
+    // Set modal title — localized edit vs. new project label
     if (titleEl)
-      titleEl.textContent = slug ? "Редагування проекту" : "Новий проект";
+      titleEl.textContent = slug
+        ? translate("dash.editor.edit_project")
+        : translate("dash.modal.new_project_title");
     projectModal?.removeAttribute("hidden");
     document.body.style.overflow = "hidden";
 
@@ -1132,12 +1168,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (titleErr) titleErr.textContent = "";
     if (shortDescErr) shortDescErr.textContent = "";
+    // Localized client-side validation messages for required fields
     if (!title) {
-      if (titleErr) titleErr.textContent = "Назва обовʼязкова";
+      if (titleErr)
+        titleErr.textContent = translate("dash.validation.name_required");
       valid = false;
     }
     if (!shortDesc) {
-      if (shortDescErr) shortDescErr.textContent = "Короткий опис обовʼязковий";
+      if (shortDescErr)
+        shortDescErr.textContent = translate(
+          "dash.validation.short_desc_required",
+        );
       valid = false;
     }
     if (!valid) return;
@@ -1164,7 +1205,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const originalHTML = submitBtn.innerHTML;
     submitBtn.disabled = true;
-    submitBtn.textContent = "Збереження...";
+    // Localized saving state — shown while PATCH/POST request is in flight
+    submitBtn.textContent = translate("dash.state.saving");
     if (feedback) {
       feedback.textContent = "";
       feedback.setAttribute("hidden", "");
@@ -1186,7 +1228,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (myUserId) loadOverviewStats(myUserId);
       } else {
         const err = await res.json().catch(() => ({}));
-        const msg = err.message || "Помилка збереження. Спробуйте ще раз.";
+        // Prefer API error message; fall back to localized save error
+        const msg = err.message || translate("dash.error.save");
         if (feedback) {
           feedback.textContent = msg;
           feedback.className =
@@ -1196,7 +1239,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     } catch {
       if (feedback) {
-        feedback.textContent = "Помилка зʼєднання.";
+        // Localized network error message in modal feedback
+        feedback.textContent = translate("dash.error.network");
         feedback.className = "dash-modal__feedback dash-modal__feedback--error";
         feedback.removeAttribute("hidden");
       }
@@ -1207,7 +1251,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   async function deleteProject(slug, id, title) {
-    if (!confirm(`Видалити проект "${title}"?`)) return;
+    // Localized confirmation — title is user/API data escaped by escHtml in the button
+    if (
+      !confirm(
+        translate("dash.confirm.delete_project").replace("{title}", title),
+      )
+    )
+      return;
     // Use slug-based URL when slug exists; fall back to ID for projects with empty slug
     const url = slug
       ? `${API}/projects/${encodeURIComponent(slug)}`
@@ -1218,10 +1268,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         loadProjects(projectsPage, projectsStatusFilter);
         if (myUserId) loadOverviewStats(myUserId);
       } else {
-        alert("Помилка видалення. Спробуйте ще раз.");
+        // Localized delete error alert
+        alert(translate("dash.error.delete"));
       }
     } catch {
-      alert("Помилка зʼєднання.");
+      // Localized network error alert
+      alert(translate("dash.error.network"));
     }
   }
 
@@ -1271,14 +1323,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   // My Subscriptions panel — current user's own subscriptions
   // ---------------------------------------------------------------------------
 
-  // Label maps for subscription type — shared with Subscribers (admin) panel below
-  const SUB_TYPE_LABEL = { GENERAL: "Загальне", PERSONAL: "Особисте" };
+  // Label maps for subscription type — runtime translate() for i18n support
+  // Shared with Subscribers (admin) panel below
+  const SUB_TYPE_LABEL = {
+    GENERAL: translate("dash.type.general"),
+    PERSONAL: translate("dash.type.personal"),
+  };
 
-  // Human-readable status labels for subscription status enum values
+  // Human-readable status labels for subscription status enum values — localized
   const SUB_STATUS_LABEL = {
-    ACTIVE: "Активна",
-    CANCELLED: "Скасована",
-    EXPIRED: "Закінчилась",
+    ACTIVE: translate("dash.sub_status.active"),
+    CANCELLED: translate("dash.sub_status.cancelled"),
+    EXPIRED: translate("dash.sub_status.expired"),
   };
 
   // CSS modifier suffix for dash-status--* class (maps status → visual badge style)
@@ -1297,22 +1353,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     const listBody = document.getElementById("my-subscriptions-list-body");
     if (!listBody) return;
 
-    // Show loading state while fetching
-    listBody.innerHTML = '<div class="dash-list__empty">Завантаження...</div>';
+    // Show localized loading state while fetching
+    listBody.innerHTML = `<div class="dash-list__empty">${translate("dash.empty.loading")}</div>`;
     try {
       // Correct endpoint: /subscriptions/me returns List<SubscriptionResponse> (plain array)
       const res = await fetchWithAuth(`${API}/subscriptions/me`);
       if (!res.ok) {
-        listBody.innerHTML =
-          '<div class="dash-list__empty">Помилка завантаження</div>';
+        listBody.innerHTML = `<div class="dash-list__empty">${translate("dash.error.load")}</div>`;
         return;
       }
       const subs = await res.json();
 
       // Empty state — user has no subscriptions yet
       if (!subs.length) {
-        listBody.innerHTML =
-          '<div class="dash-list__empty">У вас ще немає підписок</div>';
+        listBody.innerHTML = `<div class="dash-list__empty">${translate("dash.empty.no_my_subs")}</div>`;
         return;
       }
 
@@ -1324,23 +1378,22 @@ document.addEventListener("DOMContentLoaded", async () => {
           const sLabel = SUB_STATUS_LABEL[sub.status] || sub.status;
           const typeLabel = SUB_TYPE_LABEL[sub.type] || sub.type;
 
-          // Cancel button — only for ACTIVE subscriptions
+          // Cancel button — only for ACTIVE subscriptions; label and aria-label localized
           const cancelBtn =
             sub.status === "ACTIVE"
-              ? `<button type="button" class="btn btn--magenta btn--sm" data-action="cancel-my-sub" data-id="${sub.id}" aria-label="Скасувати підписку">Скасувати</button>`
+              ? `<button type="button" class="btn btn--magenta btn--sm" data-action="cancel-my-sub" data-id="${sub.id}" aria-label="${translate("dash.confirm.cancel_sub")}">${translate("dash.action.cancel_sub")}</button>`
               : "";
           return `<div class="dash-list__row">
-            <div data-label="Тип">${escHtml(typeLabel)}</div>
-            <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
-            <div class="dash-list__date" data-label="Дата підписки">${fmtDate(sub.createdAt)}</div>
-            <div class="dash-list__actions" data-label="Дії">${cancelBtn}</div>
+            <div data-label="${translate("dash.col.type")}">${escHtml(typeLabel)}</div>
+            <div data-label="${translate("dash.col.status")}"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
+            <div class="dash-list__date" data-label="${translate("dash.col.sub_date")}">${fmtDate(sub.createdAt)}</div>
+            <div class="dash-list__actions" data-label="${translate("dash.col.actions")}">${cancelBtn}</div>
           </div>`;
         })
         .join("");
     } catch (err) {
       console.error("My subscriptions load error:", err);
-      listBody.innerHTML =
-        '<div class="dash-list__empty">Помилка завантаження</div>';
+      listBody.innerHTML = `<div class="dash-list__empty">${translate("dash.error.load")}</div>`;
     }
   }
 
@@ -1351,7 +1404,8 @@ document.addEventListener("DOMContentLoaded", async () => {
    * @param {string|number} id - Subscription ID from data-id attribute
    */
   async function cancelMySubscription(id) {
-    if (!confirm("Скасувати підписку?")) return;
+    // Localized confirmation dialog
+    if (!confirm(translate("dash.confirm.cancel_sub"))) return;
 
     // Correct endpoint: /subscriptions/me/{id} — user cancels their own subscription
     const res = await fetchWithAuth(`${API}/subscriptions/me/${id}`, {
@@ -1371,20 +1425,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Track current favorites page for reload after remove
   let favoritesPage = 0;
 
-  // Render a single row for a favorited post entry
+  // Render a single row for a favorited post entry — data-labels and button localized
   function favoriteRowHtml(fav) {
     // Build row with post link, date added, and remove button
     return `<div class="dash-list__row">
-      <div class="dash-list__title" data-label="Публікація">
+      <div class="dash-list__title" data-label="${translate("dash.favorites.col.title")}">
         <a href="/post.html?slug=${escHtml(fav.postSlug)}" class="dash-list__link" target="_blank">
           ${escHtml(fav.postTitle)}
         </a>
       </div>
-      <div class="dash-list__date" data-label="Додано">${fmtDate(fav.favoritedAt)}</div>
-      <div class="dash-list__actions" data-label="Дії">
+      <div class="dash-list__date" data-label="${translate("dash.favorites.col.date")}">${fmtDate(fav.favoritedAt)}</div>
+      <div class="dash-list__actions" data-label="${translate("dash.col.actions")}">
         <button type="button" class="btn btn--magenta btn--sm"
           data-action="remove-favorite" data-slug="${escHtml(fav.postSlug)}">
-          Видалити
+          ${translate("dash.btn.delete")}
         </button>
       </div>
     </div>`;
@@ -1397,8 +1451,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const pagination = document.getElementById("favorites-pagination");
     if (!listBody) return;
 
-    // Show loading state while request is in flight
-    listBody.innerHTML = '<div class="dash-list__empty">Завантаження...</div>';
+    // Show localized loading state while request is in flight
+    listBody.innerHTML = `<div class="dash-list__empty">${translate("dash.empty.loading")}</div>`;
     if (pagination) pagination.innerHTML = "";
 
     try {
@@ -1407,16 +1461,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         `${API}/users/me/favorites?size=20&page=${page}`,
       );
       if (!res.ok) {
-        listBody.innerHTML =
-          '<div class="dash-list__empty">Помилка завантаження</div>';
+        listBody.innerHTML = `<div class="dash-list__empty">${translate("dash.error.load")}</div>`;
         return;
       }
       const data = await res.json();
-      // Render rows or empty state message
+      // Render rows or localized empty state message
       const rows = (data.content || []).map(favoriteRowHtml).join("");
       listBody.innerHTML =
         rows ||
-        '<div class="dash-list__empty">У вас ще немає збережених публікацій</div>';
+        `<div class="dash-list__empty">${translate("dash.empty.no_favorites")}</div>`;
 
       // Render pagination buttons only when more than one page exists
       if (pagination && data.page && data.page.totalPages > 1) {
@@ -1427,10 +1480,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         }).join("");
       }
     } catch (err) {
-      // Log and show user-facing error on network failure
+      // Log and show localized user-facing error on network failure
       console.error("Favorites load error:", err);
-      listBody.innerHTML =
-        '<div class="dash-list__empty">Помилка завантаження</div>';
+      listBody.innerHTML = `<div class="dash-list__empty">${translate("dash.error.load")}</div>`;
     }
   }
 
@@ -1446,10 +1498,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Reload current page to reflect removal
         loadFavorites(favoritesPage);
       } else {
-        alert("Помилка видалення. Спробуйте ще раз.");
+        // Localized delete error alert
+        alert(translate("dash.error.delete"));
       }
     } catch {
-      alert("Помилка зʼєднання.");
+      // Localized network error alert
+      alert(translate("dash.error.network"));
     }
   }
 
@@ -1466,7 +1520,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const pagination = document.getElementById("subscribers-pagination");
     if (!listBody) return;
 
-    listBody.innerHTML = '<div class="dash-list__empty">Завантаження...</div>';
+    // Show localized loading state while request is in flight
+    listBody.innerHTML = `<div class="dash-list__empty">${translate("dash.empty.loading")}</div>`;
     if (pagination) pagination.innerHTML = "";
 
     const statusParam = subscribersStatusFilter
@@ -1477,13 +1532,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         `${API}/admin/subscriptions?size=20&sort=createdAt,desc&page=${page}${statusParam}`,
       );
       if (!res.ok) {
-        listBody.innerHTML =
-          '<div class="dash-list__empty">Помилка завантаження</div>';
+        listBody.innerHTML = `<div class="dash-list__empty">${translate("dash.error.load")}</div>`;
         return;
       }
       const data = await res.json();
       allSubscribersData = data.content || [];
 
+      // Build subscriber rows — data-label and button text localized via translate()
       const rows = allSubscribersData
         .map((sub) => {
           const sClass = SUB_STATUS_CLASS[sub.status] || "draft";
@@ -1491,17 +1546,18 @@ document.addEventListener("DOMContentLoaded", async () => {
           const typeLabel = SUB_TYPE_LABEL[sub.type] || sub.type;
           return `<div class="dash-list__row">
             <div data-label="Email">${escHtml(sub.email)}</div>
-            <div data-label="Тип">${escHtml(typeLabel)}</div>
-            <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
-            <div class="dash-list__date" data-label="Дата підписки">${fmtDate(sub.createdAt)}</div>
-            <div class="dash-list__actions" data-label="Дії">
-              <button type="button" class="btn btn--magenta btn--sm" data-action="delete-sub" data-id="${sub.id}">Видалити</button>
+            <div data-label="${translate("dash.col.type")}">${escHtml(typeLabel)}</div>
+            <div data-label="${translate("dash.col.status")}"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
+            <div class="dash-list__date" data-label="${translate("dash.col.sub_date")}">${fmtDate(sub.createdAt)}</div>
+            <div class="dash-list__actions" data-label="${translate("dash.col.actions")}">
+              <button type="button" class="btn btn--magenta btn--sm" data-action="delete-sub" data-id="${sub.id}">${translate("dash.btn.delete")}</button>
             </div>
           </div>`;
         })
         .join("");
       listBody.innerHTML =
-        rows || '<div class="dash-list__empty">Підписників ще немає</div>';
+        rows ||
+        `<div class="dash-list__empty">${translate("dash.empty.no_subscribers")}</div>`;
 
       if (pagination && data.page && data.page.totalPages > 1) {
         const { number, totalPages } = data.page;
@@ -1512,13 +1568,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     } catch (err) {
       console.error("Subscribers load error:", err);
-      listBody.innerHTML =
-        '<div class="dash-list__empty">Помилка завантаження</div>';
+      listBody.innerHTML = `<div class="dash-list__empty">${translate("dash.error.load")}</div>`;
     }
   }
 
   async function deleteSubscriber(id) {
-    if (!confirm("Видалити підписника?")) return;
+    // Localized confirmation dialog
+    if (!confirm(translate("dash.confirm.delete_sub"))) return;
     try {
       const res = await fetchWithAuth(`${API}/admin/subscriptions/${id}`, {
         method: "DELETE",
@@ -1526,10 +1582,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (res.ok || res.status === 204) {
         loadSubscribers(subscribersPage, subscribersStatusFilter);
       } else {
-        alert("Помилка видалення. Спробуйте ще раз.");
+        // Localized delete error alert
+        alert(translate("dash.error.delete"));
       }
     } catch {
-      alert("Помилка зʼєднання.");
+      // Localized network error alert
+      alert(translate("dash.error.network"));
     }
   }
 
@@ -1543,12 +1601,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function exportSubscribersCSV() {
     if (!allSubscribersData.length) {
-      alert(
-        "Немає даних для експорту. Спочатку завантажте список підписників.",
-      );
+      // Localized no-data alert before export
+      alert(translate("dash.export.no_data"));
       return;
     }
-    const header = ["Email", "Тип", "Статус", "Дата підписки"];
+    // CSV header row — type/status/date columns use translated labels for readability
+    const header = [
+      "Email",
+      translate("dash.col.type"),
+      translate("dash.col.status"),
+      translate("dash.col.sub_date"),
+    ];
     const rows = allSubscribersData.map((s) => [
       s.email || "",
       SUB_TYPE_LABEL[s.type] || s.type || "",
@@ -1579,23 +1642,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     const postTitle = comment.blogPost?.title || comment.postTitle || "—";
     const authorName = comment.author?.name || comment.authorName || "—";
 
+    // Approve/reject buttons — title tooltips localized; only shown for PENDING
     const approveBtn =
       comment.status === "PENDING"
-        ? `<button type="button" class="btn btn--green btn--sm" data-action="approve-comment" data-id="${comment.id}" title="Схвалити">✓</button>`
+        ? `<button type="button" class="btn btn--green btn--sm" data-action="approve-comment" data-id="${comment.id}" title="${translate("dash.comment_status.approved")}">✓</button>`
         : "";
     const rejectBtn =
       comment.status === "PENDING"
-        ? `<button type="button" class="btn btn--ghost btn--sm" data-action="reject-comment" data-id="${comment.id}" title="Відхилити">✗</button>`
+        ? `<button type="button" class="btn btn--ghost btn--sm" data-action="reject-comment" data-id="${comment.id}" title="${translate("dash.comment_status.rejected")}">✗</button>`
         : "";
-    const deleteBtn = `<button type="button" class="btn btn--magenta btn--sm" data-action="delete-comment" data-id="${comment.id}" title="Видалити">Видалити</button>`;
+    // Delete button — title tooltip and label localized
+    const deleteBtn = `<button type="button" class="btn btn--magenta btn--sm" data-action="delete-comment" data-id="${comment.id}" title="${translate("dash.btn.delete")}">${translate("dash.btn.delete")}</button>`;
 
+    // Comment row — data-label attributes and action buttons localized
     return `<div class="dash-list__row" data-id="${comment.id}">
-      <div data-label="Автор">${escHtml(authorName)}</div>
-      <div data-label="Коментар">${escHtml(excerpt)}</div>
-      <div class="dash-list__title" data-label="Пост">${escHtml(postTitle)}</div>
-      <div class="dash-list__date" data-label="Дата">${fmtDate(comment.createdAt)}</div>
-      <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
-      <div class="dash-list__actions" data-label="Дії">${approveBtn}${rejectBtn}${deleteBtn}</div>
+      <div data-label="${translate("dash.col.author")}">${escHtml(authorName)}</div>
+      <div data-label="${translate("dash.col.comment")}">${escHtml(excerpt)}</div>
+      <div class="dash-list__title" data-label="${translate("dash.col.post")}">${escHtml(postTitle)}</div>
+      <div class="dash-list__date" data-label="${translate("dash.col.date")}">${fmtDate(comment.createdAt)}</div>
+      <div data-label="${translate("dash.col.status")}"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
+      <div class="dash-list__actions" data-label="${translate("dash.col.actions")}">${approveBtn}${rejectBtn}${deleteBtn}</div>
     </div>`;
   }
 
@@ -1606,7 +1672,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const pagination = document.getElementById("comments-pagination");
     if (!listBody) return;
 
-    listBody.innerHTML = '<div class="dash-list__empty">Завантаження...</div>';
+    // Show localized loading state while request is in flight
+    listBody.innerHTML = `<div class="dash-list__empty">${translate("dash.empty.loading")}</div>`;
     if (pagination) pagination.innerHTML = "";
 
     const statusParam = statusFilter ? `&status=${statusFilter}` : "";
@@ -1615,14 +1682,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         `${API}/admin/comments?size=20&sort=createdAt,desc&page=${page}${statusParam}`,
       );
       if (!res.ok) {
-        listBody.innerHTML =
-          '<div class="dash-list__empty">Помилка завантаження</div>';
+        listBody.innerHTML = `<div class="dash-list__empty">${translate("dash.error.load")}</div>`;
         return;
       }
       const data = await res.json();
       const rows = (data.content || []).map(commentRowHtml).join("");
       listBody.innerHTML =
-        rows || '<div class="dash-list__empty">Коментарів ще немає</div>';
+        rows ||
+        `<div class="dash-list__empty">${translate("dash.empty.no_comments")}</div>`;
 
       if (pagination && data.page && data.page.totalPages > 1) {
         const { number, totalPages } = data.page;
@@ -1633,8 +1700,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     } catch (err) {
       console.error("Comments load error:", err);
-      listBody.innerHTML =
-        '<div class="dash-list__empty">Помилка завантаження</div>';
+      listBody.innerHTML = `<div class="dash-list__empty">${translate("dash.error.load")}</div>`;
     }
   }
 
@@ -1648,15 +1714,18 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (res.ok) {
         loadComments(commentsPage, commentsStatusFilter);
       } else {
-        alert("Помилка модерації. Спробуйте ще раз.");
+        // Localized moderation error alert
+        alert(translate("dash.error.moderation"));
       }
     } catch {
-      alert("Помилка зʼєднання.");
+      // Localized network error alert
+      alert(translate("dash.error.network"));
     }
   }
 
   async function deleteComment(id) {
-    if (!confirm("Видалити коментар?")) return;
+    // Localized confirmation dialog
+    if (!confirm(translate("dash.confirm.delete_comment"))) return;
     try {
       const res = await fetchWithAuth(`${API}/comments/${id}`, {
         method: "DELETE",
@@ -1664,10 +1733,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (res.ok || res.status === 204) {
         loadComments(commentsPage, commentsStatusFilter);
       } else {
-        alert("Помилка видалення. Спробуйте ще раз.");
+        // Localized delete error alert
+        alert(translate("dash.error.delete"));
       }
     } catch {
-      alert("Помилка зʼєднання.");
+      // Localized network error alert
+      alert(translate("dash.error.network"));
     }
   }
 
@@ -1686,14 +1757,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         showCoverPreview(previewContainerId, data.url || data.imageUrl || "");
       } else {
         const err = await res.json().catch(() => ({}));
-        const msg =
-          err.detail ||
-          err.message ||
-          "Помилка завантаження файлу. Спробуйте ще раз.";
+        // Prefer API error detail; fall back to localized upload error
+        const msg = err.detail || err.message || translate("dash.error.upload");
         alert(msg);
       }
     } catch {
-      alert("Помилка зʼєднання при завантаженні файлу.");
+      // Localized network error alert for file upload
+      alert(translate("dash.error.network_upload"));
     }
   }
 
@@ -1868,7 +1938,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!cropperInstance) return;
 
       cropSaveBtn.disabled = true;
-      cropSaveBtn.textContent = "Збереження…";
+      // Localized saving state — shown while avatar is being uploaded
+      cropSaveBtn.textContent = translate("dash.state.saving");
 
       try {
         const canvas = cropperInstance.getCroppedCanvas({
@@ -1898,15 +1969,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         closeCropModal();
         initAvatarWidget(updatedUser);
       } catch (err) {
-        alert("Помилка збереження фото: " + err.message);
+        // Localized save error prefix; err.message is a server/system string (not user content)
+        alert(translate("dash.error.save") + " " + err.message);
       } finally {
         cropSaveBtn.disabled = false;
-        cropSaveBtn.textContent = "Зберегти фото";
+        // Restore localized button label after save attempt
+        cropSaveBtn.textContent = translate("dash.crop.save_btn");
       }
     });
   }
 
-  // Bind "Змінити фото" button to the hidden file input
+  // Bind the upload button to the hidden file input
   document
     .getElementById("dash-avatar-upload-btn")
     ?.addEventListener("click", () => {
@@ -1926,7 +1999,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   document
     .getElementById("dash-avatar-delete-btn")
     ?.addEventListener("click", async () => {
-      if (!confirm("Видалити фото профілю?")) return;
+      // Localized confirmation dialog
+      if (!confirm(translate("dash.confirm.delete_avatar"))) return;
 
       try {
         const res = await fetchWithAuth(
@@ -1939,7 +2013,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           name: document.querySelector(".dash-sidebar__name")?.textContent,
         });
       } catch (err) {
-        alert("Помилка видалення: " + err.message);
+        // Localized delete error prefix; err.message is a server/system string
+        alert(translate("dash.error.delete") + " " + err.message);
       }
     });
 
