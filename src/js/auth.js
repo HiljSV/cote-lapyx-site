@@ -188,18 +188,21 @@ function initLoginForm() {
     setLoading(submitBtn, translate("auth.loading"));
 
     try {
+      // credentials:'include' is required so the browser accepts the
+      // Set-Cookie: cl_refresh (HttpOnly) header from the login response.
       const res = await fetch("https://api.cote-lapyx.com/api/v1/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
+        credentials: "include",
       });
 
       const data = await res.json();
 
       if (res.ok && data.accessToken) {
-        // Store JWT tokens
+        // Store only the access token — cl_refresh is now an HttpOnly cookie
+        // set by the server; JS must not store or read it.
         localStorage.setItem("cl_access", data.accessToken);
-        localStorage.setItem("cl_refresh", data.refreshToken);
         window.location.href = "/dashboard.html";
       } else {
         showServerError(
@@ -302,20 +305,24 @@ function initRegisterForm() {
     setLoading(submitBtn, translate("auth.loading"));
 
     try {
+      // credentials:'include' is required so the browser accepts the
+      // Set-Cookie: cl_refresh (HttpOnly) header from the register response.
       const res = await fetch(
         "https://api.cote-lapyx.com/api/v1/auth/register",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name, email, password }),
+          credentials: "include",
         },
       );
 
       const data = await res.json();
 
       if (res.ok && data.accessToken) {
+        // Store only the access token — cl_refresh is now an HttpOnly cookie
+        // set by the server; JS must not store or read it.
         localStorage.setItem("cl_access", data.accessToken);
-        localStorage.setItem("cl_refresh", data.refreshToken);
         window.location.href = "/dashboard.html";
       } else {
         showServerError(
