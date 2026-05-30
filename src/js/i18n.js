@@ -35,11 +35,12 @@ const GEO_ENDPOINT = "https://api.cote-lapyx.com/api/v1/locale";
 const LS_KEY = "cl_lang";
 
 // Module-level tracker — updated by applyTranslations(), read by translate()
-let _currentLang = "en";
+// Default is "uk" (P2-4) — site primary language; detection (below) may override.
+let _currentLang = "uk";
 
 // =============================================================================
 // detectLanguage — async, returns resolved language code
-// Priority: 1) localStorage → 2) navigator.language → 3) geo-IP → 4) "en"
+// Priority: 1) localStorage → 2) navigator.language → 3) geo-IP → 4) "uk"
 // navigator comes before geo-IP because browser language reflects user preference
 // better than physical location (e.g. a Ukrainian user in France expects UK/EN, not FR)
 // =============================================================================
@@ -73,8 +74,8 @@ export async function detectLanguage() {
     // Silent fallback — geo endpoint may be unavailable (network error, CORS, etc.)
   }
 
-  // 4. Default fallback
-  return "en";
+  // 4. Default fallback — site primary language is Ukrainian (P2-4)
+  return "uk";
 }
 
 // =============================================================================
@@ -85,8 +86,8 @@ export function applyTranslations(lang) {
   // Track active language so translate() can look up values at runtime
   _currentLang = lang;
 
-  // Use requested language, fall back to English if unknown
-  const t = TRANSLATIONS[lang] || TRANSLATIONS["en"];
+  // Use requested language, fall back to Ukrainian (primary) if unknown
+  const t = TRANSLATIONS[lang] || TRANSLATIONS["uk"];
 
   // Apply text content to all translatable elements
   document.querySelectorAll("[data-i18n]").forEach((el) => {
@@ -129,7 +130,7 @@ export function applyTranslations(lang) {
 // Safe to call any time after applyTranslations() has run at least once
 // =============================================================================
 export function translate(key) {
-  const t = TRANSLATIONS[_currentLang] || TRANSLATIONS["en"];
+  const t = TRANSLATIONS[_currentLang] || TRANSLATIONS["uk"];
   return t[key] !== undefined ? t[key] : key;
 }
 

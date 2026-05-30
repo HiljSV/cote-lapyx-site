@@ -2,6 +2,9 @@
 // Auth utilities — shared across dashboard.js, admin.js
 // =============================================================================
 
+// Import translate() for runtime i18n lookups (session-expiry toast)
+import { translate } from "@js/i18n.js";
+
 // Base URL for all auth API requests
 const AUTH_API = "https://api.cote-lapyx.com/api/v1/auth";
 
@@ -17,7 +20,8 @@ const AUTH_API = "https://api.cote-lapyx.com/api/v1/auth";
 function showSessionExpiredToast() {
   // Create toast element with inline cyberpunk style (no CSS class dependency)
   const toast = document.createElement("div");
-  toast.textContent = "Сесія закінчилась. Будь ласка, увійдіть знову.";
+  // Translated session-expiry message (was hardcoded Ukrainian)
+  toast.textContent = translate("auth.session_expired");
   toast.style.cssText = [
     "position:fixed",
     "bottom:24px",

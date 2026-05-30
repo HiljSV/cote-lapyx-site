@@ -7,49 +7,66 @@
   <div class="hero__bracket hero__bracket--bl" aria-hidden="true"></div>
   <div class="hero__bracket hero__bracket--br" aria-hidden="true"></div>
 
+  <!-- Hero: container = max-width wrapper; inner = two-column grid layout -->
   <div class="hero__container">
-    <div class="hero__content">
-      <p class="hero__eyebrow" aria-hidden="true">IT Studio — Ukraine</p>
+    <div class="hero__inner">
+      <div class="hero__content">
+        <!-- Hero: eyebrow — translated via data-i18n -->
+        <p
+          class="hero__eyebrow"
+          aria-hidden="true"
+          data-i18n="index.hero.eyebrow"
+        >
+          IT Studio — Ukraine
+        </p>
 
-      <h1 class="hero__heading">
-        <span class="hero__word--cyan">Empower</span> Your
-        <br />
-        <span class="hero__word--magenta">Digital</span> Innovation
-      </h1>
+        <!-- Hero: H1 — split into i18n word fragments; cyan + magenta highlights preserved -->
+        <h1 class="hero__heading">
+          <span class="hero__word--cyan" data-i18n="index.hero.word1"
+            >Empower</span
+          >
+          <span data-i18n="index.hero.word2">Your</span>
+          <br />
+          <span class="hero__word--magenta" data-i18n="index.hero.word3"
+            >Digital</span
+          >
+          <span data-i18n="index.hero.word4">Innovation</span>
+        </h1>
 
-      <!-- Hero: subheading — split into two i18n spans so <br/> is preserved -->
-      <p class="hero__subheading">
-        <span data-i18n="index.hero.subheading.line1"
-          >Команда IT-професіоналів — Frontend, Backend, Design.</span
-        ><br />
-        <span data-i18n="index.hero.subheading.line2"
-          >Від ідеї до готового продукту.</span
-        >
-      </p>
+        <!-- Hero: subheading — split into two i18n spans so <br/> is preserved -->
+        <p class="hero__subheading">
+          <span data-i18n="index.hero.subheading.line1"
+            >Команда IT-професіоналів — Frontend, Backend, Design.</span
+          ><br />
+          <span data-i18n="index.hero.subheading.line2"
+            >Від ідеї до готового продукту.</span
+          >
+        </p>
 
-      <!-- Hero: CTA buttons — data-i18n on button text -->
-      <div class="hero__actions">
-        <a href="#services" class="btn btn--cyan"
-          ><span data-i18n="btn.our_services">Наші послуги</span></a
-        >
-        <a href="projects.html" class="btn btn--magenta"
-          ><span data-i18n="btn.projects">Проекти</span></a
-        >
-        <a href="#contact" class="btn btn--green"
-          ><span data-i18n="btn.connect">Зв'язатись</span></a
-        >
+        <!-- Hero: CTA buttons — data-i18n on button text -->
+        <div class="hero__actions">
+          <a href="#services" class="btn btn--cyan"
+            ><span data-i18n="btn.our_services">Наші послуги</span></a
+          >
+          <a href="projects.html" class="btn btn--magenta"
+            ><span data-i18n="btn.projects">Проекти</span></a
+          >
+          <a href="#contact" class="btn btn--green"
+            ><span data-i18n="btn.connect">Зв'язатись</span></a
+          >
+        </div>
       </div>
-    </div>
 
-    <div class="hero__visual" aria-hidden="true">
-      <div class="hero__visual-glow"></div>
-      <img
-        class="hero__visual-logo"
-        src="@img/logo/logo-geometric.png"
-        alt=""
-        width="420"
-        height="420"
-      />
+      <div class="hero__visual" aria-hidden="true">
+        <div class="hero__visual-glow"></div>
+        <img
+          class="hero__visual-logo"
+          src="@img/logo/logo-geometric.png"
+          alt=""
+          width="420"
+          height="420"
+        />
+      </div>
     </div>
   </div>
 

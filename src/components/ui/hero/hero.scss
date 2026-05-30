@@ -29,9 +29,14 @@
     pointer-events: none;
   }
 
+  /* Hero: container — max-width wrapper only, NO layout here */
   &__container {
     position: relative;
     z-index: 1;
+  }
+
+  /* Hero: inner grid — two-column layout on desktop */
+  &__inner {
     display: grid;
     grid-template-columns: 1fr 1fr;
     align-items: center;
@@ -39,12 +44,14 @@
     @include adaptiveValue("padding-bottom", 100, 60);
     @include adaptiveValue("gap", 48, 24);
 
+    /* Hero: tablet — keep two columns but center content */
     @media (max-width: toEm($tablet)) {
       grid-template-columns: 1fr 1fr;
       text-align: center;
       gap: 32px;
     }
 
+    /* Hero: mobile — single column stack */
     @media (max-width: toEm($mobile)) {
       grid-template-columns: 1fr;
       padding-bottom: 96px;
@@ -66,14 +73,17 @@
     }
   }
 
+  /* Hero: visual column — logo centered */
   &__visual {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
 
+    /* Hero: tablet — visual moves above content, constrained height so CTA stays visible */
     @media (max-width: toEm($tablet)) {
       order: -1;
+      max-height: 40vh;
     }
   }
 
@@ -90,6 +100,7 @@
     pointer-events: none;
   }
 
+  /* Hero: logo image — constrained on tablet so CTA buttons stay above fold */
   &__visual-logo {
     width: 100%;
     max-width: 620px;
@@ -99,8 +110,9 @@
       drop-shadow(0 0 40px rgba($neon-magenta, 0.15));
     animation: logo-float 6s ease-in-out infinite;
 
+    /* Hero: tablet — shrink logo so heading + CTA buttons are visible without scroll */
     @media (max-width: toEm($tablet)) {
-      max-width: 480px;
+      max-width: 300px;
     }
   }
 

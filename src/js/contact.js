@@ -4,6 +4,9 @@
 // Public endpoint — no JWT authentication required, use plain fetch()
 // =============================================================================
 
+// Import translate() for runtime i18n lookups — replaces all hardcoded Ukrainian strings
+import { translate } from "@js/i18n.js";
+
 const API = "https://api.cote-lapyx.com/api/v1/contact";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -37,7 +40,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Disable submit button while the request is in flight
     submit.disabled = true;
-    submit.textContent = "Надсилаємо...";
+    // Use i18n key — was hardcoded "Надсилаємо..."
+    submit.textContent = translate("contact.sending");
     hideBanners();
 
     try {
@@ -53,27 +57,23 @@ document.addEventListener("DOMContentLoaded", () => {
         successBanner.hidden = false;
         successBanner.scrollIntoView({ behavior: "smooth", block: "center" });
       } else if (res.status === 429) {
-        // Rate limit — friendly message with cooldown info
-        showError("Забагато запитів. Спробуйте через 15 хвилин.");
+        // Rate limit — translated message with cooldown info
+        showError(translate("contact.error.rate_limit"));
       } else if (res.status === 400) {
-        // Validation error from the server — show API message if present
+        // Validation error from the server — show API message if present, fall back to i18n
         const data = await res.json();
-        showError(data.message || "Перевірте правильність заповнених полів.");
+        showError(data.message || translate("contact.error.invalid_fields"));
       } else {
-        // Any other non-2xx response
-        showError(
-          "Щось пішло не так. Спробуйте ще раз або напишіть нам у Telegram.",
-        );
+        // Any other non-2xx response — translated generic error
+        showError(translate("contact.error.generic"));
       }
     } catch {
-      // Network error / no connection
-      showError(
-        "Немає зʼєднання з сервером. Перевірте інтернет і спробуйте ще раз.",
-      );
+      // Network error / no connection — translated error
+      showError(translate("contact.error.network"));
     } finally {
-      // Always re-enable the button regardless of outcome
+      // Always re-enable the button and restore translated label
       submit.disabled = false;
-      submit.textContent = "Надіслати";
+      submit.textContent = translate("contact.submit");
     }
   });
 
@@ -92,21 +92,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const email = form.email.value.trim();
     const message = form.message.value.trim();
 
+    // Validate name — minimum 2 chars, translated error message
     if (name.length < 2) {
-      showFieldError("cf-name", "Ім'я повинно містити не менше 2 символів");
+      showFieldError("cf-name", translate("contact.validate.name_min"));
       valid = false;
     }
 
+    // Validate email — basic RFC format check, translated error message
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      showFieldError("cf-email", "Введіть коректний email");
+      showFieldError("cf-email", translate("contact.validate.email_invalid"));
       valid = false;
     }
 
+    // Validate message — minimum 10 chars, translated error message
     if (message.length < 10) {
-      showFieldError(
-        "cf-message",
-        "Повідомлення повинно містити не менше 10 символів",
-      );
+      showFieldError("cf-message", translate("contact.validate.message_min"));
       valid = false;
     }
 
