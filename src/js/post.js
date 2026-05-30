@@ -27,7 +27,7 @@ function escHtml(str) {
 function fmtDate(iso) {
   if (!iso) return "";
   // Read active language from localStorage — same pattern as blog.js
-  const lang = localStorage.getItem("cl_lang") || "en";
+  const lang = localStorage.getItem("cl_lang") || "uk";
   return new Date(iso).toLocaleDateString(lang, {
     day: "numeric",
     month: "short",
@@ -47,7 +47,7 @@ function authorInitials(name) {
 // Return Latin displayName for non-UK locales, fall back to Cyrillic name
 function authorDisplayName(author) {
   if (!author) return "—";
-  const lang = localStorage.getItem("cl_lang") || "en";
+  const lang = localStorage.getItem("cl_lang") || "uk";
   return lang !== "uk" && author.displayName
     ? author.displayName
     : author.name || "—";
@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     // Read current UI language so the backend returns translated post content
-    const lang = localStorage.getItem("cl_lang") || "en";
+    const lang = localStorage.getItem("cl_lang") || "uk";
     // GET /api/v1/posts/{slug} — public endpoint, no auth needed; locale passed for translations
     const res = await fetch(
       `${API}/posts/${encodeURIComponent(slug)}?locale=${lang}`,
@@ -245,7 +245,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const params = new URLSearchParams(window.location.search);
     const slug = params.get("slug");
     if (!slug) return;
-    const lang = localStorage.getItem("cl_lang") || "en";
+    const lang = localStorage.getItem("cl_lang") || "uk";
     try {
       // Fetch post again with new locale — public endpoint, no auth needed
       const res = await fetch(
@@ -543,7 +543,7 @@ document.addEventListener("DOMContentLoaded", () => {
           .join("")
           .toUpperCase();
         // Format date with active UI language locale
-        const commentLang = localStorage.getItem("cl_lang") || "en";
+        const commentLang = localStorage.getItem("cl_lang") || "uk";
         const date = c.createdAt
           ? new Date(c.createdAt).toLocaleDateString(commentLang, {
               day: "numeric",

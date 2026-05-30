@@ -33,7 +33,7 @@ function escHtml(str) {
 // Format ISO date with locale-aware month/day names
 function fmtDate(iso) {
   if (!iso) return "";
-  const lang = localStorage.getItem("cl_lang") || "en";
+  const lang = localStorage.getItem("cl_lang") || "uk";
   return new Date(iso).toLocaleDateString(lang, {
     day: "numeric",
     month: "long",
@@ -44,7 +44,7 @@ function fmtDate(iso) {
 // Return Latin displayName for non-UK locales, fall back to Cyrillic name
 function resolveDisplayName(user) {
   if (!user) return "—";
-  const lang = localStorage.getItem("cl_lang") || "en";
+  const lang = localStorage.getItem("cl_lang") || "uk";
   return lang !== "uk" && user.displayName
     ? user.displayName
     : user.name || "—";
@@ -195,7 +195,7 @@ function renderProjectsFromApi(projects) {
 function renderProjects(member) {
   const el = document.getElementById("member-projects");
   if (!el) return;
-  const lang = localStorage.getItem("cl_lang") || "en";
+  const lang = localStorage.getItem("cl_lang") || "uk";
   el.innerHTML = member.projects
     .map((p) => {
       // Use English description for non-UK locales when available
@@ -257,7 +257,7 @@ function renderPosts(posts) {
 // API hydration — fetches member + posts with locale; re-runs on lang change
 // =============================================================================
 async function hydrateFromApi(memberId, member) {
-  const lang = localStorage.getItem("cl_lang") || "en";
+  const lang = localStorage.getItem("cl_lang") || "uk";
 
   try {
     // GET /api/v1/team-members/{slug} — public; locale for translated content

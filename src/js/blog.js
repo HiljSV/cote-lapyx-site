@@ -24,7 +24,7 @@ function escHtml(str) {
 function fmtDate(iso) {
   if (!iso) return "";
   // Use the currently active UI language for locale-aware date formatting
-  const lang = localStorage.getItem("cl_lang") || "en";
+  const lang = localStorage.getItem("cl_lang") || "uk";
   return new Date(iso).toLocaleDateString(lang, {
     day: "numeric",
     month: "short",
@@ -43,7 +43,7 @@ function authorInitials(name) {
 // Return Latin displayName for non-UK locales, fall back to Cyrillic name
 function authorDisplayName(author) {
   if (!author) return "—";
-  const lang = localStorage.getItem("cl_lang") || "en";
+  const lang = localStorage.getItem("cl_lang") || "uk";
   return lang !== "uk" && author.displayName
     ? author.displayName
     : author.name || "—";
@@ -57,8 +57,11 @@ function buildBlogCard(post) {
       ? escHtml(post.categories[0].name)
       : translate("blog.category.general");
   const date = post.publishedAt || post.createdAt;
+  // Cover image: alt carries the post title for screen readers (meaningful image, not decorative).
+  // Broken-src fallback is handled by a delegated error listener (see initBrokenCoverFallback),
+  // not an inline onerror handler — inline handlers would violate the site CSP.
   const coverHtml = post.coverImage
-    ? `<img class="blog-card__cover" src="${escHtml(post.coverImage)}" alt="" aria-hidden="true" />`
+    ? `<img class="blog-card__cover" src="${escHtml(post.coverImage)}" alt="${escHtml(post.title)}" />`
     : `<div class="blog-card__cover-placeholder" aria-hidden="true">✦</div>`;
 
   // Render avatar img if available, otherwise show initials text
@@ -110,7 +113,7 @@ async function loadPosts(page, append = false) {
   if (currentSearch) params.set("search", currentSearch);
 
   // Read current UI language so the backend returns translated post content
-  const lang = localStorage.getItem("cl_lang") || "en";
+  const lang = localStorage.getItem("cl_lang") || "uk";
   params.set("locale", lang);
 
   try {
@@ -152,20 +155,53 @@ async function loadLatestPosts() {
   if (!latestEl) return;
   try {
     // Read current UI language so the backend returns translated post content
-    const lang = localStorage.getItem("cl_lang") || "en";
+    const lang = localStorage.getItem("cl_lang") || "uk";
     // GET /api/v1/posts — public endpoint; locale appended for translations
     const res = await fetch(
       `${API}/posts?size=3&sort=publishedAt,desc&locale=${lang}`,
     );
     if (!res.ok) return;
     const data = await res.json();
-    latestEl.innerHTML = (data.content || []).map(buildBlogCard).join("");
+    const posts = data.content || [];
+    // P1-4: hide the whole #blog section when there are no posts (avoid empty block)
+    const blogSection = document.getElementById("blog");
+    if (posts.length === 0) {
+      if (blogSection) blogSection.style.display = "none";
+      latestEl.innerHTML = "";
+      return;
+    }
+    // Posts exist — ensure section is visible (in case it was hidden on a prior empty load)
+    if (blogSection) blogSection.style.display = "";
+    latestEl.innerHTML = posts.map(buildBlogCard).join("");
   } catch (_) {}
+}
+
+// CSP-safe broken-cover fallback: replace a failed .blog-card__cover image with
+// the same placeholder used when no cover exists. Uses capture-phase delegation
+// because the `error` event does not bubble.
+function initBrokenCoverFallback() {
+  document.addEventListener(
+    "error",
+    (e) => {
+      const img = e.target;
+      if (!(img instanceof HTMLImageElement)) return;
+      if (!img.classList.contains("blog-card__cover")) return;
+      const placeholder = document.createElement("div");
+      placeholder.className = "blog-card__cover-placeholder";
+      placeholder.setAttribute("aria-hidden", "true");
+      placeholder.textContent = "✦";
+      img.replaceWith(placeholder);
+    },
+    true,
+  );
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   const listEl = document.getElementById("blog-list");
   const latestEl = document.getElementById("blog-latest");
+
+  // Wire the CSP-safe broken-cover fallback once for all blog cards on the page
+  initBrokenCoverFallback();
 
   if (listEl) {
     // Initial load

@@ -14,7 +14,7 @@ const _membersCache = {};
 async function hydrateTeamAvatars() {
   try {
     // Read current UI language so the backend returns translated member content
-    const lang = localStorage.getItem("cl_lang") || "en";
+    const lang = localStorage.getItem("cl_lang") || "uk";
 
     let members;
     if (_membersCache[lang]) {
