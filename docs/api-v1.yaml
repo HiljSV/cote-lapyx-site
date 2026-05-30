@@ -2,15 +2,24 @@ openapi: 3.1.0
 
 info:
   title: Cote Lapyx API
-  version: 1.9.0
+  version: 1.10.0
   description: |
     REST API for cote-lapyx.com — a team website for Валерія, Сергій, Андрій.
 
     ## Authentication
     All protected endpoints require `Authorization: Bearer <accessToken>`.
-    Access tokens expire in **15 minutes**. Use `POST /auth/refresh` (with the refresh
-    token in the request body) to obtain a new pair. Refresh tokens expire in **30 days**
-    and are rotated on every use.
+    Access tokens expire in **15 minutes**. Use `POST /auth/refresh` to obtain a new
+    access token — the refresh token is supplied automatically via the `cl_refresh`
+    HttpOnly cookie set by the server on login/register; no manual token handling is
+    required. Refresh tokens expire in **30 days** and are rotated on every use
+    (token-family detect-and-revoke is active).
+
+    ## Refresh-token cookie
+    The `cl_refresh` cookie is set by the server on successful login and register
+    (`Set-Cookie: cl_refresh=<uuid>; HttpOnly; Secure; SameSite=Strict;
+    Path=/api/v1/auth; Max-Age=2592000`).  The browser sends it automatically with
+    every request to `/api/v1/auth/*`.  The frontend never reads or stores the cookie
+    value.  On logout the server clears the cookie by reissuing it with `Max-Age=0`.
 
     ## Roles
     - **owner** — three team members; full write access to all resources and admin endpoints.
@@ -303,24 +312,35 @@ components:
 
     RefreshRequest:
       type: object
-      required: [refreshToken]
+      # refreshToken is OPTIONAL as of SEC-1: the server reads the cl_refresh HttpOnly
+      # cookie automatically.  The field is retained for backward-compat with non-browser
+      # clients that cannot use cookies; the cookie takes precedence when both are present.
       properties:
         refreshToken:
           type: string
           format: uuid
+          description: |
+            Optional — backward-compat only. Browser clients MUST omit this field and rely
+            on the `cl_refresh` HttpOnly cookie instead. Non-browser clients may pass the
+            UUID here; the cookie is preferred when both are present.
           example: 550e8400-e29b-41d4-a716-446655440000
 
     LogoutRequest:
       type: object
-      required: [refreshToken]
+      # refreshToken is OPTIONAL as of SEC-1: the server reads the cl_refresh HttpOnly
+      # cookie automatically.  Retained for backward-compat with non-browser clients.
       properties:
         refreshToken:
           type: string
           format: uuid
+          description: |
+            Optional — backward-compat only. Browser clients MUST omit this field;
+            the server reads and clears the `cl_refresh` cookie instead.
 
     AuthResponse:
       type: object
-      required: [user, accessToken, refreshToken]
+      # SEC-1: refreshToken removed from body — delivered via cl_refresh HttpOnly cookie.
+      required: [user, accessToken]
       properties:
         user:
           $ref: "#/components/schemas/UserDTO"
@@ -328,21 +348,16 @@ components:
           type: string
           description: JWT access token, valid for 15 minutes.
           example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-        refreshToken:
-          type: string
-          format: uuid
-          description: Opaque refresh token UUID, valid for 30 days.
-          example: 550e8400-e29b-41d4-a716-446655440000
 
     TokenRefreshResponse:
       type: object
-      required: [accessToken, refreshToken]
+      # SEC-1: refreshToken removed from body — rotated token delivered via cl_refresh
+      # HttpOnly cookie (Set-Cookie header).  Only the new accessToken is in the body.
+      required: [accessToken]
       properties:
         accessToken:
           type: string
-        refreshToken:
-          type: string
-          format: uuid
+          description: New JWT access token, valid for 15 minutes.
 
     # --- User ---
 
@@ -1768,6 +1783,32 @@ components:
           type: boolean
 
   # ---------------------------------------------------------------------------
+  # Reusable headers
+  # ---------------------------------------------------------------------------
+  headers:
+    # SEC-1: cl_refresh HttpOnly cookie header.
+    # Used on login, register (set), refresh (rotate), and logout (clear).
+    SetCookieRefresh:
+      description: |
+        Sets (or rotates) the `cl_refresh` HttpOnly cookie.
+        Attributes: `HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth; Max-Age=2592000`.
+        The browser sends this cookie automatically with every request under `/api/v1/auth/`.
+        The frontend MUST NOT read or store the cookie value.
+      schema:
+        type: string
+        example: "cl_refresh=550e8400-e29b-41d4-a716-446655440000; HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth; Max-Age=2592000"
+
+    # SEC-1: cookie-clear header returned by POST /auth/logout.
+    # Identical cookie name/path/attributes but Max-Age=0 instructs the browser to delete it.
+    ClearCookieRefresh:
+      description: |
+        Clears the `cl_refresh` cookie.
+        Reissues the cookie with `Max-Age=0` so the browser deletes it immediately.
+      schema:
+        type: string
+        example: "cl_refresh=; HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth; Max-Age=0"
+
+  # ---------------------------------------------------------------------------
   # Reusable responses
   # ---------------------------------------------------------------------------
   responses:
@@ -1881,6 +1922,9 @@ paths:
       x-roles: [public]
       description: |
         Creates a new account with role `subscriber`. Rate-limited to 3 requests per 10 minutes per IP.
+
+        On success the server sets the `cl_refresh` HttpOnly cookie (see `Set-Cookie` header).
+        The response body contains only `user` + `accessToken`; the refresh token is NOT in the body.
       requestBody:
         required: true
         content:
@@ -1889,7 +1933,13 @@ paths:
               $ref: "#/components/schemas/RegisterRequest"
       responses:
         "201":
-          description: Account created successfully.
+          description: |
+            Account created successfully. The `cl_refresh` HttpOnly cookie is set in `Set-Cookie`.
+            Body contains `user` and `accessToken` only.
+          # SEC-1: cl_refresh delivered via Set-Cookie, not in response body.
+          headers:
+            Set-Cookie:
+              $ref: "#/components/headers/SetCookieRefresh"
           content:
             application/json:
               schema:
@@ -1911,7 +1961,9 @@ paths:
       security: []
       x-roles: [public]
       description: |
-        Returns a JWT access token (15 min TTL) and a refresh token (30 day TTL).
+        Returns a JWT access token (15 min TTL) in the response body.
+        The refresh token (30 day TTL) is delivered via the `cl_refresh` HttpOnly cookie
+        (`Set-Cookie` header) and is NOT present in the response body.
         Rate-limited to 5 requests/minute per IP.
       requestBody:
         required: true
@@ -1921,7 +1973,13 @@ paths:
               $ref: "#/components/schemas/AuthRequest"
       responses:
         "200":
-          description: Authentication successful.
+          description: |
+            Authentication successful. The `cl_refresh` HttpOnly cookie is set in `Set-Cookie`.
+            Body contains `user` and `accessToken` only.
+          # SEC-1: cl_refresh delivered via Set-Cookie, not in response body.
+          headers:
+            Set-Cookie:
+              $ref: "#/components/headers/SetCookieRefresh"
           content:
             application/json:
               schema:
@@ -1941,18 +1999,42 @@ paths:
       security: []
       x-roles: [public]
       description: |
-        Refresh tokens are single-use; each call invalidates the presented token
-        and issues a fresh pair (rotation). Presenting a revoked token returns 401
-        and invalidates the entire token family (detect-and-revoke).
+        The refresh token is read from the `cl_refresh` HttpOnly cookie sent automatically
+        by the browser (`credentials: 'include'`).  No request body is required for browser
+        clients.  Non-browser clients may supply `refreshToken` in the JSON body as a
+        backward-compat fallback; the cookie takes precedence when both are present.
+
+        Refresh tokens are single-use; each call invalidates the presented token and rotates
+        it: a fresh `cl_refresh` cookie is set in the `Set-Cookie` response header.
+        Presenting a revoked token returns 401 and invalidates the entire token family
+        (detect-and-revoke).
+      # SEC-1: cl_refresh cookie is the primary source of the refresh token.
+      parameters:
+        - name: cl_refresh
+          in: cookie
+          required: false
+          description: |
+            HttpOnly refresh token cookie set by POST /auth/login and POST /auth/register.
+            The browser sends this automatically. Do not read or forward this value manually.
+          schema:
+            type: string
+            format: uuid
       requestBody:
-        required: true
+        # Body is optional — browser clients omit it entirely (cookie-only flow).
+        required: false
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/RefreshRequest"
       responses:
         "200":
-          description: New token pair issued.
+          description: |
+            New access token issued. A rotated `cl_refresh` cookie is set in `Set-Cookie`.
+            Body contains only `accessToken`; the new refresh token is in the cookie.
+          # SEC-1: rotated cl_refresh delivered via Set-Cookie header.
+          headers:
+            Set-Cookie:
+              $ref: "#/components/headers/SetCookieRefresh"
           content:
             application/json:
               schema:
@@ -1960,7 +2042,19 @@ paths:
         "400":
           $ref: "#/components/responses/ValidationError"
         "401":
-          $ref: "#/components/responses/Unauthorized"
+          description: |
+            Missing, expired, or revoked refresh token. The `cl_refresh` cookie was absent
+            or its UUID was not found / already invalidated (detect-and-revoke).
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+              example:
+                type: https://cote-lapyx.com/errors/refresh-token-invalid
+                title: Unauthorized
+                status: 401
+                detail: Refresh token is missing, expired, or has been revoked.
+                instance: /api/v1/auth/refresh
 
   /auth/logout:
     post:
@@ -1971,17 +2065,38 @@ paths:
         - bearerAuth: []
       x-roles: [owner, subscriber]
       description: |
-        Revokes the provided refresh token. The access token expires naturally
-        after its 15-minute TTL. Client must discard both tokens after this call.
+        Reads the `cl_refresh` HttpOnly cookie, revokes the corresponding refresh token,
+        and clears the cookie by reissuing it with `Max-Age=0` in the `Set-Cookie` header.
+        The access token expires naturally after its 15-minute TTL.
+        Browser clients send no body; non-browser clients may pass `refreshToken` in the
+        body as a backward-compat fallback.
+      # SEC-1: cl_refresh cookie is the primary source of the refresh token for logout.
+      parameters:
+        - name: cl_refresh
+          in: cookie
+          required: false
+          description: |
+            HttpOnly refresh token cookie. The browser sends this automatically.
+            The server revokes the token and clears the cookie (Max-Age=0) on success.
+          schema:
+            type: string
+            format: uuid
       requestBody:
-        required: true
+        # Body is optional — browser clients omit it entirely (cookie-only flow).
+        required: false
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/LogoutRequest"
       responses:
         "204":
-          description: Session terminated; token revoked.
+          description: |
+            Session terminated; refresh token revoked. The `cl_refresh` cookie is cleared
+            via `Set-Cookie` with `Max-Age=0`.
+          # SEC-1: cookie cleared by server on logout.
+          headers:
+            Set-Cookie:
+              $ref: "#/components/headers/ClearCookieRefresh"
         "400":
           $ref: "#/components/responses/ValidationError"
         "401":

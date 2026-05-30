@@ -299,21 +299,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (logoutBtn) {
     logoutBtn.addEventListener("click", async () => {
-      const refreshToken = localStorage.getItem("cl_refresh");
-      if (refreshToken) {
-        // Await logout call so the token is invalidated server-side before redirect
-        try {
-          await fetch("https://api.cote-lapyx.com/api/v1/auth/logout", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ refreshToken }),
-          });
-        } catch {
-          /* best-effort — proceed to local cleanup regardless */
-        }
+      // SEC-1: cl_refresh is now an HttpOnly cookie; JS cannot read it.
+      // credentials:'include' sends the cookie so the backend can invalidate it.
+      // No body needed — the server reads the refresh token from the cookie.
+      try {
+        await fetch("https://api.cote-lapyx.com/api/v1/auth/logout", {
+          method: "POST",
+          credentials: "include",
+          // No body: server reads cl_refresh from the HttpOnly cookie
+        });
+      } catch {
+        /* best-effort — proceed to local cleanup regardless */
       }
+      // Clear access token; cl_refresh is HttpOnly and cleared server-side only
       localStorage.removeItem("cl_access");
-      localStorage.removeItem("cl_refresh");
       window.location.replace("/");
     });
   }
