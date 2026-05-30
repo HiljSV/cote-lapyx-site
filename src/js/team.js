@@ -5,18 +5,31 @@
 // Falls back gracefully when API is unreachable or member has no avatar.
 // =============================================================================
 
+// Module-level cache — maps locale string → members array.
+// Prevents duplicate /team-members requests when hydrateTeamAvatars()
+// is called multiple times for the same locale (П11 fix).
+const _membersCache = {};
+
 // Named so it can be re-called on cl:languagechange without page reload
 async function hydrateTeamAvatars() {
   try {
     // Read current UI language so the backend returns translated member content
     const lang = localStorage.getItem("cl_lang") || "en";
-    // GET /api/v1/team-members — public endpoint; locale passed for translations
-    const res = await fetch(
-      `https://api.cote-lapyx.com/api/v1/team-members?locale=${lang}`,
-    );
-    if (!res.ok) return;
 
-    const members = await res.json();
+    let members;
+    if (_membersCache[lang]) {
+      // Cache hit — reuse previously fetched data, skip network request
+      members = _membersCache[lang];
+    } else {
+      // Cache miss — GET /api/v1/team-members; locale passed for translations
+      const res = await fetch(
+        `https://api.cote-lapyx.com/api/v1/team-members?locale=${lang}`,
+      );
+      if (!res.ok) return;
+      members = await res.json();
+      // Store in module cache keyed by locale
+      _membersCache[lang] = members;
+    }
 
     members.forEach((member) => {
       // Resolve locale-aware display name — Latin for non-UK, Cyrillic for UK
