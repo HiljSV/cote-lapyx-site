@@ -400,6 +400,221 @@
   }
 }
 
+// -----------------------------------------------------------------------------
+// Social contacts admin block — rows inside admin-settings-block
+// Each row: icon · platform name · URL input · enabled toggle
+// Used in: admin settings panel, sub-section "Контакти та соцмережі"
+// -----------------------------------------------------------------------------
+
+/* Container for all social platform rows */
+.admin-social-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* Single social platform row: icon + name + input + toggle */
+.admin-social-row {
+  display: grid;
+  /* Columns: icon (36px) · name (120px) · input (1fr) · toggle (44px) */
+  grid-template-columns: 36px 120px 1fr 44px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid $border-cyan;
+  border-radius: 10px;
+  background: rgba($neon-cyan, 0.02);
+  transition: border-color 0.15s ease;
+
+  /* Highlight row on input focus within */
+  &:focus-within {
+    border-color: rgba($neon-cyan, 0.4);
+  }
+
+  /* Tablet: stack name + input on second row */
+  @media (max-width: 767.98px) {
+    grid-template-columns: 36px 1fr 44px;
+    grid-template-rows: auto auto;
+  }
+
+  /* Mobile small: full width stack */
+  @media (max-width: 479.98px) {
+    grid-template-columns: 36px 1fr 44px;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  /* Platform icon circle */
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: rgba($neon-cyan, 0.08);
+    color: $neon-cyan;
+    flex-shrink: 0;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  /* Platform name label */
+  &__name {
+    font-family: $fontHeading;
+    font-size: 13px;
+    font-weight: 600;
+    color: $text-primary;
+    white-space: nowrap;
+
+    /* On tablet collapse into grid area below icon */
+    @media (max-width: 767.98px) {
+      font-size: 12px;
+    }
+  }
+
+  /* URL input wrapper — holds the input + error message */
+  &__input-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0; /* allow flex shrink */
+
+    /* Span full remaining columns on tablet (name hides) */
+    @media (max-width: 767.98px) {
+      grid-column: 2 / 3;
+    }
+  }
+
+  /* URL text input — reuses dash-profile-form__input size */
+  &__input {
+    /* Override font to monospace for URLs */
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 12px;
+    /* Reduce padding slightly vs full form inputs */
+    padding: 8px 10px;
+    margin-bottom: 0; /* remove any default margin */
+  }
+
+  /* Inline validation error span — shown when URL is invalid */
+  &__error {
+    font-size: 11px;
+    color: $neon-magenta;
+    line-height: 1.4;
+  }
+}
+
+/* Actions row below social rows: Save button + feedback */
+.admin-social-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+/* Inline save feedback message (success / error) */
+.admin-social-feedback {
+  font-size: 13px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Success state — set by JS class modifier */
+  &--success {
+    color: $neon-green;
+  }
+
+  /* Error state — set by JS class modifier */
+  &--error {
+    color: $neon-magenta;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Personal social links block — used in dashboard profile form
+// Reuses admin-toggle and dash-profile-form__input; adds its own BEM block
+// for the row layout (icon · name · input · toggle)
+// -----------------------------------------------------------------------------
+
+/* Sub-heading above social rows in profile form */
+.dash-profile-social__heading {
+  margin-bottom: 10px;
+}
+
+/* Container for all personal social rows */
+.dash-profile-social {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  /* Single row: icon · platform name · URL input · enabled toggle */
+  &__row {
+    display: grid;
+    /* Columns: icon (32px) · name (110px) · input (1fr) · toggle (44px) */
+    grid-template-columns: 32px 110px 1fr 44px;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid $border-cyan;
+    border-radius: 9px;
+    background: rgba($neon-cyan, 0.02);
+    transition: border-color 0.15s ease;
+
+    &:focus-within {
+      border-color: rgba($neon-cyan, 0.35);
+    }
+
+    /* Mobile: collapse name column, 3-col layout */
+    @media (max-width: 767.98px) {
+      grid-template-columns: 32px 1fr 44px;
+    }
+  }
+
+  /* Platform icon circle */
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba($neon-cyan, 0.07);
+    color: $neon-cyan;
+    flex-shrink: 0;
+
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  /* Platform name text */
+  &__name {
+    font-family: $fontHeading;
+    font-size: 12px;
+    font-weight: 600;
+    color: $text-primary;
+    white-space: nowrap;
+
+    /* Hide on mobile — too narrow */
+    @media (max-width: 767.98px) {
+      display: none;
+    }
+  }
+
+  /* URL text input — reuses dash-profile-form__input shape */
+  &__input {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 12px;
+    padding: 7px 10px;
+    /* Take remaining space; override form group full-width stretch */
+    min-width: 0;
+  }
+}
+
 // ── Analytics panel ─────────────────────────────────────────────────────────
 
 /* Period selector bar */

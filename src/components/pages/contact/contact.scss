@@ -48,6 +48,15 @@
     line-height: 1.75;
     margin-bottom: 8px;
   }
+
+  // Dynamic slot wrapper (FEAT-SOCIAL): contact-item cards are injected here by
+  // socialLinks.js. Re-establish the column gap that the items had as direct
+  // flex children before the wrapper div was introduced.
+  &__slot {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
 }
 
 // -----------------------------------------------------------------------------

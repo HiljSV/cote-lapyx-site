@@ -51,6 +51,16 @@
     }
   }
 
+  // Dynamic slot wrapper (FEAT-SOCIAL): footer__contact-item anchors are injected
+  // here by socialLinks.js. Re-establish the column gap they had as direct flex
+  // children of .footer__col, and inherit the col's alignment (centered on tablet).
+  &__contacts-slot {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: inherit;
+  }
+
   // Logo column
   &__logo {
     align-self: center;
