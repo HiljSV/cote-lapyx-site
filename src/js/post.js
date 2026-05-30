@@ -6,6 +6,10 @@
 import { translate } from "@js/i18n.js";
 // Import fetchWithAuth for authenticated API calls (favorites, comments)
 import { fetchWithAuth } from "@js/common/auth.js";
+// Markdown parser — converts raw Markdown from backend to HTML
+import { marked } from "marked";
+// XSS sanitizer — cleans parsed HTML before injecting into DOM
+import DOMPurify from "dompurify";
 
 const API = "https://api.cote-lapyx.com/api/v1";
 
@@ -49,16 +53,23 @@ function authorDisplayName(author) {
     : author.name || "—";
 }
 
-// Show the "post not found" state — hides article, reveals fallback block
+// Show the "post not found" state — hides article, tags, actions, comments; reveals fallback
 function showNotFound() {
   const article = document.querySelector(".post-article");
   const tagsSection = document.getElementById("post-tags-section");
   const notFound = document.getElementById("post-not-found");
   const titleEl = document.getElementById("post-title");
+  // Hide post-actions section — irrelevant when post is not found
+  const actionsSection = document.getElementById("post-actions-section");
+  // Hide comments section — irrelevant when post is not found
+  const commentsSection = document.getElementById("post-comments-section");
+
   // Use translated string instead of hardcoded Ukrainian
   if (titleEl) titleEl.textContent = translate("post.not_found");
   if (article) article.setAttribute("hidden", "");
   if (tagsSection) tagsSection.setAttribute("hidden", "");
+  if (actionsSection) actionsSection.setAttribute("hidden", "");
+  if (commentsSection) commentsSection.setAttribute("hidden", "");
   if (notFound) notFound.removeAttribute("hidden");
 }
 
@@ -195,12 +206,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-    // Content — backend provides HTML in the `content` field
+    // Content — backend returns raw Markdown; parse + sanitize before injecting
     const contentEl = document.getElementById("post-content");
     if (contentEl) {
       if (post.content) {
-        // Content is trusted HTML from our own backend — safe to inject
-        contentEl.innerHTML = post.content;
+        // Parse Markdown → HTML, then sanitize with DOMPurify to prevent XSS
+        contentEl.innerHTML = DOMPurify.sanitize(marked.parse(post.content));
       } else if (post.excerpt) {
         contentEl.innerHTML = `<p>${escHtml(post.excerpt)}</p>`;
       } else {
@@ -274,9 +285,12 @@ document.addEventListener("DOMContentLoaded", async () => {
           <span class="post-hero__author-name">${escHtml(authorDisplayName(post.author))}</span>`;
       }
 
-      // Update content area
+      // Update content area — re-parse Markdown + sanitize on language switch
       const contentEl = document.getElementById("post-content");
-      if (contentEl && post.content) contentEl.innerHTML = post.content;
+      if (contentEl && post.content) {
+        // Parse Markdown → HTML, sanitize with DOMPurify to prevent XSS
+        contentEl.innerHTML = DOMPurify.sanitize(marked.parse(post.content));
+      }
       if (contentEl && post.excerpt && !post.content)
         contentEl.innerHTML = `<p>${escHtml(post.excerpt)}</p>`;
     } catch {
