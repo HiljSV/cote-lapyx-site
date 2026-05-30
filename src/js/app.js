@@ -14,6 +14,10 @@ import {
   translate,
 } from "@js/i18n.js";
 
+// socialLinks: company contact/social links from API → [data-social-slot] containers
+// Auto-initialises on DOMContentLoaded; no-ops on pages without [data-social-slot]
+import "@js/socialLinks.js";
+
 // =============================================================================
 // Header auth state — show "Кабінет" or "Увійти" based on localStorage token
 // =============================================================================
