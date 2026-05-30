@@ -5,7 +5,7 @@ const isProduction = process.env.NODE_ENV === "production";
 const isWp = process.argv.includes("--wp");
 
 export default {
-  lang: "ua", // Наразі тільки Українська
+  lang: "ua", // FLS build-message language pack (template_modules/languages/ua.json) — NOT the <html lang> attribute
   vscode: {
     settings: true,
     snippets: true,
