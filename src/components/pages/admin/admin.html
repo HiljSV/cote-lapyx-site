@@ -234,13 +234,12 @@
       </ul>
     </nav>
 
-    <!-- Logout button — i18n: admin.btn.logout -->
+    <!-- Logout button — i18n label on inner span to preserve SVG sibling -->
     <button
       type="button"
       class="btn btn--ghost dash-sidebar__logout"
       id="admin-logout"
       aria-label="Вийти з адмін-панелі"
-      data-i18n="admin.btn.logout"
     >
       <svg
         width="18"
@@ -253,7 +252,8 @@
           d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"
         />
       </svg>
-      Вийти
+      <!-- Label span — i18n: admin.btn.logout -->
+      <span data-i18n="admin.btn.logout">Вийти</span>
     </button>
   </aside>
   <!-- /admin-sidebar -->
@@ -498,11 +498,12 @@
           class="dash-list dash-list--admin-reg"
           aria-label="Таблиця останніх реєстрацій"
         >
+          <!-- Column headers — localized via data-i18n -->
           <div class="dash-list__head" aria-hidden="true">
-            <div>Ім'я</div>
-            <div>Email</div>
-            <div>Роль</div>
-            <div>Дата</div>
+            <div data-i18n="admin.col.name">Ім'я</div>
+            <div data-i18n="admin.col.email">Email</div>
+            <div data-i18n="admin.col.role">Роль</div>
+            <div data-i18n="admin.col.date">Дата</div>
           </div>
           <div id="admin-recent-users-body"></div>
         </div>
@@ -527,13 +528,13 @@
           class="dash-list dash-list--admin-users"
           aria-label="Таблиця всіх користувачів"
         >
-          <!-- Table header — 5 columns: name, email, role, registered, actions -->
+          <!-- Table header — 5 columns: name, email, role, registered, actions — localized via data-i18n -->
           <div class="dash-list__head" aria-hidden="true">
-            <div>Ім'я</div>
-            <div>Email</div>
-            <div>Роль</div>
-            <div>Зареєстрований</div>
-            <div>Дії</div>
+            <div data-i18n="admin.col.name">Ім'я</div>
+            <div data-i18n="admin.col.email">Email</div>
+            <div data-i18n="admin.col.role">Роль</div>
+            <div data-i18n="admin.col.registered">Зареєстрований</div>
+            <div data-i18n="admin.col.actions">Дії</div>
           </div>
           <!-- Rows injected by admin.js loadAdminUsers() -->
           <div id="admin-users-body"></div>
@@ -559,12 +560,13 @@
           class="dash-list dash-list--admin-posts"
           aria-label="Таблиця всіх публікацій"
         >
+          <!-- Column headers — localized via data-i18n -->
           <div class="dash-list__head" aria-hidden="true">
-            <div>Заголовок</div>
-            <div>Автор</div>
-            <div>Дата</div>
-            <div>Статус</div>
-            <div>Дії</div>
+            <div data-i18n="admin.col.title">Заголовок</div>
+            <div data-i18n="admin.col.author">Автор</div>
+            <div data-i18n="admin.col.date">Дата</div>
+            <div data-i18n="admin.col.status">Статус</div>
+            <div data-i18n="admin.col.actions">Дії</div>
           </div>
           <div id="admin-posts-body"></div>
         </div>
@@ -589,11 +591,12 @@
           class="dash-list dash-list--admin-projects"
           aria-label="Таблиця всіх проектів"
         >
+          <!-- Column headers — localized via data-i18n -->
           <div class="dash-list__head" aria-hidden="true">
-            <div>Назва</div>
-            <div>Автор</div>
-            <div>Технології</div>
-            <div>Статус</div>
+            <div data-i18n="admin.col.name">Назва</div>
+            <div data-i18n="admin.col.author">Автор</div>
+            <div data-i18n="admin.col.technologies">Технології</div>
+            <div data-i18n="admin.col.status">Статус</div>
           </div>
           <div id="admin-projects-body"></div>
         </div>
@@ -685,14 +688,14 @@
           class="dash-list dash-list--admin-comments"
           aria-label="Таблиця коментарів"
         >
-          <!-- Table header: column labels (aria-hidden — decorative) -->
+          <!-- Table header: column labels — localized via data-i18n -->
           <div class="dash-list__head" aria-hidden="true">
-            <div>Автор</div>
-            <div>Коментар</div>
-            <div>Пост</div>
-            <div>Дата</div>
-            <div>Статус</div>
-            <div>Дії</div>
+            <div data-i18n="admin.col.author">Автор</div>
+            <div data-i18n="admin.col.comment">Коментар</div>
+            <div data-i18n="admin.col.post">Пост</div>
+            <div data-i18n="admin.col.date">Дата</div>
+            <div data-i18n="admin.col.status">Статус</div>
+            <div data-i18n="admin.col.actions">Дії</div>
           </div>
           <!-- JS renders comment rows here -->
           <div id="admin-comments-body"></div>
@@ -772,14 +775,14 @@
           class="dash-list dash-list--admin-contacts"
           aria-label="Таблиця звернень"
         >
-          <!-- Table header (desktop) -->
+          <!-- Table header (desktop) — localized via data-i18n -->
           <div class="dash-list__head" aria-hidden="true">
-            <div>Ім'я</div>
-            <div>Email</div>
-            <div>Повідомлення</div>
-            <div>Дата</div>
-            <div>Статус</div>
-            <div>Дії</div>
+            <div data-i18n="admin.col.name">Ім'я</div>
+            <div data-i18n="admin.col.email">Email</div>
+            <div data-i18n="admin.col.message">Повідомлення</div>
+            <div data-i18n="admin.col.date">Дата</div>
+            <div data-i18n="admin.col.status">Статус</div>
+            <div data-i18n="admin.col.actions">Дії</div>
           </div>
           <!-- Rows injected by admin.js loadAdminContacts() -->
           <div id="admin-contacts-body"></div>
@@ -827,12 +830,12 @@
                 data-i18n="admin.settings.site_name"
                 >Назва сайту</label
               >
+              <!-- value populated by admin.js loadAdminSettings() -->
               <input
                 class="dash-profile-form__input"
                 type="text"
                 id="settings-site-name"
                 name="site_name"
-                value="COTE-LAPYX"
                 autocomplete="off"
               />
             </div>
@@ -846,12 +849,12 @@
                 data-i18n="admin.settings.contact_email"
                 >Контактний email</label
               >
+              <!-- value populated by admin.js loadAdminSettings() — admin@cote-lapyx.com only as backend default, NOT hardcoded -->
               <input
                 class="dash-profile-form__input"
                 type="email"
                 id="settings-email"
                 name="contact_email"
-                value="admin@cote-lapyx.com"
                 autocomplete="email"
               />
             </div>
@@ -867,26 +870,24 @@
                 data-i18n="admin.settings.description"
                 >Опис сайту</label
               >
+              <!-- content populated by admin.js loadAdminSettings() -->
               <textarea
                 class="dash-profile-form__input dash-profile-form__textarea"
                 id="settings-description"
                 name="description"
                 rows="3"
-              >
-IT команда, що будує майбутнє</textarea
-              >
+              ></textarea>
             </div>
 
             <!-- Submit — full width, right-aligned via __actions -->
             <div
               class="dash-profile-form__group dash-profile-form__group--full dash-profile-form__actions"
             >
-              <!-- Save button — i18n: admin.btn.save_settings -->
+              <!-- Save button — data-i18n on inner span to preserve SVG sibling -->
               <button
                 type="submit"
                 class="btn btn--cyan"
                 aria-label="Зберегти загальні налаштування"
-                data-i18n="admin.btn.save_settings"
               >
                 <svg
                   width="16"
@@ -899,14 +900,362 @@ IT команда, що будує майбутнє</textarea
                     d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"
                   />
                 </svg>
-                Зберегти налаштування
+                <!-- Label span — i18n: admin.btn.save_settings -->
+                <span data-i18n="admin.btn.save_settings"
+                  >Зберегти налаштування</span
+                >
               </button>
             </div>
           </form>
         </div>
         <!-- /admin-settings-block: general -->
 
-        <!-- Sub-section 2: System toggles -->
+        <!-- ===== Sub-section 2: Contacts & Social Links ===== -->
+        <!-- Loaded by admin.js loadAdminSocialContacts(); saved via POST/PATCH/DELETE /admin/contacts -->
+        <div class="admin-settings-block" id="admin-social-block">
+          <!-- Sub-section heading — i18n: admin.settings.social_links -->
+          <h3
+            class="admin-settings-block__title"
+            data-i18n="admin.settings.social_links"
+          >
+            Контакти та соцмережі
+          </h3>
+
+          <!-- Social contact rows: one per platform (icon · name · URL · toggle) -->
+          <!-- Rows are static HTML; JS populates values from GET /admin/contacts -->
+          <div
+            class="admin-social-rows"
+            id="admin-social-rows"
+            aria-label="Контактні посилання компанії"
+          >
+            <!-- Platform row: Telegram -->
+            <div
+              class="admin-social-row"
+              data-platform="TELEGRAM"
+              aria-label="Telegram"
+            >
+              <!-- Platform icon -->
+              <span class="admin-social-row__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.26 13.835l-2.94-.916c-.638-.203-.65-.638.135-.943l11.49-4.43c.533-.194 1.001.13.949.675z"
+                  />
+                </svg>
+              </span>
+              <!-- Platform name -->
+              <span class="admin-social-row__name">Telegram</span>
+              <!-- URL input -->
+              <div class="admin-social-row__input-wrap">
+                <input
+                  class="dash-profile-form__input admin-social-row__input"
+                  type="text"
+                  id="social-input-TELEGRAM"
+                  placeholder="https://t.me/…"
+                  autocomplete="off"
+                  aria-label="Telegram URL"
+                />
+                <!-- Inline validation error — shown by JS -->
+                <span
+                  class="admin-social-row__error"
+                  id="social-error-TELEGRAM"
+                  role="alert"
+                  hidden
+                ></span>
+              </div>
+              <!-- Enabled toggle -->
+              <label
+                class="admin-toggle"
+                aria-label="Показувати Telegram на сайті"
+              >
+                <input
+                  type="checkbox"
+                  id="social-toggle-TELEGRAM"
+                  aria-describedby="social-input-TELEGRAM"
+                />
+                <span class="admin-toggle__slider"></span>
+              </label>
+            </div>
+            <!-- /Telegram row -->
+
+            <!-- Platform row: GitHub -->
+            <div
+              class="admin-social-row"
+              data-platform="GITHUB"
+              aria-label="GitHub"
+            >
+              <!-- Platform icon -->
+              <span class="admin-social-row__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.5 11.5 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"
+                  />
+                </svg>
+              </span>
+              <!-- Platform name -->
+              <span class="admin-social-row__name">GitHub</span>
+              <!-- URL input -->
+              <div class="admin-social-row__input-wrap">
+                <input
+                  class="dash-profile-form__input admin-social-row__input"
+                  type="text"
+                  id="social-input-GITHUB"
+                  placeholder="https://github.com/…"
+                  autocomplete="off"
+                  aria-label="GitHub URL"
+                />
+                <span
+                  class="admin-social-row__error"
+                  id="social-error-GITHUB"
+                  role="alert"
+                  hidden
+                ></span>
+              </div>
+              <!-- Enabled toggle -->
+              <label
+                class="admin-toggle"
+                aria-label="Показувати GitHub на сайті"
+              >
+                <input
+                  type="checkbox"
+                  id="social-toggle-GITHUB"
+                  aria-describedby="social-input-GITHUB"
+                />
+                <span class="admin-toggle__slider"></span>
+              </label>
+            </div>
+            <!-- /GitHub row -->
+
+            <!-- Platform row: Instagram -->
+            <div
+              class="admin-social-row"
+              data-platform="INSTAGRAM"
+              aria-label="Instagram"
+            >
+              <!-- Platform icon -->
+              <span class="admin-social-row__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24s3.668-.014 4.948-.072c4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"
+                  />
+                </svg>
+              </span>
+              <!-- Platform name -->
+              <span class="admin-social-row__name">Instagram</span>
+              <!-- URL input -->
+              <div class="admin-social-row__input-wrap">
+                <input
+                  class="dash-profile-form__input admin-social-row__input"
+                  type="text"
+                  id="social-input-INSTAGRAM"
+                  placeholder="https://instagram.com/…"
+                  autocomplete="off"
+                  aria-label="Instagram URL"
+                />
+                <span
+                  class="admin-social-row__error"
+                  id="social-error-INSTAGRAM"
+                  role="alert"
+                  hidden
+                ></span>
+              </div>
+              <!-- Enabled toggle -->
+              <label
+                class="admin-toggle"
+                aria-label="Показувати Instagram на сайті"
+              >
+                <input
+                  type="checkbox"
+                  id="social-toggle-INSTAGRAM"
+                  aria-describedby="social-input-INSTAGRAM"
+                />
+                <span class="admin-toggle__slider"></span>
+              </label>
+            </div>
+            <!-- /Instagram row -->
+
+            <!-- Platform row: Facebook -->
+            <div
+              class="admin-social-row"
+              data-platform="FACEBOOK"
+              aria-label="Facebook"
+            >
+              <!-- Platform icon -->
+              <span class="admin-social-row__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+                  />
+                </svg>
+              </span>
+              <!-- Platform name -->
+              <span class="admin-social-row__name">Facebook</span>
+              <!-- URL input -->
+              <div class="admin-social-row__input-wrap">
+                <input
+                  class="dash-profile-form__input admin-social-row__input"
+                  type="text"
+                  id="social-input-FACEBOOK"
+                  placeholder="https://facebook.com/…"
+                  autocomplete="off"
+                  aria-label="Facebook URL"
+                />
+                <span
+                  class="admin-social-row__error"
+                  id="social-error-FACEBOOK"
+                  role="alert"
+                  hidden
+                ></span>
+              </div>
+              <!-- Enabled toggle -->
+              <label
+                class="admin-toggle"
+                aria-label="Показувати Facebook на сайті"
+              >
+                <input
+                  type="checkbox"
+                  id="social-toggle-FACEBOOK"
+                  aria-describedby="social-input-FACEBOOK"
+                />
+                <span class="admin-toggle__slider"></span>
+              </label>
+            </div>
+            <!-- /Facebook row -->
+
+            <!-- Platform row: LinkedIn -->
+            <div
+              class="admin-social-row"
+              data-platform="LINKEDIN"
+              aria-label="LinkedIn"
+            >
+              <!-- Platform icon -->
+              <span class="admin-social-row__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"
+                  />
+                </svg>
+              </span>
+              <!-- Platform name -->
+              <span class="admin-social-row__name">LinkedIn</span>
+              <!-- URL input -->
+              <div class="admin-social-row__input-wrap">
+                <input
+                  class="dash-profile-form__input admin-social-row__input"
+                  type="text"
+                  id="social-input-LINKEDIN"
+                  placeholder="https://linkedin.com/…"
+                  autocomplete="off"
+                  aria-label="LinkedIn URL"
+                />
+                <span
+                  class="admin-social-row__error"
+                  id="social-error-LINKEDIN"
+                  role="alert"
+                  hidden
+                ></span>
+              </div>
+              <!-- Enabled toggle -->
+              <label
+                class="admin-toggle"
+                aria-label="Показувати LinkedIn на сайті"
+              >
+                <input
+                  type="checkbox"
+                  id="social-toggle-LINKEDIN"
+                  aria-describedby="social-input-LINKEDIN"
+                />
+                <span class="admin-toggle__slider"></span>
+              </label>
+            </div>
+            <!-- /LinkedIn row -->
+
+            <!-- Platform row: Email — value is a bare address or mailto: -->
+            <div
+              class="admin-social-row"
+              data-platform="EMAIL"
+              aria-label="Email"
+            >
+              <!-- Platform icon -->
+              <span class="admin-social-row__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path
+                    d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+                  />
+                </svg>
+              </span>
+              <!-- Platform name -->
+              <span class="admin-social-row__name">Email</span>
+              <!-- Email input — text type to allow bare address without mailto: -->
+              <div class="admin-social-row__input-wrap">
+                <input
+                  class="dash-profile-form__input admin-social-row__input"
+                  type="text"
+                  id="social-input-EMAIL"
+                  placeholder="info@cote-lapyx.com"
+                  autocomplete="email"
+                  aria-label="Публічна email-адреса"
+                />
+                <span
+                  class="admin-social-row__error"
+                  id="social-error-EMAIL"
+                  role="alert"
+                  hidden
+                ></span>
+              </div>
+              <!-- Enabled toggle -->
+              <label
+                class="admin-toggle"
+                aria-label="Показувати Email на сайті"
+              >
+                <input
+                  type="checkbox"
+                  id="social-toggle-EMAIL"
+                  aria-describedby="social-input-EMAIL"
+                />
+                <span class="admin-toggle__slider"></span>
+              </label>
+            </div>
+            <!-- /Email row -->
+          </div>
+          <!-- /admin-social-rows -->
+
+          <!-- Save button + feedback area for contacts block -->
+          <div class="admin-social-actions">
+            <!-- Save button — i18n: admin.btn.save_contacts -->
+            <button
+              type="button"
+              class="btn btn--cyan"
+              id="admin-social-save"
+              aria-label="Зберегти налаштування соцмереж"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"
+                />
+              </svg>
+              <!-- Button label — i18n: admin.btn.save_contacts -->
+              <span data-i18n="admin.btn.save_contacts">Зберегти</span>
+            </button>
+            <!-- Inline feedback message — set by JS after save -->
+            <span
+              class="admin-social-feedback"
+              id="admin-social-feedback"
+              role="status"
+              aria-live="polite"
+              hidden
+            ></span>
+          </div>
+          <!-- /admin-social-actions -->
+        </div>
+        <!-- /admin-settings-block: contacts & social links -->
+
+        <!-- Sub-section 3: System toggles -->
         <div class="admin-settings-block">
           <!-- Sub-section heading — i18n: admin.settings.system_toggles -->
           <h3
@@ -916,16 +1265,17 @@ IT команда, що будує майбутнє</textarea
             Системні перемикачі
           </h3>
 
-          <!-- Toggle: new user registration -->
+          <!-- Toggle: new user registration — state set by admin.js loadAdminSettings() -->
           <div class="admin-toggle-row">
             <div class="admin-toggle-row__info">
               <!-- Toggle label — i18n: admin.toggle.registration -->
-              <p
+              <label
                 class="admin-toggle-row__label"
+                for="settings-toggle-registration"
                 data-i18n="admin.toggle.registration"
               >
                 Реєстрація нових користувачів
-              </p>
+              </label>
               <!-- Toggle description — i18n: admin.toggle.registration_desc -->
               <p
                 class="admin-toggle-row__desc"
@@ -934,25 +1284,31 @@ IT команда, що будує майбутнє</textarea
                 Дозволяє новим користувачам реєструватися на сайті
               </p>
             </div>
+            <!-- Checkbox id allows JS to get/set checked state; aria-label for screen readers -->
             <label
               class="admin-toggle"
               aria-label="Реєстрація нових користувачів"
             >
-              <input type="checkbox" checked aria-checked="true" />
+              <input
+                type="checkbox"
+                id="settings-toggle-registration"
+                name="registrationEnabled"
+              />
               <span class="admin-toggle__slider"></span>
             </label>
           </div>
 
-          <!-- Toggle: maintenance mode -->
+          <!-- Toggle: maintenance mode — state set by admin.js loadAdminSettings() -->
           <div class="admin-toggle-row">
             <div class="admin-toggle-row__info">
               <!-- Toggle label — i18n: admin.toggle.maintenance -->
-              <p
+              <label
                 class="admin-toggle-row__label"
+                for="settings-toggle-maintenance"
                 data-i18n="admin.toggle.maintenance"
               >
                 Режим обслуговування
-              </p>
+              </label>
               <!-- Toggle description — i18n: admin.toggle.maintenance_desc -->
               <p
                 class="admin-toggle-row__desc"
@@ -961,8 +1317,13 @@ IT команда, що будує майбутнє</textarea
                 Показує сторінку технічних робіт для всіх відвідувачів
               </p>
             </div>
+            <!-- Checkbox id allows JS to get/set checked state; aria-label for screen readers -->
             <label class="admin-toggle" aria-label="Режим обслуговування">
-              <input type="checkbox" aria-checked="false" />
+              <input
+                type="checkbox"
+                id="settings-toggle-maintenance"
+                name="maintenanceMode"
+              />
               <span class="admin-toggle__slider"></span>
             </label>
           </div>

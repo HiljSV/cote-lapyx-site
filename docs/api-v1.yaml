@@ -2,15 +2,24 @@ openapi: 3.1.0
 
 info:
   title: Cote Lapyx API
-  version: 1.8.0
+  version: 1.10.0
   description: |
     REST API for cote-lapyx.com — a team website for Валерія, Сергій, Андрій.
 
     ## Authentication
     All protected endpoints require `Authorization: Bearer <accessToken>`.
-    Access tokens expire in **15 minutes**. Use `POST /auth/refresh` (with the refresh
-    token in the request body) to obtain a new pair. Refresh tokens expire in **30 days**
-    and are rotated on every use.
+    Access tokens expire in **15 minutes**. Use `POST /auth/refresh` to obtain a new
+    access token — the refresh token is supplied automatically via the `cl_refresh`
+    HttpOnly cookie set by the server on login/register; no manual token handling is
+    required. Refresh tokens expire in **30 days** and are rotated on every use
+    (token-family detect-and-revoke is active).
+
+    ## Refresh-token cookie
+    The `cl_refresh` cookie is set by the server on successful login and register
+    (`Set-Cookie: cl_refresh=<uuid>; HttpOnly; Secure; SameSite=Strict;
+    Path=/api/v1/auth; Max-Age=2592000`).  The browser sends it automatically with
+    every request to `/api/v1/auth/*`.  The frontend never reads or stores the cookie
+    value.  On logout the server clears the cookie by reissuing it with `Max-Age=0`.
 
     ## Roles
     - **owner** — three team members; full write access to all resources and admin endpoints.
@@ -72,10 +81,17 @@ tags:
     description: Public contact form submissions and owner inbox management
   - name: Contacts
     description: |
-      Team contact links (Telegram, Instagram, LinkedIn, GitHub, Email, etc.).
+      Company-level social / contact links (Telegram, Instagram, LinkedIn, GitHub, Email, etc.).
+      Managed by owners via `/admin/contacts`. Public read (`GET /contacts`) returns only
+      enabled links ordered by `displayOrder` ascending.
 
       > **Note (v1.x):** Mutation endpoints use the `/admin/` prefix for
       > simplified Spring Security `antMatcher` config.
+
+      > **FEAT-SOCIAL (v1.9.0):** Added `enabled` flag and `displayOrder` to `ContactDTO`
+      > and `ContactRequest`. Added `GET /admin/contacts` list for the admin panel.
+      > `ContactType` and `Contact` entity are unchanged (reuse existing); Flyway V14
+      > adds the two new columns.
   - name: Translations
     description: Dynamic multilingual content (bulk upsert, per-entity)
   - name: Admin
@@ -296,24 +312,35 @@ components:
 
     RefreshRequest:
       type: object
-      required: [refreshToken]
+      # refreshToken is OPTIONAL as of SEC-1: the server reads the cl_refresh HttpOnly
+      # cookie automatically.  The field is retained for backward-compat with non-browser
+      # clients that cannot use cookies; the cookie takes precedence when both are present.
       properties:
         refreshToken:
           type: string
           format: uuid
+          description: |
+            Optional — backward-compat only. Browser clients MUST omit this field and rely
+            on the `cl_refresh` HttpOnly cookie instead. Non-browser clients may pass the
+            UUID here; the cookie is preferred when both are present.
           example: 550e8400-e29b-41d4-a716-446655440000
 
     LogoutRequest:
       type: object
-      required: [refreshToken]
+      # refreshToken is OPTIONAL as of SEC-1: the server reads the cl_refresh HttpOnly
+      # cookie automatically.  Retained for backward-compat with non-browser clients.
       properties:
         refreshToken:
           type: string
           format: uuid
+          description: |
+            Optional — backward-compat only. Browser clients MUST omit this field;
+            the server reads and clears the `cl_refresh` cookie instead.
 
     AuthResponse:
       type: object
-      required: [user, accessToken, refreshToken]
+      # SEC-1: refreshToken removed from body — delivered via cl_refresh HttpOnly cookie.
+      required: [user, accessToken]
       properties:
         user:
           $ref: "#/components/schemas/UserDTO"
@@ -321,21 +348,16 @@ components:
           type: string
           description: JWT access token, valid for 15 minutes.
           example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-        refreshToken:
-          type: string
-          format: uuid
-          description: Opaque refresh token UUID, valid for 30 days.
-          example: 550e8400-e29b-41d4-a716-446655440000
 
     TokenRefreshResponse:
       type: object
-      required: [accessToken, refreshToken]
+      # SEC-1: refreshToken removed from body — rotated token delivered via cl_refresh
+      # HttpOnly cookie (Set-Cookie header).  Only the new accessToken is in the body.
+      required: [accessToken]
       properties:
         accessToken:
           type: string
-        refreshToken:
-          type: string
-          format: uuid
+          description: New JWT access token, valid for 15 minutes.
 
     # --- User ---
 
@@ -370,8 +392,11 @@ components:
           items:
             type: string
           example: [Java, Spring Boot, PostgreSQL]
+        # FEAT-SOCIAL: UserDTO.socialLinks returns SocialLinksPrivate (url+enabled)
+        # when the caller is the account owner or ROLE_OWNER; public callers
+        # receive SocialLinks (public view, nulls for disabled) via PublicUserDTO.
         socialLinks:
-          $ref: "#/components/schemas/SocialLinks"
+          $ref: "#/components/schemas/SocialLinksPrivate"
         createdAt:
           type: string
           format: date-time
@@ -400,8 +425,10 @@ components:
           type: array
           items:
             type: string
+        # FEAT-SOCIAL: socialLinks now accepts SocialLinksRequest with optional enabled flags.
+        # Old clients omitting enabled still work (backend default: enabled=true when absent).
         socialLinks:
-          $ref: "#/components/schemas/SocialLinks"
+          $ref: "#/components/schemas/SocialLinksRequest"
 
     UserAdminUpdateRequest:
       type: object
@@ -451,30 +478,148 @@ components:
         socialLinks:
           $ref: "#/components/schemas/SocialLinks"
 
+    # --- Social Links (personal, embedded on users) ---
+    # FEAT-SOCIAL v1.9.0: flat structure kept; parallel *Enabled boolean fields added.
+    # Public responses (SocialLinks) expose only enabled links (null when disabled).
+    # The cabinet/owner response (SocialLinksPrivate) exposes url + enabled for editing.
+    #
+    # Model rationale (option A — parallel boolean columns):
+    #   - No JOIN, no array de-serialisation cost on every user fetch.
+    #   - @Embeddable on `users` stays flat; Flyway adds 5 boolean columns.
+    #   - SocialLinksRequest used in PATCH /users/me changed shape in v1.9.0 (BREAKING):
+    #     flat URL strings → per-platform {url?, enabled?} objects (see SocialLinksRequest).
+    #   - Backend service filters: if social_X_enabled = false, set field to null before
+    #     serialising into public SocialLinks response.
+    #   - Cabinet/owner context returns SocialLinksPrivate instead (url+enabled per platform).
+
     SocialLinks:
       type: object
       nullable: true
+      description: |
+        Public view of personal social links. A platform is omitted (null) if its URL is
+        absent **or** the member has toggled it off via their cabinet.
+        Embedded in `PublicUserDTO` and `TeamMemberDTO`.
       properties:
         telegram:
           type: string
           format: uri
           nullable: true
+          description: "null when link is absent or disabled."
         instagram:
           type: string
           format: uri
           nullable: true
+          description: "null when link is absent or disabled."
         linkedin:
           type: string
           format: uri
           nullable: true
+          description: "null when link is absent or disabled."
         github:
           type: string
           format: uri
           nullable: true
+          description: "null when link is absent or disabled."
         email:
           type: string
           format: email
           nullable: true
+          description: "null when link is absent or disabled."
+
+    # Cabinet / owner-edit view — exposes url AND enabled flag per platform.
+    # Returned in UserDTO when caller is the account owner or ROLE_OWNER admin.
+    SocialLinksPrivate:
+      type: object
+      nullable: true
+      description: |
+        Full editable view of social links including the enabled toggle.
+        Returned by `GET /users/me` (own account) and admin user detail.
+        NOT returned in public `PublicUserDTO` or `TeamMemberDTO`.
+      properties:
+        telegram:
+          $ref: "#/components/schemas/SocialLinkEntry"
+        instagram:
+          $ref: "#/components/schemas/SocialLinkEntry"
+        linkedin:
+          $ref: "#/components/schemas/SocialLinkEntry"
+        github:
+          $ref: "#/components/schemas/SocialLinkEntry"
+        email:
+          $ref: "#/components/schemas/SocialLinkEntry"
+
+    # One per-platform entry in the private social links view.
+    SocialLinkEntry:
+      type: object
+      nullable: true
+      description: URL + display toggle for a single social platform.
+      properties:
+        url:
+          type: string
+          nullable: true
+          description: |
+            The saved URL/email for this platform. Validated per platform:
+            `email` platform → RFC 5321 email format;
+            all others → must start with http://, https://, tg://, or mailto:.
+          example: https://t.me/andrii_dev
+        enabled:
+          type: boolean
+          default: true
+          description: |
+            When false the link is present in the DB but hidden from public responses.
+            Allows saving a URL without exposing it (e.g. link being updated).
+
+    # FEAT-SOCIAL v1.9.0: BREAKING CHANGE — SocialLinksRequest shape changed.
+    # Previous contract accepted flat strings per platform (e.g. telegram: "https://t.me/x").
+    # v1.9.0 replaces each platform field with a SocialLinkUpdateEntry object {url?, enabled?}.
+    # The single frontend caller (dashboard/cabinet) is being updated to the new shape;
+    # no grace period or dual-shape support is provided.
+    SocialLinksRequest:
+      type: object
+      nullable: true
+      description: |
+        Social links update payload embedded in `UserUpdateRequest`.
+        Each platform field is optional; absent fields are left unchanged.
+        **BREAKING (v1.9.0):** each platform value changed from a flat URL string to a
+        `SocialLinkUpdateEntry` object `{url?, enabled?}`. The single frontend caller
+        will be updated to this shape — no backward-compatible flat-string form is accepted.
+      properties:
+        telegram:
+          $ref: "#/components/schemas/SocialLinkUpdateEntry"
+        instagram:
+          $ref: "#/components/schemas/SocialLinkUpdateEntry"
+        linkedin:
+          $ref: "#/components/schemas/SocialLinkUpdateEntry"
+        github:
+          $ref: "#/components/schemas/SocialLinkUpdateEntry"
+        email:
+          $ref: "#/components/schemas/SocialLinkUpdateEntry"
+
+    # Per-platform entry in a social links PATCH request.
+    SocialLinkUpdateEntry:
+      type: object
+      nullable: true
+      description: |
+        Update payload for one social platform.
+        Send `null` to clear both url and enabled for that platform.
+      properties:
+        url:
+          type: string
+          nullable: true
+          description: |
+            URL or email for this platform.
+            Validation per platform type:
+            - `telegram`: must match `^https?://t\.me/` or `^tg://`
+            - `instagram`: must match `^https?://(www\.)?instagram\.com/`
+            - `linkedin`: must match `^https?://(www\.)?linkedin\.com/`
+            - `github`: must match `^https?://(www\.)?github\.com/`
+            - `email`: RFC 5321 format (also accepted as `mailto:` URI)
+          example: https://t.me/andrii_dev
+        enabled:
+          type: boolean
+          nullable: true
+          description: |
+            When null, the enabled state is left unchanged.
+            When false, the URL is saved but hidden from public responses.
 
     # --- Paged responses ---
 
@@ -523,8 +668,10 @@ components:
         portfolioVisible:
           type: boolean
           default: true
+        # FEAT-SOCIAL: public endpoint — embed PublicUserDTO (flat SocialLinks, no enabled flag).
+        # UserDTO carries SocialLinksPrivate and must NOT appear on a permitAll route.
         user:
-          $ref: "#/components/schemas/UserDTO"
+          $ref: "#/components/schemas/PublicUserDTO"
 
     TeamMemberUpdateRequest:
       type: object
@@ -1386,6 +1533,7 @@ components:
         [
           telegram,
           instagram,
+          facebook,
           linkedin,
           github,
           email,
@@ -1396,9 +1544,23 @@ components:
         ]
       description: Channel/platform type for a team contact link.
 
+    # --- Contact (company-level social links) ---
+    # FEAT-SOCIAL v1.9.0: Added `enabled` and `displayOrder` to resurrect the
+    # orphaned Contact entity / ContactRepository. The Contact entity and ContactType
+    # enum are unchanged; Flyway V14 adds two columns.
+    #
+    # Visibility rules:
+    #   - GET /contacts (public)     → only contacts where enabled = true, ordered by displayOrder ASC
+    #   - GET /admin/contacts (owner) → all contacts regardless of enabled, with enabled + displayOrder fields
+    #   - POST/PATCH /admin/contacts  → full ContactRequest including enabled and displayOrder
+
     ContactDTO:
       type: object
-      required: [id, type, value]
+      required: [id, type, value, enabled, displayOrder]
+      description: |
+        Public view of a company contact link. Only enabled contacts are returned by
+        `GET /contacts`. The admin list (`GET /admin/contacts`) returns all contacts
+        including disabled ones; the schema is identical (both caller contexts use ContactDTO).
       properties:
         id:
           type: integer
@@ -1410,8 +1572,9 @@ components:
           type: string
           description: |
             URL or address for the contact channel.
-            For `type: email` must be a valid email address (RFC 5321).
-            For all other types must be a valid URI (RFC 3986).
+            - `type: email` — valid RFC 5321 email address or `mailto:` URI.
+            - `type: telegram` — must start with `https://t.me/` or `tg://`.
+            - All other types — valid http/https URI (RFC 3986).
           x-validation:
             email: format:email
             default: format:uri
@@ -1420,12 +1583,28 @@ components:
           type: string
           nullable: true
           maxLength: 100
-          description: Human-readable display label (optional).
+          description: Human-readable display label (optional, shown in footer/hero).
           example: Telegram
+        enabled:
+          type: boolean
+          default: true
+          description: |
+            When false the link is saved but excluded from the public `GET /contacts` response.
+            The admin list always includes disabled contacts.
+          example: true
+        displayOrder:
+          type: integer
+          description: |
+            Ascending sort order used by `GET /contacts`. Lower values appear first.
+            The admin UI shows contacts sorted by this field; drag-and-drop reorder
+            sends a PATCH with the new `displayOrder` value.
+          example: 1
 
+    # Used by POST /admin/contacts and PATCH /admin/contacts/{id}
     ContactRequest:
       type: object
       required: [type, value]
+      description: Payload for creating or updating a company contact link.
       properties:
         type:
           $ref: "#/components/schemas/ContactType"
@@ -1434,15 +1613,34 @@ components:
           minLength: 1
           maxLength: 500
           description: |
-            For `type: email` must be a valid email address (RFC 5321).
-            For all other types must be a valid URI (RFC 3986).
+            URL or address for the contact channel. Validation is type-dependent:
+            - `email` — RFC 5321 email format or `mailto:` URI.
+            - `telegram` — `https://t.me/…` or `tg://` URI.
+            - All other types — http/https URI.
           x-validation:
             email: format:email
             default: format:uri
+          example: https://t.me/cotelapyx
         label:
           type: string
           maxLength: 100
           nullable: true
+          description: Optional display label. When null the frontend uses the platform name.
+          example: Telegram
+        enabled:
+          type: boolean
+          default: true
+          description: |
+            Controls public visibility. Defaults to `true` on creation.
+            Set to `false` to hide without deleting.
+        displayOrder:
+          type: integer
+          minimum: 0
+          default: 0
+          description: |
+            Display position (ascending). Defaults to 0 (appears first).
+            Suggested practice: leave gaps (0, 10, 20 …) so reordering rarely
+            requires updating all records.
 
     ContactSubmitResponse:
       type: object
@@ -1585,6 +1783,32 @@ components:
           type: boolean
 
   # ---------------------------------------------------------------------------
+  # Reusable headers
+  # ---------------------------------------------------------------------------
+  headers:
+    # SEC-1: cl_refresh HttpOnly cookie header.
+    # Used on login, register (set), refresh (rotate), and logout (clear).
+    SetCookieRefresh:
+      description: |
+        Sets (or rotates) the `cl_refresh` HttpOnly cookie.
+        Attributes: `HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth; Max-Age=2592000`.
+        The browser sends this cookie automatically with every request under `/api/v1/auth/`.
+        The frontend MUST NOT read or store the cookie value.
+      schema:
+        type: string
+        example: "cl_refresh=550e8400-e29b-41d4-a716-446655440000; HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth; Max-Age=2592000"
+
+    # SEC-1: cookie-clear header returned by POST /auth/logout.
+    # Identical cookie name/path/attributes but Max-Age=0 instructs the browser to delete it.
+    ClearCookieRefresh:
+      description: |
+        Clears the `cl_refresh` cookie.
+        Reissues the cookie with `Max-Age=0` so the browser deletes it immediately.
+      schema:
+        type: string
+        example: "cl_refresh=; HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth; Max-Age=0"
+
+  # ---------------------------------------------------------------------------
   # Reusable responses
   # ---------------------------------------------------------------------------
   responses:
@@ -1698,6 +1922,9 @@ paths:
       x-roles: [public]
       description: |
         Creates a new account with role `subscriber`. Rate-limited to 3 requests per 10 minutes per IP.
+
+        On success the server sets the `cl_refresh` HttpOnly cookie (see `Set-Cookie` header).
+        The response body contains only `user` + `accessToken`; the refresh token is NOT in the body.
       requestBody:
         required: true
         content:
@@ -1706,7 +1933,13 @@ paths:
               $ref: "#/components/schemas/RegisterRequest"
       responses:
         "201":
-          description: Account created successfully.
+          description: |
+            Account created successfully. The `cl_refresh` HttpOnly cookie is set in `Set-Cookie`.
+            Body contains `user` and `accessToken` only.
+          # SEC-1: cl_refresh delivered via Set-Cookie, not in response body.
+          headers:
+            Set-Cookie:
+              $ref: "#/components/headers/SetCookieRefresh"
           content:
             application/json:
               schema:
@@ -1728,7 +1961,9 @@ paths:
       security: []
       x-roles: [public]
       description: |
-        Returns a JWT access token (15 min TTL) and a refresh token (30 day TTL).
+        Returns a JWT access token (15 min TTL) in the response body.
+        The refresh token (30 day TTL) is delivered via the `cl_refresh` HttpOnly cookie
+        (`Set-Cookie` header) and is NOT present in the response body.
         Rate-limited to 5 requests/minute per IP.
       requestBody:
         required: true
@@ -1738,7 +1973,13 @@ paths:
               $ref: "#/components/schemas/AuthRequest"
       responses:
         "200":
-          description: Authentication successful.
+          description: |
+            Authentication successful. The `cl_refresh` HttpOnly cookie is set in `Set-Cookie`.
+            Body contains `user` and `accessToken` only.
+          # SEC-1: cl_refresh delivered via Set-Cookie, not in response body.
+          headers:
+            Set-Cookie:
+              $ref: "#/components/headers/SetCookieRefresh"
           content:
             application/json:
               schema:
@@ -1758,18 +1999,42 @@ paths:
       security: []
       x-roles: [public]
       description: |
-        Refresh tokens are single-use; each call invalidates the presented token
-        and issues a fresh pair (rotation). Presenting a revoked token returns 401
-        and invalidates the entire token family (detect-and-revoke).
+        The refresh token is read from the `cl_refresh` HttpOnly cookie sent automatically
+        by the browser (`credentials: 'include'`).  No request body is required for browser
+        clients.  Non-browser clients may supply `refreshToken` in the JSON body as a
+        backward-compat fallback; the cookie takes precedence when both are present.
+
+        Refresh tokens are single-use; each call invalidates the presented token and rotates
+        it: a fresh `cl_refresh` cookie is set in the `Set-Cookie` response header.
+        Presenting a revoked token returns 401 and invalidates the entire token family
+        (detect-and-revoke).
+      # SEC-1: cl_refresh cookie is the primary source of the refresh token.
+      parameters:
+        - name: cl_refresh
+          in: cookie
+          required: false
+          description: |
+            HttpOnly refresh token cookie set by POST /auth/login and POST /auth/register.
+            The browser sends this automatically. Do not read or forward this value manually.
+          schema:
+            type: string
+            format: uuid
       requestBody:
-        required: true
+        # Body is optional — browser clients omit it entirely (cookie-only flow).
+        required: false
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/RefreshRequest"
       responses:
         "200":
-          description: New token pair issued.
+          description: |
+            New access token issued. A rotated `cl_refresh` cookie is set in `Set-Cookie`.
+            Body contains only `accessToken`; the new refresh token is in the cookie.
+          # SEC-1: rotated cl_refresh delivered via Set-Cookie header.
+          headers:
+            Set-Cookie:
+              $ref: "#/components/headers/SetCookieRefresh"
           content:
             application/json:
               schema:
@@ -1777,7 +2042,19 @@ paths:
         "400":
           $ref: "#/components/responses/ValidationError"
         "401":
-          $ref: "#/components/responses/Unauthorized"
+          description: |
+            Missing, expired, or revoked refresh token. The `cl_refresh` cookie was absent
+            or its UUID was not found / already invalidated (detect-and-revoke).
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+              example:
+                type: https://cote-lapyx.com/errors/refresh-token-invalid
+                title: Unauthorized
+                status: 401
+                detail: Refresh token is missing, expired, or has been revoked.
+                instance: /api/v1/auth/refresh
 
   /auth/logout:
     post:
@@ -1788,17 +2065,38 @@ paths:
         - bearerAuth: []
       x-roles: [owner, subscriber]
       description: |
-        Revokes the provided refresh token. The access token expires naturally
-        after its 15-minute TTL. Client must discard both tokens after this call.
+        Reads the `cl_refresh` HttpOnly cookie, revokes the corresponding refresh token,
+        and clears the cookie by reissuing it with `Max-Age=0` in the `Set-Cookie` header.
+        The access token expires naturally after its 15-minute TTL.
+        Browser clients send no body; non-browser clients may pass `refreshToken` in the
+        body as a backward-compat fallback.
+      # SEC-1: cl_refresh cookie is the primary source of the refresh token for logout.
+      parameters:
+        - name: cl_refresh
+          in: cookie
+          required: false
+          description: |
+            HttpOnly refresh token cookie. The browser sends this automatically.
+            The server revokes the token and clears the cookie (Max-Age=0) on success.
+          schema:
+            type: string
+            format: uuid
       requestBody:
-        required: true
+        # Body is optional — browser clients omit it entirely (cookie-only flow).
+        required: false
         content:
           application/json:
             schema:
               $ref: "#/components/schemas/LogoutRequest"
       responses:
         "204":
-          description: Session terminated; token revoked.
+          description: |
+            Session terminated; refresh token revoked. The `cl_refresh` cookie is cleared
+            via `Set-Cookie` with `Max-Age=0`.
+          # SEC-1: cookie cleared by server on logout.
+          headers:
+            Set-Cookie:
+              $ref: "#/components/headers/ClearCookieRefresh"
         "400":
           $ref: "#/components/responses/ValidationError"
         "401":
@@ -3647,20 +3945,30 @@ paths:
           $ref: "#/components/responses/NotFound"
 
   # ---------------------------------------------------------------------------
-  # Contacts (team social links)
+  # Contacts (company-level social / contact links) — FEAT-SOCIAL v1.9.0
+  # ---------------------------------------------------------------------------
+  # Public: GET /contacts — only enabled contacts, ordered by displayOrder ASC.
+  # Admin:  GET/POST /admin/contacts
+  #         GET/PATCH/DELETE /admin/contacts/{id}
   # ---------------------------------------------------------------------------
 
   /contacts:
     get:
       tags: [Contacts]
-      summary: List team contact links
+      summary: List enabled team contact links (public)
       operationId: listContacts
+      # Public endpoint — no auth required
       security: []
       x-roles: [public]
-      description: Returns all public contact links for the team (Telegram, Instagram, LinkedIn, etc.). No authentication required.
+      description: |
+        Returns only the enabled company-level social / contact links for the team
+        (Telegram, Instagram, LinkedIn, GitHub, Email, etc.), sorted by `displayOrder`
+        ascending. Disabled links are excluded. No authentication required.
+
+        Used by the site footer, hero CTA, and contact page to render the icon row.
       responses:
         "200":
-          description: Array of contact links.
+          description: Ordered array of enabled contact links.
           content:
             application/json:
               schema:
@@ -3669,6 +3977,38 @@ paths:
                   $ref: "#/components/schemas/ContactDTO"
 
   /admin/contacts:
+    get:
+      tags: [Contacts]
+      summary: List all contact links including disabled (owner only)
+      operationId: adminListContacts
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Returns all company contact links regardless of `enabled` state, sorted by
+        `displayOrder` ascending. Used by the admin panel to manage the full link set.
+        Supports optional filtering by `enabled` state.
+      parameters:
+        - name: enabled
+          in: query
+          required: false
+          description: Filter by enabled state. Omit to return all.
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Array of all contact links (enabled + disabled).
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContactDTO"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
     post:
       tags: [Contacts]
       summary: Create a contact link (owner only)
@@ -3676,6 +4016,11 @@ paths:
       security:
         - bearerAuth: []
       x-roles: [owner]
+      description: |
+        Creates a new company contact link. The `type` field maps 1:1 to the existing
+        `ContactType` enum on the `contacts` table. Duplicate types are allowed
+        (e.g. two GitHub links with different labels) — no unique constraint on type alone.
+        Returns 409 only if `value` is identical to an existing record.
       requestBody:
         required: true
         content:
@@ -3696,15 +4041,25 @@ paths:
         "403":
           $ref: "#/components/responses/Forbidden"
         "409":
-          $ref: "#/components/responses/Conflict"
+          description: A contact with this exact value already exists.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+              example:
+                type: https://cote-lapyx.com/errors/conflict
+                title: Conflict
+                status: 409
+                detail: A contact link with this value already exists.
+                instance: /api/v1/admin/contacts
         "422":
           $ref: "#/components/responses/ValidationError"
 
   /admin/contacts/{id}:
-    put:
+    get:
       tags: [Contacts]
-      summary: Update a contact link (owner only)
-      operationId: updateContact
+      summary: Get a single contact link by ID (owner only)
+      operationId: adminGetContact
       security:
         - bearerAuth: []
       x-roles: [owner]
@@ -3715,6 +4070,45 @@ paths:
           schema:
             type: integer
             format: int64
+          example: 3
+      responses:
+        "200":
+          description: Contact link detail.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactDTO"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    patch:
+      tags: [Contacts]
+      summary: Update a contact link (owner only)
+      operationId: updateContact
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Partial update — all `ContactRequest` fields are optional.
+        Toggling `enabled: false` hides the link from public `GET /contacts` without
+        deleting it. Updating `displayOrder` repositions the link in the rendered order.
+
+        > Note: the previous contract used `PUT` (full replace). Changed to `PATCH`
+        > (partial update) in v1.9.0 to match the rest of the admin CRUD pattern.
+        > The old `PUT /admin/contacts/{id}` is deprecated; backend should accept both
+        > for one sprint, then remove PUT.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 3
       requestBody:
         required: true
         content:
@@ -3741,11 +4135,14 @@ paths:
 
     delete:
       tags: [Contacts]
-      summary: Delete a contact link (owner only)
+      summary: Delete a contact link permanently (owner only)
       operationId: deleteContact
       security:
         - bearerAuth: []
       x-roles: [owner]
+      description: |
+        Permanently removes the contact link record from the database.
+        To hide without deleting, use `PATCH /admin/contacts/{id}` with `enabled: false`.
       parameters:
         - name: id
           in: path
@@ -3753,6 +4150,7 @@ paths:
           schema:
             type: integer
             format: int64
+          example: 3
       responses:
         "204":
           description: Contact link deleted.
@@ -4270,7 +4668,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/SiteSettingsDTO"
         "400":
-          $ref: "#/components/responses/BadRequest"
+          $ref: "#/components/responses/ValidationError"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "403":

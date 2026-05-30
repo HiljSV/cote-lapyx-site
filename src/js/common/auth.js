@@ -1,6 +1,12 @@
 // =============================================================================
 // Auth utilities — shared across dashboard.js, admin.js
+// SEC-1: refresh token is now HttpOnly cookie (cl_refresh).
+// JS must NOT read/write cl_refresh — it travels automatically via credentials:'include'.
+// Only cl_access (access token) remains in localStorage.
 // =============================================================================
+
+// Import translate() for runtime i18n lookups (session-expiry toast)
+import { translate } from "@js/i18n.js";
 
 // Base URL for all auth API requests
 const AUTH_API = "https://api.cote-lapyx.com/api/v1/auth";
@@ -17,7 +23,8 @@ const AUTH_API = "https://api.cote-lapyx.com/api/v1/auth";
 function showSessionExpiredToast() {
   // Create toast element with inline cyberpunk style (no CSS class dependency)
   const toast = document.createElement("div");
-  toast.textContent = "Сесія закінчилась. Будь ласка, увійдіть знову.";
+  // Translated session-expiry message (was hardcoded Ukrainian)
+  toast.textContent = translate("auth.session_expired");
   toast.style.cssText = [
     "position:fixed",
     "bottom:24px",
@@ -44,50 +51,54 @@ function showSessionExpiredToast() {
 /**
  * Fetch with automatic JWT refresh.
  * - Attaches Authorization header from localStorage "cl_access"
- * - On 401: tries POST /auth/refresh with "cl_refresh"
- *   - If refresh succeeds: retries original request with new token
+ * - credentials:'include' is always set so the browser sends/receives the
+ *   HttpOnly cl_refresh cookie to api.cote-lapyx.com (required for refresh
+ *   and logout; harmless for other endpoints).
+ * - On 401: tries POST /auth/refresh — the cl_refresh HttpOnly cookie is sent
+ *   automatically by the browser, no JS read required.
+ *   - If refresh succeeds: stores new cl_access and retries original request
  *   - If refresh fails: shows session-expiry toast, then redirects to /login.html
  */
 export async function fetchWithAuth(url, options = {}) {
-  // Attach current access token to request
+  // Read current access token from localStorage
   const token = localStorage.getItem("cl_access");
 
-  // Inner helper — reuses options spread, only token changes on retry
+  // Inner helper — reuses options spread, only token changes on retry.
+  // credentials:'include' ensures the cl_refresh cookie travels with all
+  // cross-subdomain requests to api.cote-lapyx.com.
   const doFetch = (t) =>
     fetch(url, {
       ...options,
+      credentials: "include",
       headers: { ...options.headers, Authorization: `Bearer ${t}` },
     });
 
+  // Initial request — may return 401 if access token is expired
   const res = await doFetch(token);
   if (res.status !== 401) return res;
 
-  // Access token expired — try silent refresh
-  const refreshToken = localStorage.getItem("cl_refresh");
-  if (!refreshToken) {
-    // No refresh token — session truly expired; show toast before redirect
-    signOut(true);
-    return res;
-  }
-
-  // Attempt token refresh
+  // Access token expired — attempt silent refresh via HttpOnly cookie.
+  // The cl_refresh cookie is sent automatically by the browser (not read by JS).
+  // No guard on localStorage here — always attempt the refresh.
   const rRes = await fetch(`${AUTH_API}/refresh`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ refreshToken }),
+    credentials: "include",
+    // No body: the server reads cl_refresh from the HttpOnly cookie
   });
 
   if (!rRes.ok) {
-    // Refresh failed (revoked/expired) — session expired; show toast before redirect
+    // Refresh failed (cookie absent, expired, or revoked) — session is over
     signOut(true);
     return res;
   }
 
-  // Refresh succeeded — persist new tokens and retry original request
-  const { accessToken, refreshToken: newRefresh } = await rRes.json();
+  // Refresh succeeded — server returns only accessToken in JSON body.
+  // cl_refresh is rotated server-side and written back as a new HttpOnly cookie.
+  const { accessToken } = await rRes.json();
+  // Persist the new access token; cl_refresh is managed by the browser/server
   localStorage.setItem("cl_access", accessToken);
-  localStorage.setItem("cl_refresh", newRefresh);
 
+  // Retry the original request with the fresh access token
   return doFetch(accessToken);
 }
 
@@ -96,17 +107,20 @@ export async function fetchWithAuth(url, options = {}) {
 // =============================================================================
 
 /**
- * Remove tokens from localStorage and redirect to /login.html.
+ * Clear the access token from localStorage and redirect to /login.html.
  * No-op if the user is already on the login page (prevents redirect loops).
+ *
+ * NOTE (SEC-1): cl_refresh is an HttpOnly cookie — JS cannot clear it.
+ * The backend /auth/logout endpoint clears it server-side.
+ * Only cl_access is managed here.
  *
  * @param {boolean} [showToast=false] - When true, show session-expiry toast
  *   for 2 seconds before redirecting. Pass true only for automatic expiry;
  *   manual logout should pass false (or omit) to redirect immediately.
  */
 export function signOut(showToast = false) {
-  // Clear both tokens regardless of redirect
+  // Clear the access token — cl_refresh is HttpOnly, managed by backend only
   localStorage.removeItem("cl_access");
-  localStorage.removeItem("cl_refresh");
 
   // No redirect needed if already on login page
   if (!window.location.pathname.includes("login")) {

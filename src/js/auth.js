@@ -2,6 +2,9 @@
 // auth.js — Login & Register page logic
 // =============================================================================
 
+// Import translate() for runtime i18n lookups — replaces hardcoded Ukrainian strings
+import { translate } from "@js/i18n.js";
+
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
@@ -67,7 +70,9 @@ function initPasswordToggles() {
       input.type = isHidden ? "text" : "password";
       btn.setAttribute(
         "aria-label",
-        isHidden ? "Приховати пароль" : "Показати пароль",
+        isHidden
+          ? translate("auth.toggle.hide")
+          : translate("auth.toggle.show"),
       );
     });
   });
@@ -92,12 +97,21 @@ function getPasswordStrength(value) {
   return "medium";
 }
 
-const STRENGTH_LABELS = {
-  weak: "Слабкий",
-  medium: "Середній",
-  strong: "Надійний",
-  "very-strong": "Відмінний",
-};
+// Strength label is resolved at call time via translate() (i18n), keyed by level.
+// Explicit literal keys (not built dynamically) so the i18n checker can verify them.
+function getStrengthLabel(level) {
+  switch (level) {
+    case "medium":
+      return translate("auth.strength.medium");
+    case "strong":
+      return translate("auth.strength.strong");
+    case "very-strong":
+      return translate("auth.strength.very_strong");
+    case "weak":
+    default:
+      return translate("auth.strength.weak");
+  }
+}
 
 /**
  * Initialize strength meter for a password input.
@@ -122,7 +136,7 @@ function initStrengthMeter(input, fillEl, labelEl) {
     const level = getPasswordStrength(val);
     fillEl.className = `auth-form__strength-fill ${level}`;
     labelEl.className = `auth-form__strength-label ${level}`;
-    labelEl.textContent = STRENGTH_LABELS[level];
+    labelEl.textContent = getStrengthLabel(level);
   });
 }
 
@@ -155,49 +169,49 @@ function initLoginForm() {
 
     // Validate email
     if (!email) {
-      showError(emailError, "Введіть email-адресу");
+      showError(emailError, translate("auth.error.email_required"));
       valid = false;
     } else if (!isValidEmail(email)) {
-      showError(emailError, "Невірний формат email");
+      showError(emailError, translate("auth.error.email_invalid"));
       valid = false;
     }
 
     // Validate password
     if (!password) {
-      showError(passwordError, "Введіть пароль");
+      showError(passwordError, translate("auth.error.password_required"));
       valid = false;
     }
 
     if (!valid) return;
 
     // Submit
-    setLoading(submitBtn, "Зачекайте...");
+    setLoading(submitBtn, translate("auth.loading"));
 
     try {
+      // credentials:'include' is required so the browser accepts the
+      // Set-Cookie: cl_refresh (HttpOnly) header from the login response.
       const res = await fetch("https://api.cote-lapyx.com/api/v1/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
+        credentials: "include",
       });
 
       const data = await res.json();
 
       if (res.ok && data.accessToken) {
-        // Store JWT tokens
+        // Store only the access token — cl_refresh is now an HttpOnly cookie
+        // set by the server; JS must not store or read it.
         localStorage.setItem("cl_access", data.accessToken);
-        localStorage.setItem("cl_refresh", data.refreshToken);
         window.location.href = "/dashboard.html";
       } else {
         showServerError(
           serverError,
-          data.detail ?? data.message ?? "Помилка входу. Спробуйте ще раз.",
+          data.detail ?? data.message ?? translate("auth.error.login_failed"),
         );
       }
     } catch {
-      showServerError(
-        serverError,
-        "Не вдалося зв'язатися з сервером. Перевірте з'єднання.",
-      );
+      showServerError(serverError, translate("auth.error.network"));
     } finally {
       clearLoading(submitBtn);
     }
@@ -251,74 +265,75 @@ function initRegisterForm() {
 
     // Validate name
     if (!name) {
-      showError(nameError, "Введіть ім'я");
+      showError(nameError, translate("auth.error.name_required"));
       valid = false;
     } else if (name.length < 2) {
-      showError(nameError, "Ім'я має містити мінімум 2 символи");
+      showError(nameError, translate("auth.error.name_min"));
       valid = false;
     }
 
     // Validate email
     if (!email) {
-      showError(emailError, "Введіть email-адресу");
+      showError(emailError, translate("auth.error.email_required"));
       valid = false;
     } else if (!isValidEmail(email)) {
-      showError(emailError, "Невірний формат email");
+      showError(emailError, translate("auth.error.email_invalid"));
       valid = false;
     }
 
     // Validate password
     if (!password) {
-      showError(passwordError, "Введіть пароль");
+      showError(passwordError, translate("auth.error.password_required"));
       valid = false;
     } else if (password.length < 8) {
-      showError(passwordError, "Пароль має містити мінімум 8 символів");
+      showError(passwordError, translate("auth.error.password_min"));
       valid = false;
     }
 
     // Validate confirm password
     if (!confirm) {
-      showError(confirmError, "Підтвердіть пароль");
+      showError(confirmError, translate("auth.error.confirm_required"));
       valid = false;
     } else if (password && confirm !== password) {
-      showError(confirmError, "Паролі не збігаються");
+      showError(confirmError, translate("auth.error.password_mismatch"));
       valid = false;
     }
 
     if (!valid) return;
 
     // Submit
-    setLoading(submitBtn, "Зачекайте...");
+    setLoading(submitBtn, translate("auth.loading"));
 
     try {
+      // credentials:'include' is required so the browser accepts the
+      // Set-Cookie: cl_refresh (HttpOnly) header from the register response.
       const res = await fetch(
         "https://api.cote-lapyx.com/api/v1/auth/register",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name, email, password }),
+          credentials: "include",
         },
       );
 
       const data = await res.json();
 
       if (res.ok && data.accessToken) {
+        // Store only the access token — cl_refresh is now an HttpOnly cookie
+        // set by the server; JS must not store or read it.
         localStorage.setItem("cl_access", data.accessToken);
-        localStorage.setItem("cl_refresh", data.refreshToken);
         window.location.href = "/dashboard.html";
       } else {
         showServerError(
           serverError,
           data.detail ??
             data.message ??
-            "Помилка реєстрації. Спробуйте ще раз.",
+            translate("auth.error.register_failed"),
         );
       }
     } catch {
-      showServerError(
-        serverError,
-        "Не вдалося зв'язатися з сервером. Перевірте з'єднання.",
-      );
+      showServerError(serverError, translate("auth.error.network"));
     } finally {
       clearLoading(submitBtn);
     }

@@ -493,12 +493,18 @@ describe("auth.js", () => {
   });
 
   describe("signOut()", () => {
-    it("removes cl_access and cl_refresh from localStorage", () => {
+    // SEC-1: cl_refresh is an HttpOnly cookie — JS never sets it and cannot clear
+    // it. signOut() must only remove cl_access from localStorage.
+    it("removes cl_access from localStorage and does NOT touch cl_refresh", () => {
       localStorage.setItem("cl_access", "a");
+      // cl_refresh is set here only to confirm signOut leaves it alone
+      // (in production it would never be in localStorage at all)
       localStorage.setItem("cl_refresh", "r");
       auth.signOut();
+      // Access token must be cleared
       expect(localStorage.getItem("cl_access")).toBeNull();
-      expect(localStorage.getItem("cl_refresh")).toBeNull();
+      // cl_refresh must not be touched by JS — HttpOnly cookie, server-managed
+      expect(localStorage.getItem("cl_refresh")).toBe("r");
     });
 
     it("redirects to /login.html when not on login page", () => {
@@ -549,35 +555,58 @@ describe("auth.js", () => {
       expect(globalThis.fetch).toHaveBeenCalledTimes(1);
     });
 
-    it("on 401 with no refresh token: signs out and returns the original 401", async () => {
+    // SEC-1: cl_refresh is an HttpOnly cookie — no localStorage gate.
+    // fetchWithAuth ALWAYS attempts the refresh fetch on 401; the browser sends
+    // the cl_refresh cookie automatically via credentials:'include'.
+    it("on 401: always attempts the refresh fetch (no localStorage gate)", async () => {
+      // No cl_refresh in localStorage — that is now the normal production state
       localStorage.setItem("cl_access", "EXPIRED");
-      globalThis.fetch.mockResolvedValueOnce(
-        new Response("Unauthorized", { status: 401 }),
-      );
+
+      // signOut(true) uses a 2-second setTimeout — use fake timers so we can
+      // advance past the delay synchronously and assert the redirect.
+      vi.useFakeTimers();
+
+      globalThis.fetch
+        // 1st call: original request -> 401
+        .mockResolvedValueOnce(new Response("Unauthorized", { status: 401 }))
+        // 2nd call: /auth/refresh -> also 401 (no cookie present in jsdom)
+        .mockResolvedValueOnce(new Response("nope", { status: 401 }));
 
       const res = await auth.fetchWithAuth("https://api.example.com/data");
 
+      // Signs out: access token cleared, toast timer pending
       expect(res.status).toBe(401);
       expect(localStorage.getItem("cl_access")).toBeNull();
+
+      // Advance past the 2-second toast delay to trigger the redirect
+      vi.advanceTimersByTime(2100);
       expect(window.location.replace).toHaveBeenCalledWith("/login.html");
+
+      vi.useRealTimers();
+
+      // Two fetch calls: original + refresh attempt
+      expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+
+      // The refresh call must use credentials:'include' and no body
+      const refreshCall = globalThis.fetch.mock.calls[1];
+      expect(refreshCall[0]).toContain("/auth/refresh");
+      expect(refreshCall[1].credentials).toBe("include");
+      expect(refreshCall[1].body).toBeUndefined();
     });
 
-    it("on 401 with refresh token: refreshes and retries with new token", async () => {
+    it("on 401 + successful refresh: updates cl_access, NEVER writes cl_refresh, retries", async () => {
       localStorage.setItem("cl_access", "OLD");
-      localStorage.setItem("cl_refresh", "REFRESH");
+      // cl_refresh is NOT in localStorage (it is an HttpOnly cookie in production)
 
       globalThis.fetch
         // 1st call: original request -> 401
         .mockResolvedValueOnce(new Response("nope", { status: 401 }))
-        // 2nd call: /auth/refresh -> 200 with new tokens
+        // 2nd call: /auth/refresh -> 200 with new accessToken only
+        // (cl_refresh rotation happens as a Set-Cookie header — not visible to JS)
         .mockResolvedValueOnce(
-          new Response(
-            JSON.stringify({
-              accessToken: "NEW_ACCESS",
-              refreshToken: "NEW_REFRESH",
-            }),
-            { status: 200 },
-          ),
+          new Response(JSON.stringify({ accessToken: "NEW_ACCESS" }), {
+            status: 200,
+          }),
         )
         // 3rd call: retried original -> 200
         .mockResolvedValueOnce(new Response('{"ok":true}', { status: 200 }));
@@ -586,17 +615,27 @@ describe("auth.js", () => {
 
       expect(res.status).toBe(200);
       expect(globalThis.fetch).toHaveBeenCalledTimes(3);
-      expect(localStorage.getItem("cl_access")).toBe("NEW_ACCESS");
-      expect(localStorage.getItem("cl_refresh")).toBe("NEW_REFRESH");
 
-      // Retried call uses the NEW token
+      // Access token updated in localStorage
+      expect(localStorage.getItem("cl_access")).toBe("NEW_ACCESS");
+      // cl_refresh MUST NEVER be written to localStorage (HttpOnly cookie territory)
+      expect(localStorage.getItem("cl_refresh")).toBeNull();
+
+      // Retry call must use the new access token
       const lastCallOptions = globalThis.fetch.mock.calls[2][1];
       expect(lastCallOptions.headers.Authorization).toBe("Bearer NEW_ACCESS");
+
+      // Original and retry calls must include credentials
+      expect(globalThis.fetch.mock.calls[0][1].credentials).toBe("include");
+      expect(globalThis.fetch.mock.calls[2][1].credentials).toBe("include");
     });
 
-    it("on 401 with bad refresh token: signs out and returns original 401", async () => {
+    it("on 401 + failed refresh: signs out and returns original 401", async () => {
       localStorage.setItem("cl_access", "OLD");
-      localStorage.setItem("cl_refresh", "BAD");
+      // No cl_refresh in localStorage — normal production state
+
+      // signOut(true) uses a 2-second setTimeout — advance past it with fake timers
+      vi.useFakeTimers();
 
       globalThis.fetch
         .mockResolvedValueOnce(new Response("nope", { status: 401 }))
@@ -606,11 +645,17 @@ describe("auth.js", () => {
 
       expect(res.status).toBe(401);
       expect(localStorage.getItem("cl_access")).toBeNull();
+      // cl_refresh is never written by JS — must still be null
       expect(localStorage.getItem("cl_refresh")).toBeNull();
+
+      // Advance past the 2-second toast delay to trigger the redirect
+      vi.advanceTimersByTime(2100);
       expect(window.location.replace).toHaveBeenCalledWith("/login.html");
+
+      vi.useRealTimers();
     });
 
-    it("merges custom headers with Authorization", async () => {
+    it("merges custom headers with Authorization and always sets credentials:include", async () => {
       localStorage.setItem("cl_access", "T");
       globalThis.fetch.mockResolvedValueOnce(new Response("", { status: 200 }));
 
@@ -626,6 +671,8 @@ describe("auth.js", () => {
       expect(options.headers["X-Custom"]).toBe("1");
       expect(options.headers.Authorization).toBe("Bearer T");
       expect(options.body).toBe('{"a":1}');
+      // SEC-1: credentials must always be 'include' so cl_refresh cookie travels
+      expect(options.credentials).toBe("include");
     });
   });
 });

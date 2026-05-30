@@ -2,13 +2,13 @@
   {
     "id": "serhii",
     "name": "Сергій",
-    "role": "Frontend Developer",
+    "role": "Fullstack / Frontend Developer",
     "bio": "Поєднує дизайн-мислення та фронтенд-розробку. Автор фірмового стилю cote-lapyx.",
     "photo": null,
     "initial": "С",
     "color": "cyan",
     "socials": {
-      "github": "https://github.com/cote-lapyx",
+      "github": "https://github.com/HiljSV",
       "linkedin": "#",
       "telegram": "https://t.me/cotelapyx"
     },
@@ -62,7 +62,7 @@
     "initial": "А",
     "color": "green",
     "socials": {
-      "github": "https://github.com/cote-lapyx",
+      "github": "https://github.com/COTE-LAPYX",
       "linkedin": "#",
       "telegram": "https://t.me/cotelapyx"
     },
@@ -118,7 +118,7 @@
     "initial": "В",
     "color": "magenta",
     "socials": {
-      "github": "https://github.com/cote-lapyx",
+      "github": "#",
       "linkedin": "#",
       "telegram": "https://t.me/cotelapyx"
     },

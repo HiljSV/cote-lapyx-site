@@ -38,7 +38,7 @@ function authorInitials(name) {
 // Return Latin displayName for non-UK locales, fall back to Cyrillic name
 function authorDisplayName(author) {
   if (!author) return "—";
-  const lang = localStorage.getItem("cl_lang") || "en";
+  const lang = localStorage.getItem("cl_lang") || "uk";
   return lang !== "uk" && author.displayName
     ? author.displayName
     : author.name || "—";
@@ -138,7 +138,7 @@ async function loadProjects(page, append = false) {
   if (currentSearch) params.set("search", currentSearch);
 
   // Read current UI language so the backend returns translated project content
-  const lang = localStorage.getItem("cl_lang") || "en";
+  const lang = localStorage.getItem("cl_lang") || "uk";
   params.set("locale", lang);
 
   try {
@@ -179,9 +179,33 @@ async function loadProjects(page, append = false) {
   }
 }
 
+// CSP-safe broken-cover fallback: replace a failed .project-card__cover image
+// with the same gear placeholder used when no cover exists. Uses capture-phase
+// delegation because the `error` event does not bubble. Mirrors blog.js so that
+// owner-added cover URLs (managed via the admin panel) degrade gracefully.
+function initBrokenCoverFallback() {
+  document.addEventListener(
+    "error",
+    (e) => {
+      const img = e.target;
+      if (!(img instanceof HTMLImageElement)) return;
+      if (!img.classList.contains("project-card__cover")) return;
+      const placeholder = document.createElement("div");
+      placeholder.className = "project-card__cover-placeholder";
+      placeholder.setAttribute("aria-hidden", "true");
+      placeholder.innerHTML = "&#9881;";
+      img.replaceWith(placeholder);
+    },
+    true,
+  );
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   const gridEl = document.getElementById("projects-grid");
   if (!gridEl) return;
+
+  // Wire the CSP-safe broken-cover fallback once for all project cards
+  initBrokenCoverFallback();
 
   // Pre-fetch member slugs before rendering so author links are ready on first load
   await initMemberSlugs();

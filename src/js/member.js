@@ -19,6 +19,16 @@ const SOCIAL_ICONS = {
     btnClass: "btn--green",
     svg: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.26 13.835l-2.94-.916c-.638-.203-.65-.638.135-.943l11.49-4.43c.533-.194 1.001.13.949.675z"/></svg>`,
   },
+  instagram: {
+    label: "Instagram",
+    btnClass: "btn--magenta",
+    svg: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24s3.668-.014 4.948-.072c4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>`,
+  },
+  email: {
+    label: "Email",
+    btnClass: "btn--cyan",
+    svg: `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>`,
+  },
 };
 
 // Sanitize strings before injecting into innerHTML
@@ -33,7 +43,7 @@ function escHtml(str) {
 // Format ISO date with locale-aware month/day names
 function fmtDate(iso) {
   if (!iso) return "";
-  const lang = localStorage.getItem("cl_lang") || "en";
+  const lang = localStorage.getItem("cl_lang") || "uk";
   return new Date(iso).toLocaleDateString(lang, {
     day: "numeric",
     month: "long",
@@ -44,7 +54,7 @@ function fmtDate(iso) {
 // Return Latin displayName for non-UK locales, fall back to Cyrillic name
 function resolveDisplayName(user) {
   if (!user) return "—";
-  const lang = localStorage.getItem("cl_lang") || "en";
+  const lang = localStorage.getItem("cl_lang") || "uk";
   return lang !== "uk" && user.displayName
     ? user.displayName
     : user.name || "—";
@@ -80,30 +90,39 @@ function renderBadges(member) {
     .join("");
 }
 
-// Render social links from API socialLinks object merged with local JSON fallback
-function renderSocials(apiSocialLinks, localSocials) {
+// Render social links from the API socialLinks object only.
+// FEAT-SOCIAL (DEC-3): the API flat socialLinks is the single source of truth —
+// a platform value is a URL when owner-enabled, or null when disabled/absent.
+// No local-JSON fallback: that would resurrect links the owner toggled OFF.
+// Supports all 5 personal platforms; email is rendered as a mailto: link.
+function renderSocials(apiSocialLinks) {
   const el = document.getElementById("member-socials");
   if (!el) return;
-  // Prefer API social links; fall back to local JSON values for missing keys
-  const merged = {
-    github: apiSocialLinks?.github || localSocials?.github || null,
-    linkedin: apiSocialLinks?.linkedin || localSocials?.linkedin || null,
-    telegram: apiSocialLinks?.telegram || localSocials?.telegram || null,
-  };
-  const links = Object.entries(merged)
+
+  // Fixed platform order; values come straight from the API (null = hidden)
+  const order = ["github", "linkedin", "telegram", "instagram", "email"];
+  const links = order
+    .map((key) => [key, apiSocialLinks?.[key] ?? null])
     .filter(([, url]) => url && url !== "#")
     .map(([key, url]) => {
       const icon = SOCIAL_ICONS[key];
       if (!icon) return "";
 
-      // Fix #1 — Normalize telegram handle to full URL.
-      // Users may store @handle, handle, or t.me/handle in their dashboard.
-      // Without normalization the browser treats it as a relative path.
-      if (key === "telegram" && url && !/^https?:\/\//.test(url)) {
-        url = "https://t.me/" + url.replace(/^@/, "");
+      let href = url;
+
+      // Email → mailto: link (stays in same tab); bare address gets the scheme
+      if (key === "email") {
+        href = url.startsWith("mailto:") ? url : `mailto:${url}`;
+        return `<a href="${escHtml(href)}" class="btn ${escHtml(icon.btnClass)}" aria-label="${escHtml(icon.label)}">${icon.svg} ${escHtml(icon.label)}</a>`;
       }
 
-      return `<a href="${escHtml(url)}" class="btn ${escHtml(icon.btnClass)}" target="_blank" rel="noopener" aria-label="${escHtml(icon.label)}">${icon.svg} ${escHtml(icon.label)}</a>`;
+      // Normalize a bare telegram handle (@handle / handle) to a full t.me URL,
+      // otherwise the browser treats it as a relative path.
+      if (key === "telegram" && !/^https?:\/\//.test(href)) {
+        href = "https://t.me/" + href.replace(/^@/, "");
+      }
+
+      return `<a href="${escHtml(href)}" class="btn ${escHtml(icon.btnClass)}" target="_blank" rel="noopener" aria-label="${escHtml(icon.label)}">${icon.svg} ${escHtml(icon.label)}</a>`;
     })
     .join("");
   el.innerHTML = links;
@@ -195,7 +214,7 @@ function renderProjectsFromApi(projects) {
 function renderProjects(member) {
   const el = document.getElementById("member-projects");
   if (!el) return;
-  const lang = localStorage.getItem("cl_lang") || "en";
+  const lang = localStorage.getItem("cl_lang") || "uk";
   el.innerHTML = member.projects
     .map((p) => {
       // Use English description for non-UK locales when available
@@ -257,7 +276,7 @@ function renderPosts(posts) {
 // API hydration — fetches member + posts with locale; re-runs on lang change
 // =============================================================================
 async function hydrateFromApi(memberId, member) {
-  const lang = localStorage.getItem("cl_lang") || "en";
+  const lang = localStorage.getItem("cl_lang") || "uk";
 
   try {
     // GET /api/v1/team-members/{slug} — public; locale for translated content
@@ -288,8 +307,8 @@ async function hydrateFromApi(memberId, member) {
     // Update photo with API avatar
     renderPhoto(member, avatarUrl, displayName, profession);
 
-    // Merge API social links over local JSON fallback
-    renderSocials(data.user?.socialLinks, member.socials);
+    // Render personal socials from the API only (enabled-only; source of truth)
+    renderSocials(data.user?.socialLinks);
 
     // Update page title and OG tags with resolved name
     document.title = `${displayName} — cote-lapyx`;
@@ -376,7 +395,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   renderPhoto(member, null, member.name, member.role);
   renderBadges(member);
-  renderSocials(null, member.socials);
+  // Socials are API-only (FEAT-SOCIAL): render empty until the API responds with
+  // the enabled-only set — never seed from local JSON (would bypass the toggle).
+  renderSocials(null);
   renderSkills(member);
   renderProjects(member);
 
