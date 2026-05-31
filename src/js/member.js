@@ -193,9 +193,16 @@ function renderProjectsFromApi(projects) {
       // shortDescription from API (locale-aware, already translated by backend)
       const desc = p.shortDescription || "";
 
+      // Cover image from API when present; otherwise the </> ASCII placeholder.
+      // Mirrors projects.js — a failed external/owner-set image degrades to the
+      // placeholder via the capture-phase broken-cover handler below.
+      const coverHtml = p.coverImage
+        ? `<img class="project-card__cover" src="${escHtml(p.coverImage)}" alt="" aria-hidden="true" />`
+        : `<div class="project-card__cover-placeholder" aria-hidden="true">&lt;/&gt;</div>`;
+
       return `<li>
         <article class="project-card project-card--cyan">
-          <div class="project-card__cover-placeholder" aria-hidden="true">&lt;/&gt;</div>
+          ${coverHtml}
           <div class="project-card__body">
             <h3 class="project-card__title">${escHtml(p.title)}</h3>
             <p class="project-card__description">${escHtml(desc)}</p>
@@ -372,9 +379,34 @@ async function hydrateProjects(userId, lang) {
 // =============================================================================
 // DOMContentLoaded — initial render from local JSON, then hydrate from API
 // =============================================================================
+// CSP-safe broken-cover fallback: replace a failed .project-card__cover image with
+// the </> placeholder used when no cover exists. Capture-phase delegation because the
+// `error` event does not bubble. Mirrors projects.js/blog.js so owner-set or external
+// cover URLs (e.g. the netlify-hosted ZYRO cover) degrade gracefully instead of showing
+// a broken-image icon.
+function initBrokenCoverFallback() {
+  document.addEventListener(
+    "error",
+    (e) => {
+      const img = e.target;
+      if (!(img instanceof HTMLImageElement)) return;
+      if (!img.classList.contains("project-card__cover")) return;
+      const placeholder = document.createElement("div");
+      placeholder.className = "project-card__cover-placeholder";
+      placeholder.setAttribute("aria-hidden", "true");
+      placeholder.innerHTML = "&lt;/&gt;";
+      img.replaceWith(placeholder);
+    },
+    true,
+  );
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   // Guard: only run on member.html
   if (!document.getElementById("member-photo-wrap")) return;
+
+  // Wire the CSP-safe broken-cover fallback once for all project cards on this page
+  initBrokenCoverFallback();
 
   const params = new URLSearchParams(window.location.search);
   const memberId = params.get("id") || "valeriia";
