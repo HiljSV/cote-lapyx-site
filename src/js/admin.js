@@ -1447,8 +1447,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const toggleEl = document.getElementById(`social-toggle-${platform}`);
 
         if (inputEl) {
-          // Populate input with existing value; empty if not set
-          inputEl.value = state ? state.value : "";
+          // Populate input with existing value; empty if not set.
+          // EMAIL is stored with a "mailto:" scheme (backend contract) — strip it
+          // for display so the field shows a bare address (e.g. info@cote-lapyx.com).
+          const rawValue = state ? state.value : "";
+          inputEl.value =
+            platform === "EMAIL" ? rawValue.replace(/^mailto:/i, "") : rawValue;
         }
         if (toggleEl) {
           // Check toggle if contact exists and is enabled
@@ -1484,15 +1488,25 @@ document.addEventListener("DOMContentLoaded", () => {
     const rowData = SOCIAL_PLATFORMS.map((platform) => {
       const inputEl = document.getElementById(`social-input-${platform}`);
       const toggleEl = document.getElementById(`social-toggle-${platform}`);
-      const value = inputEl ? inputEl.value.trim() : "";
+      const rawValue = inputEl ? inputEl.value.trim() : "";
       const enabled = toggleEl ? toggleEl.checked : false;
 
-      // Validate URL if non-empty
-      const validationError = validateSocialUrl(platform, value);
+      // Validate the raw (user-typed) value — EMAIL accepts a bare address here
+      const validationError = validateSocialUrl(platform, rawValue);
       if (validationError) {
         setSocialRowError(platform, validationError);
         hasErrors = true;
       }
+
+      // Normalize EMAIL to a "mailto:" scheme before sending — the backend
+      // ALLOWED_SCHEMES (http/https/mailto/tg) rejects a bare email address.
+      // Only prefix when the user typed a bare address (no scheme yet).
+      const value =
+        platform === "EMAIL" &&
+        rawValue &&
+        !/^(mailto:|https?:\/\/)/i.test(rawValue)
+          ? `mailto:${rawValue}`
+          : rawValue;
 
       return { platform, value, enabled };
     });
