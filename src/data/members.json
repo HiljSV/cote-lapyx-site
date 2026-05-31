@@ -13,45 +13,48 @@
       "telegram": "https://t.me/cotelapyx"
     },
     "badges": [
-      { "label": "HTML", "color": "cyan" },
-      { "label": "CSS", "color": "cyan" },
-      { "label": "JavaScript", "color": "cyan" },
-      { "label": "TypeScript", "color": "magenta" }
+      {
+        "label": "HTML",
+        "color": "cyan"
+      },
+      {
+        "label": "CSS",
+        "color": "cyan"
+      },
+      {
+        "label": "JavaScript",
+        "color": "cyan"
+      },
+      {
+        "label": "TypeScript",
+        "color": "magenta"
+      }
     ],
     "skills": {
       "Frontend": [
-        { "label": "HTML / CSS", "pct": 92, "color": "cyan" },
-        { "label": "JavaScript", "pct": 88, "color": "cyan" },
-        { "label": "TypeScript", "pct": 80, "color": "magenta" },
-        { "label": "Responsive Layout", "pct": 90, "color": "cyan" }
+        {
+          "label": "HTML / CSS",
+          "pct": 92,
+          "color": "cyan"
+        },
+        {
+          "label": "JavaScript",
+          "pct": 88,
+          "color": "cyan"
+        },
+        {
+          "label": "TypeScript",
+          "pct": 80,
+          "color": "magenta"
+        },
+        {
+          "label": "Responsive Layout",
+          "pct": 90,
+          "color": "cyan"
+        }
       ]
     },
-    "projects": [
-      {
-        "title": "cote-lapyx.com",
-        "description": "Офіційний сайт студії. Фірмовий стиль, компонентна архітектура, CSS-анімації.",
-        "descriptionEn": "Official studio website. Brand identity, component architecture, CSS animations.",
-        "tags": [
-          { "label": "HTML", "color": "cyan" },
-          { "label": "CSS", "color": "cyan" },
-          { "label": "JavaScript", "color": "cyan" }
-        ],
-        "color": "cyan",
-        "links": { "github": "#", "demo": "https://cote-lapyx.com" }
-      },
-      {
-        "title": "Component Library",
-        "description": "Особиста бібліотека UI-компонентів у cyberpunk-стилі з CSS-анімаціями та TypeScript.",
-        "descriptionEn": "Personal UI component library in cyberpunk style with CSS animations and TypeScript.",
-        "tags": [
-          { "label": "HTML", "color": "cyan" },
-          { "label": "CSS", "color": "cyan" },
-          { "label": "TypeScript", "color": "magenta" }
-        ],
-        "color": "magenta",
-        "links": { "github": "#" }
-      }
-    ]
+    "projects": []
   },
   {
     "id": "andrii",
@@ -67,47 +70,57 @@
       "telegram": "https://t.me/cotelapyx"
     },
     "badges": [
-      { "label": "Java", "color": "green" },
-      { "label": "C#", "color": "cyan" },
-      { "label": "Python", "color": "magenta" },
-      { "label": "JavaScript", "color": "cyan" },
-      { "label": "MySQL", "color": "green" }
+      {
+        "label": "Java",
+        "color": "green"
+      },
+      {
+        "label": "C#",
+        "color": "cyan"
+      },
+      {
+        "label": "Python",
+        "color": "magenta"
+      },
+      {
+        "label": "JavaScript",
+        "color": "cyan"
+      },
+      {
+        "label": "MySQL",
+        "color": "green"
+      }
     ],
     "skills": {
       "Backend": [
-        { "label": "Java", "pct": 92, "color": "green" },
-        { "label": "C#", "pct": 85, "color": "cyan" },
-        { "label": "Python", "pct": 75, "color": "magenta" },
-        { "label": "MySQL", "pct": 82, "color": "green" },
-        { "label": "REST API", "pct": 88, "color": "cyan" }
+        {
+          "label": "Java",
+          "pct": 92,
+          "color": "green"
+        },
+        {
+          "label": "C#",
+          "pct": 85,
+          "color": "cyan"
+        },
+        {
+          "label": "Python",
+          "pct": 75,
+          "color": "magenta"
+        },
+        {
+          "label": "MySQL",
+          "pct": 82,
+          "color": "green"
+        },
+        {
+          "label": "REST API",
+          "pct": 88,
+          "color": "cyan"
+        }
       ]
     },
-    "projects": [
-      {
-        "title": "cote-lapyx API",
-        "description": "REST API backend з JWT-авторизацією, валідацією та документацією Swagger.",
-        "descriptionEn": "REST API backend with JWT authorization, validation, and Swagger documentation.",
-        "tags": [
-          { "label": "Java", "color": "green" },
-          { "label": "C#", "color": "cyan" },
-          { "label": "MySQL", "color": "green" }
-        ],
-        "color": "green",
-        "links": { "github": "#" }
-      },
-      {
-        "title": "Auth Service",
-        "description": "Сервіс авторизації та управління користувачами з JWT, OAuth2 та ролевою моделлю.",
-        "descriptionEn": "Authorization and user management service with JWT, OAuth2, and role-based access control.",
-        "tags": [
-          { "label": "Java", "color": "green" },
-          { "label": "JWT", "color": "cyan" },
-          { "label": "REST API", "color": "cyan" }
-        ],
-        "color": "cyan",
-        "links": { "github": "#" }
-      }
-    ]
+    "projects": []
   },
   {
     "id": "valeriia",
@@ -123,44 +136,47 @@
       "telegram": "https://t.me/cotelapyx"
     },
     "badges": [
-      { "label": "Figma", "color": "magenta" },
-      { "label": "Adobe Photoshop", "color": "magenta" },
-      { "label": "Adobe Illustrator", "color": "magenta" },
-      { "label": "WordPress", "color": "cyan" }
+      {
+        "label": "Figma",
+        "color": "magenta"
+      },
+      {
+        "label": "Adobe Photoshop",
+        "color": "magenta"
+      },
+      {
+        "label": "Adobe Illustrator",
+        "color": "magenta"
+      },
+      {
+        "label": "WordPress",
+        "color": "cyan"
+      }
     ],
     "skills": {
       "Design": [
-        { "label": "Figma", "pct": 95, "color": "magenta" },
-        { "label": "Adobe Photoshop", "pct": 88, "color": "magenta" },
-        { "label": "Adobe Illustrator", "pct": 85, "color": "magenta" },
-        { "label": "WordPress", "pct": 75, "color": "cyan" }
+        {
+          "label": "Figma",
+          "pct": 95,
+          "color": "magenta"
+        },
+        {
+          "label": "Adobe Photoshop",
+          "pct": 88,
+          "color": "magenta"
+        },
+        {
+          "label": "Adobe Illustrator",
+          "pct": 85,
+          "color": "magenta"
+        },
+        {
+          "label": "WordPress",
+          "pct": 75,
+          "color": "cyan"
+        }
       ]
     },
-    "projects": [
-      {
-        "title": "cote-lapyx Brand Kit",
-        "description": "Фірмовий стиль студії: логотип, кольорова палітра, типографіка, cyberpunk-естетика.",
-        "descriptionEn": "Studio brand identity: logo, color palette, typography, and cyberpunk aesthetics.",
-        "tags": [
-          { "label": "Figma", "color": "magenta" },
-          { "label": "Branding", "color": "magenta" },
-          { "label": "UI/UX", "color": "cyan" }
-        ],
-        "color": "magenta",
-        "links": { "github": "#" }
-      },
-      {
-        "title": "Geometric Logo System",
-        "description": "Система геометричних логотипів з адаптивними варіантами для різних носіїв.",
-        "descriptionEn": "Geometric logo system with adaptive variants for different media and surfaces.",
-        "tags": [
-          { "label": "Figma", "color": "magenta" },
-          { "label": "Illustrator", "color": "magenta" },
-          { "label": "SVG", "color": "cyan" }
-        ],
-        "color": "cyan",
-        "links": { "github": "#" }
-      }
-    ]
+    "projects": []
   }
 ]
