@@ -140,25 +140,24 @@
 }
 
 // -----------------------------------------------------------------------------
-// Cover image — constrained to the article TEXT COLUMN (800px), NOT the page container
-// .post-cover        — outer section, carries no width beyond block flow
-// .post-cover__inner — matches .post-article__body exactly: max-width 800px + 15px gutters
-// .post-cover__img   — fills the inner wrapper; rounded corners clip the image
-// At viewports < 800px both cover and text are full-width (match).
-// At 1280px desktop both are 800px centered (match).
+// Cover image — mirrors .post-article__body box model EXACTLY.
+// Structure: .page__container (in HTML) > .post-cover > .post-cover__inner > img
+// - .page__container supplies the 15px side gutters — same container as the article body
+// - .post-cover__inner: max-width:800px, margin:0 auto, NO own padding
+//   → identical to .post-article__body, so content box == text content box at all viewports
+// - At <800px viewport: both are full-width-minus-container-gutters (match)
+// - At 1280px desktop: both are exactly 800px centered (match, 0px difference)
 // -----------------------------------------------------------------------------
 
 .post-cover {
-  /* Outer wrapper: block-level flow only, no stray overflow or line-height hacks */
+  /* Outer wrapper: sits inside .page__container, which provides the 15px side gutters */
 
-  /* Inner container — matches .post-article__body width exactly (800px) */
-  /* Gutters (15px) match .page__container padding so edges align with the text */
+  /* Inner container — mirrors .post-article__body: max-width 800px, centered, NO own padding.
+     Gutters come from the parent .page__container (same source as article body). */
   &__inner {
     max-width: 800px;
     margin: 0 auto;
-    /* Side gutters identical to .page__container — keeps edges flush with article text */
-    padding-left: 15px;
-    padding-right: 15px;
+    /* NO padding here — gutters come from .page__container (identical to .post-article__body) */
     /* overflow:hidden clips the rounded image corners */
     overflow: hidden;
     border-radius: 12px;

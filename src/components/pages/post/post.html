@@ -30,9 +30,14 @@
 
 <main class="page" id="post-main">
   <!-- Cover image — injected by JS, hidden until available -->
-  <!-- post-cover: outer block wrapper; post-cover__inner: aligns image to article TEXT column (800px, same as post-article__body) -->
-  <div class="post-cover" id="post-cover-wrap" hidden>
-    <!-- JS injects: <div class="post-cover__inner"><img class="post-cover__img" .../></div> -->
+  <!-- Cover mirrors .post-article__body box model EXACTLY:
+       .page__container supplies the 15px side gutters (same container as the article body),
+       .post-cover__inner is max-width:800px with NO own padding — identical to .post-article__body.
+       Result: cover content box == text content box at every viewport width. -->
+  <div class="page__container">
+    <div class="post-cover" id="post-cover-wrap" hidden>
+      <!-- JS injects: <div class="post-cover__inner"><img class="post-cover__img" .../></div> -->
+    </div>
   </div>
 
   <!-- Article body -->

@@ -198,8 +198,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // Cover image — unhide wrapper and inject inner container + img when image is present.
-    // .post-cover__inner aligns the image to the article TEXT column (max-width: 800px),
-    // matching .post-article__body exactly so cover and text edges are flush.
+    // Box model mirrors .post-article__body EXACTLY:
+    // HTML structure: .page__container > #post-cover-wrap(.post-cover) > .post-cover__inner > img
+    // .page__container supplies 15px side gutters (same source as article body).
+    // .post-cover__inner has max-width:800px and NO own padding — identical to .post-article__body.
+    // Cover content box == text content box at every viewport width.
     if (post.coverImage) {
       const coverWrap = document.getElementById("post-cover-wrap");
       if (coverWrap) {
