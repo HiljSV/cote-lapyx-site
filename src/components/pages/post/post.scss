@@ -140,14 +140,30 @@
 }
 
 // -----------------------------------------------------------------------------
-// Cover image
+// Cover image — mirrors .post-article__body box model EXACTLY.
+// Structure: .page__container (in HTML) > .post-cover > .post-cover__inner > img
+// - .page__container supplies the 15px side gutters — same container as the article body
+// - .post-cover__inner: max-width:800px, margin:0 auto, NO own padding
+//   → identical to .post-article__body, so content box == text content box at all viewports
+// - At <800px viewport: both are full-width-minus-container-gutters (match)
+// - At 1280px desktop: both are exactly 800px centered (match, 0px difference)
 // -----------------------------------------------------------------------------
 
 .post-cover {
-  width: 100%;
-  overflow: hidden;
-  line-height: 0;
+  /* Outer wrapper: sits inside .page__container, which provides the 15px side gutters */
 
+  /* Inner container — mirrors .post-article__body: max-width 800px, centered, NO own padding.
+     Gutters come from the parent .page__container (same source as article body). */
+  &__inner {
+    max-width: 800px;
+    margin: 0 auto;
+    /* NO padding here — gutters come from .page__container (identical to .post-article__body) */
+    /* overflow:hidden clips the rounded image corners */
+    overflow: hidden;
+    border-radius: 12px;
+  }
+
+  /* Cover image: fills the inner wrapper; border-radius clips via parent overflow:hidden */
   &__img {
     width: 100%;
     height: 420px;
@@ -155,10 +171,12 @@
     object-position: center;
     display: block;
 
+    /* Tablet: reduce height */
     @media (max-width: toEm($tablet)) {
       height: 280px;
     }
 
+    /* Mobile: reduce height further */
     @media (max-width: toEm($mobile)) {
       height: 200px;
     }

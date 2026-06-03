@@ -197,11 +197,17 @@ document.addEventListener("DOMContentLoaded", async () => {
         <span class="post-hero__author-name">${escHtml(authorDisplayName(post.author))}</span>`;
     }
 
-    // Cover image — unhide wrapper when image is present
+    // Cover image — unhide wrapper and inject inner container + img when image is present.
+    // Box model mirrors .post-article__body EXACTLY:
+    // HTML structure: .page__container > #post-cover-wrap(.post-cover) > .post-cover__inner > img
+    // .page__container supplies 15px side gutters (same source as article body).
+    // .post-cover__inner has max-width:800px and NO own padding — identical to .post-article__body.
+    // Cover content box == text content box at every viewport width.
     if (post.coverImage) {
       const coverWrap = document.getElementById("post-cover-wrap");
       if (coverWrap) {
-        coverWrap.innerHTML = `<img class="post-cover__img" src="${escHtml(post.coverImage)}" alt="${escHtml(post.title)}" />`;
+        // Inject inner wrapper: image is constrained to 800px (article text column width)
+        coverWrap.innerHTML = `<div class="post-cover__inner"><img class="post-cover__img" src="${escHtml(post.coverImage)}" alt="${escHtml(post.title)}" /></div>`;
         coverWrap.removeAttribute("hidden");
       }
     }
