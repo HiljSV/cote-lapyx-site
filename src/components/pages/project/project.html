@@ -43,10 +43,17 @@
 </div>
 
 <main class="page" id="project-main">
-  <!-- Cover image — injected by JS, hidden until available -->
-  <div class="post-cover" id="project-cover-wrap" hidden>
-    <!-- JS injects: <img src="..." alt="..." class="post-cover__img"> -->
+  <!-- ===== Fix B: cover image container =====
+       Wrapping in .page__container mirrors the post page structure exactly:
+       .page__container > .post-cover > .post-cover__inner > img
+       This gives the 15px side gutters and an 800px max-width inner cap,
+       matching the post-article body column so cover and text align perfectly. -->
+  <div class="page__container">
+    <div class="post-cover" id="project-cover-wrap" hidden>
+      <!-- JS injects: <div class="post-cover__inner"><img class="post-cover__img" src="..." alt="..."></div> -->
+    </div>
   </div>
+  <!-- ===== /Fix B ===== -->
 
   <!-- Main content + sidebar -->
   <section
@@ -63,7 +70,11 @@
 
       <!-- Right: sidebar -->
       <aside class="project-detail__sidebar" aria-label="Деталі проекту">
-        <!-- Tech stack tags — JS injects neon-badge items -->
+        <!-- ===== Fix A.4: tech tags container =====
+             h2 title is static HTML (translated via data-i18n — no JS reconstruction needed).
+             JS now targets #project-tech-tags (.project-detail__tech-tags = flex-wrap:wrap, gap:8px)
+             instead of #project-tech (.project-detail__tech = flex-direction:column → full-width stretch).
+             Result: neon-badge chips render compact and wrap naturally. -->
         <div class="project-detail__tech" id="project-tech">
           <h2
             class="project-detail__tech-title"
@@ -71,8 +82,10 @@
           >
             Технології
           </h2>
-          <!-- JS injects tags -->
+          <!-- JS injects neon-badge spans here (flex-wrap row) -->
+          <div class="project-detail__tech-tags" id="project-tech-tags"></div>
         </div>
+        <!-- ===== /Fix A.4 ===== -->
 
         <!-- Additional meta (date, status, links, etc.) — JS injects key-value rows -->
         <div class="project-detail__meta-block" id="project-meta-block">
