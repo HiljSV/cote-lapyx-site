@@ -250,12 +250,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       const sourcesEl = document.getElementById("post-sources");
       const sourcesSection = document.getElementById("post-sources-section");
       if (sourcesEl) {
-        // Escape URL in BOTH href attribute and visible link text — sources are user/AI-provided
+        // Escape URL in BOTH href attribute and visible link text — sources are user/AI-provided.
+        // Scheme guard: only http(s) URLs become clickable links (blocks javascript:/data: XSS
+        // via AI-generated source strings); anything else renders as escaped plain text.
         sourcesEl.innerHTML = post.sources
-          .map(
-            (url) =>
-              `<li class="post-sources__item"><a class="post-sources__link" href="${escHtml(url)}" target="_blank" rel="noopener noreferrer">${escHtml(url)}</a></li>`,
-          )
+          .map((url) => {
+            const safe = escHtml(url);
+            const isHttp = /^https?:\/\//i.test(String(url).trim());
+            return isHttp
+              ? `<li class="post-sources__item"><a class="post-sources__link" href="${safe}" target="_blank" rel="noopener noreferrer">${safe}</a></li>`
+              : `<li class="post-sources__item"><span class="post-sources__link">${safe}</span></li>`;
+          })
           .join("");
       }
       // Reveal section — only after list is populated
