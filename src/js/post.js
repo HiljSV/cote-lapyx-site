@@ -198,11 +198,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     // Cover image — unhide wrapper and inject inner container + img when image is present.
-    // .post-cover__inner constrains the image to the article column width (not full-bleed).
+    // .post-cover__inner aligns the image to the article TEXT column (max-width: 800px),
+    // matching .post-article__body exactly so cover and text edges are flush.
     if (post.coverImage) {
       const coverWrap = document.getElementById("post-cover-wrap");
       if (coverWrap) {
-        // Inject inner container wrapper so the image aligns with the article text column
+        // Inject inner wrapper: image is constrained to 800px (article text column width)
         coverWrap.innerHTML = `<div class="post-cover__inner"><img class="post-cover__img" src="${escHtml(post.coverImage)}" alt="${escHtml(post.title)}" /></div>`;
         coverWrap.removeAttribute("hidden");
       }
