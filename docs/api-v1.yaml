@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Cote Lapyx API
-  version: 1.10.0
+  version: 1.11.0
   description: |
     REST API for cote-lapyx.com — a team website for Валерія, Сергій, Андрій.
 
@@ -777,6 +777,22 @@ components:
             True when the authenticated requester has liked this post.
             False for anonymous users and for unauthenticated requests.
           example: false
+        # sources mirrors the content field: null in list responses, populated in single-post detail.
+        sources:
+          type: array
+          nullable: true
+          description: |
+            Ordered list of source URLs or references rendered as the "Джерела" block on the
+            post page. Order is significant — items appear in the order stored.
+            **Null in list responses** (mirrors `content`). Populated only for single-post detail.
+            Empty array means the post has no sources.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 500
+          example:
+            - "https://spring.io/blog/2024/01/01/example"
+            - "https://docs.oracle.com/en/java/"
 
     BlogPostCreateRequest:
       type: object
@@ -812,6 +828,25 @@ components:
           items:
             type: integer
             format: int64
+        # Optional ordered list of sources — @Size(max=20) on list, @NotBlank @Size(max=500) per element.
+        sources:
+          type: array
+          nullable: true
+          maxItems: 20
+          description: |
+            Ordered list of source URLs or references for the "Джерела" block.
+            Order is significant — items are rendered in the order they appear here.
+            Optional: omit or send `null` to create a post without sources.
+            Each element must be non-blank and at most 500 characters.
+            Constraints: `@Size(max=20)` on the list; `@NotBlank @Size(max=500)` per element.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 500
+            description: A source URL or reference string. Must not be blank.
+          example:
+            - "https://spring.io/blog/2024/01/01/example"
+            - "https://docs.oracle.com/en/java/"
 
     BlogPostUpdateRequest:
       type: object
@@ -842,6 +877,26 @@ components:
           items:
             type: integer
             format: int64
+        # Patch semantics: null → leave existing sources unchanged; [] → clear all sources.
+        # Per-element constraints: @NotBlank @Size(max=500); list constraint: @Size(max=20).
+        sources:
+          type: array
+          nullable: true
+          maxItems: 20
+          description: |
+            Patch-semantics: omit or send `null` to leave existing sources unchanged.
+            Send an empty array `[]` to clear all sources from the post.
+            Order is significant — the stored order matches the order supplied here.
+            Each element must be non-blank and at most 500 characters.
+            Constraints: `@Size(max=20)` on the list; `@NotBlank @Size(max=500)` per element.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 500
+            description: A source URL or reference string. Must not be blank.
+          example:
+            - "https://spring.io/blog/2024/01/01/example"
+            - "https://docs.oracle.com/en/java/"
 
     PagedBlogPostResponse:
       type: object
