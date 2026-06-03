@@ -140,25 +140,47 @@
 }
 
 // -----------------------------------------------------------------------------
-// Cover image
+// Cover image — constrained to article/container width (not full-bleed)
+// .post-cover        — outer section, carries no width beyond block flow
+// .post-cover__inner — mirrors page__container: max-width + gutters only
+// .post-cover__img   — fills the inner container at capped height
 // -----------------------------------------------------------------------------
 
 .post-cover {
-  width: 100%;
+  /* Outer wrapper: establishes background context, no explicit width needed */
   overflow: hidden;
   line-height: 0;
 
+  /* Inner container — mirrors .page__container constraints */
+  /* max-width + gutters ONLY; layout stays in __img, not here */
+  &__inner {
+    max-width: #{$containerWidth}px;
+    margin: 0 auto;
+    /* Adaptive side gutters matching the global container (15px min → 15px at $containerWidth) */
+    padding-left: 15px;
+    padding-right: 15px;
+    overflow: hidden;
+    border-radius: 12px;
+    /* Restore normal line-height inside the wrapper */
+    line-height: normal;
+  }
+
+  /* Cover image: fills the inner container width; aspect-ratio-based heights */
   &__img {
     width: 100%;
     height: 420px;
     object-fit: cover;
     object-position: center;
     display: block;
+    /* Rounded corners match the inner container */
+    border-radius: 12px;
 
+    /* Tablet: reduce height */
     @media (max-width: toEm($tablet)) {
       height: 280px;
     }
 
+    /* Mobile: reduce height further */
     @media (max-width: toEm($mobile)) {
       height: 200px;
     }
