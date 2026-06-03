@@ -151,14 +151,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       linksEl.innerHTML = githubBtn + demoBtn;
     }
 
-    // Cover image — unhide wrapper when image is present
+    // ===== Fix B: cover image injection — mirror post page structure =====
+    // BEFORE: bare <img> injected directly into #project-cover-wrap (.post-cover)
+    //         → no .post-cover__inner → no 800px cap → image bleeds full viewport
+    // AFTER:  .post-cover__inner wraps the img → max-width:800px, margin:0 auto,
+    //         border-radius:12px (from post.scss .post-cover__inner)
+    //         → cover matches article column width at every breakpoint
     if (project.coverImage) {
       const coverWrap = document.getElementById("project-cover-wrap");
       if (coverWrap) {
-        coverWrap.innerHTML = `<img class="post-cover__img" src="${escHtml(project.coverImage)}" alt="${escHtml(project.title)}" />`;
+        coverWrap.innerHTML = `<div class="post-cover__inner"><img class="post-cover__img" src="${escHtml(project.coverImage)}" alt="${escHtml(project.title)}" /></div>`;
         coverWrap.removeAttribute("hidden");
       }
     }
+    // ===== /Fix B =====
 
     // Content (description / full content)
     const contentEl = document.getElementById("project-content");
@@ -175,23 +181,24 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     }
 
-    // Technologies sidebar — badge list with cycling neon colors
-    const techEl = document.getElementById("project-tech");
+    // ===== Fix A.4: tech tags injection — retarget to the flex-wrap row =====
+    // BEFORE: badges injected into #project-tech (.project-detail__tech, flex-direction:column)
+    //         → children stretch full sidebar width; h2 was reconstructed each render
+    // AFTER:  badges injected into #project-tech-tags (.project-detail__tech-tags,
+    //         flex-wrap:wrap, gap:8px) → chips are compact and wrap naturally.
+    //         h2 title is now static HTML with data-i18n — no JS reconstruction needed.
+    const techTagsEl = document.getElementById("project-tech-tags");
     const TECH_COLORS = ["cyan", "magenta", "green"];
-    if (techEl && project.technologies?.length > 0) {
-      const tagsHtml = project.technologies
+    if (techTagsEl && project.technologies?.length > 0) {
+      // Inject only the badge spans — title is handled by data-i18n in HTML
+      techTagsEl.innerHTML = project.technologies
         .map(
           (t, i) =>
             `<span class="neon-badge neon-badge--${TECH_COLORS[i % 3]}">${escHtml(t)}</span>`,
         )
         .join("");
-      // Preserve existing h2 title element if present, fall back to translated string
-      const titleEl2 = techEl.querySelector(".project-detail__tech-title");
-      techEl.innerHTML =
-        (titleEl2?.outerHTML ||
-          `<h2 class="project-detail__tech-title">${escHtml(translate("projects.tech_title"))}</h2>`) +
-        tagsHtml;
     }
+    // ===== /Fix A.4 =====
 
     // Meta sidebar (date, author link) — translated labels
     const metaEl = document.getElementById("project-meta-block");
