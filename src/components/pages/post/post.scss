@@ -388,6 +388,69 @@
 }
 
 // -----------------------------------------------------------------------------
+// Sources section — ordered list of reference URLs below the article
+// -----------------------------------------------------------------------------
+
+/* Sources: section vertical rhythm — mirrors post-tags-section spacing */
+.post-sources-section {
+  padding-top: 32px;
+  padding-bottom: 40px;
+}
+
+/* Sources: section heading — neon-cyan, matches post-comments__title style */
+.post-sources__title {
+  font-family: $fontHeading;
+  font-size: clamp(18px, 2.5vw, 24px);
+  font-weight: 700;
+  color: $neon-cyan;
+  margin-bottom: 20px;
+  text-shadow:
+    0 0 8px $neon-cyan,
+    0 0 16px rgba($neon-cyan, 0.3);
+}
+
+/* Sources: list — plain vertical stack, no bullets */
+.post-sources {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  /* Sources: each list item — full-width row */
+  &__item {
+    display: block;
+  }
+
+  /* Sources: link — neon-cyan, wraps long URLs cleanly */
+  &__link {
+    display: inline-block;
+    /* Break anywhere so URLs with no spaces do not overflow at 320px */
+    overflow-wrap: anywhere;
+    word-break: break-all;
+    font-size: 14px;
+    line-height: 1.6;
+    color: $neon-cyan;
+    text-decoration: underline;
+    text-decoration-color: rgba($neon-cyan, 0.35);
+    transition: text-decoration-color 0.2s ease;
+
+    /* Sources: link hover — stronger underline accent */
+    &:hover {
+      text-decoration-color: $neon-cyan;
+    }
+
+    /* Sources: focus ring — matches site-wide focus style */
+    &:focus-visible {
+      outline: 2px solid $neon-cyan;
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
 // Not-found state
 // -----------------------------------------------------------------------------
 

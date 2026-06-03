@@ -377,6 +377,7 @@
   "post.comment.save": "Зберегти",
   "post.comment.cancel": "Скасувати",
   "post.comment.liked_hint": "Лайк",
+  "post.sources_title": "Джерела",
   "error.network": "Помилка з'єднання.",
   "error.generic": "Помилка. Спробуйте ще раз.",
   "project.status.published": "Опубліковано",

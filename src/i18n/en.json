@@ -377,6 +377,7 @@
   "post.comment.save": "Save",
   "post.comment.cancel": "Cancel",
   "post.comment.liked_hint": "Like",
+  "post.sources_title": "Sources",
   "error.network": "Connection error.",
   "error.generic": "Something went wrong. Please try again.",
   "project.status.published": "Published",
