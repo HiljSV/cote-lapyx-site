@@ -377,6 +377,7 @@
   "post.comment.save": "Enregistrer",
   "post.comment.cancel": "Annuler",
   "post.comment.liked_hint": "J'aime",
+  "post.sources_title": "Sources",
   "error.network": "Erreur de connexion.",
   "error.generic": "Une erreur est survenue. Veuillez réessayer.",
   "project.status.published": "Publié",

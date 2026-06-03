@@ -377,6 +377,7 @@
   "post.comment.save": "Speichern",
   "post.comment.cancel": "Abbrechen",
   "post.comment.liked_hint": "Gefällt mir",
+  "post.sources_title": "Quellen",
   "error.network": "Verbindungsfehler.",
   "error.generic": "Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
   "project.status.published": "Veröffentlicht",

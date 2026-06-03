@@ -53,10 +53,12 @@ function authorDisplayName(author) {
     : author.name || "—";
 }
 
-// Show the "post not found" state — hides article, tags, actions, comments; reveals fallback
+// Show the "post not found" state — hides article, tags, sources, actions, comments; reveals fallback
 function showNotFound() {
   const article = document.querySelector(".post-article");
   const tagsSection = document.getElementById("post-tags-section");
+  // Sources section — hide when post is not found (mirrors tags section behaviour)
+  const sourcesSection = document.getElementById("post-sources-section");
   const notFound = document.getElementById("post-not-found");
   const titleEl = document.getElementById("post-title");
   // Hide post-actions section — irrelevant when post is not found
@@ -68,6 +70,7 @@ function showNotFound() {
   if (titleEl) titleEl.textContent = translate("post.not_found");
   if (article) article.setAttribute("hidden", "");
   if (tagsSection) tagsSection.setAttribute("hidden", "");
+  if (sourcesSection) sourcesSection.setAttribute("hidden", "");
   if (actionsSection) actionsSection.setAttribute("hidden", "");
   if (commentsSection) commentsSection.setAttribute("hidden", "");
   if (notFound) notFound.removeAttribute("hidden");
@@ -239,6 +242,29 @@ document.addEventListener("DOMContentLoaded", async () => {
           .join("");
       }
       if (tagsSection) tagsSection.removeAttribute("hidden");
+    }
+
+    // Sources section — show only when sources array is non-empty
+    // sources is an ordered array of URL strings returned by the post DETAIL endpoint
+    if (post.sources?.length > 0) {
+      const sourcesEl = document.getElementById("post-sources");
+      const sourcesSection = document.getElementById("post-sources-section");
+      if (sourcesEl) {
+        // Escape URL in BOTH href attribute and visible link text — sources are user/AI-provided.
+        // Scheme guard: only http(s) URLs become clickable links (blocks javascript:/data: XSS
+        // via AI-generated source strings); anything else renders as escaped plain text.
+        sourcesEl.innerHTML = post.sources
+          .map((url) => {
+            const safe = escHtml(url);
+            const isHttp = /^https?:\/\//i.test(String(url).trim());
+            return isHttp
+              ? `<li class="post-sources__item"><a class="post-sources__link" href="${safe}" target="_blank" rel="noopener noreferrer">${safe}</a></li>`
+              : `<li class="post-sources__item"><span class="post-sources__link">${safe}</span></li>`;
+          })
+          .join("");
+      }
+      // Reveal section — only after list is populated
+      if (sourcesSection) sourcesSection.removeAttribute("hidden");
     }
   } catch {
     showNotFound();

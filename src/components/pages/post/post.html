@@ -211,6 +211,25 @@
     </div>
   </section>
 
+  <!-- Sources section — hidden until sources are available; JS populates and reveals -->
+  <section
+    class="section section--dark post-sources-section"
+    id="post-sources-section"
+    hidden
+    aria-label="Джерела"
+  >
+    <div class="page__container">
+      <!-- Sources: heading — translated via data-i18n, mirrors post-comments__title pattern -->
+      <h2 class="post-sources__title" data-i18n="post.sources_title">
+        Джерела
+      </h2>
+      <!-- Sources: list — JS injects <li><a> items per source URL -->
+      <ul class="post-sources" id="post-sources" role="list">
+        <!-- JS injects source link items -->
+      </ul>
+    </div>
+  </section>
+
   <!-- Not-found state — shown by JS when post is missing -->
   <section
     class="section section--dark post-not-found"
