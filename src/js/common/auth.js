@@ -54,7 +54,7 @@ function showSessionExpiredToast() {
  * - credentials:'include' is always set so the browser sends/receives the
  *   HttpOnly cl_refresh cookie to api.cote-lapyx.com (required for refresh
  *   and logout; harmless for other endpoints).
- * - On 401: tries POST /auth/refresh — the cl_refresh HttpOnly cookie is sent
+ * - On 401 OR 403: tries POST /auth/refresh — the cl_refresh HttpOnly cookie is sent
  *   automatically by the browser, no JS read required.
  *   - If refresh succeeds: stores new cl_access and retries original request
  *   - If refresh fails: shows session-expiry toast, then redirects to /login.html
@@ -73,11 +73,15 @@ export async function fetchWithAuth(url, options = {}) {
       headers: { ...options.headers, Authorization: `Bearer ${t}` },
     });
 
-  // Initial request — may return 401 if access token is expired
+  // Initial request — may return 401 OR 403 when the access token is expired.
+  // NOTE: role-protected URL matchers (e.g. /api/v1/admin/**) reject an
+  // expired/invalid token with 403 (AccessDenied), not 401 — so we must treat
+  // both as "try a silent refresh". (A genuine 403 for a valid-but-unauthorized
+  // user simply refreshes once and still returns 403 on retry — harmless.)
   const res = await doFetch(token);
-  if (res.status !== 401) return res;
+  if (res.status !== 401 && res.status !== 403) return res;
 
-  // Access token expired — attempt silent refresh via HttpOnly cookie.
+  // Access token expired/rejected — attempt silent refresh via HttpOnly cookie.
   // The cl_refresh cookie is sent automatically by the browser (not read by JS).
   // No guard on localStorage here — always attempt the refresh.
   const rRes = await fetch(`${AUTH_API}/refresh`, {
