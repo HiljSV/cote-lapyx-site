@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Cote Lapyx API
-  version: 1.12.0
+  version: 1.13.0
   description: |
     REST API for cote-lapyx.com — a team website for Валерія, Сергій, Андрій.
 
@@ -970,6 +970,17 @@ components:
         updatedAt:
           type: string
           format: date-time
+        # FEAT-COLLABORATORS (v1.13.0): secondary contributors on shared projects.
+        # Empty array when no collaborators exist; never null.
+        collaborators:
+          type: array
+          description: |
+            Team members who collaborated on the project (secondary contributors, not the sole
+            author). Used by the member profile page to badge shared projects with each
+            contributing member's avatar and link. Empty array when none exist; never null.
+          items:
+            $ref: "#/components/schemas/CollaboratorRef"
+          example: []
 
     ProjectCreateRequest:
       type: object
@@ -1047,6 +1058,39 @@ components:
           nullable: true
         status:
           $ref: "#/components/schemas/ProjectStatus"
+
+    # Minimal public reference to a team member embedded in ProjectDTO.collaborators.
+    # Sourced from CollaboratorRef.java — contains exactly the fields that the member
+    # profile page needs to render the "спільний проект" badge and navigation link.
+    CollaboratorRef:
+      type: object
+      required: [id, userId, slug, name]
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: TeamMember PK — used for member-page navigation links.
+          example: 2
+        userId:
+          type: integer
+          format: int64
+          description: Linked User PK — matches the `authorId` / `memberId` filter on GET /projects.
+          example: 5
+        slug:
+          type: string
+          pattern: "^[a-z0-9-]+$"
+          description: TeamMember URL slug — used for /member.html?slug=X routing.
+          example: serhii
+        name:
+          type: string
+          description: User display name (from the linked user record).
+          example: Сергій
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+          description: User avatar URL. Null when the user has not set an avatar.
+          example: https://cdn.cote-lapyx.com/avatars/serhii.png
 
     PagedProjectResponse:
       type: object
@@ -2710,7 +2754,18 @@ paths:
         - name: authorId
           in: query
           required: false
-          description: Filter by team member (author) ID.
+          description: Filter by team member (author) User PK.
+          schema:
+            type: integer
+            format: int64
+        - name: memberId
+          in: query
+          required: false
+          description: |
+            Filter to projects where the user (User PK) is either the AUTHOR or a
+            COLLABORATOR. Takes priority over `authorId` when both parameters are
+            supplied. Used by the member profile page to display all projects a
+            team member was involved in, regardless of primary authorship.
           schema:
             type: integer
             format: int64
