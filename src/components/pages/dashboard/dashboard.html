@@ -1662,12 +1662,12 @@
             aria-label="Редактор вмісту публікації"
           ></div>
           <!-- Hidden sync field — value kept in sync with editor.getMarkdown() before submit -->
+          <!-- required removed: form is novalidate; content validation is done via JS in handlePostSubmit -->
           <textarea
             class="dash-modal__input dash-modal__textarea"
             id="post-content"
             name="content"
             rows="8"
-            required
             hidden
             aria-hidden="true"
           ></textarea>

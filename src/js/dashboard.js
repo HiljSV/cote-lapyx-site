@@ -6,9 +6,9 @@ import { fetchWithAuth } from "@js/common/auth.js";
 import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.css";
 
-// Toast UI WYSIWYG editor — outputs Markdown; bundled (no CDN)
-import Editor from "@toast-ui/editor";
-import "@toast-ui/editor/dist/toastui-editor.css";
+// Toast UI WYSIWYG editor — lazy-loaded via dynamic import() inside initPostEditor().
+// NOT imported statically here — this keeps the ~643KB editor out of app.min.js
+// so public pages (index, blog, post, team, …) do not pay for it.
 
 // i18n — language detection, translation apply, switcher wiring, runtime lookup
 import {
@@ -845,17 +845,31 @@ document.addEventListener("DOMContentLoaded", async () => {
    * This prevents duplicate editor instances when the post modal is opened
    * multiple times without a full page reload.
    *
+   * The editor and its CSS are loaded via dynamic import() on the FIRST call
+   * so that Rollup code-splits them into a separate async chunk (vendor-toastui).
+   * Public pages never load that chunk — they are unaffected by the editor weight.
+   *
    * The editor mounts in WYSIWYG mode with a Markdown tab available.
    * On every change the hidden #post-content textarea is kept in sync so that
    * the native form.reset() call in openPostModal still clears it, and the
    * existing validation logic (content.trim()) keeps working unchanged.
+   *
+   * @returns {Promise<void>} resolves when the editor is mounted and ready.
    */
-  function initPostEditor() {
+  async function initPostEditor() {
     // Guard: only init once per page lifecycle
     if (postEditor) return;
 
     const mountEl = document.getElementById("post-content-editor");
     if (!mountEl) return;
+
+    // Lazy-load Toast UI Editor + its CSS on first modal open.
+    // Dynamic import() tells Rollup to code-split this into a separate chunk
+    // that is only fetched when the dashboard user actually opens the post modal.
+    const [{ default: Editor }] = await Promise.all([
+      import("@toast-ui/editor"),
+      import("@toast-ui/editor/dist/toastui-editor.css"),
+    ]);
 
     // Create the Toast UI Editor instance
     postEditor = new Editor({
@@ -893,13 +907,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Modal helpers
   const postModal = document.getElementById("post-modal");
 
-  function openPostModal(slug) {
+  /**
+   * openPostModal — show the post create/edit modal and prime the editor.
+   *
+   * Async because initPostEditor() is async (lazy-loads Toast UI on first call).
+   * The editor is awaited BEFORE form.reset() and setMarkdown() so the instance
+   * is guaranteed to exist when we try to clear or populate it.
+   *
+   * @param {string|null} slug — post slug to edit, or null/undefined for new post.
+   */
+  async function openPostModal(slug) {
     const form = document.getElementById("post-form");
     const titleEl = document.getElementById("post-modal-title");
     const feedback = document.getElementById("post-form-feedback");
 
-    // Initialize the WYSIWYG editor on first open (no-op on subsequent opens)
-    initPostEditor();
+    // Initialize the WYSIWYG editor on first open (no-op on subsequent opens).
+    // Must await so the editor instance (postEditor) exists before setMarkdown() calls below.
+    await initPostEditor();
 
     form?.reset();
     // After form.reset() the hidden textarea is cleared — clear editor too
