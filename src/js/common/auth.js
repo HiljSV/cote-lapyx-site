@@ -45,27 +45,99 @@ function showSessionExpiredToast() {
 }
 
 // =============================================================================
-// fetchWithAuth — attaches JWT, handles silent token refresh on 401
+// Token expiry + silent refresh helpers
 // =============================================================================
 
 /**
- * Fetch with automatic JWT refresh.
- * - Attaches Authorization header from localStorage "cl_access"
- * - credentials:'include' is always set so the browser sends/receives the
- *   HttpOnly cl_refresh cookie to api.cote-lapyx.com (required for refresh
- *   and logout; harmless for other endpoints).
- * - On 401 OR 403: tries POST /auth/refresh — the cl_refresh HttpOnly cookie is sent
- *   automatically by the browser, no JS read required.
- *   - If refresh succeeds: stores new cl_access and retries original request
- *   - If refresh fails: shows session-expiry toast, then redirects to /login.html
+ * Returns true if the JWT is missing, unparseable, or expired (within a small
+ * clock-skew buffer). Client-side READ of the `exp` claim only — NOT signature
+ * verification (the server still validates). A malformed token is treated as
+ * expired so we proactively refresh rather than send a doomed request.
+ *
+ * @param {string|null} token - the raw JWT access token
+ * @param {number} [skewSeconds=15] - refresh this many seconds BEFORE real expiry
+ */
+export function isTokenExpired(token, skewSeconds = 15) {
+  if (!token) return true;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (!payload.exp) return false; // no exp claim → treat as non-expiring
+    return payload.exp * 1000 <= Date.now() + skewSeconds * 1000;
+  } catch {
+    return true; // malformed → force a refresh
+  }
+}
+
+// In-flight refresh promise — de-dupes concurrent refreshes so a burst of
+// parallel requests triggers ONE /auth/refresh, not N (which would rotate the
+// HttpOnly cl_refresh cookie N times and could race).
+let _refreshInFlight = null;
+
+/**
+ * Silently refresh the access token via POST /auth/refresh. The HttpOnly
+ * cl_refresh cookie travels automatically (credentials:'include'); the server
+ * rotates it and returns a new accessToken in the JSON body, which we persist.
+ * Concurrent callers share a single in-flight request.
+ *
+ * @returns {Promise<string|null>} the new access token, or null on failure
+ */
+export async function refreshAccessToken() {
+  if (_refreshInFlight) return _refreshInFlight;
+  _refreshInFlight = (async () => {
+    try {
+      const rRes = await fetch(`${AUTH_API}/refresh`, {
+        method: "POST",
+        credentials: "include", // sends the HttpOnly cl_refresh cookie
+      });
+      if (!rRes.ok) return null;
+      const { accessToken } = await rRes.json();
+      if (accessToken) localStorage.setItem("cl_access", accessToken);
+      return accessToken || null;
+    } catch {
+      return null; // network error — caller decides what to do
+    } finally {
+      _refreshInFlight = null;
+    }
+  })();
+  return _refreshInFlight;
+}
+
+/**
+ * Guarantees a usable session for protected-page guards. If the access token is
+ * present and not expired → ok. Otherwise silently refresh via the HttpOnly
+ * cookie BEFORE the caller decides to redirect to /login. Lets a session
+ * survive an expired/cleared access token for as long as the 30-day refresh
+ * cookie is valid — i.e. the user is not kicked out mid-session.
+ *
+ * @returns {Promise<boolean>} true if a session exists (token valid or refreshed)
+ */
+export async function ensureSession() {
+  const token = localStorage.getItem("cl_access");
+  if (token && !isTokenExpired(token)) return true;
+  return Boolean(await refreshAccessToken());
+}
+
+// =============================================================================
+// fetchWithAuth — attaches JWT, auto-refreshes the token before it expires
+// =============================================================================
+
+/**
+ * Fetch with automatic JWT refresh — the token is renewed transparently so the
+ * user is never kicked out while their 30-day refresh cookie is valid.
+ * - Attaches Authorization from localStorage "cl_access".
+ * - credentials:'include' always set so the HttpOnly cl_refresh cookie travels.
+ * - PROACTIVE: if the access token is missing or (about to be) expired, refresh
+ *   BEFORE sending the request — no failed call, no UI flash.
+ * - REACTIVE fallback: if the request still returns 401 OR 403 (token revoked,
+ *   clock skew, or a role-protected URL that answers 403 for a bad token),
+ *   refresh once and retry. A genuine 403 (valid token, missing role) refreshes
+ *   once and still returns 403 — harmless, no loop.
+ * - If refresh fails (cookie absent/expired/revoked) → session-expiry toast +
+ *   redirect to /login.html.
  */
 export async function fetchWithAuth(url, options = {}) {
-  // Read current access token from localStorage
-  const token = localStorage.getItem("cl_access");
+  let token = localStorage.getItem("cl_access");
 
-  // Inner helper — reuses options spread, only token changes on retry.
-  // credentials:'include' ensures the cl_refresh cookie travels with all
-  // cross-subdomain requests to api.cote-lapyx.com.
   const doFetch = (t) =>
     fetch(url, {
       ...options,
@@ -73,37 +145,24 @@ export async function fetchWithAuth(url, options = {}) {
       headers: { ...options.headers, Authorization: `Bearer ${t}` },
     });
 
-  // Initial request — may return 401 OR 403 when the access token is expired.
-  // NOTE: role-protected URL matchers (e.g. /api/v1/admin/**) reject an
-  // expired/invalid token with 403 (AccessDenied), not 401 — so we must treat
-  // both as "try a silent refresh". (A genuine 403 for a valid-but-unauthorized
-  // user simply refreshes once and still returns 403 on retry — harmless.)
+  // PROACTIVE: refresh up-front when the token is missing/expired.
+  if (isTokenExpired(token)) {
+    const fresh = await refreshAccessToken();
+    if (fresh) token = fresh;
+    // If refresh failed here, still try the request — the reactive branch below
+    // will sign out on the resulting 401/403 (keeps a single sign-out path).
+  }
+
   const res = await doFetch(token);
   if (res.status !== 401 && res.status !== 403) return res;
 
-  // Access token expired/rejected — attempt silent refresh via HttpOnly cookie.
-  // The cl_refresh cookie is sent automatically by the browser (not read by JS).
-  // No guard on localStorage here — always attempt the refresh.
-  const rRes = await fetch(`${AUTH_API}/refresh`, {
-    method: "POST",
-    credentials: "include",
-    // No body: the server reads cl_refresh from the HttpOnly cookie
-  });
-
-  if (!rRes.ok) {
-    // Refresh failed (cookie absent, expired, or revoked) — session is over
-    signOut(true);
+  // REACTIVE fallback — refresh once more and retry the original request.
+  const fresh = await refreshAccessToken();
+  if (!fresh) {
+    signOut(true); // refresh genuinely failed — session is over
     return res;
   }
-
-  // Refresh succeeded — server returns only accessToken in JSON body.
-  // cl_refresh is rotated server-side and written back as a new HttpOnly cookie.
-  const { accessToken } = await rRes.json();
-  // Persist the new access token; cl_refresh is managed by the browser/server
-  localStorage.setItem("cl_access", accessToken);
-
-  // Retry the original request with the fresh access token
-  return doFetch(accessToken);
+  return doFetch(fresh);
 }
 
 // =============================================================================

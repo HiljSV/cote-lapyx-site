@@ -532,8 +532,15 @@ describe("auth.js", () => {
   });
 
   describe("fetchWithAuth()", () => {
+    // A syntactically-valid, NON-expired JWT so isTokenExpired() returns false
+    // and the PROACTIVE refresh branch is skipped — these tests exercise the
+    // REACTIVE (401/403 → refresh → retry) path on a token the SERVER rejects.
+    const VALID_JWT = `x.${btoa(
+      JSON.stringify({ exp: Math.floor(Date.now() / 1000) + 3600 }),
+    )}.y`;
+
     it("attaches Bearer token from localStorage", async () => {
-      localStorage.setItem("cl_access", "TOKEN1");
+      localStorage.setItem("cl_access", VALID_JWT);
       globalThis.fetch.mockResolvedValueOnce(
         new Response("{}", { status: 200 }),
       );
@@ -543,11 +550,11 @@ describe("auth.js", () => {
       expect(globalThis.fetch).toHaveBeenCalledTimes(1);
       const [url, options] = globalThis.fetch.mock.calls[0];
       expect(url).toBe("https://api.example.com/data");
-      expect(options.headers.Authorization).toBe("Bearer TOKEN1");
+      expect(options.headers.Authorization).toBe(`Bearer ${VALID_JWT}`);
     });
 
     it("returns the response unchanged for non-401 status", async () => {
-      localStorage.setItem("cl_access", "TOKEN1");
+      localStorage.setItem("cl_access", VALID_JWT);
       const ok = new Response('{"ok":true}', { status: 200 });
       globalThis.fetch.mockResolvedValueOnce(ok);
       const res = await auth.fetchWithAuth("https://api.example.com/data");
@@ -559,8 +566,9 @@ describe("auth.js", () => {
     // fetchWithAuth ALWAYS attempts the refresh fetch on 401; the browser sends
     // the cl_refresh cookie automatically via credentials:'include'.
     it("on 401: always attempts the refresh fetch (no localStorage gate)", async () => {
-      // No cl_refresh in localStorage — that is now the normal production state
-      localStorage.setItem("cl_access", "EXPIRED");
+      // No cl_refresh in localStorage — that is now the normal production state.
+      // Valid (non-expired) JWT so the server-side 401 drives the REACTIVE path.
+      localStorage.setItem("cl_access", VALID_JWT);
 
       // signOut(true) uses a 2-second setTimeout — use fake timers so we can
       // advance past the delay synchronously and assert the redirect.
@@ -595,7 +603,7 @@ describe("auth.js", () => {
     });
 
     it("on 401 + successful refresh: updates cl_access, NEVER writes cl_refresh, retries", async () => {
-      localStorage.setItem("cl_access", "OLD");
+      localStorage.setItem("cl_access", VALID_JWT);
       // cl_refresh is NOT in localStorage (it is an HttpOnly cookie in production)
 
       globalThis.fetch
@@ -631,7 +639,7 @@ describe("auth.js", () => {
     });
 
     it("on 401 + failed refresh: signs out and returns original 401", async () => {
-      localStorage.setItem("cl_access", "OLD");
+      localStorage.setItem("cl_access", VALID_JWT);
       // No cl_refresh in localStorage — normal production state
 
       // signOut(true) uses a 2-second setTimeout — advance past it with fake timers
@@ -656,7 +664,7 @@ describe("auth.js", () => {
     });
 
     it("merges custom headers with Authorization and always sets credentials:include", async () => {
-      localStorage.setItem("cl_access", "T");
+      localStorage.setItem("cl_access", VALID_JWT);
       globalThis.fetch.mockResolvedValueOnce(new Response("", { status: 200 }));
 
       await auth.fetchWithAuth("https://api.example.com/data", {
@@ -669,7 +677,7 @@ describe("auth.js", () => {
       expect(options.method).toBe("POST");
       expect(options.headers["Content-Type"]).toBe("application/json");
       expect(options.headers["X-Custom"]).toBe("1");
-      expect(options.headers.Authorization).toBe("Bearer T");
+      expect(options.headers.Authorization).toBe(`Bearer ${VALID_JWT}`);
       expect(options.body).toBe('{"a":1}');
       // SEC-1: credentials must always be 'include' so cl_refresh cookie travels
       expect(options.credentials).toBe("include");

@@ -2,7 +2,7 @@
 // Dashboard — Owner cabinet JS
 // =============================================================================
 
-import { fetchWithAuth } from "@js/common/auth.js";
+import { fetchWithAuth, ensureSession } from "@js/common/auth.js";
 import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.css";
 
@@ -33,8 +33,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (!sidebar) return; // not on dashboard page
 
-  // Token guard — runs only on dashboard page (after sidebar check)
-  if (!localStorage.getItem("cl_access")) {
+  // Token guard — runs only on dashboard page (after sidebar check).
+  // ensureSession() silently refreshes an expired/missing access token via the
+  // HttpOnly refresh cookie BEFORE giving up, so an idle user is not kicked out
+  // while their refresh cookie is still valid. Only redirect if there is truly
+  // no session.
+  if (!(await ensureSession())) {
     window.location.replace("/login.html");
     return;
   }

@@ -3,7 +3,7 @@
 // SPA-style section switching, mobile sidebar drawer, comment filter tabs
 // =============================================================================
 
-import { fetchWithAuth } from "@js/common/auth.js";
+import { fetchWithAuth, ensureSession } from "@js/common/auth.js";
 import { invalidateCompanyLinksCache } from "@js/socialLinks.js";
 
 // i18n — runtime translation lookup for dynamically rendered strings
@@ -14,7 +14,7 @@ import {
   translate,
 } from "@js/i18n.js";
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   // ---------------------------------------------------------------------------
   // Element refs
   // ---------------------------------------------------------------------------
@@ -24,8 +24,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Guard: exit early if not on the admin page
   if (!sidebar) return;
 
-  // Token guard — redirect to login if not authenticated
-  if (!localStorage.getItem("cl_access")) {
+  // Token guard — ensureSession() silently refreshes an expired/missing access
+  // token via the HttpOnly refresh cookie before redirecting, so an idle admin
+  // is not kicked out while their refresh cookie is still valid.
+  if (!(await ensureSession())) {
     window.location.replace("/login.html");
     return;
   }
