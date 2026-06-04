@@ -652,11 +652,17 @@
   }
 }
 
-// admin all users: Name | Email | Role | Registered | Status | Actions
+// admin all users: Name | Email | Role | Registered | Actions
+// BUG #4 fix: was 6 columns (1fr 1fr 90px 110px 100px 185px) but JS renders
+// only 5 cells — the 6th phantom column pushed Actions into the 5th slot (100px),
+// clipping "РЕДАГУВАТИ". Role was 90px — too narrow for "SUBSCRIBER" badge
+// (≈108px with padding + uppercase letter-spacing), causing it to visually
+// overflow into the Registered date cell ("SUBSCRIBER17 трав. 2026 р.").
+// Fix: drop the phantom column, widen Role to 115px, Actions to 150px.
 .dash-list--admin-users {
   .dash-list__head,
   .dash-list__row {
-    grid-template-columns: 1fr 1fr 90px 110px 100px 185px;
+    grid-template-columns: 1fr 1fr 115px 120px 150px;
   }
 }
 
@@ -677,10 +683,15 @@
 }
 
 // admin comments: Author | Comment | Post | Date | Status | Actions
+// BUG #3 fix: Actions column was 185px — too narrow for two simultaneous
+// buttons ("ОЗНАЧИТИ ПЕРЕГЛЯНУТО" ≈190px wide + "ВИДАЛИТИ" ≈90px + 8px gap
+// = ≈288px needed). The .btn overflow:hidden clipped text within each button.
+// Fix: widen Actions to 250px so both buttons sit side by side on desktop;
+// dash-list__actions flex-wrap:wrap handles stacking on mobile (320px).
 .dash-list--admin-comments {
   .dash-list__head,
   .dash-list__row {
-    grid-template-columns: 90px 1fr 120px 90px 110px 185px;
+    grid-template-columns: 90px 1fr 120px 90px 110px 250px;
   }
 }
 
