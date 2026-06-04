@@ -362,6 +362,53 @@
   min-width: 0; /* allow text to shrink and truncate */
 }
 
+// -----------------------------------------------------------------------------
+// BUG #4 fix — Users table: Role badge contained inside its grid cell
+// The neon-badge was overflowing the 90px Role column into the adjacent date
+// cell, causing "SUBSCRIBER17 трав. 2026 р." to appear merged.
+// overflow:hidden clips the badge to its column; max-width:100% ensures the
+// badge cannot be wider than the column even after the column was widened.
+// -----------------------------------------------------------------------------
+
+/* Contain badge inside the Role column — prevents overflow into date cell */
+.dash-list--admin-users .dash-list__row > div:nth-child(3),
+.dash-list--admin-reg .dash-list__row > div:nth-child(3) {
+  overflow: hidden;
+
+  /* Ensure the neon-badge shrinks to fit rather than overflowing */
+  .neon-badge {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    vertical-align: middle;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// BUG #3 fix — Comments action buttons: ensure buttons size to their content
+// The .btn overflow:hidden + fixed Actions column (185px) was clipping long
+// Cyrillic labels like "ОЗНАЧИТИ ПЕРЕГЛЯНУТО".
+// The column was widened to 250px in dashboard.scss.
+// Additionally, buttons in .dash-list--admin-comments must never shrink below
+// their natural content width — flex-shrink:0 prevents compression.
+// -----------------------------------------------------------------------------
+
+/* Action buttons in comments table — prevent flex-shrink clipping */
+.dash-list--admin-comments {
+  .dash-list__actions {
+    /* Allow buttons to wrap to a second line on tablet/mobile */
+    flex-wrap: wrap;
+    align-items: flex-start;
+
+    /* Each button sizes to its own content — never shrinks */
+    .btn {
+      flex-shrink: 0;
+      width: auto;
+    }
+  }
+}
+
 /* Avatar circle — initials fallback */
 .dash-list__avatar {
   flex-shrink: 0;
