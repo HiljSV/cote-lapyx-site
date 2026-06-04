@@ -1511,3 +1511,213 @@
     }
   }
 }
+
+// =============================================================================
+// Toast UI WYSIWYG editor — cyberpunk theme overrides
+// The editor CSS is imported via JS (bundled, no CDN).
+// These rules override the editor's default white/light theme to match
+// the dark cyberpunk design system of cote-lapyx.com.
+// =============================================================================
+
+/* Editor mount wrapper — fills the field width */
+.dash-modal__editor {
+  /* Full width to match other modal inputs */
+  width: 100%;
+
+  /* Border matches other modal inputs (cyan glow on focus handled below) */
+  border: 1px solid $border-cyan;
+  border-radius: 4px;
+  overflow: hidden;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  /* Highlight the editor border when it contains focus */
+  &:focus-within {
+    border-color: $neon-cyan;
+    box-shadow: 0 0 6px rgba($neon-cyan, 0.35);
+  }
+
+  /* Tablet: slightly taller editor for comfortable writing */
+  @media (max-width: toEm($tablet)) {
+    .toastui-editor-defaultUI {
+      min-height: 240px;
+    }
+  }
+
+  /* Mobile (320px): compact editor — still usable */
+  @media (max-width: toEm($mobileSmall)) {
+    .toastui-editor-defaultUI {
+      min-height: 200px;
+    }
+  }
+}
+
+/* ===== Toast UI root shell ===== */
+.toastui-editor-defaultUI {
+  /* Dark background to match the dark cyberpunk theme */
+  background: rgba(0, 14, 26, 0.6) !important;
+  border: none !important; /* border handled by .dash-modal__editor wrapper */
+  font-family: $fontFamily !important;
+  color: $text-primary !important;
+}
+
+/* ===== Toolbar ===== */
+.toastui-editor-toolbar {
+  /* Slightly lighter surface to distinguish toolbar from content area */
+  background: rgba($bg-surface, 0.9) !important;
+  border-bottom: 1px solid $border-cyan !important;
+
+  /* Toolbar items — icon buttons */
+  .toastui-editor-toolbar-icons {
+    background: transparent !important;
+    border: 1px solid transparent !important;
+    color: $text-muted !important;
+    border-radius: 3px;
+    transition:
+      color 0.15s,
+      background 0.15s;
+
+    /* Active / hover state */
+    &:hover,
+    &.active {
+      background: rgba($neon-cyan, 0.12) !important;
+      border-color: rgba($neon-cyan, 0.3) !important;
+      color: $neon-cyan !important;
+    }
+  }
+
+  /* Divider between toolbar groups */
+  .toastui-editor-toolbar-divider {
+    background: $border-cyan !important;
+  }
+
+  /* Tab switcher (WYSIWYG / Markdown) — pill tabs */
+  .toastui-editor-mode-switch {
+    background: transparent !important;
+    border-top: 1px solid $border-cyan !important;
+
+    .tab-item {
+      background: rgba($bg-surface, 0.6) !important;
+      border: 1px solid $border-cyan !important;
+      color: $text-muted !important;
+      transition: all 0.15s;
+
+      /* Active tab */
+      &.active {
+        background: rgba($neon-cyan, 0.12) !important;
+        border-color: $neon-cyan !important;
+        color: $neon-cyan !important;
+      }
+    }
+  }
+}
+
+/* ===== Editor content area ===== */
+.toastui-editor-contents,
+.toastui-editor-md-container .CodeMirror {
+  /* Content background — slightly transparent dark */
+  background: rgba(0, 14, 26, 0.5) !important;
+  color: $text-primary !important;
+  font-family: $fontFamily !important;
+  font-size: 14px !important;
+  line-height: 1.7 !important;
+
+  /* Headings in content — cyan tint */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: $neon-cyan !important;
+  }
+
+  /* Links — magenta accent */
+  a {
+    color: rgba($neon-magenta, 0.9) !important;
+
+    &:hover {
+      color: $neon-magenta !important;
+    }
+  }
+
+  /* Inline code */
+  code {
+    background: rgba($neon-cyan, 0.08) !important;
+    color: $neon-cyan !important;
+    border: 1px solid rgba($neon-cyan, 0.2) !important;
+    border-radius: 3px !important;
+    font-family: monospace !important;
+    font-size: 12px !important;
+    padding: 1px 5px !important;
+  }
+
+  /* Code block */
+  pre {
+    background: rgba(0, 5, 10, 0.7) !important;
+    border: 1px solid $border-cyan !important;
+    border-radius: 4px !important;
+
+    code {
+      background: transparent !important;
+      border: none !important;
+      font-size: 13px !important;
+    }
+  }
+
+  /* Blockquote */
+  blockquote {
+    border-left: 3px solid $neon-cyan !important;
+    background: rgba($neon-cyan, 0.04) !important;
+    color: $text-muted !important;
+    padding-left: 12px !important;
+    margin-left: 0 !important;
+  }
+
+  /* Horizontal rule */
+  hr {
+    border-color: $border-cyan !important;
+  }
+}
+
+/* ===== CodeMirror (Markdown tab) ===== */
+.toastui-editor-md-container .CodeMirror {
+  /* CodeMirror caret and selection colors */
+  .CodeMirror-cursor {
+    border-left-color: $neon-cyan !important;
+  }
+
+  .CodeMirror-selected,
+  .CodeMirror-line::selection,
+  .CodeMirror-line > span::selection,
+  .CodeMirror-line > span > span::selection {
+    background: rgba($neon-cyan, 0.15) !important;
+  }
+}
+
+/* ===== Placeholder text ===== */
+.toastui-editor-contents p.placeholder,
+.ProseMirror p.is-editor-empty:first-child::before {
+  color: $text-muted !important;
+}
+
+/* ===== Scrollbar (thin, cyan-tinted) ===== */
+.toastui-editor-contents::-webkit-scrollbar,
+.toastui-editor-md-container .CodeMirror-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.toastui-editor-contents::-webkit-scrollbar-thumb,
+.toastui-editor-md-container .CodeMirror-scroll::-webkit-scrollbar-thumb {
+  background: rgba($neon-cyan, 0.2);
+  border-radius: 2px;
+}
+
+/* ===== Toolbar wrap (mobile — allow wrapping) ===== */
+@media (max-width: toEm($mobileSmall)) {
+  /* Toolbar: allow icons to wrap on 320px instead of overflowing */
+  .toastui-editor-toolbar-group {
+    flex-wrap: wrap !important;
+  }
+}
