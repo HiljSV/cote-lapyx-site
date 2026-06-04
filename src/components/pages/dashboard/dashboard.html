@@ -1647,18 +1647,29 @@
           ></textarea>
         </div>
 
-        <!-- Content field -->
-        <div class="dash-modal__field">
-          <label class="dash-modal__label" for="post-content">
+        <!-- Content field — WYSIWYG editor (Toast UI) mounts on #post-content-editor -->
+        <!-- The hidden textarea #post-content is kept so existing JS refs and form reset work -->
+        <!-- JS syncs editor.getMarkdown() → #post-content.value before submit/validation -->
+        <div class="dash-modal__field dash-modal__field--editor">
+          <label class="dash-modal__label" for="post-content-editor">
             <!-- Label: Content (required) -->
             <span data-i18n="dash.modal.post.content_label">Зміст *</span>
           </label>
+          <!-- Toast UI WYSIWYG editor mount point — filled by dashboard.js initPostEditor() -->
+          <div
+            id="post-content-editor"
+            class="dash-modal__editor"
+            aria-label="Редактор вмісту публікації"
+          ></div>
+          <!-- Hidden sync field — value kept in sync with editor.getMarkdown() before submit -->
+          <!-- required removed: form is novalidate; content validation is done via JS in handlePostSubmit -->
           <textarea
             class="dash-modal__input dash-modal__textarea"
             id="post-content"
             name="content"
             rows="8"
-            required
+            hidden
+            aria-hidden="true"
           ></textarea>
           <span class="dash-modal__error" id="post-content-error"></span>
         </div>

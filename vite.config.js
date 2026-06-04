@@ -281,6 +281,18 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
         output: [
           {
             manualChunks(id) {
+              // Toast UI Editor — lazy-loaded via dynamic import() in dashboard.js.
+              // Return a named chunk "vendor-toastui" so Rollup keeps it separate
+              // from app.min.js regardless of bundle.enable mode.
+              // This prevents the 643KB editor from loading on every public page.
+              if (
+                id.includes("@toast-ui") ||
+                id.includes("prosemirror") ||
+                id.includes("codemirror") ||
+                id.includes("squire-rte")
+              ) {
+                return "vendor-toastui";
+              }
               if (
                 templateConfig.js.bundle.enable ||
                 templateConfig.server.buildforlocal
@@ -312,6 +324,16 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
                   ? asset.names[0].split(".").pop()
                   : "";
               if (/css/.test(extType)) {
+                // CSS from the lazily-loaded Toast UI vendor chunk must be
+                // stored separately so it doesn't collide with app.min.css
+                // and gets the correct auto-injected name for the async chunk.
+                // Vite names the CSS asset after the manualChunks key
+                // ("vendor-toastui") — originalFileNames is empty for injected CSS,
+                // so we match on asset.names instead.
+                const assetName = (asset.names ?? []).join(" ");
+                if (assetName.includes("vendor-toastui")) {
+                  return `${isAssets}css/vendor-toastui.min[extname]`;
+                }
                 return templateConfig.js.bundle.enable ||
                   templateConfig.server.buildforlocal
                   ? `${isAssets}css/app.min[extname]`
@@ -331,7 +353,17 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
                 ? `${isAssets}js/app.min.js`
                 : `${isAssets}js/[name].min.js`;
             },
-            chunkFileNames(name) {
+            chunkFileNames(chunkInfo) {
+              // Async vendor chunks (e.g. Toast UI lazy-loaded from dashboard.js)
+              // must get their own file names — never merged into app.min.js.
+              // Using [name].min.js here ensures vendor-toastui lands in a
+              // separate file even when bundle.enable is true.
+              if (
+                chunkInfo.name === "vendor-toastui" ||
+                (chunkInfo.name && chunkInfo.name.startsWith("vendor-"))
+              ) {
+                return `${isAssets}js/[name].min.js`;
+              }
               return templateConfig.js.bundle.enable ||
                 templateConfig.server.buildforlocal
                 ? `${isAssets}js/app.min.js`

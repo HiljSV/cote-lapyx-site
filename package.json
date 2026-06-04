@@ -93,6 +93,7 @@
     "@img/sharp-win32-x64": "^0.34.5"
   },
   "dependencies": {
+    "@toast-ui/editor": "^3.2.2",
     "cropperjs": "^1.6.2",
     "dompurify": "^3.4.7",
     "marked": "^18.0.4"
