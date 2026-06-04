@@ -6,6 +6,10 @@ import { fetchWithAuth } from "@js/common/auth.js";
 import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.css";
 
+// Toast UI WYSIWYG editor — outputs Markdown; bundled (no CDN)
+import Editor from "@toast-ui/editor";
+import "@toast-ui/editor/dist/toastui-editor.css";
+
 // i18n — language detection, translation apply, switcher wiring, runtime lookup
 import {
   detectLanguage,
@@ -51,6 +55,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   let commentsStatusFilter = "";
   let subscribersStatusFilter = "";
   let allSubscribersData = [];
+
+  // Post WYSIWYG editor instance — initialized once (guard against re-init)
+  // Holds the Toast UI Editor mounted on #post-content-editor
+  let postEditor = null;
 
   // Load user data: reveal admin link + populate profile form + update sidebar
   (async () => {
@@ -826,6 +834,62 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // ---------------------------------------------------------------------------
+  // Post WYSIWYG editor — Toast UI, Markdown output
+  // ---------------------------------------------------------------------------
+
+  /**
+   * initPostEditor — initialize Toast UI Editor on #post-content-editor (once).
+   *
+   * Guard: if postEditor already exists the function returns immediately.
+   * This prevents duplicate editor instances when the post modal is opened
+   * multiple times without a full page reload.
+   *
+   * The editor mounts in WYSIWYG mode with a Markdown tab available.
+   * On every change the hidden #post-content textarea is kept in sync so that
+   * the native form.reset() call in openPostModal still clears it, and the
+   * existing validation logic (content.trim()) keeps working unchanged.
+   */
+  function initPostEditor() {
+    // Guard: only init once per page lifecycle
+    if (postEditor) return;
+
+    const mountEl = document.getElementById("post-content-editor");
+    if (!mountEl) return;
+
+    // Create the Toast UI Editor instance
+    postEditor = new Editor({
+      // Mount point — the <div id="post-content-editor"> from HTML
+      el: mountEl,
+      // Start in WYSIWYG mode; user can switch to Markdown tab via toolbar
+      initialEditType: "wysiwyg",
+      // Preview panel shown beside the markdown tab (split) — not used in wysiwyg start
+      previewStyle: "tab",
+      // Initial empty content
+      initialValue: "",
+      // Fixed height (scroll inside) — matches the old textarea rows="8"
+      height: "280px",
+      // Minimal toolbar — enough for blog posts without overwhelming the modal
+      toolbarItems: [
+        ["heading", "bold", "italic", "strike"],
+        ["hr", "quote"],
+        ["ul", "ol"],
+        ["table", "link"],
+        ["code", "codeblock"],
+      ],
+    });
+
+    // Sync editor content → hidden textarea on every change.
+    // This keeps #post-content.value up to date so form.reset() and
+    // the existing handlePostSubmit validation read the correct value.
+    postEditor.on("change", () => {
+      const hiddenField = document.getElementById("post-content");
+      if (hiddenField) {
+        hiddenField.value = postEditor.getMarkdown();
+      }
+    });
+  }
+
   // Modal helpers
   const postModal = document.getElementById("post-modal");
 
@@ -833,7 +897,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     const form = document.getElementById("post-form");
     const titleEl = document.getElementById("post-modal-title");
     const feedback = document.getElementById("post-form-feedback");
+
+    // Initialize the WYSIWYG editor on first open (no-op on subsequent opens)
+    initPostEditor();
+
     form?.reset();
+    // After form.reset() the hidden textarea is cleared — clear editor too
+    if (postEditor) postEditor.setMarkdown("");
+
     if (feedback) {
       feedback.textContent = "";
       feedback.setAttribute("hidden", "");
@@ -859,6 +930,11 @@ document.addEventListener("DOMContentLoaded", async () => {
           setField("post-title", post.title);
           setField("post-type", post.type);
           setField("post-excerpt", post.excerpt);
+          // Populate editor with existing post content (Markdown string from API)
+          // Also sync the hidden textarea so validation is consistent
+          if (postEditor) {
+            postEditor.setMarkdown(post.content || "");
+          }
           setField("post-content", post.content);
           setField("post-cover", post.coverImage);
           setField("post-status", post.status);
@@ -876,6 +952,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   function closePostModal() {
     postModal?.setAttribute("hidden", "");
     document.body.style.overflow = "";
+    // Clear editor content on close so it's blank on next "New post" open
+    if (postEditor) postEditor.setMarkdown("");
     const preview = document.getElementById("post-cover-preview");
     if (preview) preview.setAttribute("hidden", "");
   }
@@ -885,6 +963,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const slug = document.getElementById("post-edit-slug").value;
     const feedback = document.getElementById("post-form-feedback");
     const submitBtn = document.getElementById("post-form-submit");
+
+    // Sync markdown from WYSIWYG editor → hidden textarea BEFORE reading the value.
+    // This is the canonical read path: editor.getMarkdown() → textarea.value → content var.
+    // The "change" listener keeps the textarea in sync on every keystroke, but we
+    // do an explicit sync here as a safety net (e.g. programmatic content changes).
+    if (postEditor) {
+      const hiddenField = document.getElementById("post-content");
+      if (hiddenField) hiddenField.value = postEditor.getMarkdown();
+    }
 
     // Client-side validation
     const title = document.getElementById("post-title").value.trim();
