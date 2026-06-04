@@ -1,4 +1,7 @@
 import membersData from "../data/members.json";
+// translate() resolves i18n keys against the currently active language at call-time.
+// Needed for the locale-aware «Спільний проєкт» / "Shared project" badge label.
+import { translate } from "@js/i18n.js";
 
 const API = "https://api.cote-lapyx.com/api/v1";
 
@@ -159,7 +162,13 @@ function renderSkills(member) {
 // Uses the same .project-card BEM structure as renderProjects().
 // Maps API fields: shortDescription, projectUrl/githubUrl, technologies array.
 // Falls back to local JSON data via renderProjects() if API call fails.
-function renderProjectsFromApi(projects) {
+//
+// @param {Array}  projects      — list of ProjectResponse objects from /api/v1/projects
+// @param {number} currentUserId — the visiting member's User PK (from TeamMemberResponse.userId).
+//   Used to distinguish author projects from collaborated projects:
+//   if currentUserId !== project.authorId but currentUserId is in project.collaborators[].userId
+//   → render the «Спільний проєкт» badge on the card.
+function renderProjectsFromApi(projects, currentUserId) {
   const el = document.getElementById("member-projects");
   if (!el) return;
 
@@ -171,6 +180,26 @@ function renderProjectsFromApi(projects) {
 
   el.innerHTML = projects
     .map((p) => {
+      // -----------------------------------------------------------------------
+      // Shared-project badge logic
+      // A project is "shared" for this member when:
+      //   1. The member is NOT the primary author (currentUserId !== p.authorId)
+      //   2. AND the member IS listed in p.collaborators[].userId
+      // The badge is locale-aware — translate() reads the active language at
+      // render-time, so it updates correctly on cl:languagechange re-renders.
+      // -----------------------------------------------------------------------
+      const collaborators = p.collaborators || [];
+      const isCollaborator =
+        currentUserId &&
+        p.authorId !== currentUserId &&
+        collaborators.some((c) => c.userId === currentUserId);
+
+      // Locale-aware badge label from i18n (escHtml guards against future
+      // i18n values that might contain special characters)
+      const sharedBadgeHtml = isCollaborator
+        ? `<span class="project-card__shared-badge" aria-label="${escHtml(translate("member.shared_project"))}">${escHtml(translate("member.shared_project"))}</span>`
+        : "";
+
       // Technologies from API are plain strings — render as cyan neon badges
       const tagsHtml = (p.technologies || [])
         .map(
@@ -204,6 +233,7 @@ function renderProjectsFromApi(projects) {
         <article class="project-card project-card--cyan">
           ${coverHtml}
           <div class="project-card__body">
+            ${sharedBadgeHtml}
             <h3 class="project-card__title">${escHtml(p.title)}</h3>
             <p class="project-card__description">${escHtml(desc)}</p>
             <ul class="project-card__tags" aria-label="Технології" role="list">${tagsHtml}</ul>
@@ -359,18 +389,24 @@ async function hydratePosts(userId, lang) {
 }
 
 // Fetch and render the member's portfolio projects from the real API.
+// Uses ?memberId= (author-OR-collaborator filter) so collaborated projects also appear.
+// The previous ?authorId= filter only returned projects where the member is the primary
+// author — this change ensures backlog #10 (shared projects) are included.
 // On success, overwrites the local JSON placeholder rendered by renderProjects().
 // On failure, silently keeps the local JSON data visible (already rendered).
 async function hydrateProjects(userId, lang) {
   try {
-    // GET /api/v1/projects — public endpoint; authorId filters by member; locale for translated content
+    // GET /api/v1/projects — public endpoint (no auth needed).
+    // memberId triggers author-OR-collaborator matching in ProjectController.
+    // locale ensures the backend returns translated title/shortDescription.
     const res = await fetch(
-      `${API}/projects?size=10&sort=createdAt,desc&authorId=${userId}&locale=${lang}`,
+      `${API}/projects?size=20&sort=createdAt,desc&memberId=${userId}&locale=${lang}`,
     );
     if (!res.ok) return;
     const data = await res.json();
-    // Replace local JSON placeholder with real API data
-    renderProjectsFromApi(data.content || []);
+    // Pass userId so renderProjectsFromApi can detect author vs collaborator
+    // and render the «Спільний проєкт» badge on collaborated projects.
+    renderProjectsFromApi(data.content || [], userId);
   } catch (_) {
     // Silently fail — local JSON placeholder rendered by renderProjects() stays visible
   }
