@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Cote Lapyx API
-  version: 1.11.0
+  version: 1.12.0
   description: |
     REST API for cote-lapyx.com — a team website for Валерія, Сергій, Андрій.
 
@@ -1401,6 +1401,16 @@ components:
         value:
           type: string
           example: My First Post
+        # WS-3: stale flag — set by the backend when the source post is edited after
+        # this translation was generated; cleared per-language by POST .../regenerate.
+        stale:
+          type: boolean
+          default: false
+          description: |
+            `true` when the source entity was edited after this translation was generated,
+            meaning the translation may no longer match the current source content.
+            Cleared on a per-language basis by `POST /posts/{postId}/translations/regenerate`.
+            Always `false` for translations that have never been auto-generated (manual upserts).
 
     TranslationUpsertRequest:
       type: object
@@ -3373,6 +3383,72 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "404":
           $ref: "#/components/responses/NotFound"
+
+  # ---------------------------------------------------------------------------
+  # Post Translations — stale-sync (WS-3)
+  # ---------------------------------------------------------------------------
+
+  /posts/{postId}/translations/regenerate:
+    post:
+      tags: [Posts]
+      summary: Regenerate all stale translations for a post (owner only)
+      operationId: regeneratePostTranslations
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Triggers re-translation of every locale whose `TranslationDTO.stale` flag is `true`
+        for the specified post, using the current source content as input to the Gemini engine.
+
+        On success each regenerated locale has its `stale` flag cleared. Languages that fail
+        during the Gemini call remain `stale = true` and are not included in the success count —
+        the caller should surface an appropriate warning in the admin UI.
+
+        No request body is required. The backend resolves stale locales automatically from the
+        `translations` table.
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          description: Numeric ID of the blog post whose stale translations should be regenerated.
+          schema:
+            type: integer
+            format: int64
+            example: 42
+      # No requestBody — locale discovery is server-side
+      responses:
+        "204":
+          description: |
+            Regeneration completed. All previously-stale translations that could be processed
+            have been re-translated and their `stale` flag cleared. Locales that failed
+            individually remain stale; no error is returned for per-language failures
+            (the client should re-fetch translations and check `stale` flags).
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: Authenticated user does not have the owner role.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+              example:
+                type: https://cote-lapyx.com/errors/forbidden
+                title: Forbidden
+                status: 403
+                detail: This action requires the owner role.
+                instance: /api/v1/posts/42/translations/regenerate
+        "404":
+          description: Post not found.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+              example:
+                type: https://cote-lapyx.com/errors/not-found
+                title: Not Found
+                status: 404
+                detail: Blog post with id 42 was not found.
+                instance: /api/v1/posts/42/translations/regenerate
 
   # ---------------------------------------------------------------------------
   # Categories
