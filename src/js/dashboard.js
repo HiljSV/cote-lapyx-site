@@ -1580,7 +1580,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Build row with post link, date added, and remove button
     return `<div class="dash-list__row">
       <div class="dash-list__title" data-label="${translate("dash.favorites.col.title")}">
-        <a href="/post.html?slug=${escHtml(fav.postSlug)}" class="dash-list__link" target="_blank">
+        <a href="/blog/${escHtml(fav.postSlug)}" class="dash-list__link" target="_blank">
           ${escHtml(fav.postTitle)}
         </a>
       </div>

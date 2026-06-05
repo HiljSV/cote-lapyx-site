@@ -99,7 +99,7 @@ function buildProjectCard(project, index) {
       </div>
       <div class="project-card__footer">
         <div class="project-card__links">
-          ${project.slug ? `<a href="project.html?slug=${encodeURIComponent(project.slug)}" class="btn btn--ghost btn--sm">${translate("btn.learn_more")}</a>` : ""}
+          ${project.slug ? `<a href="/projects/${encodeURIComponent(project.slug)}" class="btn btn--ghost btn--sm">${translate("btn.learn_more")}</a>` : ""}
           ${githubBtn}${demoBtn}
         </div>
         ${

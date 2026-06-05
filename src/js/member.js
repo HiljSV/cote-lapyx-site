@@ -216,7 +216,7 @@ function renderProjectsFromApi(projects, currentUserId) {
       // Demo link — prefer projectUrl, fall back to project detail page by slug
       const demoHref = p.projectUrl
         ? p.projectUrl
-        : `project.html?slug=${encodeURIComponent(p.slug)}`;
+        : `/projects/${encodeURIComponent(p.slug)}`;
       const demoLink = `<a href="${escHtml(demoHref)}" class="btn btn--cyan btn--sm" target="_blank" rel="noopener">Demo</a>`;
 
       // shortDescription from API (locale-aware, already translated by backend)
@@ -297,9 +297,7 @@ function renderPosts(posts) {
   el.innerHTML = posts
     .map((p) => {
       const date = p.publishedAt || p.createdAt;
-      const href = p.slug
-        ? `post.html?slug=${encodeURIComponent(p.slug)}`
-        : "#";
+      const href = p.slug ? `/blog/${encodeURIComponent(p.slug)}` : "#";
       return `<a href="${escHtml(href)}" class="member-posts__item">
         <time class="member-posts__date" datetime="${escHtml(date || "")}">${escHtml(fmtDate(date))}</time>
         <span class="member-posts__title">${escHtml(p.title || "")}</span>

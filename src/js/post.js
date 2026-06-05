@@ -83,8 +83,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Guard: only run on post.html (bundle mode sends all JS to every page)
   if (!document.getElementById("post-main")) return;
 
+  // Resolve the slug from the SEO-friendly path (/blog/<slug>) first, then fall
+  // back to the legacy ?slug= query param. Apache internally rewrites
+  // /blog/<slug> → /post.html, so the browser URL keeps no query string and the
+  // slug must be read from window.location.pathname.
   const params = new URLSearchParams(window.location.search);
-  const slug = params.get("slug");
+  const pathMatch = window.location.pathname.match(/\/blog\/([a-z0-9-]+)/i);
+  const slug = pathMatch ? pathMatch[1] : params.get("slug");
   if (!slug) {
     window.location.href = "blog.html";
     return;
@@ -107,7 +112,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     /* SEO: inject dynamic canonical, OG tags and JSON-LD BlogPosting */
     (function injectPostSEO(post, slug) {
-      const canonical = `https://cote-lapyx.com/post.html?slug=${encodeURIComponent(slug)}`;
+      // Canonical uses the SEO-friendly URL form.
+      const canonical = `https://cote-lapyx.com/blog/${encodeURIComponent(slug)}`;
 
       let canonEl = document.querySelector("link[rel='canonical']");
       if (!canonEl) {
@@ -166,7 +172,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.head.appendChild(ldEl);
       }
       ldEl.textContent = JSON.stringify(ld);
-    })(post, params.get("slug") || "");
+    })(post, slug || "");
 
     // Title + meta
     const titleEl = document.getElementById("post-title");

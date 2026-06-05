@@ -81,8 +81,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Guard: only run on project.html (bundle mode sends all JS to every page)
   if (!document.getElementById("project-content")) return;
 
+  // Resolve slug from the SEO-friendly path (/projects/<slug>) first, then the
+  // legacy ?slug= query param (Apache rewrites /projects/<slug> → /project.html,
+  // so the browser keeps no query string).
   const params = new URLSearchParams(window.location.search);
-  const slug = params.get("slug");
+  const pathMatch = window.location.pathname.match(/\/projects\/([a-z0-9-]+)/i);
+  const slug = pathMatch ? pathMatch[1] : params.get("slug");
   if (!slug) {
     window.location.href = "projects.html";
     return;
@@ -226,7 +230,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Only act when we are on the project page
     if (!document.getElementById("project-content")) return;
     const params = new URLSearchParams(window.location.search);
-    const slug = params.get("slug");
+    const pathMatch = window.location.pathname.match(
+      /\/projects\/([a-z0-9-]+)/i,
+    );
+    const slug = pathMatch ? pathMatch[1] : params.get("slug");
     if (!slug) return;
     const lang = localStorage.getItem("cl_lang") || "uk";
     try {
