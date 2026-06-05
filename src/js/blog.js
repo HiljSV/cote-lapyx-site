@@ -8,7 +8,7 @@ const API = "https://api.cote-lapyx.com/api/v1";
 const PAGE_SIZE = 12;
 
 let currentPage = 0;
-let currentCategory = "";
+let currentTag = "";
 let currentSearch = "";
 let totalPages = 1;
 let searchTimer = null;
@@ -108,7 +108,8 @@ async function loadPosts(page, append = false) {
     sort: "publishedAt,desc",
     page,
   });
-  if (currentCategory) params.set("categorySlug", currentCategory);
+  // Filter by tag slug (public endpoint param is `tag`) + free-text search.
+  if (currentTag) params.set("tag", currentTag);
   if (currentSearch) params.set("search", currentSearch);
 
   // Read current UI language so the backend returns translated post content
@@ -195,6 +196,40 @@ function initBrokenCoverFallback() {
   );
 }
 
+// Build the topic (tag) filter buttons from tags actually used by published posts.
+// Fetches a large page once, collects unique {slug,name}, and injects buttons so
+// every button maps to at least one real post (no dead filters).
+async function loadTagFilters() {
+  const group = document.getElementById("blog-filter-group");
+  if (!group) return;
+  try {
+    const lang = localStorage.getItem("cl_lang") || "uk";
+    const res = await fetch(
+      `${API}/posts?size=100&sort=publishedAt,desc&locale=${lang}`,
+    );
+    if (!res.ok) return;
+    const data = await res.json();
+    const seen = new Map();
+    (data.content || []).forEach((p) =>
+      (p.tags || []).forEach((t) => {
+        if (t && t.slug && !seen.has(t.slug))
+          seen.set(t.slug, t.name || t.slug);
+      }),
+    );
+    // Alphabetical by display name for stable ordering.
+    const tags = [...seen.entries()].sort((a, b) => a[1].localeCompare(b[1]));
+    const html = tags
+      .map(
+        ([slug, name]) =>
+          `<button class="filter-bar__btn" data-filter-tag="${escHtml(slug)}">${escHtml(name)}</button>`,
+      )
+      .join("");
+    group.insertAdjacentHTML("beforeend", html);
+  } catch (_) {
+    /* filter keeps just the "All" button on error */
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const listEl = document.getElementById("blog-list");
   const latestEl = document.getElementById("blog-latest");
@@ -206,17 +241,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // Initial load
     loadPosts(0);
 
-    // Category filter buttons
-    document.querySelectorAll("[data-filter-cat]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        document
-          .querySelectorAll("[data-filter-cat]")
-          .forEach((b) => b.classList.remove("is-active"));
-        btn.classList.add("is-active");
-        const cat = btn.dataset.filterCat;
-        currentCategory = cat === "all" ? "" : cat;
-        loadPosts(0);
-      });
+    // Populate dynamic tag buttons, then delegate clicks (buttons added async).
+    loadTagFilters();
+    const filterGroup = document.getElementById("blog-filter-group");
+    filterGroup?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-filter-tag]");
+      if (!btn) return;
+      filterGroup
+        .querySelectorAll("[data-filter-tag]")
+        .forEach((b) => b.classList.remove("is-active"));
+      btn.classList.add("is-active");
+      currentTag = btn.dataset.filterTag || "";
+      loadPosts(0);
     });
 
     // Search input (debounced 500ms)

@@ -200,6 +200,36 @@ function initBrokenCoverFallback() {
   );
 }
 
+// Build the stack (technology) filter buttons from technologies actually used by
+// published projects. Fetches a large page once, collects the unique set, and
+// injects buttons so every button maps to ≥1 real project (no dead filters).
+async function loadTechFilters() {
+  const group = document.getElementById("projects-filter-group");
+  if (!group) return;
+  try {
+    const lang = localStorage.getItem("cl_lang") || "uk";
+    const res = await fetch(
+      `${API}/projects?size=100&sort=createdAt,desc&locale=${lang}`,
+    );
+    if (!res.ok) return;
+    const data = await res.json();
+    const set = new Set();
+    (data.content || []).forEach((p) =>
+      (p.technologies || []).forEach((t) => t && set.add(t)),
+    );
+    const techs = [...set].sort((a, b) => a.localeCompare(b));
+    const html = techs
+      .map(
+        (t) =>
+          `<button class="filter-bar__btn" data-filter-tech="${escHtml(t)}">${escHtml(t)}</button>`,
+      )
+      .join("");
+    group.insertAdjacentHTML("beforeend", html);
+  } catch (_) {
+    /* filter keeps just the "All" button on error */
+  }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   const gridEl = document.getElementById("projects-grid");
   if (!gridEl) return;
@@ -213,16 +243,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Initial load
   loadProjects(0);
 
-  // Tech filter buttons
-  document.querySelectorAll("[data-filter-tech]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document
-        .querySelectorAll("[data-filter-tech]")
-        .forEach((b) => b.classList.remove("is-active"));
-      btn.classList.add("is-active");
-      currentTech = btn.dataset.filterTech || "";
-      loadProjects(0);
-    });
+  // Populate dynamic tech buttons, then delegate clicks (buttons added async).
+  loadTechFilters();
+  const filterGroup = document.getElementById("projects-filter-group");
+  filterGroup?.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-filter-tech]");
+    if (!btn) return;
+    filterGroup
+      .querySelectorAll("[data-filter-tech]")
+      .forEach((b) => b.classList.remove("is-active"));
+    btn.classList.add("is-active");
+    currentTech = btn.dataset.filterTech || "";
+    loadProjects(0);
   });
 
   // Search input (debounced 500ms)
