@@ -6,6 +6,9 @@
   min-height: 100svh;
   display: flex;
   flex-direction: column;
+  /* Vertically center the content so the hero always fills exactly one screen,
+     keeping the corner brackets + scroll hint pinned to the real viewport bottom. */
+  justify-content: center;
   align-items: center;
   position: relative;
   overflow: hidden;
@@ -33,6 +36,9 @@
   &__container {
     position: relative;
     z-index: 1;
+    /* Span full width so the two-column inner grid lays out correctly when the
+       hero is a centered flex item (justify-content: center). */
+    width: 100%;
   }
 
   /* Hero: inner grid — two-column layout on desktop */
@@ -278,6 +284,80 @@
       height: 32px;
       background: linear-gradient(to bottom, $neon-cyan, transparent);
       box-shadow: 0 0 4px $neon-cyan;
+    }
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // Short-viewport (landscape / low height) adaptation.
+  // The hero is min-height:100svh; on a short screen the (width-based) padding
+  // and large logo make the content overflow, pushing the corner brackets and
+  // scroll hint below the fold. These height breakpoints compact the content so
+  // it always fits one screen and the decorations stay at the true bottom.
+  // ───────────────────────────────────────────────────────────────────────────
+  // NOTE: !important on padding/gap is required because the adaptiveValue mixin
+  // emits non-media .hero__inner padding clamps LATER in the cascade, which would
+  // otherwise beat these height media queries by source order. The heading class
+  // is .hero__heading (h1) — not __title.
+  @media (max-height: 820px) {
+    &__inner {
+      padding-top: 48px !important;
+      padding-bottom: 48px !important;
+      gap: 32px !important;
+    }
+    &__content {
+      gap: 20px;
+    }
+    &__heading {
+      font-size: clamp(30px, 4.4vw, 50px);
+    }
+    &__visual-logo {
+      max-width: 440px;
+    }
+  }
+
+  @media (max-height: 640px) {
+    &__inner {
+      padding-top: 24px !important;
+      padding-bottom: 24px !important;
+      gap: 24px !important;
+    }
+    &__content {
+      gap: 12px;
+    }
+    &__heading {
+      font-size: clamp(24px, 3.6vw, 38px);
+      line-height: 1.05;
+    }
+    &__subheading {
+      font-size: 15px;
+    }
+    &__visual-logo {
+      max-width: 300px;
+    }
+    // No vertical room for the scroll cue on very short screens.
+    &__scroll-hint {
+      display: none;
+    }
+  }
+
+  @media (max-height: 480px) {
+    &__inner {
+      padding-top: 14px !important;
+      padding-bottom: 14px !important;
+      gap: 18px !important;
+    }
+    &__content {
+      gap: 10px;
+    }
+    &__heading {
+      font-size: clamp(20px, 3vw, 30px);
+    }
+    &__visual-logo {
+      max-width: 200px;
+    }
+    &__bracket {
+      width: 32px;
+      height: 32px;
     }
   }
 }
