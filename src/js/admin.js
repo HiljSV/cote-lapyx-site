@@ -924,8 +924,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   function postActionsHtml(post) {
     const slug = escHtml(post.slug || "");
     const id = escHtml(String(post.id));
-    // View — public post page (always available)
-    let html = `<a class="btn btn--ghost btn--xs" href="/post.html?slug=${slug}" target="_blank" rel="noopener" title="${translate("admin.action.view")}">👁</a>`;
+    // View — public post page (SEO-friendly URL; always available)
+    let html = `<a class="btn btn--ghost btn--xs" href="/blog/${slug}" target="_blank" rel="noopener" title="${translate("admin.action.view")}">👁</a>`;
     if (ownsResource(post)) {
       // Edit — reuse the full dashboard editor (WYSIWYG + cover upload)
       html += `<button type="button" class="btn btn--ghost btn--xs" data-action="edit-post" data-slug="${slug}" title="${translate("admin.action.edit")}">✏️</button>`;
@@ -955,7 +955,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   function projectActionsHtml(project) {
     const slug = escHtml(project.slug || "");
     const id = escHtml(String(project.id));
-    let html = `<a class="btn btn--ghost btn--xs" href="/project.html?slug=${slug}" target="_blank" rel="noopener" title="${translate("admin.action.view")}">👁</a>`;
+    let html = `<a class="btn btn--ghost btn--xs" href="/projects/${slug}" target="_blank" rel="noopener" title="${translate("admin.action.view")}">👁</a>`;
     if (ownsResource(project)) {
       html += `<button type="button" class="btn btn--ghost btn--xs" data-action="edit-project" data-slug="${slug}" title="${translate("admin.action.edit")}">✏️</button>`;
       if (project.status === "PUBLISHED") {

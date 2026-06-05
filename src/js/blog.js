@@ -69,9 +69,8 @@ function buildBlogCard(post) {
     ? `<img src="${escHtml(post.author.avatar)}" alt="" aria-hidden="true" />`
     : initials;
 
-  const href = post.slug
-    ? `post.html?slug=${encodeURIComponent(post.slug)}`
-    : "#";
+  // SEO-friendly article URL (Apache rewrites /blog/<slug> → post.html)
+  const href = post.slug ? `/blog/${encodeURIComponent(post.slug)}` : "#";
   return `<li>
     <a href="${href}" class="blog-card__link">
       <article class="blog-card">
