@@ -1,4 +1,19 @@
 <head>
+  <!-- Base URL: makes all relative asset/link paths resolve from the site root.
+       Required so SEO-friendly sub-path URLs (e.g. /blog/<slug>, /projects/<slug>)
+       still load assets and nav links correctly. Must be the first element in <head>. -->
+  <base href="/" />
+  <!-- With <base href="/">, bare "#fragment" links would resolve to the homepage on
+       sub-path URLs. Rewrite same-page fragment anchors (skip-link, in-page anchors)
+       to the current path so they keep working. -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var here = location.pathname + location.search;
+      document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+        a.setAttribute("href", here + a.getAttribute("href"));
+      });
+    });
+  </script>
   <!-- Analytics: Umami only (self-hosted, privacy-first). Google Analytics removed (P2-2). -->
   <!-- Umami Analytics (self-hosted, privacy-first) -->
   <script
