@@ -16,22 +16,17 @@
       <!-- Filter bar -->
       <div class="blog-page__filter">
         <div class="filter-bar" role="search" aria-label="Фільтр статей">
-          <div class="filter-bar__group">
-            <span class="filter-bar__label" data-i18n="blog.filter.category_label">Категорія:</span>
-            <button class="filter-bar__btn is-active" data-filter-cat="all">
+          <!-- Tag filter: "All" is static; topic buttons are injected by blog.js
+               (loadTagFilters) from tags actually used by posts → no dead buttons.
+               Filter param: ?tag=<slug>. -->
+          <div class="filter-bar__group" id="blog-filter-group">
+            <span
+              class="filter-bar__label"
+              data-i18n="blog.filter.category_label"
+              >Тема:</span
+            >
+            <button class="filter-bar__btn is-active" data-filter-tag="">
               <span data-i18n="filter.all">Всі</span>
-            </button>
-            <button class="filter-bar__btn" data-filter-cat="frontend">
-              Frontend
-            </button>
-            <button class="filter-bar__btn" data-filter-cat="backend">
-              Backend
-            </button>
-            <button class="filter-bar__btn" data-filter-cat="design">
-              Design
-            </button>
-            <button class="filter-bar__btn" data-filter-cat="devops">
-              DevOps
             </button>
           </div>
           <div class="filter-bar__search">
@@ -53,7 +48,12 @@
 
       <!-- Grid -->
       <ul class="blog-page__grid" id="blog-list" role="list">
-        <li class="blog-page__loading" id="blog-loading" aria-live="polite" data-i18n="ui.loading">
+        <li
+          class="blog-page__loading"
+          id="blog-loading"
+          aria-live="polite"
+          data-i18n="ui.loading"
+        >
           Завантаження...
         </li>
       </ul>

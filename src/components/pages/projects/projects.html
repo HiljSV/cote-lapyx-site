@@ -16,22 +16,17 @@
       <!-- Filter bar -->
       <div class="projects-page__filter">
         <div class="filter-bar" role="search" aria-label="Фільтр проектів">
-          <div class="filter-bar__group">
-            <span class="filter-bar__label" data-i18n="projects.filter.stack_label">Стек:</span>
+          <!-- Tech filter: "All" is static; stack buttons are injected by
+               projects.js (loadTechFilters) from technologies actually used by
+               projects → no dead buttons. Filter param: ?technology=<name>. -->
+          <div class="filter-bar__group" id="projects-filter-group">
+            <span
+              class="filter-bar__label"
+              data-i18n="projects.filter.stack_label"
+              >Стек:</span
+            >
             <button class="filter-bar__btn is-active" data-filter-tech="">
               <span data-i18n="filter.all">Всі</span>
-            </button>
-            <button class="filter-bar__btn" data-filter-tech="HTML">
-              HTML/CSS
-            </button>
-            <button class="filter-bar__btn" data-filter-tech="JavaScript">
-              JavaScript
-            </button>
-            <button class="filter-bar__btn" data-filter-tech="Python">
-              Python
-            </button>
-            <button class="filter-bar__btn" data-filter-tech="Java">
-              Java
             </button>
           </div>
           <div class="filter-bar__search">
