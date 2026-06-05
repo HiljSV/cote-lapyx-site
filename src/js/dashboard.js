@@ -159,8 +159,43 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (document.querySelector('[data-panel="projects"]:not([hidden])')) {
         loadProjects(0, projectsStatusFilter);
       }
+
+      // Deep-link from the admin panel: open the post/project editor directly.
+      // Supported query params (mutually exclusive):
+      //   ?newPost=1            → new-post modal
+      //   ?editPost=<slug>      → edit existing post
+      //   ?newProject=1         → new-project modal
+      //   ?editProject=<slug>   → edit existing project
+      // The query string is cleared afterwards so a refresh doesn't re-open it.
+      handleEditorDeepLink();
     } catch (_) {}
   })();
+
+  /**
+   * Inspect the URL query string and open the relevant editor modal.
+   * Called once /users/me has resolved (so myUserId-dependent loaders work).
+   */
+  function handleEditorDeepLink() {
+    const params = new URLSearchParams(window.location.search);
+    const editPost = params.get("editPost");
+    const editProject = params.get("editProject");
+    const newPost = params.get("newPost");
+    const newProject = params.get("newProject");
+    if (!editPost && !editProject && !newPost && !newProject) return;
+
+    if (newPost || editPost) {
+      activateSection("posts");
+      loadPosts(0, postsStatusFilter);
+      openPostModal(editPost || null);
+    } else if (newProject || editProject) {
+      activateSection("projects");
+      loadProjects(0, projectsStatusFilter);
+      openProjectModal(editProject || null);
+    }
+
+    // Strip the params so a refresh / back-navigation doesn't reopen the modal.
+    window.history.replaceState({}, "", window.location.pathname);
+  }
 
   // ---------------------------------------------------------------------------
   // Sidebar open / close (mobile)

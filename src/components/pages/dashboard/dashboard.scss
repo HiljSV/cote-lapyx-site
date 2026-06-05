@@ -653,32 +653,29 @@
 }
 
 // admin all users: Name | Email | Role | Registered | Actions
-// BUG #4 fix: was 6 columns (1fr 1fr 90px 110px 100px 185px) but JS renders
-// only 5 cells — the 6th phantom column pushed Actions into the 5th slot (100px),
-// clipping "РЕДАГУВАТИ". Role was 90px — too narrow for "SUBSCRIBER" badge
-// (≈108px with padding + uppercase letter-spacing), causing it to visually
-// overflow into the Registered date cell ("SUBSCRIBER17 трав. 2026 р.").
-// Fix: drop the phantom column, widen Role to 115px, Actions to 150px.
+// Actions cell now holds icon buttons (edit / block-unblock / delete) that
+// wrap via .dash-list__actions flex-wrap, so 170px fits two per row.
 .dash-list--admin-users {
   .dash-list__head,
   .dash-list__row {
-    grid-template-columns: 1fr 1fr 115px 120px 150px;
+    grid-template-columns: 1fr 1fr 115px 120px 170px;
   }
 }
 
-// admin posts: Title | Author | Category | Date | Status | Actions
+// admin posts: Title | Author | Date | Status | Actions (5 columns).
+// Must match the 5-cell head/row markup in admin.html + loadAdminPosts().
 .dash-list--admin-posts {
   .dash-list__head,
   .dash-list__row {
-    grid-template-columns: 1fr 100px 100px 100px 120px 185px;
+    grid-template-columns: 1fr 110px 110px 120px 210px;
   }
 }
 
-// admin projects: Name | Author | Technologies | Status | Actions
+// admin projects: Name | Author | Technologies | Status | Actions (5 columns).
 .dash-list--admin-projects {
   .dash-list__head,
   .dash-list__row {
-    grid-template-columns: 1fr 100px 160px 120px 185px;
+    grid-template-columns: 1fr 100px 150px 120px 210px;
   }
 }
 

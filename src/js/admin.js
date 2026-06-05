@@ -24,6 +24,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Guard: exit early if not on the admin page
   if (!sidebar) return;
 
+  // ID of the currently authenticated admin — captured from /users/me below.
+  // Used to decide whether owner-scoped PATCH (/posts|/projects/{slug}) is
+  // allowed for a given row: the backend returns 403 when an OWNER edits a
+  // resource authored by a different user, so we disable the publish/edit
+  // actions on rows the current admin does not own.
+  let currentUserId = null;
+
   // Token guard — ensureSession() silently refreshes an expired/missing access
   // token via the HttpOnly refresh cookie before redirecting, so an idle admin
   // is not kicked out while their refresh cookie is still valid.
@@ -40,6 +47,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         window.location.replace("/dashboard.html");
         return;
       }
+
+      // Remember the admin's own user id for owner-scoped action gating.
+      currentUserId = user.id ?? null;
 
       // Hydrate sidebar name, role badge, and avatar
       const nameEl = document.getElementById("admin-sidebar-name");
@@ -709,26 +719,48 @@ document.addEventListener("DOMContentLoaded", async () => {
       const rows = (data.content || [])
         .map((u) => {
           const roleColor = ROLE_BADGE[u.role] || "green";
-          // Name cell: avatar (image or initial) + display name side by side
+          const isSelf = currentUserId != null && u.id === currentUserId;
+          const blocked = u.status && u.status !== "ACTIVE";
+          // Blocked/suspended badge shown next to the name so the admin can see
+          // account state at a glance.
+          const statusBadge = blocked
+            ? `<span class="neon-badge neon-badge--magenta" title="${escHtml(u.status)}">${
+                u.status === "SUSPENDED"
+                  ? translate("admin.user_status.suspended")
+                  : translate("admin.user_status.blocked")
+              }</span>`
+            : "";
+          // Edit — opens the modal (name / role / status). Always available.
+          const editBtn = `<button type="button" class="btn btn--ghost btn--sm"
+              data-action="edit-user"
+              data-id="${escHtml(String(u.id))}"
+              data-name="${escHtml(u.name || "")}"
+              data-role="${escHtml(u.role || "")}"
+              data-status="${escHtml(u.status || "ACTIVE")}"
+              title="${translate("admin.action.edit")}">✏️</button>`;
+          // Block/unblock + delete — never on the admin's own row (self-lockout
+          // and self-delete are rejected by the backend anyway).
+          let extraBtns = "";
+          if (!isSelf) {
+            extraBtns += blocked
+              ? `<button type="button" class="btn btn--cyan btn--sm" data-action="unblock-user" data-id="${escHtml(String(u.id))}" title="${translate("admin.action.unblock")}">🔓</button>`
+              : `<button type="button" class="btn btn--ghost btn--sm" data-action="block-user" data-id="${escHtml(String(u.id))}" title="${translate("admin.action.block")}">🚫</button>`;
+            extraBtns += `<button type="button" class="btn btn--magenta btn--sm" data-action="delete-user" data-id="${escHtml(String(u.id))}" title="${translate("admin.action.delete")}">🗑</button>`;
+          }
+          // Name cell: avatar (image or initial) + display name + status badge
           return `<div class="dash-list__row">
           <div class="dash-list__title" data-label="Ім'я">
             <span class="dash-list__user-cell">
               ${userAvatarHtml(u)}
               ${escHtml(u.name || u.email)}
+              ${statusBadge}
             </span>
           </div>
           <div data-label="Email">${escHtml(u.email)}</div>
           <div data-label="Роль"><span class="neon-badge neon-badge--${roleColor}">${escHtml(u.role?.toLowerCase() || "—")}</span></div>
           <div class="dash-list__date" data-label="Зареєстрований">${fmtDate(u.createdAt)}</div>
-          <div data-label="Дії">
-            <button type="button" class="btn btn--ghost btn--sm"
-              data-action="edit-user"
-              data-id="${escHtml(String(u.id))}"
-              data-name="${escHtml(u.name || "")}"
-              data-role="${escHtml(u.role || "")}"
-              data-status="${escHtml(u.status || "ACTIVE")}">
-              Редагувати
-            </button>
+          <div class="dash-list__actions" data-label="Дії">
+            ${editBtn}${extraBtns}
           </div>
         </div>`;
         })
@@ -775,11 +807,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         .map((post) => {
           const sClass = STATUS_CLASS[post.status] || "draft";
           const sLabel = statusLabels[post.status] || post.status;
+          // Build the per-row action buttons (view / edit / publish-toggle / delete)
+          const actions = postActionsHtml(post);
           return `<div class="dash-list__row">
           <div class="dash-list__title" data-label="Заголовок">${escHtml(post.title)}</div>
           <div data-label="Автор">${escHtml(post.author?.name || "—")}</div>
           <div class="dash-list__date" data-label="Дата">${fmtDate(post.createdAt)}</div>
           <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
+          <div class="dash-list__actions" data-label="${translate("admin.col.actions")}">${actions}</div>
         </div>`;
         })
         .join("");
@@ -832,11 +867,14 @@ document.addEventListener("DOMContentLoaded", async () => {
             .join("");
           const sClass = STATUS_CLASS[project.status] || "draft";
           const sLabel = projStatusLabels[project.status] || project.status;
+          // Per-row action buttons (view / edit / publish-toggle / delete)
+          const actions = projectActionsHtml(project);
           return `<div class="dash-list__row">
           <div class="dash-list__title" data-label="Назва">${escHtml(project.title)}</div>
           <div data-label="Автор">${escHtml(project.author?.name || "—")}</div>
           <div class="dash-list__tech" data-label="Технології">${techs || "—"}</div>
           <div data-label="Статус"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
+          <div class="dash-list__actions" data-label="${translate("admin.col.actions")}">${actions}</div>
         </div>`;
         })
         .join("");
@@ -856,6 +894,195 @@ document.addEventListener("DOMContentLoaded", async () => {
         '<div class="dash-list__empty">Помилка завантаження</div>';
     }
   }
+
+  // ---------------------------------------------------------------------------
+  // Admin posts / projects — per-row action buttons + handlers
+  //
+  // Available actions:
+  //   👁 view           — open the public page in a new tab (any row)
+  //   ✏️ edit           — deep-link to the dashboard editor (owner's own rows)
+  //   ⬆/⬇ publish toggle — PUBLISHED ⇄ DRAFT, i.e. show on / hide from the site
+  //   📦/♻ archive toggle — ARCHIVED ⇄ DRAFT (retire / restore)
+  //   🗑 delete          — force-delete via /admin/{type}/{id} (any row)
+  //
+  // Status changes go through the owner-scoped PATCH /{type}/{slug}, which the
+  // backend rejects (403) for resources authored by another user — so the
+  // edit/publish/archive buttons are only rendered on rows the admin owns.
+  // Force-delete uses the dedicated /admin endpoint and works on any row.
+  // ---------------------------------------------------------------------------
+
+  /** True when the current admin authored the given resource (owner-scoped PATCH allowed). */
+  function ownsResource(res) {
+    return currentUserId != null && res?.authorId === currentUserId;
+  }
+
+  /**
+   * Build the action-button HTML for one post row.
+   * @param {object} post - BlogPostDTO (needs slug, id, status, authorId)
+   * @returns {string} HTML string of buttons
+   */
+  function postActionsHtml(post) {
+    const slug = escHtml(post.slug || "");
+    const id = escHtml(String(post.id));
+    // View — public post page (always available)
+    let html = `<a class="btn btn--ghost btn--xs" href="/post.html?slug=${slug}" target="_blank" rel="noopener" title="${translate("admin.action.view")}">👁</a>`;
+    if (ownsResource(post)) {
+      // Edit — reuse the full dashboard editor (WYSIWYG + cover upload)
+      html += `<button type="button" class="btn btn--ghost btn--xs" data-action="edit-post" data-slug="${slug}" title="${translate("admin.action.edit")}">✏️</button>`;
+      // Publish ⇄ hide (DRAFT) toggle
+      if (post.status === "PUBLISHED") {
+        html += `<button type="button" class="btn btn--ghost btn--xs" data-action="set-post-status" data-slug="${slug}" data-status="DRAFT" title="${translate("admin.action.hide")}">⬇</button>`;
+      } else {
+        html += `<button type="button" class="btn btn--cyan btn--xs" data-action="set-post-status" data-slug="${slug}" data-status="PUBLISHED" title="${translate("admin.action.publish")}">⬆</button>`;
+      }
+      // Archive ⇄ restore toggle
+      if (post.status === "ARCHIVED") {
+        html += `<button type="button" class="btn btn--ghost btn--xs" data-action="set-post-status" data-slug="${slug}" data-status="DRAFT" title="${translate("admin.action.restore")}">♻</button>`;
+      } else {
+        html += `<button type="button" class="btn btn--ghost btn--xs" data-action="set-post-status" data-slug="${slug}" data-status="ARCHIVED" title="${translate("admin.action.archive")}">📦</button>`;
+      }
+    }
+    // Delete — force-delete (always available to admin)
+    html += `<button type="button" class="btn btn--magenta btn--xs" data-action="delete-post" data-id="${id}" title="${translate("admin.action.delete")}">🗑</button>`;
+    return html;
+  }
+
+  /**
+   * Build the action-button HTML for one project row.
+   * @param {object} project - ProjectDTO (needs slug, id, status, authorId)
+   * @returns {string} HTML string of buttons
+   */
+  function projectActionsHtml(project) {
+    const slug = escHtml(project.slug || "");
+    const id = escHtml(String(project.id));
+    let html = `<a class="btn btn--ghost btn--xs" href="/project.html?slug=${slug}" target="_blank" rel="noopener" title="${translate("admin.action.view")}">👁</a>`;
+    if (ownsResource(project)) {
+      html += `<button type="button" class="btn btn--ghost btn--xs" data-action="edit-project" data-slug="${slug}" title="${translate("admin.action.edit")}">✏️</button>`;
+      if (project.status === "PUBLISHED") {
+        html += `<button type="button" class="btn btn--ghost btn--xs" data-action="set-project-status" data-slug="${slug}" data-status="DRAFT" title="${translate("admin.action.hide")}">⬇</button>`;
+      } else {
+        html += `<button type="button" class="btn btn--cyan btn--xs" data-action="set-project-status" data-slug="${slug}" data-status="PUBLISHED" title="${translate("admin.action.publish")}">⬆</button>`;
+      }
+      if (project.status === "ARCHIVED") {
+        html += `<button type="button" class="btn btn--ghost btn--xs" data-action="set-project-status" data-slug="${slug}" data-status="DRAFT" title="${translate("admin.action.restore")}">♻</button>`;
+      } else {
+        html += `<button type="button" class="btn btn--ghost btn--xs" data-action="set-project-status" data-slug="${slug}" data-status="ARCHIVED" title="${translate("admin.action.archive")}">📦</button>`;
+      }
+    }
+    html += `<button type="button" class="btn btn--magenta btn--xs" data-action="delete-project" data-id="${id}" title="${translate("admin.action.delete")}">🗑</button>`;
+    return html;
+  }
+
+  /**
+   * Change a post status via owner-scoped PATCH /posts/{slug}.
+   * @param {string} slug
+   * @param {"DRAFT"|"PUBLISHED"|"ARCHIVED"} status
+   */
+  async function setPostStatus(slug, status) {
+    try {
+      const res = await fetchWithAuth(`${ADMIN_API}/posts/${slug}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (res.ok) loadAdminPosts(adminPostsPage);
+      else if (res.status === 403) alert(translate("admin.error.not_owner"));
+      else alert(translate("admin.error.save"));
+    } catch {
+      alert(translate("admin.error.network"));
+    }
+  }
+
+  /**
+   * Force-delete any post via DELETE /admin/posts/{id} (moderation endpoint).
+   * @param {number} id
+   */
+  async function deleteAdminPost(id) {
+    if (!confirm(translate("admin.confirm.delete_post"))) return;
+    try {
+      const res = await fetchWithAuth(`${ADMIN_API}/admin/posts/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok || res.status === 204) loadAdminPosts(adminPostsPage);
+      else alert(translate("admin.error.delete"));
+    } catch {
+      alert(translate("admin.error.network"));
+    }
+  }
+
+  /** Change a project status via owner-scoped PATCH /projects/{slug}. */
+  async function setProjectStatus(slug, status) {
+    try {
+      const res = await fetchWithAuth(`${ADMIN_API}/projects/${slug}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (res.ok) loadAdminProjects(adminProjectsPage);
+      else if (res.status === 403) alert(translate("admin.error.not_owner"));
+      else alert(translate("admin.error.save"));
+    } catch {
+      alert(translate("admin.error.network"));
+    }
+  }
+
+  /** Force-delete any project via DELETE /admin/projects/{id}. */
+  async function deleteAdminProject(id) {
+    if (!confirm(translate("admin.confirm.delete_project"))) return;
+    try {
+      const res = await fetchWithAuth(`${ADMIN_API}/admin/projects/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok || res.status === 204) loadAdminProjects(adminProjectsPage);
+      else alert(translate("admin.error.delete"));
+    } catch {
+      alert(translate("admin.error.network"));
+    }
+  }
+
+  // Delegated click handler — post row actions
+  document
+    .getElementById("admin-posts-body")
+    ?.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+      const { action, slug, id, status } = btn.dataset;
+      if (action === "edit-post") {
+        window.location.href = `/dashboard.html?editPost=${encodeURIComponent(slug)}`;
+      } else if (action === "set-post-status") {
+        setPostStatus(slug, status);
+      } else if (action === "delete-post") {
+        deleteAdminPost(Number(id));
+      }
+    });
+
+  // Delegated click handler — project row actions
+  document
+    .getElementById("admin-projects-body")
+    ?.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+      const { action, slug, id, status } = btn.dataset;
+      if (action === "edit-project") {
+        window.location.href = `/dashboard.html?editProject=${encodeURIComponent(slug)}`;
+      } else if (action === "set-project-status") {
+        setProjectStatus(slug, status);
+      } else if (action === "delete-project") {
+        deleteAdminProject(Number(id));
+      }
+    });
+
+  // Create buttons — deep-link to the dashboard editor in "new" mode
+  document
+    .getElementById("admin-post-create-btn")
+    ?.addEventListener("click", () => {
+      window.location.href = "/dashboard.html?newPost=1";
+    });
+  document
+    .getElementById("admin-project-create-btn")
+    ?.addEventListener("click", () => {
+      window.location.href = "/dashboard.html?newProject=1";
+    });
 
   // ---------------------------------------------------------------------------
   // Admin comments panel — shows all comments with status badges
@@ -1244,15 +1471,64 @@ document.addEventListener("DOMContentLoaded", async () => {
     .getElementById("admin-user-modal-backdrop")
     ?.addEventListener("click", closeUserEditModal);
 
-  // Delegate edit-user button clicks on the full users table body
+  /**
+   * Block (status=BLOCKED) or unblock (status=ACTIVE) a user account.
+   * Blocked users are rejected at login by the backend.
+   * @param {number} id - user id
+   * @param {"BLOCKED"|"ACTIVE"} status
+   */
+  async function setUserStatus(id, status) {
+    const confirmKey =
+      status === "BLOCKED"
+        ? "admin.confirm.block_user"
+        : "admin.confirm.unblock_user";
+    if (!confirm(translate(confirmKey))) return;
+    try {
+      const res = await fetchWithAuth(`${ADMIN_API}/admin/users/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (res.ok) loadAdminUsers(adminUsersPage);
+      else if (res.status === 409) alert(translate("admin.error.self_action"));
+      else alert(translate("admin.error.save"));
+    } catch {
+      alert(translate("admin.error.network"));
+    }
+  }
+
+  /** Permanently delete a user account via DELETE /admin/users/{id}. */
+  async function deleteAdminUser(id) {
+    if (!confirm(translate("admin.confirm.delete_user"))) return;
+    try {
+      const res = await fetchWithAuth(`${ADMIN_API}/admin/users/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok || res.status === 204) loadAdminUsers(adminUsersPage);
+      else if (res.status === 409)
+        alert(translate("admin.error.user_has_content"));
+      else alert(translate("admin.error.delete"));
+    } catch {
+      alert(translate("admin.error.network"));
+    }
+  }
+
+  // Delegate action-button clicks on the full users table body
   document
     .getElementById("admin-users-body")
     ?.addEventListener("click", (e) => {
-      const btn = e.target.closest('[data-action="edit-user"]');
+      const btn = e.target.closest("[data-action]");
       if (!btn) return;
-      // Extract all fields from the button's data-* attributes
-      const { id, name, role, status } = btn.dataset;
-      openUserEditModal({ id, name, role, status });
+      const { action, id, name, role, status } = btn.dataset;
+      if (action === "edit-user") {
+        openUserEditModal({ id, name, role, status });
+      } else if (action === "block-user") {
+        setUserStatus(Number(id), "BLOCKED");
+      } else if (action === "unblock-user") {
+        setUserStatus(Number(id), "ACTIVE");
+      } else if (action === "delete-user") {
+        deleteAdminUser(Number(id));
+      }
     });
 
   // Submit handler — PATCH /admin/users/:id with changed fields

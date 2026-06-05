@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Cote Lapyx API
-  version: 1.13.0
+  version: 1.14.0
   description: |
     REST API for cote-lapyx.com — a team website for Валерія, Сергій, Андрій.
 
@@ -210,6 +210,13 @@ components:
       type: string
       enum: [owner, subscriber]
 
+    UserStatus:
+      type: string
+      description: |
+        Account lifecycle status. `active` accounts can sign in; `blocked` and
+        `suspended` accounts are rejected at login.
+      enum: [active, blocked, suspended]
+
     # --- Problem Detail (RFC 9457) ---
 
     ProblemDetail:
@@ -397,6 +404,10 @@ components:
         # receive SocialLinks (public view, nulls for disabled) via PublicUserDTO.
         socialLinks:
           $ref: "#/components/schemas/SocialLinksPrivate"
+        # Account status — exposed in the authenticated/owner view so the admin
+        # users table can display and toggle the blocked state.
+        status:
+          $ref: "#/components/schemas/UserStatus"
         createdAt:
           type: string
           format: date-time
@@ -441,8 +452,8 @@ components:
           minLength: 2
           maxLength: 100
         status:
-          type: string
-          enum: [active, blocked, suspended]
+          allOf:
+            - $ref: "#/components/schemas/UserStatus"
           description: Account status. Use `blocked` to prevent login; `suspended` for temporary restriction.
 
     # Public-safe representation of a user — returned as the embedded `author` object
