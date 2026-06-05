@@ -554,13 +554,25 @@
           <h2 class="dash-section__title" data-i18n="admin.section.posts">
             Публікації
           </h2>
+          <!-- Create-new-post button — deep-links to the dashboard editor
+               (reuses the full WYSIWYG + cover-upload flow there). -->
+          <button
+            type="button"
+            class="btn btn--cyan btn--sm"
+            id="admin-post-create-btn"
+            data-i18n="admin.btn.new_post"
+          >
+            + Нова публікація
+          </button>
         </div>
 
         <div
           class="dash-list dash-list--admin-posts"
           aria-label="Таблиця всіх публікацій"
         >
-          <!-- Column headers — localized via data-i18n -->
+          <!-- Column headers — 5 columns: title, author, date, status, actions.
+               Must stay in sync with loadAdminPosts() row cells and the
+               .dash-list--admin-posts grid-template-columns (5 cols). -->
           <div class="dash-list__head" aria-hidden="true">
             <div data-i18n="admin.col.title">Заголовок</div>
             <div data-i18n="admin.col.author">Автор</div>
@@ -585,18 +597,30 @@
           <h2 class="dash-section__title" data-i18n="admin.section.projects">
             Проекти
           </h2>
+          <!-- Create-new-project button — deep-links to the dashboard editor. -->
+          <button
+            type="button"
+            class="btn btn--cyan btn--sm"
+            id="admin-project-create-btn"
+            data-i18n="admin.btn.new_project"
+          >
+            + Новий проект
+          </button>
         </div>
 
         <div
           class="dash-list dash-list--admin-projects"
           aria-label="Таблиця всіх проектів"
         >
-          <!-- Column headers — localized via data-i18n -->
+          <!-- Column headers — 5 columns: name, author, technologies, status,
+               actions. Must stay in sync with loadAdminProjects() row cells and
+               the .dash-list--admin-projects grid-template-columns (5 cols). -->
           <div class="dash-list__head" aria-hidden="true">
             <div data-i18n="admin.col.name">Назва</div>
             <div data-i18n="admin.col.author">Автор</div>
             <div data-i18n="admin.col.technologies">Технології</div>
             <div data-i18n="admin.col.status">Статус</div>
+            <div data-i18n="admin.col.actions">Дії</div>
           </div>
           <div id="admin-projects-body"></div>
         </div>
