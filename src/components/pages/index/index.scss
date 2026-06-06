@@ -85,13 +85,12 @@
   &__stats {
     display: flex;
     align-self: center;
-    // gap: 32px;
-    @include adaptiveValue("gap", 32, 12);
+    // Keep stats in a ROW on every size (wrap if extremely narrow), not stacked.
+    @include adaptiveValue("gap", 32, 10);
+    flex-direction: row;
     flex-wrap: wrap;
+    justify-content: center;
     margin-top: 8px;
-    @media (max-width: toEm($mobileSmall)) {
-      flex-direction: column;
-    }
   }
 
   &__stat {
@@ -120,25 +119,14 @@
     font-family: $fontHeading;
   }
 
-  // Tech icons column
+  // Tech icons — always a ROW (3 across), wrap only if extremely narrow.
   &__visual {
     display: flex;
-    // flex-direction: row;
-
+    flex-direction: row;
     justify-content: center;
+    flex-wrap: wrap;
     gap: 16px;
     align-items: center;
-
-    @media (max-width: toEm($tablet)) {
-      justify-content: center;
-      flex-direction: column;
-    }
-    @media (max-width: toEm($mobile)) {
-      flex-direction: row;
-    }
-    @media (max-width: toEm($mobileSmall)) {
-      flex-direction: column;
-    }
   }
 
   &__tech-icon {

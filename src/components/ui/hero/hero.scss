@@ -278,6 +278,12 @@
     animation: fade-in-up 0.6s ease both;
     animation-delay: 0.7s;
 
+    // On touch/phone widths the scroll cue overlaps the stacked CTA buttons —
+    // hide it (scrolling is obvious on mobile).
+    @media (max-width: toEm($mobile)) {
+      display: none;
+    }
+
     &::after {
       content: "";
       width: 1px;
