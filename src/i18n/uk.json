@@ -393,6 +393,7 @@
   "auth.email_placeholder": "your@email.com",
   "auth.password": "Пароль",
   "auth.login_btn": "Увійти",
+  "auth.or": "або",
   "auth.no_account": "Немає акаунту?",
   "auth.register_link": "Зареєструватись",
   "auth.show_password_aria": "Показати пароль",

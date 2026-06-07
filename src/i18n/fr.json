@@ -393,6 +393,7 @@
   "auth.email_placeholder": "your@email.com",
   "auth.password": "Mot de passe",
   "auth.login_btn": "Se connecter",
+  "auth.or": "ou",
   "auth.no_account": "Pas de compte ?",
   "auth.register_link": "S'inscrire.",
   "auth.show_password_aria": "Afficher le mot de passe",

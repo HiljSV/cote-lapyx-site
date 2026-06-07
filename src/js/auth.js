@@ -344,10 +344,46 @@ function initRegisterForm() {
 // Init on DOM ready
 // -----------------------------------------------------------------------------
 
+// -----------------------------------------------------------------------------
+// Google Sign-In — callback invoked by Google Identity Services after the user
+// picks a Google account. Sends the ID token to the backend, which verifies it,
+// finds/creates the account and returns our JWT (+ cl_refresh HttpOnly cookie).
+// -----------------------------------------------------------------------------
+async function handleGoogleCredential(response) {
+  const serverError =
+    document.getElementById("login-server-error") ||
+    document.getElementById("reg-server-error");
+  try {
+    const res = await fetch("https://api.cote-lapyx.com/api/v1/auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      // credential = Google ID token (JWT); credentials:'include' to accept cl_refresh cookie
+      body: JSON.stringify({ credential: response.credential }),
+      credentials: "include",
+    });
+    const data = await res.json();
+    if (res.ok && data.accessToken) {
+      localStorage.setItem("cl_access", data.accessToken);
+      window.location.href = "/dashboard.html";
+    } else if (serverError) {
+      showServerError(
+        serverError,
+        data.detail ?? data.message ?? translate("auth.error.login_failed"),
+      );
+    }
+  } catch {
+    if (serverError)
+      showServerError(serverError, translate("auth.error.network"));
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   initPasswordToggles();
   initLoginForm();
   initRegisterForm();
+
+  // Expose the Google Identity Services callback (referenced by data-callback).
+  window.handleGoogleCredential = handleGoogleCredential;
 
   // Show registration success banner when arriving from register page
   if (new URLSearchParams(window.location.search).get("registered") === "1") {

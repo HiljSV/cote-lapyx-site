@@ -226,6 +226,32 @@
     }
   }
 
+  // "або" divider between the form and the Google button
+  &__divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0 16px;
+    color: $text-muted;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+
+    &::before,
+    &::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: $border-cyan;
+    }
+  }
+
+  // Center the Google Identity Services button
+  &__google {
+    display: flex;
+    justify-content: center;
+  }
+
   // -----------------------------------------------------------------------------
   // Password strength indicator
   // -----------------------------------------------------------------------------

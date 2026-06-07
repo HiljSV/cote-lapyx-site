@@ -132,6 +132,26 @@
       </button>
     </form>
 
+    <!-- Google Sign-In: divider + GIS button. The callback
+         (window.handleGoogleCredential) lives in auth.js and POSTs the Google
+         ID token to /auth/google. -->
+    <div class="auth-form__divider"><span data-i18n="auth.or">або</span></div>
+    <div
+      id="g_id_onload"
+      data-client_id="362602579157-9dr0ggevfjn0jtcie7ifkqhimq5tthea.apps.googleusercontent.com"
+      data-callback="handleGoogleCredential"
+      data-auto_prompt="false"
+    ></div>
+    <div
+      class="g_id_signin auth-form__google"
+      data-type="standard"
+      data-theme="filled_black"
+      data-text="continue_with"
+      data-shape="pill"
+      data-logo_alignment="left"
+    ></div>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <!-- Footer link -->
     <div class="auth-card__footer">
       <!-- "No account?" prompt + register link — each part translated separately -->
