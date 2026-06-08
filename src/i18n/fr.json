@@ -558,5 +558,22 @@
   "dash.pwd.error_network": "Erreur de connexion. Veuillez réessayer.",
   "dash.export.no_data": "Aucune donnée à exporter. Veuillez d'abord charger la liste des abonnés.",
   "dash.show_pwd.show": "Afficher le mot de passe",
-  "dash.show_pwd.hide": "Masquer le mot de passe"
+  "dash.show_pwd.hide": "Masquer le mot de passe",
+
+  "auth.verify_email.title": "Vérification de l'email",
+  "auth.verify_email.checking": "Vérification du lien...",
+  "auth.verify_email.success_title": "Email vérifié !",
+  "auth.verify_email.success_text": "Votre email a été vérifié avec succès. Vous pouvez maintenant vous connecter.",
+  "auth.verify_email.success_btn": "Se connecter",
+  "auth.verify_email.error_title": "Lien invalide",
+  "auth.verify_email.error_text": "Le lien de vérification est invalide ou expiré. Veuillez en demander un nouveau.",
+  "auth.verify_email.error_btn": "Accueil",
+  "auth.verify_email.no_token": "Lien de vérification introuvable. Veuillez vérifier votre email.",
+
+  "dash.verify_banner.text": "Confirmez votre email",
+  "dash.verify_banner.hint": "Vérifiez votre boîte de réception et cliquez sur le lien dans l'email.",
+  "dash.verify_banner.resend_btn": "Renvoyer",
+  "dash.verify_banner.sent": "Email envoyé ! Vérifiez votre boîte de réception.",
+  "dash.verify_banner.resend_error": "Échec de l'envoi. Veuillez réessayer.",
+  "dash.verify_banner.resend_network": "Erreur de connexion. Veuillez réessayer."
 }

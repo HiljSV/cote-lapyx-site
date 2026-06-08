@@ -558,5 +558,22 @@
   "dash.pwd.error_network": "Connection error. Please try again.",
   "dash.export.no_data": "No data to export. Please load the subscribers list first.",
   "dash.show_pwd.show": "Show password",
-  "dash.show_pwd.hide": "Hide password"
+  "dash.show_pwd.hide": "Hide password",
+
+  "auth.verify_email.title": "Email Verification",
+  "auth.verify_email.checking": "Checking link...",
+  "auth.verify_email.success_title": "Email verified!",
+  "auth.verify_email.success_text": "Your email has been verified successfully. You can now log in.",
+  "auth.verify_email.success_btn": "Log in",
+  "auth.verify_email.error_title": "Invalid link",
+  "auth.verify_email.error_text": "The verification link is invalid or has expired. Please request a new one.",
+  "auth.verify_email.error_btn": "Go home",
+  "auth.verify_email.no_token": "No verification link found. Please check your email.",
+
+  "dash.verify_banner.text": "Confirm your email",
+  "dash.verify_banner.hint": "Check your inbox and click the link in the email.",
+  "dash.verify_banner.resend_btn": "Resend",
+  "dash.verify_banner.sent": "Email sent! Check your inbox.",
+  "dash.verify_banner.resend_error": "Failed to send. Please try again.",
+  "dash.verify_banner.resend_network": "Connection error. Please try again."
 }

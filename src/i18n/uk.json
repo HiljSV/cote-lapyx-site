@@ -558,5 +558,22 @@
   "dash.pwd.error_network": "Помилка зʼєднання. Спробуйте ще раз.",
   "dash.export.no_data": "Немає даних для експорту. Спочатку завантажте список підписників.",
   "dash.show_pwd.show": "Показати пароль",
-  "dash.show_pwd.hide": "Сховати пароль"
+  "dash.show_pwd.hide": "Сховати пароль",
+
+  "auth.verify_email.title": "Підтвердження email",
+  "auth.verify_email.checking": "Перевіряємо посилання...",
+  "auth.verify_email.success_title": "Email підтверджено!",
+  "auth.verify_email.success_text": "Ваш email успішно підтверджено. Тепер ви можете увійти до акаунту.",
+  "auth.verify_email.success_btn": "Увійти",
+  "auth.verify_email.error_title": "Посилання недійсне",
+  "auth.verify_email.error_text": "Посилання для підтвердження недійсне або прострочене. Запросіть нове посилання.",
+  "auth.verify_email.error_btn": "На головну",
+  "auth.verify_email.no_token": "Посилання для підтвердження не знайдено. Перевірте email.",
+
+  "dash.verify_banner.text": "Підтвердьте email",
+  "dash.verify_banner.hint": "Перевірте вашу поштову скриньку та натисніть посилання у листі.",
+  "dash.verify_banner.resend_btn": "Надіслати знову",
+  "dash.verify_banner.sent": "Лист надіслано! Перевірте вашу поштову скриньку.",
+  "dash.verify_banner.resend_error": "Помилка надсилання. Спробуйте ще раз.",
+  "dash.verify_banner.resend_network": "Помилка зʼєднання. Спробуйте ще раз."
 }

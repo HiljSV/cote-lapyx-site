@@ -5,6 +5,14 @@
 // Import translate() for runtime i18n lookups — replaces hardcoded Ukrainian strings
 import { translate } from "@js/i18n.js";
 
+// =============================================================================
+// Turnstile configuration
+// TURNSTILE_SITE_KEY: set to a real key before deploying bot protection.
+// When left blank (""), the Turnstile script is NOT loaded and captchaToken
+// is sent as "" — the backend must accept empty tokens in dev/key-not-set mode.
+// =============================================================================
+const TURNSTILE_SITE_KEY = "";
+
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
@@ -219,6 +227,61 @@ function initLoginForm() {
 }
 
 // -----------------------------------------------------------------------------
+// Turnstile initialization
+// -----------------------------------------------------------------------------
+
+/**
+ * Load the Cloudflare Turnstile script and render the widget into
+ * #reg-turnstile-container.  Called only when TURNSTILE_SITE_KEY is non-empty.
+ *
+ * The rendered widget writes the token into the hidden input
+ * `cf-turnstile-response` (added automatically by Turnstile) which we read
+ * on submit.  We also keep a module-level _turnstileToken string for direct
+ * access via the callback.
+ */
+let _turnstileToken = "";
+
+function initTurnstile() {
+  // Guard: only load when a real key is configured
+  if (!TURNSTILE_SITE_KEY) return;
+
+  const container = document.getElementById("reg-turnstile-container");
+  if (!container) return;
+
+  // Callback invoked by Turnstile when the challenge is solved
+  window._onTurnstileSuccess = (token) => {
+    _turnstileToken = token;
+  };
+
+  // Callback invoked when the challenge expires — reset the stored token
+  window._onTurnstileExpire = () => {
+    _turnstileToken = "";
+  };
+
+  // Dynamically load the Turnstile script — only once per page
+  if (document.getElementById("cf-turnstile-script")) return;
+  const script = document.createElement("script");
+  script.id = "cf-turnstile-script";
+  script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+  script.async = true;
+  script.defer = true;
+
+  // Once the script loads, explicitly render the widget
+  script.onload = () => {
+    if (window.turnstile) {
+      window.turnstile.render(container, {
+        sitekey: TURNSTILE_SITE_KEY,
+        callback: window._onTurnstileSuccess,
+        "expired-callback": window._onTurnstileExpire,
+        theme: "dark",
+      });
+    }
+  };
+
+  document.head.appendChild(script);
+}
+
+// -----------------------------------------------------------------------------
 // Register form
 // -----------------------------------------------------------------------------
 
@@ -230,6 +293,8 @@ function initRegisterForm() {
   const emailInput = document.getElementById("reg-email");
   const passwordInput = document.getElementById("reg-password");
   const confirmInput = document.getElementById("reg-confirm");
+  // Honeypot field — should remain empty for real users
+  const honeypotInput = document.getElementById("reg-website");
   const nameError = document.getElementById("reg-name-error");
   const emailError = document.getElementById("reg-email-error");
   const passwordError = document.getElementById("reg-password-error");
@@ -243,6 +308,9 @@ function initRegisterForm() {
     document.getElementById("reg-strength-fill"),
     document.getElementById("reg-strength-label"),
   );
+
+  // Initialize Cloudflare Turnstile widget (no-op when key is blank)
+  initTurnstile();
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -260,6 +328,16 @@ function initRegisterForm() {
     const confirm = confirmInput.value;
     const role =
       form.querySelector('input[name="role"]:checked')?.value ?? "subscriber";
+
+    // Read honeypot value — bots typically fill this; real users leave it blank
+    const website = honeypotInput ? honeypotInput.value : "";
+
+    // Read Turnstile token: prefer module-level var (set by callback),
+    // fall back to hidden input created by Turnstile script
+    const captchaToken =
+      _turnstileToken ||
+      (document.querySelector('input[name="cf-turnstile-response"]')?.value ??
+        "");
 
     let valid = true;
 
@@ -301,7 +379,9 @@ function initRegisterForm() {
 
     if (!valid) return;
 
-    // Submit
+    // Submit — include honeypot (website) and captchaToken in payload.
+    // The backend silently rejects requests where website is non-empty
+    // and validates captchaToken with Cloudflare when a key is configured.
     setLoading(submitBtn, translate("auth.loading"));
 
     try {
@@ -312,7 +392,13 @@ function initRegisterForm() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, email, password }),
+          body: JSON.stringify({
+            name,
+            email,
+            password,
+            website,
+            captchaToken,
+          }),
           credentials: "include",
         },
       );
@@ -331,6 +417,11 @@ function initRegisterForm() {
             data.message ??
             translate("auth.error.register_failed"),
         );
+        // Reset Turnstile widget after a failed attempt so the user can retry
+        if (TURNSTILE_SITE_KEY && window.turnstile) {
+          window.turnstile.reset();
+          _turnstileToken = "";
+        }
       }
     } catch {
       showServerError(serverError, translate("auth.error.network"));

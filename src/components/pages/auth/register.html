@@ -226,6 +226,31 @@
         ></span>
       </div>
 
+      <!-- Honeypot field: visually hidden, off-screen (CSS .visually-hidden pattern).
+           Bots fill it; real users do not. tabindex="-1" prevents keyboard focus.
+           aria-hidden removes it from the a11y tree so screen readers skip it.
+           autocomplete="off" stops browsers and password managers from pre-filling it. -->
+      <div class="visually-hidden" aria-hidden="true">
+        <label for="reg-website">Website</label>
+        <input
+          type="text"
+          id="reg-website"
+          name="website"
+          tabindex="-1"
+          autocomplete="off"
+          value=""
+        />
+      </div>
+
+      <!-- Cloudflare Turnstile widget container.
+           Rendered by JS in auth.js when TURNSTILE_SITE_KEY is non-empty.
+           When key is blank the container stays empty and captchaToken = "". -->
+      <div
+        class="auth-form__turnstile"
+        id="reg-turnstile-container"
+        aria-live="polite"
+      ></div>
+
       <!-- Server error -->
       <div
         class="auth-form__server-error"

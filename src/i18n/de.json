@@ -558,5 +558,22 @@
   "dash.pwd.error_network": "Verbindungsfehler. Bitte erneut versuchen.",
   "dash.export.no_data": "Keine Daten zum Exportieren. Bitte laden Sie zuerst die Abonnentenliste.",
   "dash.show_pwd.show": "Passwort anzeigen",
-  "dash.show_pwd.hide": "Passwort verbergen"
+  "dash.show_pwd.hide": "Passwort verbergen",
+
+  "auth.verify_email.title": "E-Mail-Verifizierung",
+  "auth.verify_email.checking": "Link wird überprüft...",
+  "auth.verify_email.success_title": "E-Mail verifiziert!",
+  "auth.verify_email.success_text": "Ihre E-Mail wurde erfolgreich verifiziert. Sie können sich jetzt anmelden.",
+  "auth.verify_email.success_btn": "Anmelden",
+  "auth.verify_email.error_title": "Ungültiger Link",
+  "auth.verify_email.error_text": "Der Verifizierungslink ist ungültig oder abgelaufen. Bitte fordern Sie einen neuen an.",
+  "auth.verify_email.error_btn": "Startseite",
+  "auth.verify_email.no_token": "Kein Verifizierungslink gefunden. Bitte überprüfen Sie Ihre E-Mail.",
+
+  "dash.verify_banner.text": "E-Mail bestätigen",
+  "dash.verify_banner.hint": "Prüfen Sie Ihren Posteingang und klicken Sie auf den Link in der E-Mail.",
+  "dash.verify_banner.resend_btn": "Erneut senden",
+  "dash.verify_banner.sent": "E-Mail gesendet! Prüfen Sie Ihren Posteingang.",
+  "dash.verify_banner.resend_error": "Senden fehlgeschlagen. Bitte erneut versuchen.",
+  "dash.verify_banner.resend_network": "Verbindungsfehler. Bitte erneut versuchen."
 }

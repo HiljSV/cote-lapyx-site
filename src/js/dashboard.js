@@ -173,6 +173,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         loadProjects(0, projectsStatusFilter);
       }
 
+      // Show email verification banner when emailVerified is explicitly false.
+      // Passes the user's email so the resend handler can use it without a
+      // second /users/me fetch.
+      if (user.emailVerified === false) {
+        initEmailVerifyBanner(user.email);
+      }
+
       // Deep-link from the admin panel: open the post/project editor directly.
       // Supported query params (mutually exclusive):
       //   ?newPost=1            → new-post modal
@@ -208,6 +215,86 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Strip the params so a refresh / back-navigation doesn't reopen the modal.
     window.history.replaceState({}, "", window.location.pathname);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Email verification banner
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Reveal the #dash-verify-banner and wire the "Resend" button.
+   *
+   * The banner is shown when /users/me returns emailVerified === false.
+   * Clicking "Resend" POSTs to the public /auth/resend-verification endpoint
+   * with the user's email, then shows an inline "sent" or "error" confirmation.
+   *
+   * This is a public endpoint — no fetchWithAuth, plain fetch with credentials:'include'
+   * to match the pattern used for other public auth endpoints in auth.js.
+   *
+   * @param {string} userEmail - Email address of the current user (from /users/me)
+   */
+  function initEmailVerifyBanner(userEmail) {
+    const banner = document.getElementById("dash-verify-banner");
+    const resendBtn = document.getElementById("dash-verify-resend");
+    const feedback = document.getElementById("verify-banner-feedback");
+
+    // Guard: elements must exist
+    if (!banner || !resendBtn) return;
+
+    // Reveal the banner — stays visible until the user verifies their email
+    banner.removeAttribute("hidden");
+
+    // Wire the Resend button
+    resendBtn.addEventListener("click", async () => {
+      // Prevent double-click while the request is in flight
+      resendBtn.disabled = true;
+      const originalText = resendBtn.textContent;
+      resendBtn.textContent = translate("auth.loading");
+
+      // Clear any previous inline feedback message
+      if (feedback) feedback.textContent = "";
+
+      try {
+        // POST to public endpoint — plain fetch, credentials:'include' for cookie handling
+        const res = await fetch(
+          "https://api.cote-lapyx.com/api/v1/auth/resend-verification",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            // Send the email from /users/me — already known at banner init time
+            body: JSON.stringify({ email: userEmail }),
+            credentials: "include",
+          },
+        );
+
+        if (res.ok) {
+          // Show success confirmation inline inside the banner
+          if (feedback) {
+            feedback.textContent = translate("dash.verify_banner.sent");
+            feedback.className =
+              "dash-verify-banner__feedback dash-verify-banner__feedback--ok";
+          }
+        } else {
+          // Server returned an error — show translated error message
+          if (feedback) {
+            feedback.textContent = translate("dash.verify_banner.resend_error");
+            feedback.className =
+              "dash-verify-banner__feedback dash-verify-banner__feedback--err";
+          }
+        }
+      } catch {
+        // Network failure — show translated network error
+        if (feedback) {
+          feedback.textContent = translate("dash.verify_banner.resend_network");
+          feedback.className =
+            "dash-verify-banner__feedback dash-verify-banner__feedback--err";
+        }
+      } finally {
+        // Restore button state after the request completes
+        resendBtn.disabled = false;
+        resendBtn.textContent = originalText;
+      }
+    });
   }
 
   // ---------------------------------------------------------------------------
