@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Cote Lapyx API
-  version: 1.15.0
+  version: 1.16.0
   description: |
     REST API for cote-lapyx.com — a team website for Валерія, Сергій, Андрій.
 
@@ -213,9 +213,16 @@ components:
     UserStatus:
       type: string
       description: |
-        Account lifecycle status. `active` accounts can sign in; `blocked` and
-        `suspended` accounts are rejected at login.
-      enum: [active, blocked, suspended]
+        Account lifecycle status.
+        - `active` — normal account; sign-in allowed.
+        - `blocked` — owner-blocked; sign-in rejected.
+        - `suspended` — temporary restriction by owner; sign-in rejected.
+        - `archived` — dormant after 1 year of inactivity; sign-in reactivates the account
+          automatically (status flips back to `active`). No data is deleted.
+        - `pending_deletion` — self-deletion requested via `DELETE /users/me`; a 30-day grace
+          period is running. Signing in within those 30 days cancels the deletion and restores
+          `active`. After 30 days the backend permanently purges the account.
+      enum: [active, blocked, suspended, archived, pending_deletion]
 
     # --- User Activity (F1 — telemetry foundation) ---
 
@@ -2447,6 +2454,61 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "422":
           $ref: "#/components/responses/ValidationError"
+
+    # F3 — self-service account deletion (soft, 30-day grace period)
+    delete:
+      tags: [Users]
+      summary: Request deletion of own account (self-service)
+      operationId: deleteMyAccount
+      security:
+        - bearerAuth: []
+      # Any authenticated user (owner or subscriber) may request deletion of their OWN account.
+      x-roles: [owner, subscriber]
+      description: |
+        Initiates a **soft-delete** of the caller's own account.
+
+        **Grace period flow:**
+        1. Account status is set to `pending_deletion`.
+        2. All active refresh tokens for the account are revoked immediately.
+        3. A confirmation email is sent to the account's registered email address.
+        4. The caller is automatically logged out (the access token remains valid for
+           its remaining TTL, max 15 min; the backend rejects it on any subsequent
+           privileged action once the status is `pending_deletion`).
+        5. If the user logs in again within **30 days**, the deletion is cancelled
+           automatically and the account status is restored to `active`.
+        6. After 30 days with no login, the backend permanently purges the account
+           and all associated data (posts authored, comments, subscriptions, favorites,
+           refresh tokens, upload files, activity log).
+
+        **Owner accounts:** owners cannot delete their own account if doing so would
+        leave zero active owners on the platform (returns 409).
+
+        No request body and no path parameters are required — the endpoint is
+        scoped to the authenticated caller's account.
+      responses:
+        # 204 = deletion request accepted; grace period started; user logged out
+        "204":
+          description: |
+            Deletion request accepted. Account status is now `pending_deletion`.
+            All refresh tokens have been revoked and a confirmation email has been sent.
+            The caller is considered logged out.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        # 409 = last active owner; deletion would leave the platform ownerless
+        "409":
+          description: |
+            Cannot delete the last remaining owner account. At least one active
+            `owner` account must exist at all times.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+              example:
+                type: https://cote-lapyx.com/errors/last-owner
+                title: Conflict
+                status: 409
+                detail: Cannot delete the last active owner account.
+                instance: /api/v1/users/me
 
   /users/me/comments:
     get:
