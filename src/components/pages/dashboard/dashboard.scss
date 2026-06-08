@@ -1867,3 +1867,100 @@
     }
   }
 }
+
+// -----------------------------------------------------------------------------
+// Email verification banner — shown when emailVerified === false
+// -----------------------------------------------------------------------------
+
+/* Banner: full-width strip inside dash-main, above all section panels.
+   Uses amber/warning colour to draw attention without being alarming. */
+.dash-verify-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  background: rgba(255, 170, 0, 0.08);
+  border: 1px solid rgba(255, 170, 0, 0.35);
+  box-shadow:
+    0 0 8px rgba(255, 170, 0, 0.15),
+    inset 0 0 8px rgba(255, 170, 0, 0.04);
+
+  /* [hidden] override — browser default hidden conflicts with flex */
+  &[hidden] {
+    display: none;
+  }
+
+  /* Warning icon — amber */
+  &__icon {
+    flex-shrink: 0;
+    color: #ffaa00;
+    margin-top: 2px;
+  }
+
+  /* Text block: title + hint + feedback, grows to fill available space */
+  &__body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  /* Banner title (strong) */
+  &__title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffaa00;
+    display: block;
+  }
+
+  /* Hint text below the title */
+  &__hint {
+    font-size: 13px;
+    color: $text-secondary;
+    display: block;
+    line-height: 1.5;
+  }
+
+  /* Inline feedback: shown after resend attempt (success or error) */
+  &__feedback {
+    font-size: 13px;
+    display: block;
+    margin-top: 4px;
+
+    /* Success feedback colour — neon green */
+    &--ok {
+      color: $neon-green;
+    }
+
+    /* Error feedback colour — magenta */
+    &--err {
+      color: $neon-magenta;
+    }
+  }
+
+  /* Resend button — aligned to the right, does not shrink */
+  &__btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+    align-self: center;
+  }
+
+  /* Mobile: stack body and button vertically */
+  @media (max-width: toEm($mobile)) {
+    flex-wrap: wrap;
+
+    &__btn {
+      width: 100%;
+      justify-content: center;
+      margin-top: 8px;
+    }
+  }
+
+  /* Mobile S: reduce horizontal padding */
+  @media (max-width: toEm($mobileSmall)) {
+    padding: 12px 14px;
+  }
+}

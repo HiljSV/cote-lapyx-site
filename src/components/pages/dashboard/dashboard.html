@@ -291,6 +291,64 @@
       <span data-i18n="dash.btn.menu">Меню</span>
     </button>
 
+    <!-- ===== Email verification banner =====
+         Hidden by default; JS reveals when /users/me returns emailVerified=false.
+         Remains visible across all sections (positioned above all panels).
+         Resend button POSTs /auth/resend-verification with the current user's email.
+         The banner auto-hides when emailVerified becomes true. -->
+    <div
+      class="dash-verify-banner"
+      id="dash-verify-banner"
+      role="alert"
+      aria-live="polite"
+      hidden
+    >
+      <!-- Banner icon: warning -->
+      <svg
+        class="dash-verify-banner__icon"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+        />
+      </svg>
+      <!-- Banner text block -->
+      <div class="dash-verify-banner__body">
+        <!-- Banner heading: translated via data-i18n -->
+        <strong
+          class="dash-verify-banner__title"
+          data-i18n="dash.verify_banner.text"
+          >Підтвердьте email</strong
+        >
+        <!-- Banner hint: translated via data-i18n -->
+        <span
+          class="dash-verify-banner__hint"
+          data-i18n="dash.verify_banner.hint"
+          >Перевірте вашу поштову скриньку та натисніть посилання у листі.</span
+        >
+        <!-- Inline feedback — shown by JS after resend attempt -->
+        <span
+          class="dash-verify-banner__feedback"
+          id="verify-banner-feedback"
+          aria-live="polite"
+        ></span>
+      </div>
+      <!-- Resend button: calls resend-verification API via JS -->
+      <button
+        type="button"
+        class="btn btn--ghost btn--sm dash-verify-banner__btn"
+        id="dash-verify-resend"
+        data-i18n="dash.verify_banner.resend_btn"
+      >
+        Надіслати знову
+      </button>
+    </div>
+    <!-- ===== /Email verification banner ===== -->
+
     <!-- ===== SECTION: OVERVIEW ===== -->
     <div class="dash-section-panel is-active" data-panel="overview">
       <!-- ===== Overview: welcome card — shown for non-OWNER by JS ===== -->
