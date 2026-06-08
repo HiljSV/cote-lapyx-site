@@ -2178,9 +2178,11 @@ components:
           nullable: true
           description: |
             ISO 8601 UTC timestamp for expected maintenance end time.
-            Send `null` to clear an existing ETA (maintenance flag is left unchanged).
-            Setting an ETA does NOT automatically toggle `maintenanceMode`; set both
-            fields in the same request when enabling maintenance with a known deadline.
+            Partial-update semantics (like all settings fields): omit / send `null`
+            to leave the current value UNCHANGED. The ETA is cleared automatically
+            when `maintenanceMode` is set to `false` (ending maintenance clears any
+            stale ETA). Setting an ETA does NOT toggle `maintenanceMode`; send both
+            fields together when enabling maintenance with a known deadline.
           example: "2026-06-10T06:00:00Z"
 
     # F064: slim public payload returned by GET /site-settings/public.
@@ -5529,8 +5531,9 @@ paths:
         **F064 — Maintenance mode + ETA:**
         Set `maintenanceMode: true` to activate soft maintenance mode.
         Optionally include `maintenanceUntil` with an ISO 8601 UTC timestamp so the
-        frontend banner can display a localised countdown.  Set `maintenanceUntil: null`
-        to clear an existing ETA without toggling the maintenance flag.
+        frontend banner can display a localised countdown. `maintenanceUntil` uses
+        partial-update semantics (omit/null = unchanged) and is cleared automatically
+        when `maintenanceMode` is set to `false`.
 
         **Cache invalidation:** the backend maintains an in-memory cache of the
         maintenance flag and `maintenanceUntil` (TTL ≤ 10 s). A successful PATCH
