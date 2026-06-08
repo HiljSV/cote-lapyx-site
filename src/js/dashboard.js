@@ -143,12 +143,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       myUserId = user.id;
 
-      // Reveal OWNER-only nav items and load overview stats
+      // Gate overview content by role:
+      // OWNER → reveal owner-only widgets (stat tiles + recent lists) + load stats
+      // non-OWNER → hide owner-only widgets, show subscriber welcome card instead
       if (user.role === "OWNER") {
+        // Reveal owner-only nav items (Posts, Projects, Comments, Subscribers)
         document
           .querySelectorAll("[data-owner-nav]")
           .forEach((el) => el.removeAttribute("hidden"));
+
+        // Reveal owner-only overview widgets (stat tiles, recent posts, recent projects)
+        document
+          .querySelectorAll("[data-owner-overview]")
+          .forEach((el) => el.removeAttribute("hidden"));
+
+        // Load and populate the stats + recent content into the now-visible widgets
         loadOverviewStats(user.id);
+      } else {
+        // Non-OWNER (SUBSCRIBER etc.) — show welcome card, keep owner widgets hidden
+        showSubscriberWelcome(user);
       }
 
       // Load data for whichever panel the user may have navigated to
@@ -309,12 +322,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  // "All posts / All projects" shortcut links inside overview panel
+  // Section shortcut links — used by overview "All posts/projects" links AND
+  // the subscriber welcome card quick-links (Profile / My Subscriptions / Favorites).
+  // Calls activateSection() + triggers the appropriate data loader for sections
+  // that need it (my-subscriptions, favorites), mirroring the nav-link handler.
   document.querySelectorAll("[data-section-link]").forEach((el) => {
     el.addEventListener("click", (e) => {
       e.preventDefault();
       const section = el.dataset.sectionLink;
-      if (section) activateSection(section);
+      if (!section) return;
+      activateSection(section);
+      // Trigger data loaders for subscriber-relevant sections
+      if (section === "my-subscriptions") {
+        loadMySubscriptions();
+      }
+      if (section === "favorites") {
+        loadFavorites(0);
+      }
     });
   });
 
@@ -475,6 +499,41 @@ document.addEventListener("DOMContentLoaded", async () => {
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
+  }
+
+  // ---------------------------------------------------------------------------
+  // Subscriber overview welcome — non-OWNER users see this instead of stat tiles
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Show the subscriber welcome card for non-OWNER users.
+   *
+   * Reveals #overview-welcome by removing [hidden].
+   * Injects a personalised greeting using escHtml(user.name) — XSS-safe.
+   * The quick-link cards use [data-section-link] which is already wired to
+   * activateSection() via the event delegation block set up above.
+   *
+   * Owner-only widgets (data-owner-overview) remain hidden — no stats or
+   * recent-posts/projects loaders are called for non-OWNER users, so no element
+   * will be stuck on "Завантаження...".
+   *
+   * @param {Object} user - User object from /users/me response
+   */
+  function showSubscriberWelcome(user) {
+    // Reveal the welcome card
+    const welcomeEl = document.getElementById("overview-welcome");
+    if (!welcomeEl) return;
+    welcomeEl.removeAttribute("hidden");
+
+    // Inject greeting — use translate() for the template, escHtml() for the name
+    // so special characters in the user's name cannot break the DOM.
+    // Pattern: "Вітаємо, {name}!" where {name} is replaced with the safe name.
+    const greetingEl = document.getElementById("overview-welcome-greeting");
+    if (greetingEl && user.name) {
+      const template = translate("dash.overview.welcome_greeting");
+      // Replace {name} placeholder with the HTML-escaped user name
+      greetingEl.innerHTML = template.replace("{name}", escHtml(user.name));
+    }
   }
 
   async function loadOverviewStats(authorId) {
