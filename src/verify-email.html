@@ -1,0 +1,30 @@
+<script type="module" src="@js/verify-email.js"></script>
+<template
+  src="@components/templates/inner/inner.html"
+  locals='{
+  "title": "Підтвердження email — COTE-LAPYX",
+  "lang": "uk",
+  "preloader": {"enable":"false","once":"false"},
+  "keywords": "",
+  "description": "Підтвердження email адреси cote-lapyx",
+  "canonical": "",
+  "og_type": "website",
+  "og_locale": "uk_UA"
+}'
+>
+  <block name="header">
+    <include
+      src="@components/layout/header/header.html"
+      locals='{"active":"Login"}'
+    ></include>
+  </block>
+  <block name="main">
+    <include
+      src="@components/pages/auth/verify-email.html"
+      locals="{}"
+    ></include>
+  </block>
+  <block name="footer">
+    <include src="@components/layout/footer/footer.html" locals="{}"></include>
+  </block>
+</template>

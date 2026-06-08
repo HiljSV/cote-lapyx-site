@@ -1,0 +1,137 @@
+<!-- ===== Section: Email Verification ===== -->
+<!-- This section is the full content of the verify-email page.
+     JS (verify-email.js) reads ?token= from the URL, POSTs to /auth/verify-email,
+     and swaps the loading state for a success or error state. -->
+<section class="auth-section">
+  <div class="auth-card" style="width: 100%; max-width: 440px">
+    <!-- Verify-email card header -->
+    <div class="auth-card__header">
+      <!-- Page title: translated via data-i18n -->
+      <h1 class="auth-card__title" data-i18n="auth.verify_email.title">
+        Підтвердження email
+      </h1>
+    </div>
+
+    <!-- ===== State: checking (default, shown on page load) ===== -->
+    <!-- Replaced by success/error state by JS after the API call completes -->
+    <div
+      class="auth-verify__state auth-verify__state--checking"
+      id="verify-checking"
+      aria-live="polite"
+    >
+      <!-- Spinner icon -->
+      <div class="auth-verify__icon auth-verify__icon--spin" aria-hidden="true">
+        <svg
+          width="48"
+          height="48"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="10" opacity="0.25" />
+          <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round" />
+        </svg>
+      </div>
+      <!-- Checking message — translated via data-i18n -->
+      <p class="auth-verify__message" data-i18n="auth.verify_email.checking">
+        Перевіряємо посилання...
+      </p>
+    </div>
+
+    <!-- ===== State: success (hidden until JS reveals it) ===== -->
+    <div
+      class="auth-verify__state auth-verify__state--success"
+      id="verify-success"
+      hidden
+      aria-live="polite"
+    >
+      <!-- Success icon -->
+      <div
+        class="auth-verify__icon auth-verify__icon--success"
+        aria-hidden="true"
+      >
+        <svg
+          width="48"
+          height="48"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"
+          />
+        </svg>
+      </div>
+      <!-- Success heading — translated via data-i18n -->
+      <h2
+        class="auth-verify__heading"
+        data-i18n="auth.verify_email.success_title"
+      >
+        Email підтверджено!
+      </h2>
+      <!-- Success body text — translated via data-i18n -->
+      <p
+        class="auth-verify__message"
+        data-i18n="auth.verify_email.success_text"
+      >
+        Ваш email успішно підтверджено. Тепер ви можете увійти до акаунту.
+      </p>
+      <!-- CTA: go to login -->
+      <a
+        href="/login.html"
+        class="btn btn--cyan btn--lg auth-verify__btn"
+        data-i18n="auth.verify_email.success_btn"
+      >
+        Увійти
+      </a>
+    </div>
+
+    <!-- ===== State: error (hidden until JS reveals it) ===== -->
+    <div
+      class="auth-verify__state auth-verify__state--error"
+      id="verify-error"
+      hidden
+      aria-live="polite"
+    >
+      <!-- Error icon -->
+      <div
+        class="auth-verify__icon auth-verify__icon--error"
+        aria-hidden="true"
+      >
+        <svg
+          width="48"
+          height="48"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+          />
+        </svg>
+      </div>
+      <!-- Error heading — translated via data-i18n -->
+      <h2
+        class="auth-verify__heading"
+        data-i18n="auth.verify_email.error_title"
+      >
+        Посилання недійсне
+      </h2>
+      <!-- Error body text: set by JS (may be API message or translated fallback) -->
+      <p class="auth-verify__message" id="verify-error-text">
+        Посилання для підтвердження недійсне або прострочене.
+      </p>
+      <!-- CTA: go home -->
+      <a
+        href="/"
+        class="btn btn--ghost btn--lg auth-verify__btn"
+        data-i18n="auth.verify_email.error_btn"
+      >
+        На головну
+      </a>
+    </div>
+  </div>
+</section>
+<!-- ===== /Section: Email Verification ===== -->
