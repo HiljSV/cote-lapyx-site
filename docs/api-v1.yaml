@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Cote Lapyx API
-  version: 1.16.0
+  version: 1.17.0
   description: |
     REST API for cote-lapyx.com — a team website for Валерія, Сергій, Андрій.
 
@@ -241,6 +241,7 @@ components:
         - `SUBSCRIPTION_CANCEL` — an existing subscription was cancelled.
         - `STATUS_CHANGE` — an owner changed the account status (e.g. blocked → active).
         - `ACCOUNT_DELETE` — the user account was deleted (admin or self-service).
+        - `EMAIL_VERIFIED` — the user confirmed their email address via POST /auth/verify-email (FEAT-061).
       enum:
         - REGISTRATION
         - LOGIN
@@ -251,6 +252,9 @@ components:
         - SUBSCRIPTION_CANCEL
         - STATUS_CHANGE
         - ACCOUNT_DELETE
+        # FEAT-061: recorded when a LOCAL user successfully consumes their email
+        # verification token via POST /auth/verify-email.
+        - EMAIL_VERIFIED
 
     # --- Problem Detail (RFC 9457) ---
 
@@ -351,6 +355,34 @@ components:
           minLength: 8
           maxLength: 72
           example: "S3cur3P@ss!"
+        # Bot protection — Cloudflare Turnstile CAPTCHA token (FEAT-061).
+        # Optional when app.turnstile.secret-key is blank (dev/staging skip mode).
+        # When the secret key is configured the server verifies this token against
+        # https://challenges.cloudflare.com/turnstile/v0/siteverify; absence or
+        # invalid value → 400.  Frontend omits this field when the public site-key
+        # config is blank (widget not rendered).
+        captchaToken:
+          type: string
+          description: |
+            Cloudflare Turnstile challenge token obtained from the frontend widget.
+            Optional when the server's `app.turnstile.secret-key` is blank (graceful
+            skip — verification is bypassed). When the secret key is configured,
+            this field is required; an absent or invalid token returns 400.
+          example: "0.abc123..."
+        # Honeypot field — must be absent or empty in legitimate requests (FEAT-061).
+        # Hidden by CSS in the frontend form; bots fill it automatically.
+        # Non-blank value → server silently rejects with 400 (generic error, no
+        # indication that the field triggered rejection).
+        # Marked x-internal so Swagger UI hides it from human-readable docs.
+        website:
+          type: string
+          maxLength: 255
+          description: |
+            Honeypot anti-bot trap. Legitimate clients MUST leave this field absent
+            or empty. A non-blank value causes the server to silently reject the
+            registration request with a generic 400 (no enumeration of the reason).
+            The frontend renders this field hidden (`aria-hidden`, `autocomplete=off`).
+          x-internal: true
 
     RefreshRequest:
       type: object
@@ -379,6 +411,42 @@ components:
             Optional — backward-compat only. Browser clients MUST omit this field;
             the server reads and clears the `cl_refresh` cookie instead.
 
+    # FEAT-061: email verification token consumption payload.
+    # Sent by the frontend verify-email.html page after reading ?token from the URL.
+    VerifyEmailRequest:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: |
+            The one-time verification token extracted from the confirmation link
+            (e.g. `?token=<hex-string>`). The server looks this up in
+            `email_verification_tokens`, checks expiry, then marks the user verified
+            and deletes the token row.
+          example: "a3f8b2c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1"
+
+    # FEAT-061: resend-verification request payload.
+    # The endpoint always returns 202 regardless of whether the email exists to
+    # prevent account enumeration.
+    ResendVerificationRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+          description: |
+            The email address of the account for which to resend the verification link.
+            The server silently ignores this request when:
+            - No LOCAL account with this email exists.
+            - The account is already verified.
+            - The account belongs to a Google OAuth user (always verified).
+            In all cases the response is 202 to prevent account enumeration.
+          example: andrii@cote-lapyx.com
+
     AuthResponse:
       type: object
       # SEC-1: refreshToken removed from body — delivered via cl_refresh HttpOnly cookie.
@@ -405,7 +473,7 @@ components:
 
     UserDTO:
       type: object
-      required: [id, name, email, role, createdAt]
+      required: [id, name, email, role, emailVerified, createdAt]
       properties:
         id:
           type: integer
@@ -420,6 +488,24 @@ components:
           example: andrii@cote-lapyx.com
         role:
           $ref: "#/components/schemas/UserRole"
+        # FEAT-061: email verification status for LOCAL-auth accounts.
+        # Always true for Google OAuth users (verified by Google at sign-in).
+        # False for LOCAL registrations until the user clicks the verification link.
+        # Unverified LOCAL users can log in but cannot comment or subscribe (403).
+        # Existing users before this feature was deployed are backfilled to true
+        # (Flyway V22 UPDATE users SET email_verified = true).
+        emailVerified:
+          type: boolean
+          description: |
+            Indicates whether the account email address has been confirmed.
+            - `true` — verified (either Google OAuth login, or LOCAL registration
+              where the user clicked the email confirmation link).
+            - `false` — LOCAL registration pending email verification. The user can
+              log in but commenting and creating subscriptions are blocked (403)
+              until verification is complete.
+            Existing accounts are backfilled to `true` at migration time so they
+            are not unexpectedly locked out.
+          example: true
         avatar:
           type: string
           format: uri
@@ -2205,7 +2291,22 @@ paths:
       security: []
       x-roles: [public]
       description: |
-        Creates a new account with role `subscriber`. Rate-limited to 3 requests per 10 minutes per IP.
+        Creates a new LOCAL account with role `subscriber`.
+        Rate-limited to 3 requests per 10 minutes per IP.
+
+        **Bot protection (FEAT-061):**
+        - `captchaToken` — Cloudflare Turnstile response token. Required when the
+          server has `app.turnstile.secret-key` configured; silently skipped when
+          the key is blank (dev / staging). Frontend renders the widget only when
+          the public site-key config is set.
+        - `website` — honeypot field. Must be left absent or empty. Bots that fill
+          it receive a generic 400 with no indication the trap was triggered.
+
+        **Email verification (FEAT-061):**
+        After successful registration, `user.emailVerified` is `false` and a
+        verification email is dispatched. The user can log in immediately but
+        cannot comment or create subscriptions until they verify their email via
+        `POST /auth/verify-email`.
 
         On success the server sets the `cl_refresh` HttpOnly cookie (see `Set-Cookie` header).
         The response body contains only `user` + `accessToken`; the refresh token is NOT in the body.
@@ -2405,6 +2506,113 @@ paths:
                 $ref: "#/components/schemas/UserDTO"
         "401":
           $ref: "#/components/responses/Unauthorized"
+
+  # FEAT-061: email address verification — consume one-time token sent by email.
+  /auth/verify-email:
+    post:
+      tags: [Auth]
+      summary: Verify email address with a one-time token
+      operationId: verifyEmail
+      # Public — the user may not be logged in when clicking the link in their email.
+      security: []
+      x-roles: [public]
+      description: |
+        Consumes the one-time token included in the email verification link sent
+        after LOCAL registration.
+
+        **Flow:**
+        1. Frontend reads `?token=` from the URL on `verify-email.html`.
+        2. Frontend POSTs the token to this endpoint.
+        3. Server validates: token exists in `email_verification_tokens`, has not
+           expired (48 h TTL), and belongs to an unverified LOCAL user.
+        4. On success: `users.email_verified` is set to `true`, the token row is
+           deleted, and the response is 200.
+        5. On failure (token not found, expired, or already consumed): 400 with
+           `ProblemDetail` — the user is prompted to request a new link.
+
+        **Google OAuth users** never need this flow — their `emailVerified` is set
+        to `true` automatically at sign-in.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyEmailRequest"
+      responses:
+        "200":
+          description: Email verified successfully. The user's `emailVerified` flag is now `true`.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [message]
+                properties:
+                  message:
+                    type: string
+                    description: Human-readable confirmation message.
+                    example: "Email address verified successfully."
+        "400":
+          description: |
+            Token is invalid (not found), expired (past 48 h TTL), or has already
+            been consumed. The user should request a new verification link via
+            `POST /auth/resend-verification`.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+              example:
+                type: https://cote-lapyx.com/errors/email-token-invalid
+                title: Invalid or Expired Token
+                status: 400
+                detail: The verification token is invalid or has expired. Please request a new link.
+                instance: /api/v1/auth/verify-email
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  # FEAT-061: resend email verification link.
+  # Always 202 regardless of account existence to prevent account enumeration.
+  /auth/resend-verification:
+    post:
+      tags: [Auth]
+      summary: Resend the email verification link
+      operationId: resendVerificationEmail
+      # Public — the user may not be logged in yet.
+      security: []
+      x-roles: [public]
+      description: |
+        Triggers a new verification email for a LOCAL account that has not yet
+        confirmed its email address.
+
+        **Anti-enumeration guarantee:** this endpoint always returns `202 Accepted`
+        regardless of whether the supplied email matches an existing account, is
+        already verified, or belongs to a Google OAuth user. This is intentional
+        to prevent attackers from discovering which email addresses are registered.
+
+        **Rate limit:** 3 requests per 10 minutes per IP (enforced in `RateLimitFilter`).
+
+        **Server behaviour (internal, not exposed to client):**
+        - If a LOCAL unverified account with this email exists: regenerate the
+          verification token (invalidate previous tokens for the user), send the
+          confirmation email.
+        - In all other cases: silently do nothing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResendVerificationRequest"
+      responses:
+        "202":
+          description: |
+            Request accepted. If a matching unverified LOCAL account exists, a
+            new verification email has been dispatched. The response body is
+            intentionally empty to prevent account enumeration.
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
 
   # ---------------------------------------------------------------------------
   # Users (self-service)
