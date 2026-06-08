@@ -108,8 +108,9 @@ async function verifyToken() {
         data.detail ||
         data.message ||
         translate("auth.verify_email.error_text");
-      // escHtml because message comes from API (untrusted)
-      showError(escHtml(message));
+      // showError assigns via textContent, which already neutralizes HTML —
+      // pass the raw message (no escHtml, otherwise entities would render literally)
+      showError(message);
     }
   } catch {
     // Network failure — show a generic translated error
