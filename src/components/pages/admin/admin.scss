@@ -662,6 +662,421 @@
   }
 }
 
+// =============================================================================
+// User Detail Panel — full-page admin view for a single user
+// Replaces the old minimal edit modal (openUserEditModal).
+// Sections: header card · management · telemetry · activity timeline.
+// =============================================================================
+
+/* ── user-detail: back navigation bar ── */
+.user-detail__nav {
+  /* Spacing above the header card */
+  margin-bottom: 20px;
+}
+
+/* ── user-detail: back button inherits .btn .btn--ghost .btn--sm ── */
+/* Extra gap between arrow icon and label text */
+.user-detail__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── user-detail header card — glass card with avatar, name, badges ── */
+.user-detail__header-card {
+  /* Loading state: centered text while fetch is in flight */
+  .user-detail__loading {
+    text-align: center;
+    color: $text-muted;
+    font-size: 14px;
+    padding: 24px 0;
+  }
+}
+
+/* header-body: flex row (avatar left, name-group center, meta-row below) */
+.user-detail__header-body {
+  /* Desktop: avatar | name-group — side by side */
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+
+  /* Tablet: wrap so meta-row spans full width */
+  @media (max-width: 767.98px) {
+    gap: 16px;
+  }
+}
+
+/* Large avatar circle — image or initials */
+.user-detail__avatar {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  /* Gradient background for initials fallback */
+  background: linear-gradient(
+    135deg,
+    rgba($neon-magenta, 0.15),
+    rgba($neon-cyan, 0.15)
+  );
+  border: 2px solid rgba($neon-cyan, 0.4);
+  /* Initials text style */
+  font-family: $fontHeading;
+  font-size: 28px;
+  font-weight: 700;
+  color: $neon-cyan;
+  text-shadow: 0 0 12px rgba($neon-cyan, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Clip image when avatar URL is set */
+  overflow: hidden;
+
+  /* Image variant — applied by JS when avatar URL is available */
+  &--img {
+    background: none;
+    border-color: rgba($neon-cyan, 0.2);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+  }
+
+  /* Mobile: slightly smaller avatar */
+  @media (max-width: 479.98px) {
+    width: 60px;
+    height: 60px;
+    font-size: 22px;
+  }
+}
+
+/* name-group: display name + username + email row — flex column */
+.user-detail__name-group {
+  flex: 1;
+  min-width: 0; /* allow text to shrink and truncate */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Large display name heading */
+.user-detail__display-name {
+  font-family: $fontHeading;
+  font-size: 22px;
+  font-weight: 700;
+  color: $text-primary;
+  letter-spacing: 0.02em;
+  /* Truncate if very long */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  @media (max-width: 479.98px) {
+    font-size: 18px;
+  }
+}
+
+/* @username line — muted, smaller */
+.user-detail__username {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 13px;
+  color: $text-muted;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Email row: email text + verified/unverified badge inline */
+.user-detail__email-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: $text-primary;
+  flex-wrap: wrap;
+}
+
+/* Email verified / unverified badge chips */
+.user-detail__verified {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+
+  /* Verified: green */
+  &--ok {
+    color: $neon-green;
+    border: 1px solid rgba($neon-green, 0.4);
+    background: rgba($neon-green, 0.07);
+  }
+
+  /* Unverified: amber/yellow */
+  &--no {
+    color: #ffaa00;
+    border: 1px solid rgba(#ffaa00, 0.4);
+    background: rgba(#ffaa00, 0.07);
+  }
+}
+
+/* meta-row: badges + provider + since — wraps on mobile */
+.user-detail__meta-row {
+  /* Span the full header width — sits below name-group */
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+/* Auth provider chip (LOCAL / GOOGLE) */
+.user-detail__provider {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: $fontHeading;
+  letter-spacing: 0.05em;
+  color: $text-muted;
+  border: 1px solid $border-cyan;
+  background: rgba($neon-cyan, 0.03);
+  text-transform: uppercase;
+}
+
+/* "Member since" text chip */
+.user-detail__since {
+  font-size: 12px;
+  color: $text-muted;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+// ── user-detail: management section ──────────────────────────────────────────
+
+/* Management form: role + status fields in a flex row */
+.user-detail__mgmt-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+/* Individual form field: label above, select below */
+.user-detail__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+}
+
+/* Field label text */
+.user-detail__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: $text-muted;
+  font-family: $fontHeading;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Shared select sizing — inherits dash-profile-form__input shape */
+.user-detail__select {
+  /* Remove default bottom margin from the input class */
+  margin-bottom: 0;
+
+  /* Small variant for the activity filter */
+  &--sm {
+    padding: 6px 10px;
+    font-size: 12px;
+    min-width: 160px;
+  }
+}
+
+/* Management actions: save button + feedback span */
+.user-detail__mgmt-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  /* Push the actions row to align with the bottom of fields */
+  padding-bottom: 1px;
+}
+
+/* Inline save feedback message */
+.user-detail__feedback {
+  font-size: 13px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Success state */
+  &--success {
+    color: $neon-green;
+  }
+
+  /* Error state */
+  &--error {
+    color: $neon-magenta;
+  }
+}
+
+/* Danger zone sub-block — red border to signal destructive action */
+.user-detail__danger-zone {
+  padding: 16px 20px;
+  border: 1px solid rgba($neon-magenta, 0.35);
+  border-radius: 10px;
+  background: rgba($neon-magenta, 0.03);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Danger zone title */
+.user-detail__danger-title {
+  flex: 1;
+  font-family: $fontHeading;
+  font-size: 13px;
+  font-weight: 700;
+  color: $neon-magenta;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+// ── user-detail: telemetry section ───────────────────────────────────────────
+
+/* Definition list grid — 2-column on desktop, 1-column on mobile */
+.user-detail__telemetry-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+}
+
+/* Single telemetry row: label | value */
+.user-detail__telemetry-row {
+  display: grid;
+  /* Desktop: 200px label, rest = value */
+  grid-template-columns: 200px 1fr;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba($border-cyan, 0.4);
+
+  /* Last row: no bottom border */
+  &:last-child {
+    border-bottom: none;
+  }
+
+  /* Mobile: stack label above value */
+  @media (max-width: 479.98px) {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+
+/* Telemetry row label (dt) */
+.user-detail__telemetry-label {
+  font-family: $fontHeading;
+  font-size: 12px;
+  font-weight: 600;
+  color: $text-muted;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Telemetry row value (dd) */
+.user-detail__telemetry-value {
+  font-size: 13px;
+  color: $text-primary;
+  margin: 0;
+  word-break: break-all;
+
+  /* Monospace variant for IPs and user-agent strings */
+  &--mono {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 12px;
+  }
+}
+
+// ── user-detail: activity table ───────────────────────────────────────────────
+
+/* Activity filter label+select wrapper */
+.user-detail__activity-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Filter label text — small, muted */
+.user-detail__filter-label {
+  font-size: 12px;
+  color: $text-muted;
+  white-space: nowrap;
+}
+
+/* Activity list — 4-column grid (type · time · IP · detail) */
+.dash-list--activity {
+  /* Desktop: type 160px, time 160px, IP 120px, detail 1fr */
+  .dash-list__head,
+  .dash-list__row {
+    grid-template-columns: 160px 160px 120px 1fr;
+  }
+
+  /* Tablet: hide detail column; 3 columns */
+  @media (max-width: 767.98px) {
+    .dash-list__head,
+    .dash-list__row {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+
+    /* Hide detail column on tablet */
+    .dash-list__row > div:nth-child(4) {
+      display: none;
+    }
+
+    .dash-list__head > div:nth-child(4) {
+      display: none;
+    }
+  }
+
+  /* Mobile: 2 columns (type + time), stack others */
+  @media (max-width: 479.98px) {
+    .dash-list__head {
+      display: none; /* hide header row on mobile — labels in data-label */
+    }
+
+    .dash-list__row {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* Hide IP + detail on mobile small */
+    .dash-list__row > div:nth-child(3),
+    .dash-list__row > div:nth-child(4) {
+      display: none;
+    }
+  }
+}
+
+/* Activity type chip — icon + label inline */
+.activity-type-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: $fontHeading;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
 // ── Analytics panel ─────────────────────────────────────────────────────────
 
 /* Period selector bar */
