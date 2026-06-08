@@ -18,6 +18,13 @@ import {
 // Auto-initialises on DOMContentLoaded; no-ops on pages without [data-social-slot]
 import "@js/socialLinks.js";
 
+// maintenance-banner: fetches public settings and shows a fixed amber banner
+// if maintenanceMode === true. Fails silently on any error.
+import { initMaintenanceBanner } from "@js/common/maintenance-banner.js";
+
+// Run maintenance banner check on every public page load
+initMaintenanceBanner();
+
 // =============================================================================
 // Header auth state — show "Кабінет" or "Увійти" based on localStorage token
 // =============================================================================

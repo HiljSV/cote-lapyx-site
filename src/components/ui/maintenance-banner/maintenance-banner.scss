@@ -1,0 +1,152 @@
+// =============================================================================
+// Maintenance Banner — public-facing persistent fixed banner
+// Appears below the header when maintenanceMode === true from the public API.
+// Uses amber/warning accent per cyberpunk design language — distinct from
+// the cyan/magenta/green scheme to immediately signal a warning state.
+// =============================================================================
+
+// Amber warning colour — not in settings.scss (warning-only use case)
+$amber: #ffab00;
+$amber-dim: rgba(255, 171, 0, 0.12);
+$amber-border: rgba(255, 171, 0, 0.35);
+
+// Banner is hidden by default; JS adds .is-visible when maintenanceMode is true
+.maintenance-banner {
+  /* Hidden by default — JS reveals it when mode is active */
+  display: none;
+
+  /* Fixed position below the header (header height = 70px) */
+  position: fixed;
+  top: 70px;
+  left: 0;
+  right: 0;
+
+  /* Stack above page content but below modals/drawer */
+  z-index: 150;
+
+  /* Amber warning background with cyberpunk glass effect */
+  background: $amber-dim;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid $amber-border;
+
+  /* Neon amber glow on the bottom border */
+  box-shadow: 0 2px 16px rgba(255, 171, 0, 0.2);
+
+  /* Smooth slide-in from top */
+  transform: translateY(-100%);
+  transition:
+    transform 0.35s ease,
+    opacity 0.35s ease;
+  opacity: 0;
+
+  /* Show state — added by JS */
+  &.is-visible {
+    /* Override display:none first, then animation plays */
+    display: block;
+  }
+
+  /* Animated-in state — separate class added after display:block takes effect */
+  &.is-animated {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Inner layout: horizontally centered, flex row */
+.maintenance-banner__inner {
+  /* Max-width container — no flex here (container rule) */
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+/* Content row — flex layout on the inner child */
+.maintenance-banner__body {
+  /* Flex row: icon + text centered, wraps on small screens */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  padding: 10px 0;
+  min-height: 44px; /* WCAG 2.5.5 touch target size */
+}
+
+/* Warning icon — amber wrench/tool emoji (injected by JS) */
+.maintenance-banner__icon {
+  /* Vertically center the icon with text baseline */
+  display: inline-flex;
+  align-items: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* Main message text */
+.maintenance-banner__text {
+  /* Amber neon text with subtle glow */
+  color: $amber;
+  text-shadow: 0 0 8px rgba(255, 171, 0, 0.5);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+/* ETA segment — "орієнтовно до <date>" */
+.maintenance-banner__eta {
+  /* Slightly dimmer than main text */
+  color: rgba(255, 171, 0, 0.75);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+
+/* Tablet: 991.98px and below */
+@media (max-width: 991.98px) {
+  .maintenance-banner {
+    /* Tablet — header height stays 70px */
+    top: 70px;
+  }
+
+  .maintenance-banner__text {
+    /* Slightly smaller on tablet */
+    font-size: 13px;
+  }
+}
+
+/* Mobile: 767.98px and below */
+@media (max-width: 767.98px) {
+  .maintenance-banner__body {
+    /* Stack icon+text on a single line, allow wrap */
+    flex-direction: row;
+    padding: 8px 0;
+    gap: 4px 8px;
+  }
+
+  .maintenance-banner__text {
+    /* Compact on mobile */
+    font-size: 12px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .maintenance-banner__eta {
+    font-size: 12px;
+    white-space: normal;
+    text-align: center;
+  }
+}
+
+/* Mobile small: 479.98px and below */
+@media (max-width: 479.98px) {
+  .maintenance-banner__body {
+    /* Single column on very small screens */
+    flex-direction: column;
+    text-align: center;
+    padding: 8px 0;
+    gap: 2px;
+  }
+}
