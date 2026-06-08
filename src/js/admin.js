@@ -1733,8 +1733,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Render each activity row — ALL user-provided strings escaped via escHtml
       const rows = items
         .map((item) => {
+          // Fallback for unknown types: store raw label; the row template
+          // escapes typeInfo.label once (avoid double-escaping here).
           const typeInfo = labels[item.type] || {
-            label: escHtml(item.type || "—"),
+            label: item.type || "—",
             icon: "•",
           };
           return `<div class="dash-list__row">
