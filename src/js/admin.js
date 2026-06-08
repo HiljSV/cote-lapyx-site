@@ -730,13 +730,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                   : translate("admin.user_status.blocked")
               }</span>`
             : "";
-          // Edit — opens the modal (name / role / status). Always available.
+          // Edit — opens the full user-detail panel. Only data-id is needed;
+          // role/status are loaded fresh from GET /admin/users/{id} in the panel.
           const editBtn = `<button type="button" class="btn btn--ghost btn--sm"
               data-action="edit-user"
               data-id="${escHtml(String(u.id))}"
-              data-name="${escHtml(u.name || "")}"
-              data-role="${escHtml(u.role || "")}"
-              data-status="${escHtml(u.status || "ACTIVE")}"
               title="${translate("admin.action.edit")}">✏️</button>`;
           // Block/unblock + delete — never on the admin's own row (self-lockout
           // and self-delete are rejected by the backend anyway).
@@ -1431,45 +1429,498 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
   // ---------------------------------------------------------------------------
-  // Admin users — edit modal
+  // Admin user detail panel
+  // Replaces the old minimal edit modal (openUserEditModal).
+  // Entry points:
+  //   openUserDetail(id)  — called when a row is clicked (data-action="view-user")
+  //   deep-link           — ?userId=<id> on page load opens the panel automatically
   // ---------------------------------------------------------------------------
 
+  // Track which activity page and filter are currently showing
+  let userDetailId = null;
+  let userDetailActivityPage = 0;
+  let userDetailActivityFilter = "";
+
+  // Activity type → localized label + icon mapping.
+  // Resolved lazily so translate() picks up the current language.
+  function activityLabels() {
+    return {
+      REGISTRATION: {
+        label: translate("admin.activity_type.REGISTRATION"),
+        icon: "✨",
+      },
+      LOGIN: { label: translate("admin.activity_type.LOGIN"), icon: "🔑" },
+      PROFILE_UPDATE: {
+        label: translate("admin.activity_type.PROFILE_UPDATE"),
+        icon: "✏️",
+      },
+      EMAIL_CHANGE: {
+        label: translate("admin.activity_type.EMAIL_CHANGE"),
+        icon: "📧",
+      },
+      PASSWORD_CHANGE: {
+        label: translate("admin.activity_type.PASSWORD_CHANGE"),
+        icon: "🔒",
+      },
+      SUBSCRIPTION_CREATE: {
+        label: translate("admin.activity_type.SUBSCRIPTION_CREATE"),
+        icon: "⭐",
+      },
+      SUBSCRIPTION_CANCEL: {
+        label: translate("admin.activity_type.SUBSCRIPTION_CANCEL"),
+        icon: "❌",
+      },
+      STATUS_CHANGE: {
+        label: translate("admin.activity_type.STATUS_CHANGE"),
+        icon: "🔄",
+      },
+      ACCOUNT_DELETE: {
+        label: translate("admin.activity_type.ACCOUNT_DELETE"),
+        icon: "🗑",
+      },
+      EMAIL_VERIFIED: {
+        label: translate("admin.activity_type.EMAIL_VERIFIED"),
+        icon: "✅",
+      },
+    };
+  }
+
   /**
-   * Open the user-edit modal and populate its fields.
-   * @param {{ id: string, name: string, role: string, status: string }} user
+   * Activate the user-detail panel and load data for a given user id.
+   * Updates the URL ?userId= for deep-link support (replaceState — no history entry).
+   * @param {number|string} id - user id
    */
-  function openUserEditModal({ id, name, role, status }) {
-    // Populate hidden id and visible fields
-    document.getElementById("admin-user-edit-id").value = id;
-    document.getElementById("admin-user-edit-name").value = name;
-    document.getElementById("admin-user-edit-role").value =
-      role || "SUBSCRIBER";
-    document.getElementById("admin-user-edit-status").value =
-      status || "ACTIVE";
-    // Show modal by removing hidden attribute
-    document.getElementById("admin-user-modal").removeAttribute("hidden");
+  function openUserDetail(id) {
+    userDetailId = id;
+    userDetailActivityPage = 0;
+    userDetailActivityFilter = "";
+
+    // Update URL so the page is deep-linkable — no extra history entry
+    const url = new URL(window.location.href);
+    url.searchParams.set("userId", id);
+    window.history.replaceState(null, "", url.toString());
+
+    // Switch active panel to user-detail
+    activateSection("user-detail");
+
+    // Reset activity filter dropdown to "all"
+    const filterSelect = document.getElementById("user-detail-activity-type");
+    if (filterSelect) filterSelect.value = "";
+
+    // Load header + management + telemetry data
+    loadUserDetailData(id);
+    // Load activity timeline (page 0, no filter)
+    loadUserActivity(id, 0, "");
   }
 
-  /** Close the user-edit modal and reset the form. */
-  function closeUserEditModal() {
-    document.getElementById("admin-user-modal").setAttribute("hidden", "");
-    document.getElementById("admin-user-form").reset();
+  /**
+   * Navigate back to the users list and remove ?userId= from the URL.
+   */
+  function closeUserDetail() {
+    // Clear the deep-link query param
+    const url = new URL(window.location.href);
+    url.searchParams.delete("userId");
+    window.history.replaceState(null, "", url.toString());
+
+    // Reset stored id
+    userDetailId = null;
+
+    // Return to users panel and reload the list
+    activateSection("users");
+    loadAdminUsers(adminUsersPage);
   }
 
-  // Close button inside modal header
-  document
-    .getElementById("admin-user-modal-close")
-    ?.addEventListener("click", closeUserEditModal);
+  /**
+   * Load AdminUserDetailDTO from GET /admin/users/{id} and populate
+   * the header, management form, and telemetry sections.
+   * @param {number|string} id
+   */
+  async function loadUserDetailData(id) {
+    // Show loading, hide content
+    const loadingEl = document.getElementById("user-detail-loading");
+    const bodyEl = document.getElementById("user-detail-body");
+    const mgmtEl = document.getElementById("user-detail-mgmt");
+    const telemetryEl = document.getElementById("user-detail-telemetry");
+    const activityEl = document.getElementById("user-detail-activity");
 
-  // Cancel button in modal actions row
-  document
-    .getElementById("admin-user-modal-cancel")
-    ?.addEventListener("click", closeUserEditModal);
+    if (loadingEl) loadingEl.removeAttribute("hidden");
+    if (bodyEl) bodyEl.setAttribute("hidden", "");
+    if (mgmtEl) mgmtEl.setAttribute("hidden", "");
+    if (telemetryEl) telemetryEl.setAttribute("hidden", "");
+    if (activityEl) activityEl.setAttribute("hidden", "");
 
-  // Click on backdrop also closes modal
+    try {
+      // Authenticated GET — fetchWithAuth handles token refresh
+      const res = await fetchWithAuth(`${ADMIN_API}/admin/users/${id}`);
+      if (!res.ok) {
+        if (loadingEl) loadingEl.textContent = translate("admin.state.error");
+        return;
+      }
+      const u = await res.json();
+
+      // ── Populate header section ──────────────────────────────────────────
+
+      // Avatar: image or initials
+      const avatarEl = document.getElementById("user-detail-avatar");
+      if (avatarEl) {
+        if (u.avatar) {
+          // Real avatar image — escHtml on src to prevent XSS
+          avatarEl.innerHTML = `<img src="${escHtml(u.avatar)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;" />`;
+          avatarEl.classList.add("user-detail__avatar--img");
+        } else {
+          // Initials fallback — escHtml on computed initials
+          const parts = (u.name || u.email || "?").trim().split(/\s+/);
+          const initials =
+            parts.length >= 2
+              ? (parts[0][0] + parts[1][0]).toUpperCase()
+              : parts[0].slice(0, 2).toUpperCase();
+          avatarEl.textContent = escHtml(initials);
+          avatarEl.classList.remove("user-detail__avatar--img");
+        }
+      }
+
+      // Display name (falls back to name, then email)
+      const displayNameEl = document.getElementById("user-detail-display-name");
+      if (displayNameEl) {
+        const dn =
+          u.displayName && u.displayName.trim() ? u.displayName : u.name || "—";
+        displayNameEl.textContent = escHtml(dn);
+      }
+
+      // Username (@name line)
+      const usernameEl = document.getElementById("user-detail-username");
+      if (usernameEl) {
+        usernameEl.textContent = u.name ? escHtml(`@${u.name}`) : "—";
+      }
+
+      // Email
+      const emailEl = document.getElementById("user-detail-email");
+      if (emailEl) emailEl.textContent = escHtml(u.email || "—");
+
+      // Verified badge — show only the correct badge based on emailVerified
+      const verifiedEl = document.getElementById("user-detail-verified");
+      const unverifiedEl = document.getElementById("user-detail-unverified");
+      if (verifiedEl && unverifiedEl) {
+        if (u.emailVerified) {
+          verifiedEl.removeAttribute("hidden");
+          unverifiedEl.setAttribute("hidden", "");
+        } else {
+          verifiedEl.setAttribute("hidden", "");
+          unverifiedEl.removeAttribute("hidden");
+        }
+      }
+
+      // Role badge — colour matches ROLE_BADGE map
+      const roleBadgeEl = document.getElementById("user-detail-role-badge");
+      if (roleBadgeEl) {
+        const roleColor = ROLE_BADGE[u.role] || "green";
+        roleBadgeEl.className = `neon-badge neon-badge--${roleColor}`;
+        roleBadgeEl.textContent = escHtml((u.role || "—").toLowerCase());
+      }
+
+      // Status badge — colour by status value
+      const statusBadgeEl = document.getElementById("user-detail-status-badge");
+      if (statusBadgeEl) {
+        const statusColor =
+          u.status === "ACTIVE"
+            ? "green"
+            : u.status === "BLOCKED"
+              ? "magenta"
+              : "cyan";
+        statusBadgeEl.className = `neon-badge neon-badge--${statusColor}`;
+        statusBadgeEl.textContent = escHtml((u.status || "—").toLowerCase());
+      }
+
+      // Auth provider chip
+      const providerEl = document.getElementById("user-detail-provider");
+      if (providerEl) {
+        providerEl.textContent = escHtml(u.authProvider || "LOCAL");
+      }
+
+      // Member since date
+      const sinceEl = document.getElementById("user-detail-since");
+      if (sinceEl) sinceEl.textContent = fmtDate(u.createdAt);
+
+      // ── Show header body; hide loading ───────────────────────────────────
+      if (loadingEl) loadingEl.setAttribute("hidden", "");
+      if (bodyEl) bodyEl.removeAttribute("hidden");
+
+      // ── Populate management form ─────────────────────────────────────────
+      const mgmtIdEl = document.getElementById("user-detail-mgmt-id");
+      const roleSelectEl = document.getElementById("user-detail-role-select");
+      const statusSelectEl = document.getElementById(
+        "user-detail-status-select",
+      );
+      if (mgmtIdEl) mgmtIdEl.value = u.id;
+      if (roleSelectEl) roleSelectEl.value = u.role || "SUBSCRIBER";
+      if (statusSelectEl) statusSelectEl.value = u.status || "ACTIVE";
+
+      // Show management section
+      if (mgmtEl) mgmtEl.removeAttribute("hidden");
+
+      // ── Populate telemetry fields ────────────────────────────────────────
+      // All values are escaped with escHtml; null/undefined shows "—"
+      const regIpEl = document.getElementById("user-detail-reg-ip");
+      if (regIpEl) regIpEl.textContent = escHtml(u.registrationIp || "—");
+
+      const lastLoginAtEl = document.getElementById(
+        "user-detail-last-login-at",
+      );
+      if (lastLoginAtEl)
+        lastLoginAtEl.textContent = u.lastLoginAt
+          ? fmtDatetime(u.lastLoginAt)
+          : "—";
+
+      const lastLoginIpEl = document.getElementById(
+        "user-detail-last-login-ip",
+      );
+      if (lastLoginIpEl)
+        lastLoginIpEl.textContent = escHtml(u.lastLoginIp || "—");
+
+      const userAgentEl = document.getElementById("user-detail-user-agent");
+      if (userAgentEl) userAgentEl.textContent = escHtml(u.userAgent || "—");
+
+      // Show telemetry section
+      if (telemetryEl) telemetryEl.removeAttribute("hidden");
+
+      // Show activity section (content loaded separately)
+      if (activityEl) activityEl.removeAttribute("hidden");
+    } catch (err) {
+      console.error("User detail load error:", err);
+      if (loadingEl) loadingEl.textContent = translate("admin.state.error");
+    }
+  }
+
+  /**
+   * Load paginated activity for a user from GET /admin/users/{id}/activity.
+   * @param {number|string} id - user id
+   * @param {number} page - 0-based page number
+   * @param {string} type - activity type filter ("" = all)
+   */
+  async function loadUserActivity(id, page, type) {
+    userDetailActivityPage = page;
+    userDetailActivityFilter = type;
+
+    const body = document.getElementById("user-detail-activity-body");
+    if (!body) return;
+
+    // Show loading placeholder while fetching
+    body.innerHTML = `<div class="dash-list__empty">${translate("admin.state.loading")}</div>`;
+
+    try {
+      // Build URL: page, size, sort newest-first, optional type filter
+      let url = `${ADMIN_API}/admin/users/${id}/activity?page=${page}&size=15&sort=createdAt,desc`;
+      if (type) url += `&type=${encodeURIComponent(type)}`;
+
+      // Authenticated GET — fetchWithAuth handles token refresh
+      const res = await fetchWithAuth(url);
+      if (!res.ok) {
+        body.innerHTML = `<div class="dash-list__empty">${translate("admin.state.error")}</div>`;
+        return;
+      }
+      const data = await res.json();
+      const items = data.content || [];
+
+      if (!items.length) {
+        body.innerHTML = `<div class="dash-list__empty">${translate("admin.user_detail.empty_activity")}</div>`;
+        renderPagination("user-detail-activity-pagination", 0, 0, () => {});
+        return;
+      }
+
+      // Resolve activity labels for current language
+      const labels = activityLabels();
+
+      // Render each activity row — ALL user-provided strings escaped via escHtml
+      const rows = items
+        .map((item) => {
+          // Fallback for unknown types: store raw label; the row template
+          // escapes typeInfo.label once (avoid double-escaping here).
+          const typeInfo = labels[item.type] || {
+            label: item.type || "—",
+            icon: "•",
+          };
+          return `<div class="dash-list__row">
+          <!-- Type chip: icon + localized label -->
+          <div data-label="${translate("admin.user_detail.col_type")}">
+            <span class="activity-type-chip">
+              <span aria-hidden="true">${typeInfo.icon}</span>
+              ${escHtml(typeInfo.label)}
+            </span>
+          </div>
+          <!-- Timestamp — formatted by fmtDatetime -->
+          <div class="dash-list__date" data-label="${translate("admin.user_detail.col_time")}">
+            ${fmtDatetime(item.createdAt)}
+          </div>
+          <!-- IP address — escaped (user-controlled via backend) -->
+          <div data-label="${translate("admin.user_detail.col_ip")}">
+            ${escHtml(item.ipAddress || "—")}
+          </div>
+          <!-- Detail string — user-controlled text, must be escaped -->
+          <div data-label="${translate("admin.user_detail.col_detail")}">
+            ${escHtml(item.detail || "—")}
+          </div>
+        </div>`;
+        })
+        .join("");
+
+      body.innerHTML = rows;
+
+      // Render pagination if more than one page
+      if (data.page) {
+        renderPagination(
+          "user-detail-activity-pagination",
+          data.page.number,
+          data.page.totalPages,
+          (p) => loadUserActivity(id, p, userDetailActivityFilter),
+        );
+      }
+    } catch (err) {
+      console.error("User activity load error:", err);
+      body.innerHTML = `<div class="dash-list__empty">${translate("admin.state.error")}</div>`;
+    }
+  }
+
+  /**
+   * Format an ISO datetime string with both date and time (uk-UA locale).
+   * Used for lastLoginAt and activity timestamps.
+   * @param {string|null} iso - ISO 8601 string
+   * @returns {string} formatted date-time or "—"
+   */
+  function fmtDatetime(iso) {
+    if (!iso) return "—";
+    return new Date(iso).toLocaleString("uk-UA", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  // ── Back button: return to users list ──────────────────────────────────────
   document
-    .getElementById("admin-user-modal-backdrop")
-    ?.addEventListener("click", closeUserEditModal);
+    .getElementById("user-detail-back")
+    ?.addEventListener("click", closeUserDetail);
+
+  // ── Activity type filter dropdown change ───────────────────────────────────
+  document
+    .getElementById("user-detail-activity-type")
+    ?.addEventListener("change", (e) => {
+      // Reload activity from page 0 with the selected type filter
+      if (userDetailId !== null) {
+        loadUserActivity(userDetailId, 0, e.target.value);
+      }
+    });
+
+  // ── Management form: PATCH role + status ───────────────────────────────────
+  document
+    .getElementById("user-detail-mgmt-form")
+    ?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      // Read form values
+      const id = document.getElementById("user-detail-mgmt-id").value;
+      const role =
+        document.getElementById("user-detail-role-select").value || undefined;
+      const status =
+        document.getElementById("user-detail-status-select").value || undefined;
+
+      const body = {};
+      if (role) body.role = role;
+      if (status) body.status = status;
+
+      const saveBtn = document.getElementById("user-detail-save-btn");
+      const feedbackEl = document.getElementById("user-detail-save-feedback");
+      if (saveBtn) saveBtn.disabled = true;
+
+      try {
+        // Authenticated PATCH — fetchWithAuth handles token refresh
+        const res = await fetchWithAuth(`${ADMIN_API}/admin/users/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+
+        if (res.ok) {
+          // Show success feedback and reload header to reflect new badges
+          if (feedbackEl) {
+            feedbackEl.textContent = translate("admin.user_detail.save_ok");
+            feedbackEl.className =
+              "user-detail__feedback user-detail__feedback--success";
+            feedbackEl.removeAttribute("hidden");
+            // Auto-hide feedback after 3 s
+            setTimeout(() => {
+              feedbackEl.setAttribute("hidden", "");
+              feedbackEl.textContent = "";
+              feedbackEl.className = "user-detail__feedback";
+            }, 3000);
+          }
+          // Reload detail data so badges + selects reflect the saved state
+          loadUserDetailData(id);
+        } else if (res.status === 409) {
+          alert(translate("admin.error.self_action"));
+        } else {
+          alert(translate("admin.error.save"));
+        }
+      } catch {
+        alert(translate("admin.error.network"));
+      } finally {
+        if (saveBtn) saveBtn.disabled = false;
+      }
+    });
+
+  // ── Delete account button ──────────────────────────────────────────────────
+  document
+    .getElementById("user-detail-delete-btn")
+    ?.addEventListener("click", async () => {
+      if (!userDetailId) return;
+      // Confirm before permanent deletion — i18n: admin.user_detail.confirm_delete
+      if (!confirm(translate("admin.user_detail.confirm_delete"))) return;
+
+      try {
+        // Authenticated DELETE — fetchWithAuth handles token refresh
+        const res = await fetchWithAuth(
+          `${ADMIN_API}/admin/users/${userDetailId}`,
+          { method: "DELETE" },
+        );
+
+        if (res.ok || res.status === 204) {
+          // Return to users list after successful deletion
+          closeUserDetail();
+        } else if (res.status === 409) {
+          alert(translate("admin.error.user_has_content"));
+        } else {
+          alert(translate("admin.error.delete"));
+        }
+      } catch {
+        alert(translate("admin.error.network"));
+      }
+    });
+
+  // Delegate action-button clicks on the full users table body.
+  // "edit-user" now opens the full user-detail panel instead of the old modal.
+  document
+    .getElementById("admin-users-body")
+    ?.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-action]");
+      if (!btn) return;
+      const { action, id } = btn.dataset;
+      if (action === "edit-user") {
+        // Open the full user-detail view (replaces old modal flow)
+        openUserDetail(Number(id));
+      } else if (action === "block-user") {
+        setUserStatus(Number(id), "BLOCKED");
+      } else if (action === "unblock-user") {
+        setUserStatus(Number(id), "ACTIVE");
+      } else if (action === "delete-user") {
+        deleteAdminUser(Number(id));
+      }
+    });
+
+  // ---------------------------------------------------------------------------
+  // setUserStatus / deleteAdminUser — inline quick actions from the users table
+  // (block/unblock/delete without opening the detail panel)
+  // ---------------------------------------------------------------------------
 
   /**
    * Block (status=BLOCKED) or unblock (status=ACTIVE) a user account.
@@ -1512,69 +1963,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       alert(translate("admin.error.network"));
     }
   }
-
-  // Delegate action-button clicks on the full users table body
-  document
-    .getElementById("admin-users-body")
-    ?.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-action]");
-      if (!btn) return;
-      const { action, id, name, role, status } = btn.dataset;
-      if (action === "edit-user") {
-        openUserEditModal({ id, name, role, status });
-      } else if (action === "block-user") {
-        setUserStatus(Number(id), "BLOCKED");
-      } else if (action === "unblock-user") {
-        setUserStatus(Number(id), "ACTIVE");
-      } else if (action === "delete-user") {
-        deleteAdminUser(Number(id));
-      }
-    });
-
-  // Submit handler — PATCH /admin/users/:id with changed fields
-  document
-    .getElementById("admin-user-form")
-    ?.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      // Read form values
-      const id = document.getElementById("admin-user-edit-id").value;
-      const body = {
-        name:
-          document.getElementById("admin-user-edit-name").value.trim() ||
-          undefined,
-        role:
-          document.getElementById("admin-user-edit-role").value || undefined,
-        status:
-          document.getElementById("admin-user-edit-status").value || undefined,
-      };
-
-      // Strip keys whose value is undefined before serialising
-      Object.keys(body).forEach((k) => body[k] === undefined && delete body[k]);
-
-      const submitBtn = e.target.querySelector('[type="submit"]');
-      submitBtn.disabled = true;
-
-      try {
-        // Authenticated PATCH — fetchWithAuth handles token refresh
-        const res = await fetchWithAuth(`${ADMIN_API}/admin/users/${id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-        if (!res.ok) throw new Error("API error");
-
-        // Close modal and reload table to reflect changes
-        closeUserEditModal();
-        loadAdminUsers(adminUsersPage);
-      } catch (err) {
-        console.error("User update error:", err);
-        alert("Помилка збереження");
-      } finally {
-        // Always re-enable button
-        submitBtn.disabled = false;
-      }
-    });
 
   // ---------------------------------------------------------------------------
   // Settings panel — load general settings + social contacts when switching to settings
@@ -1890,6 +2278,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   // (e.g. navigated via URL hash or direct link — not just on click)
   if (document.querySelector('[data-panel="settings"]:not([hidden])')) {
     loadAdminSocialContacts();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Deep-link: ?userId= — open user-detail panel on page load if present
+  // Allows direct navigation to a user card, e.g. from an external notification.
+  // ---------------------------------------------------------------------------
+  const deepLinkUserId = new URL(window.location.href).searchParams.get(
+    "userId",
+  );
+  if (deepLinkUserId) {
+    // Open the user-detail panel directly; skip the overview default
+    openUserDetail(Number(deepLinkUserId));
   }
 
   // Load overview data on init

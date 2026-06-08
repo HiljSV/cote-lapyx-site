@@ -1581,127 +1581,423 @@
   <!-- /admin-main -->
 
   <!-- ================================================================
-       USER EDIT MODAL
-       Opened by JS openUserEditModal() when "Редагувати" is clicked.
-       Reuses .dash-modal classes defined in dashboard.scss.
+       PANEL: USER DETAIL
+       Replaces the old minimal edit modal.
+       Opened when a user row is clicked (openUserDetail(id)) or via ?userId=.
+       Sections: header · management · telemetry · activity timeline.
+       Layout choice: stacked sections (no extra tab JS needed; overview scrolls).
+       Deep-link support: JS reads ?userId= on load and opens this panel.
        ================================================================ -->
-  <div
-    class="dash-modal"
-    id="admin-user-modal"
-    hidden
-    aria-modal="true"
-    role="dialog"
-    aria-labelledby="admin-user-modal-title"
-  >
-    <!-- Blurred backdrop — click closes modal -->
-    <div class="dash-modal__backdrop" id="admin-user-modal-backdrop"></div>
+  <div class="admin-section-panel" data-panel="user-detail" hidden>
+    <!-- ── User-detail: back navigation bar ── -->
+    <div class="user-detail__nav">
+      <!-- Back button — returns to users list and clears ?userId= from URL -->
+      <button
+        type="button"
+        class="btn btn--ghost btn--sm user-detail__back"
+        id="user-detail-back"
+        aria-label="Назад до списку користувачів"
+      >
+        <!-- Left arrow icon -->
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"
+          />
+        </svg>
+        <!-- Label — i18n: admin.user_detail.back -->
+        <span data-i18n="admin.user_detail.back">← Назад до користувачів</span>
+      </button>
+    </div>
+    <!-- /user-detail nav -->
 
-    <!-- Dialog box -->
-    <div class="dash-modal__box">
-      <!-- Modal header: title + close button -->
-      <div class="dash-modal__header">
-        <!-- Modal title — i18n: admin.modal.edit_user -->
-        <h3
-          class="dash-modal__title"
-          id="admin-user-modal-title"
-          data-i18n="admin.modal.edit_user"
-        >
-          Редагування користувача
-        </h3>
-        <button
-          type="button"
-          class="dash-modal__close"
-          id="admin-user-modal-close"
-          aria-label="Закрити"
-        >
-          ✕
-        </button>
+    <!-- ── Section 1: Header card — avatar, name, badges, meta ── -->
+    <section
+      class="user-detail__header-card dash-section"
+      aria-label="Інформація про користувача"
+      id="user-detail-header"
+    >
+      <!-- Loading skeleton shown while fetch is in flight -->
+      <div
+        class="user-detail__loading"
+        id="user-detail-loading"
+        aria-live="polite"
+      >
+        <span data-i18n="admin.state.loading">Завантаження...</span>
       </div>
 
-      <!-- Edit form — novalidate; validation is done in JS -->
-      <form class="dash-modal__form" id="admin-user-form" novalidate>
-        <!-- Hidden: stores the user id for the PATCH request -->
-        <input type="hidden" id="admin-user-edit-id" />
-
-        <!-- Field: display name -->
-        <div class="dash-modal__field">
-          <!-- Label — i18n: admin.modal.name_label -->
-          <label
-            class="dash-modal__label"
-            for="admin-user-edit-name"
-            data-i18n="admin.modal.name_label"
-            >Ім'я</label
-          >
-          <input
-            class="dash-modal__input"
-            type="text"
-            id="admin-user-edit-name"
-            name="name"
-            autocomplete="off"
-          />
+      <!-- Content block — hidden until data arrives, shown by JS -->
+      <div class="user-detail__header-body" id="user-detail-body" hidden>
+        <!-- Avatar: large circle — image or initials fallback; populated by JS -->
+        <div
+          class="user-detail__avatar"
+          id="user-detail-avatar"
+          aria-hidden="true"
+        >
+          ?
         </div>
 
+        <!-- Name group: display name + username + email row -->
+        <div class="user-detail__name-group">
+          <!-- Display name (large heading) — escaped and injected by JS -->
+          <h2 class="user-detail__display-name" id="user-detail-display-name">
+            —
+          </h2>
+          <!-- Username (@name) — injected by JS -->
+          <p class="user-detail__username" id="user-detail-username">—</p>
+
+          <!-- Email row: address + verified/unverified badge -->
+          <p class="user-detail__email-row">
+            <!-- Email address — escaped by JS -->
+            <span id="user-detail-email">—</span>
+            <!-- Verified badge — toggled by JS based on emailVerified field -->
+            <span
+              class="user-detail__verified user-detail__verified--ok"
+              id="user-detail-verified"
+              hidden
+              aria-label="Email підтверджено"
+              >✓ verified</span
+            >
+            <span
+              class="user-detail__verified user-detail__verified--no"
+              id="user-detail-unverified"
+              hidden
+              aria-label="Email не підтверджено"
+              >✗ unverified</span
+            >
+          </p>
+        </div>
+        <!-- /name-group -->
+
+        <!-- Badge row: role + status + auth provider + member-since -->
+        <div class="user-detail__meta-row">
+          <!-- Role badge — class and text set by JS -->
+          <span class="neon-badge" id="user-detail-role-badge">—</span>
+          <!-- Status badge — class and text set by JS -->
+          <span class="neon-badge" id="user-detail-status-badge">—</span>
+          <!-- Auth provider chip (LOCAL / GOOGLE) — set by JS -->
+          <span class="user-detail__provider" id="user-detail-provider">—</span>
+          <!-- Member since date — injected by JS -->
+          <span class="user-detail__since">
+            <!-- Label — i18n: admin.user_detail.member_since -->
+            <span data-i18n="admin.user_detail.member_since">Учасник з</span>
+            <!-- Date value — escaped by JS -->
+            <span id="user-detail-since">—</span>
+          </span>
+        </div>
+        <!-- /meta-row -->
+      </div>
+      <!-- /header-body -->
+    </section>
+    <!-- /header card -->
+
+    <!-- ── Section 2: Management — role + status change, delete ── -->
+    <section
+      class="user-detail__mgmt dash-section"
+      aria-label="Управління обліковим записом"
+      id="user-detail-mgmt"
+      hidden
+    >
+      <div class="dash-section__header">
+        <!-- Section title — i18n: admin.user_detail.section_mgmt -->
+        <h3
+          class="dash-section__title"
+          data-i18n="admin.user_detail.section_mgmt"
+        >
+          Управління
+        </h3>
+      </div>
+
+      <!-- Management form: role + status selects + save -->
+      <form
+        class="user-detail__mgmt-form"
+        id="user-detail-mgmt-form"
+        novalidate
+        aria-label="Змінити роль або статус користувача"
+      >
+        <!-- Hidden user id for PATCH request -->
+        <input type="hidden" id="user-detail-mgmt-id" />
+
         <!-- Field: role selector — OWNER or SUBSCRIBER only -->
-        <div class="dash-modal__field">
-          <!-- Label — i18n: admin.modal.role_label -->
+        <div class="user-detail__field">
+          <!-- Label — i18n: admin.user_detail.role_label -->
           <label
-            class="dash-modal__label"
-            for="admin-user-edit-role"
-            data-i18n="admin.modal.role_label"
+            class="user-detail__label"
+            for="user-detail-role-select"
+            data-i18n="admin.user_detail.role_label"
             >Роль</label
           >
           <select
-            class="dash-modal__input"
-            id="admin-user-edit-role"
+            class="dash-profile-form__input user-detail__select"
+            id="user-detail-role-select"
             name="role"
           >
+            <!-- Options: OWNER and SUBSCRIBER (the only user-assignable roles) -->
             <option value="OWNER">OWNER</option>
             <option value="SUBSCRIBER">SUBSCRIBER</option>
           </select>
         </div>
 
-        <!-- Field: account status selector -->
-        <div class="dash-modal__field">
-          <!-- Label — i18n: admin.modal.status_label -->
+        <!-- Field: status selector — manual states only (NOT system-managed ones) -->
+        <div class="user-detail__field">
+          <!-- Label — i18n: admin.user_detail.status_label -->
           <label
-            class="dash-modal__label"
-            for="admin-user-edit-status"
-            data-i18n="admin.modal.status_label"
+            class="user-detail__label"
+            for="user-detail-status-select"
+            data-i18n="admin.user_detail.status_label"
             >Статус</label
           >
           <select
-            class="dash-modal__input"
-            id="admin-user-edit-status"
+            class="dash-profile-form__input user-detail__select"
+            id="user-detail-status-select"
             name="status"
           >
-            <option value="ACTIVE">ACTIVE</option>
-            <option value="BLOCKED">BLOCKED</option>
+            <!-- ACTIVE / BLOCKED / SUSPENDED only — ARCHIVED/PENDING_DELETION/DELETED are system-managed -->
+            <option value="ACTIVE" data-i18n="admin.user_detail.status_active">
+              ACTIVE
+            </option>
+            <option
+              value="BLOCKED"
+              data-i18n="admin.user_detail.status_blocked"
+            >
+              BLOCKED
+            </option>
+            <option
+              value="SUSPENDED"
+              data-i18n="admin.user_detail.status_suspended"
+            >
+              SUSPENDED
+            </option>
           </select>
         </div>
 
-        <!-- Actions row: save + cancel -->
-        <div class="dash-modal__actions">
-          <!-- Save button — i18n: admin.btn.save -->
+        <!-- Save button + inline feedback -->
+        <div class="user-detail__mgmt-actions">
+          <!-- Save changes button — i18n: admin.btn.save -->
           <button
             type="submit"
             class="btn btn--cyan"
+            id="user-detail-save-btn"
             data-i18n="admin.btn.save"
           >
             Зберегти
           </button>
-          <!-- Cancel button — i18n: admin.btn.cancel -->
-          <button
-            type="button"
-            class="btn btn--ghost"
-            id="admin-user-modal-cancel"
-            data-i18n="admin.btn.cancel"
-          >
-            Скасувати
-          </button>
+          <!-- Inline save feedback — set by JS after PATCH -->
+          <span
+            class="user-detail__feedback"
+            id="user-detail-save-feedback"
+            role="status"
+            aria-live="polite"
+            hidden
+          ></span>
         </div>
       </form>
-    </div>
+
+      <!-- Danger zone: delete account -->
+      <div
+        class="user-detail__danger-zone"
+        role="region"
+        aria-label="Зона небезпечних дій"
+      >
+        <!-- Danger zone title — i18n: admin.user_detail.danger_title -->
+        <h4
+          class="user-detail__danger-title"
+          data-i18n="admin.user_detail.danger_title"
+        >
+          Небезпечна зона
+        </h4>
+        <!-- Delete button — confirm dialog opened by JS before DELETE -->
+        <button
+          type="button"
+          class="btn btn--magenta"
+          id="user-detail-delete-btn"
+          aria-label="Видалити обліковий запис назавжди"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+            />
+          </svg>
+          <!-- Label — i18n: admin.user_detail.delete_btn -->
+          <span data-i18n="admin.user_detail.delete_btn">Видалити акаунт</span>
+        </button>
+      </div>
+    </section>
+    <!-- /management section -->
+
+    <!-- ── Section 3: Telemetry — registration/login IPs, user-agent (read-only) ── -->
+    <section
+      class="user-detail__telemetry dash-section"
+      aria-label="Телеметрія безпеки"
+      id="user-detail-telemetry"
+      hidden
+    >
+      <div class="dash-section__header">
+        <!-- Section title — i18n: admin.user_detail.section_telemetry -->
+        <h3
+          class="dash-section__title"
+          data-i18n="admin.user_detail.section_telemetry"
+        >
+          Телеметрія
+        </h3>
+      </div>
+
+      <!-- Telemetry grid: label-value pairs, read-only, populated by JS -->
+      <dl class="user-detail__telemetry-grid">
+        <!-- Registration IP -->
+        <div class="user-detail__telemetry-row">
+          <!-- Label — i18n: admin.user_detail.reg_ip -->
+          <dt
+            class="user-detail__telemetry-label"
+            data-i18n="admin.user_detail.reg_ip"
+          >
+            IP реєстрації
+          </dt>
+          <dd class="user-detail__telemetry-value" id="user-detail-reg-ip">
+            —
+          </dd>
+        </div>
+
+        <!-- Last login timestamp -->
+        <div class="user-detail__telemetry-row">
+          <!-- Label — i18n: admin.user_detail.last_login_at -->
+          <dt
+            class="user-detail__telemetry-label"
+            data-i18n="admin.user_detail.last_login_at"
+          >
+            Останній вхід
+          </dt>
+          <dd
+            class="user-detail__telemetry-value"
+            id="user-detail-last-login-at"
+          >
+            —
+          </dd>
+        </div>
+
+        <!-- Last login IP -->
+        <div class="user-detail__telemetry-row">
+          <!-- Label — i18n: admin.user_detail.last_login_ip -->
+          <dt
+            class="user-detail__telemetry-label"
+            data-i18n="admin.user_detail.last_login_ip"
+          >
+            IP останнього входу
+          </dt>
+          <dd
+            class="user-detail__telemetry-value"
+            id="user-detail-last-login-ip"
+          >
+            —
+          </dd>
+        </div>
+
+        <!-- User-agent string -->
+        <div class="user-detail__telemetry-row">
+          <!-- Label — i18n: admin.user_detail.user_agent -->
+          <dt
+            class="user-detail__telemetry-label"
+            data-i18n="admin.user_detail.user_agent"
+          >
+            User-Agent
+          </dt>
+          <dd
+            class="user-detail__telemetry-value user-detail__telemetry-value--mono"
+            id="user-detail-user-agent"
+          >
+            —
+          </dd>
+        </div>
+      </dl>
+    </section>
+    <!-- /telemetry section -->
+
+    <!-- ── Section 4: Activity timeline — paginated log from /activity ── -->
+    <section
+      class="user-detail__activity dash-section"
+      aria-label="Журнал активності"
+      id="user-detail-activity"
+      hidden
+    >
+      <div class="dash-section__header">
+        <!-- Section title — i18n: admin.user_detail.section_activity -->
+        <h3
+          class="dash-section__title"
+          data-i18n="admin.user_detail.section_activity"
+        >
+          Активність
+        </h3>
+
+        <!-- Activity type filter dropdown -->
+        <div class="user-detail__activity-filter">
+          <!-- Filter label (visually hidden, accessible via aria-label) -->
+          <label
+            class="user-detail__filter-label"
+            for="user-detail-activity-type"
+            data-i18n="admin.user_detail.filter_label"
+            >Фільтр:</label
+          >
+          <select
+            class="dash-profile-form__input user-detail__select user-detail__select--sm"
+            id="user-detail-activity-type"
+            aria-label="Фільтр за типом активності"
+          >
+            <!-- All types — i18n: admin.user_detail.filter_all -->
+            <option value="" data-i18n="admin.user_detail.filter_all">
+              Всі типи
+            </option>
+            <!-- Individual activity types — labels set by JS from ACTIVITY_LABELS map -->
+            <option value="REGISTRATION">REGISTRATION</option>
+            <option value="LOGIN">LOGIN</option>
+            <option value="PROFILE_UPDATE">PROFILE_UPDATE</option>
+            <option value="EMAIL_CHANGE">EMAIL_CHANGE</option>
+            <option value="PASSWORD_CHANGE">PASSWORD_CHANGE</option>
+            <option value="SUBSCRIPTION_CREATE">SUBSCRIPTION_CREATE</option>
+            <option value="SUBSCRIPTION_CANCEL">SUBSCRIPTION_CANCEL</option>
+            <option value="STATUS_CHANGE">STATUS_CHANGE</option>
+            <option value="ACCOUNT_DELETE">ACCOUNT_DELETE</option>
+            <option value="EMAIL_VERIFIED">EMAIL_VERIFIED</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Activity table: rows rendered by JS loadUserActivity() -->
+      <div
+        class="dash-list dash-list--activity"
+        aria-label="Таблиця активності"
+      >
+        <!-- Table header columns: type, timestamp, IP, detail — localized via data-i18n -->
+        <div class="dash-list__head" aria-hidden="true">
+          <!-- Type column — i18n: admin.user_detail.col_type -->
+          <div data-i18n="admin.user_detail.col_type">Тип</div>
+          <!-- Timestamp column — i18n: admin.user_detail.col_time -->
+          <div data-i18n="admin.user_detail.col_time">Час</div>
+          <!-- IP address column — i18n: admin.user_detail.col_ip -->
+          <div data-i18n="admin.user_detail.col_ip">IP</div>
+          <!-- Detail column — i18n: admin.user_detail.col_detail -->
+          <div data-i18n="admin.user_detail.col_detail">Деталі</div>
+        </div>
+        <!-- Activity rows injected by JS loadUserActivity() -->
+        <div id="user-detail-activity-body"></div>
+      </div>
+      <!-- /activity table -->
+
+      <!-- Pagination — rendered by renderPagination() -->
+      <div class="dash-pagination" id="user-detail-activity-pagination"></div>
+    </section>
+    <!-- /activity section -->
   </div>
-  <!-- /user edit modal -->
+  <!-- /panel: user-detail -->
 </div>
 <!-- /dashboard -->
