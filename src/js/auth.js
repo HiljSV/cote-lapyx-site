@@ -11,7 +11,7 @@ import { translate } from "@js/i18n.js";
 // When left blank (""), the Turnstile script is NOT loaded and captchaToken
 // is sent as "" — the backend must accept empty tokens in dev/key-not-set mode.
 // =============================================================================
-const TURNSTILE_SITE_KEY = "";
+const TURNSTILE_SITE_KEY = "0x4AAAAAADg7fveA9FBDsqN_";
 
 // -----------------------------------------------------------------------------
 // Helpers
