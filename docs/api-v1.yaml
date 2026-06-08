@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Cote Lapyx API
-  version: 1.17.0
+  version: 1.18.0
   description: |
     REST API for cote-lapyx.com — a team website for Валерія, Сергій, Андрій.
 
@@ -101,6 +101,12 @@ tags:
   - name: Dashboard
     description: Authenticated-user views — statistics and personal data summaries.
   # Locale tag — geo-IP country detection for frontend language auto-detection
+  - name: SiteSettings
+    description: |
+      Public and admin site-settings endpoints.
+      `GET /site-settings/public` is public (no auth) and exposes only the fields
+      needed for the maintenance banner. Full settings (including sensitive fields)
+      are available to owners via `GET /admin/settings`.
   - name: Locale
     description: Geo-IP based locale detection. Returns the ISO 3166-1 alpha-2 country code inferred from the client IP address.
 
@@ -2122,6 +2128,18 @@ components:
           type: boolean
           description: Put site in maintenance mode (non-owners see maintenance page).
           example: false
+        # F064: optional ETA timestamp shown to non-owner users during maintenance.
+        # Null when no ETA is set. Exposed on the public banner via GET /site-settings/public.
+        maintenanceUntil:
+          type: string
+          format: date-time
+          nullable: true
+          description: |
+            ISO 8601 UTC timestamp indicating when maintenance is expected to end.
+            Null when no ETA has been set. Returned in the maintenance `ProblemDetail`
+            as the `maintenanceUntil` extension field and via `GET /site-settings/public`
+            so the public banner can show a localised countdown.
+          example: "2026-06-10T06:00:00Z"
         updatedAt:
           type: string
           format: date-time
@@ -2151,6 +2169,92 @@ components:
           type: boolean
         maintenanceMode:
           type: boolean
+        # F064: set or clear the maintenance ETA. Send null to remove the ETA
+        # without changing maintenanceMode.  The backend invalidates its cached
+        # settings snapshot when any PATCH /admin/settings succeeds.
+        maintenanceUntil:
+          type: string
+          format: date-time
+          nullable: true
+          description: |
+            ISO 8601 UTC timestamp for expected maintenance end time.
+            Send `null` to clear an existing ETA (maintenance flag is left unchanged).
+            Setting an ETA does NOT automatically toggle `maintenanceMode`; set both
+            fields in the same request when enabling maintenance with a known deadline.
+          example: "2026-06-10T06:00:00Z"
+
+    # F064: slim public payload returned by GET /site-settings/public.
+    # Exposes only the fields the frontend needs to render the maintenance banner.
+    # Does NOT include sensitive settings (contactEmail, telegramUsername, etc.).
+    PublicSiteSettingsResponse:
+      type: object
+      required: [siteName, maintenanceMode]
+      description: |
+        Read-only public projection of site settings used by the frontend maintenance
+        banner. Available without authentication (`permitAll`). Returns only the three
+        fields needed for the banner; all sensitive admin fields are omitted.
+      properties:
+        siteName:
+          type: string
+          description: Human-readable site name, used in the banner heading.
+          example: cote-lapyx
+        maintenanceMode:
+          type: boolean
+          description: |
+            When `true`, the site is in maintenance mode: all write operations
+            except `/auth/login`, `/auth/refresh`, and `/auth/logout` are blocked
+            for non-owners with a 503 response (see `MaintenanceProblem`).
+            Read-only `GET` endpoints remain accessible for everyone.
+          example: false
+        # F064: nullable ETA — frontend shows a countdown when set.
+        maintenanceUntil:
+          type: string
+          format: date-time
+          nullable: true
+          description: |
+            Expected end time of maintenance in ISO 8601 UTC format.
+            Null when no ETA has been provided by the owner.
+            When non-null the frontend banner should display a localised
+            countdown or human-readable datetime to the user.
+          example: "2026-06-10T06:00:00Z"
+
+    # F064: RFC 9457 ProblemDetail extension returned with HTTP 503 when
+    # maintenanceMode=true and the request is a write from a non-owner.
+    # Extends the base ProblemDetail with `maintenanceUntil` so the client
+    # can display the ETA without a second round-trip to /site-settings/public.
+    MaintenanceProblem:
+      allOf:
+        - $ref: "#/components/schemas/ProblemDetail"
+        - type: object
+          description: |
+            Specialised 503 ProblemDetail emitted by `MaintenanceFilter` when the
+            site is in maintenance mode and the requester is not an owner.
+            Extends the base RFC 9457 shape with one optional extension field:
+            `maintenanceUntil` — the owner-set ETA (null when not configured).
+            The `Retry-After` HTTP header is also set when `maintenanceUntil` is
+            non-null (value = seconds until the ETA timestamp).
+          properties:
+            type:
+              type: string
+              format: uri
+              example: https://cote-lapyx.com/problems/maintenance
+            title:
+              type: string
+              example: Service Unavailable — Maintenance
+            status:
+              type: integer
+              example: 503
+            # F064 extension: ETA forwarded from SiteSettings so the client can
+            # display the countdown inline without a second API call.
+            maintenanceUntil:
+              type: string
+              format: date-time
+              nullable: true
+              description: |
+                ISO 8601 UTC timestamp when maintenance is expected to end.
+                Null when no ETA was set by the owner.
+                The `Retry-After` HTTP response header echoes this as seconds.
+              example: "2026-06-10T06:00:00Z"
 
   # ---------------------------------------------------------------------------
   # Reusable headers
@@ -2247,10 +2351,75 @@ components:
           schema:
             $ref: "#/components/schemas/ProblemDetail"
 
+    # F064: emitted by MaintenanceFilter for non-owner writes when
+    # maintenanceMode=true.  Includes Retry-After header when ETA is known.
+    ServiceUnavailable:
+      description: |
+        Site is in maintenance mode. Writes (POST / PUT / PATCH / DELETE) from
+        non-owner callers are rejected. Read-only `GET` requests and the auth
+        allowlist (`/auth/login`, `/auth/refresh`, `/auth/logout`) are unaffected.
+        **Owner bypass:** authenticated callers with `ROLE_OWNER` pass through
+        unconditionally — this response is never returned to them.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: |
+            Present when `maintenanceUntil` is set. Value = seconds remaining
+            until the ETA timestamp (computed by the server at response time).
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/MaintenanceProblem"
+          example:
+            type: https://cote-lapyx.com/problems/maintenance
+            title: Service Unavailable — Maintenance
+            status: 503
+            detail: The site is currently under maintenance. Please try again later.
+            instance: /api/v1/auth/register
+            maintenanceUntil: "2026-06-10T06:00:00Z"
+
 # ===========================================================================
 # Paths
 # ===========================================================================
 paths:
+  # ---------------------------------------------------------------------------
+  # Public site settings — maintenance banner (public, no auth)
+  # ---------------------------------------------------------------------------
+
+  # F064: public projection of site settings.  Used by the frontend to decide
+  # whether to show the maintenance banner before any protected content loads.
+  # permitAll in Spring Security; no JWT required.
+  /site-settings/public:
+    get:
+      tags: [SiteSettings]
+      summary: Get public site settings (maintenance banner data)
+      operationId: getPublicSiteSettings
+      # Public endpoint — no authentication required
+      security: []
+      x-roles: [public]
+      description: |
+        Returns the minimal subset of site settings that the frontend needs to render
+        the maintenance banner (`maintenanceMode`, `maintenanceUntil`, `siteName`).
+
+        This endpoint is intentionally public (`permitAll`) so the banner can be
+        fetched even before the user is authenticated (e.g. on the login page).
+
+        **Maintenance bypass note:** this endpoint itself is always accessible —
+        `MaintenanceFilter` explicitly allowlists it so the banner can always be
+        rendered regardless of maintenance state.
+      responses:
+        "200":
+          description: Public site settings loaded successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicSiteSettingsResponse"
+              example:
+                siteName: cote-lapyx
+                maintenanceMode: true
+                maintenanceUntil: "2026-06-10T06:00:00Z"
+
   # ---------------------------------------------------------------------------
   # Locale — geo-IP language detection (public, no auth)
   # ---------------------------------------------------------------------------
@@ -2337,6 +2506,11 @@ paths:
           $ref: "#/components/responses/ValidationError"
         "429":
           $ref: "#/components/responses/TooManyRequests"
+        # F064: MaintenanceFilter blocks /auth/register for non-owners when
+        # maintenanceMode=true.  /auth/login, /auth/refresh, /auth/logout are
+        # on the allowlist and are NEVER blocked.
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 
   /auth/login:
     post:
@@ -3453,6 +3627,10 @@ paths:
                 detail: The comment was rejected by the automatic moderation filter.
                 instance: /api/v1/posts/my-first-post/comments
                 reason: profanity
+        # F064: MaintenanceFilter blocks this write for non-owners when maintenanceMode=true.
+        # Representative of all non-allowlisted POST / PUT / PATCH / DELETE endpoints.
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 
   /comments/{id}:
     patch:
@@ -4200,6 +4378,9 @@ paths:
           $ref: "#/components/responses/ValidationError"
         "409":
           $ref: "#/components/responses/Conflict"
+        # F064: MaintenanceFilter blocks this write for non-owners when maintenanceMode=true.
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 
   /subscriptions/me:
     get:
@@ -5341,6 +5522,23 @@ paths:
       security:
         - bearerAuth: []
       x-roles: [owner]
+      description: |
+        Partially updates site-wide configuration. All fields are optional — only
+        supplied fields are changed.
+
+        **F064 — Maintenance mode + ETA:**
+        Set `maintenanceMode: true` to activate soft maintenance mode.
+        Optionally include `maintenanceUntil` with an ISO 8601 UTC timestamp so the
+        frontend banner can display a localised countdown.  Set `maintenanceUntil: null`
+        to clear an existing ETA without toggling the maintenance flag.
+
+        **Cache invalidation:** the backend maintains an in-memory cache of the
+        maintenance flag and `maintenanceUntil` (TTL ≤ 10 s). A successful PATCH
+        invalidates this cache immediately so `MaintenanceFilter` uses the updated
+        values on the next request without a DB round-trip.
+
+        **Owner bypass:** owners are never blocked by `MaintenanceFilter` — this
+        endpoint is always reachable even when `maintenanceMode = true`.
       requestBody:
         required: true
         content:
