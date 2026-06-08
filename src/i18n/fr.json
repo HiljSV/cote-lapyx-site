@@ -611,5 +611,10 @@
   "admin.activity_type.SUBSCRIPTION_CANCEL": "Annulation d'abonnement",
   "admin.activity_type.STATUS_CHANGE": "Changement de statut",
   "admin.activity_type.ACCOUNT_DELETE": "Compte supprimé",
-  "admin.activity_type.EMAIL_VERIFIED": "Email vérifié"
+  "admin.activity_type.EMAIL_VERIFIED": "Email vérifié",
+
+  "maintenance.banner_text": "Site en maintenance technique",
+  "maintenance.until_prefix": "estimé jusqu'à",
+  "admin.toggle.maintenance_eta": "Maintenance ETA",
+  "admin.toggle.maintenance_eta_desc": "Heure de fin prévue de la maintenance (optionnel)"
 }

@@ -611,5 +611,10 @@
   "admin.activity_type.SUBSCRIPTION_CANCEL": "Abonnement gekündigt",
   "admin.activity_type.STATUS_CHANGE": "Statusänderung",
   "admin.activity_type.ACCOUNT_DELETE": "Konto gelöscht",
-  "admin.activity_type.EMAIL_VERIFIED": "E-Mail bestätigt"
+  "admin.activity_type.EMAIL_VERIFIED": "E-Mail bestätigt",
+
+  "maintenance.banner_text": "Website in Wartung",
+  "maintenance.until_prefix": "voraussichtlich bis",
+  "admin.toggle.maintenance_eta": "Maintenance ETA",
+  "admin.toggle.maintenance_eta_desc": "Erwartete Abschlusszeit der Wartung (optional)"
 }
