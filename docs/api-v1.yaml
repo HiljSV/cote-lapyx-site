@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Cote Lapyx API
-  version: 1.14.0
+  version: 1.15.0
   description: |
     REST API for cote-lapyx.com — a team website for Валерія, Сергій, Андрій.
 
@@ -217,6 +217,34 @@ components:
         `suspended` accounts are rejected at login.
       enum: [active, blocked, suspended]
 
+    # --- User Activity (F1 — telemetry foundation) ---
+
+    # Enum for all trackable user-lifecycle events stored in the user_activity table.
+    # Backend service records these automatically on each corresponding action.
+    UserActivityType:
+      type: string
+      description: |
+        Machine-readable type of a user activity event.
+        - `REGISTRATION` — account created (row seeded at register time).
+        - `LOGIN` — successful authentication via POST /auth/login.
+        - `PROFILE_UPDATE` — PATCH /users/me changed name, avatar, bio, skills, or social links.
+        - `EMAIL_CHANGE` — PATCH /users/me/email completed successfully.
+        - `PASSWORD_CHANGE` — POST /users/me/password completed successfully.
+        - `SUBSCRIPTION_CREATE` — a new subscription was created for this user.
+        - `SUBSCRIPTION_CANCEL` — an existing subscription was cancelled.
+        - `STATUS_CHANGE` — an owner changed the account status (e.g. blocked → active).
+        - `ACCOUNT_DELETE` — the user account was deleted (admin or self-service).
+      enum:
+        - REGISTRATION
+        - LOGIN
+        - PROFILE_UPDATE
+        - EMAIL_CHANGE
+        - PASSWORD_CHANGE
+        - SUBSCRIPTION_CREATE
+        - SUBSCRIPTION_CANCEL
+        - STATUS_CHANGE
+        - ACCOUNT_DELETE
+
     # --- Problem Detail (RFC 9457) ---
 
     ProblemDetail:
@@ -416,6 +444,135 @@ components:
           type: string
           format: date-time
           example: "2026-04-23T14:30:00Z"
+
+    # F1 — Admin-only extended user detail.
+    # Returned by GET /admin/users/{id} (owner scope only).
+    # Extends the base UserDTO with four telemetry fields captured at key lifecycle events.
+    # NOT used in the admin user list (PagedUserResponse still wraps UserDTO) to avoid
+    # leaking telemetry columns in bulk responses and to keep JOIN cost on the list query to zero.
+    #
+    # Schema split rationale:
+    #   - UserDTO  → used by GET /users/me, GET /auth/me, admin list (PagedUserResponse),
+    #                PATCH /admin/users/{id} response.  No telemetry.
+    #   - AdminUserDetailDTO → used only by GET /admin/users/{id}.  Adds 4 nullable
+    #                telemetry fields.  Extends UserDTO via allOf to stay DRY.
+    AdminUserDetailDTO:
+      allOf:
+        - $ref: "#/components/schemas/UserDTO"
+        - type: object
+          description: |
+            Owner-only extended view of a user account.
+            Returned exclusively by `GET /admin/users/{id}`.
+            All four added fields are nullable — they are populated progressively
+            as the user performs the corresponding actions (login, register, etc.).
+          properties:
+            # IP address captured at account creation (POST /auth/register).
+            # IPv4 max 15 chars; IPv6 max 45 chars (RFC 5952 compressed notation).
+            registrationIp:
+              type: string
+              nullable: true
+              maxLength: 45
+              description: |
+                IP address from which the account was registered.
+                Captured once at `POST /auth/register`. Null if the record predates F1.
+              example: "93.184.216.34"
+            # ISO 8601 UTC timestamp of the most recent successful POST /auth/login.
+            lastLoginAt:
+              type: string
+              format: date-time
+              nullable: true
+              description: |
+                Timestamp of the most recent successful login (`POST /auth/login`).
+                Null if the user has never logged in after F1 was deployed.
+              example: "2026-06-07T21:15:00Z"
+            # IP address of the most recent successful login.
+            lastLoginIp:
+              type: string
+              nullable: true
+              maxLength: 45
+              description: |
+                IP address from which the most recent successful login was performed.
+                Null if the user has never logged in after F1 was deployed.
+              example: "93.184.216.34"
+            # User-Agent string captured at the most recent successful login.
+            # Stored truncated to 512 chars to avoid unbounded storage.
+            userAgent:
+              type: string
+              nullable: true
+              maxLength: 512
+              description: |
+                HTTP `User-Agent` header captured at the most recent successful login.
+                Truncated to 512 characters. Null if the user has never logged in after F1.
+              example: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0 Safari/537.36"
+
+    # F1 — Single activity event returned in the paginated activity log.
+    # Sourced from the (future) user_activity table.
+    UserActivityResponse:
+      type: object
+      required: [id, type, createdAt]
+      description: |
+        One entry in the user activity audit log.
+        Returned by `GET /admin/users/{id}/activity`.
+        All fields except `id`, `type`, and `createdAt` are nullable to accommodate
+        activity types that do not produce IP/UA/detail data.
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Surrogate primary key of the activity row.
+          example: 4201
+        type:
+          $ref: "#/components/schemas/UserActivityType"
+        createdAt:
+          type: string
+          format: date-time
+          description: ISO 8601 UTC timestamp when the event was recorded.
+          example: "2026-06-08T09:30:00Z"
+        # Client IP at the time of the event — absent for non-network events
+        # (e.g. STATUS_CHANGE triggered by an owner in the admin panel).
+        ipAddress:
+          type: string
+          nullable: true
+          maxLength: 45
+          description: |
+            Client IP address at the time of the event (IPv4 or IPv6).
+            Null for server-side events (e.g. `STATUS_CHANGE`, `ACCOUNT_DELETE` by admin).
+          example: "93.184.216.34"
+        # Raw User-Agent string — only populated for browser-originated events.
+        userAgent:
+          type: string
+          nullable: true
+          maxLength: 512
+          description: |
+            HTTP `User-Agent` header at the time of the event.
+            Null for server-side events and for event types that do not capture UA.
+          example: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        # Human-readable or JSON summary of what changed — e.g. changed fields on
+        # PROFILE_UPDATE, old/new status on STATUS_CHANGE.
+        detail:
+          type: string
+          nullable: true
+          description: |
+            Short human-readable or JSON summary of the event payload.
+            Examples:
+            - `PROFILE_UPDATE`: `"fields: name, bio"`
+            - `STATUS_CHANGE`: `"blocked → active"`
+            - `EMAIL_CHANGE`: `"new: user@example.com"`
+            Null for events with no additional context (e.g. `LOGIN`).
+          example: "fields: name, bio"
+
+    # Pagination wrapper for user activity log entries.
+    PagedUserActivityResponse:
+      type: object
+      required: [content, page]
+      description: Paginated list of user activity events.
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserActivityResponse"
+        page:
+          $ref: "#/components/schemas/PageMetadata"
 
     UserUpdateRequest:
       type: object
@@ -4404,11 +4561,18 @@ paths:
   /admin/users/{id}:
     get:
       tags: [Admin]
-      summary: Get a user by ID (owner only)
+      summary: Get a user by ID with telemetry (owner only)
       operationId: adminGetUser
       security:
         - bearerAuth: []
       x-roles: [owner]
+      # F1: returns AdminUserDetailDTO (extends UserDTO with 4 telemetry fields).
+      # The admin list endpoint (GET /admin/users) still returns PagedUserResponse
+      # (wrapping plain UserDTO) — no telemetry leaks into bulk list responses.
+      description: |
+        Returns the full user profile for the specified account, including admin-only
+        telemetry: `registrationIp`, `lastLoginAt`, `lastLoginIp`, `userAgent`.
+        These fields are **never** exposed by `GET /users/me` or any public endpoint.
       parameters:
         - name: id
           in: path
@@ -4418,11 +4582,11 @@ paths:
             format: int64
       responses:
         "200":
-          description: User profile.
+          description: Extended user profile with admin telemetry fields.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserDTO"
+                $ref: "#/components/schemas/AdminUserDetailDTO"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "403":
@@ -4504,6 +4668,62 @@ paths:
           $ref: "#/components/responses/NotFound"
         "409":
           $ref: "#/components/responses/Conflict"
+
+  # ---------------------------------------------------------------------------
+  # Admin — User Activity Log (F1 — telemetry foundation)
+  # ---------------------------------------------------------------------------
+
+  /admin/users/{id}/activity:
+    get:
+      tags: [Admin]
+      summary: List activity events for a user (owner only)
+      operationId: adminGetUserActivity
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Returns a paginated, reverse-chronological audit log of lifecycle events
+        for the specified user account (registrations, logins, profile/email/password
+        changes, subscription events, status changes, and account deletion).
+
+        Sourced from the `user_activity` table (Flyway migration added by F1 epic).
+        All events are immutable — no write operations exist on this endpoint.
+
+        Returns 404 if the user ID does not exist.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Numeric ID of the target user account.
+          schema:
+            type: integer
+            format: int64
+            example: 42
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+        # Default sort is createdAt,desc (newest first) — matches typical admin audit UX.
+        - $ref: "#/components/parameters/SortParam"
+        # Optional filter to narrow to a specific event category.
+        - name: type
+          in: query
+          required: false
+          description: |
+            Filter to a specific activity type. Omit to return events of all types.
+          schema:
+            $ref: "#/components/schemas/UserActivityType"
+      responses:
+        "200":
+          description: Paginated list of user activity events, newest first by default.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedUserActivityResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
 
   # ---------------------------------------------------------------------------
   # Admin — Posts (all statuses, all authors)
