@@ -293,11 +293,107 @@
 
     <!-- ===== SECTION: OVERVIEW ===== -->
     <div class="dash-section-panel is-active" data-panel="overview">
+      <!-- ===== Overview: welcome card — shown for non-OWNER by JS ===== -->
+      <!-- Hidden by default; JS removes [hidden] when user.role !== "OWNER" -->
+      <!-- The welcome title and greeting are injected by JS via escHtml(name) -->
+      <div class="dash-overview-welcome" id="overview-welcome" hidden>
+        <!-- Welcome heading: data-i18n applied by applyTranslations() -->
+        <h2
+          class="dash-overview-welcome__title"
+          data-i18n="dash.overview.welcome_title"
+        >
+          Ласкаво просимо
+        </h2>
+        <!-- Greeting with user name — injected by JS: "Вітаємо, {name}!" -->
+        <p
+          class="dash-overview-welcome__greeting"
+          id="overview-welcome-greeting"
+        ></p>
+
+        <!-- Quick-link cards: Profile / My Subscriptions / Favorites -->
+        <!-- Each button calls activateSection via data-section-link attribute -->
+        <div class="dash-overview-welcome__links">
+          <!-- Quick link: Profile section -->
+          <button
+            type="button"
+            class="dash-overview-welcome__link-card"
+            data-section-link="profile"
+          >
+            <!-- Profile icon -->
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+              />
+            </svg>
+            <!-- Card label: Profile — data-i18n applied by applyTranslations() -->
+            <span data-i18n="dash.overview.quick_profile">Профіль</span>
+          </button>
+
+          <!-- Quick link: My Subscriptions section -->
+          <button
+            type="button"
+            class="dash-overview-welcome__link-card"
+            data-section-link="my-subscriptions"
+          >
+            <!-- Subscriptions icon -->
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"
+              />
+            </svg>
+            <!-- Card label: My Subscriptions -->
+            <span data-i18n="dash.overview.quick_subscriptions"
+              >Мої підписки</span
+            >
+          </button>
+
+          <!-- Quick link: Favorites section -->
+          <button
+            type="button"
+            class="dash-overview-welcome__link-card"
+            data-section-link="favorites"
+          >
+            <!-- Favorites icon (star) -->
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+              />
+            </svg>
+            <!-- Card label: Favorites -->
+            <span data-i18n="dash.overview.quick_favorites">Вибране</span>
+          </button>
+        </div>
+      </div>
+      <!-- /overview-welcome -->
+
+      <!-- ===== Overview: OWNER-only widgets ===== -->
+      <!-- data-owner-overview: hidden by default; JS reveals for OWNER only -->
+
       <!-- Stats row — values injected by JS from /dashboard/stats -->
       <section
         class="dash-stats"
         aria-label="Статистика"
         data-i18n-aria="dash.overview.stats_aria"
+        data-owner-overview
+        hidden
       >
         <!-- Posts count card -->
         <div class="dash-stat-card">
@@ -392,11 +488,13 @@
         </div>
       </section>
 
-      <!-- Recent posts table -->
+      <!-- Recent posts table — OWNER only; hidden until JS reveals for OWNER -->
       <section
         class="dash-section"
         aria-label="Останні публікації"
         data-i18n-aria="dash.overview.recent_posts_aria"
+        data-owner-overview
+        hidden
       >
         <div class="dash-section__header">
           <!-- Section title: Recent posts -->
@@ -438,11 +536,13 @@
         </div>
       </section>
 
-      <!-- Recent projects table -->
+      <!-- Recent projects table — OWNER only; hidden until JS reveals for OWNER -->
       <section
         class="dash-section"
         aria-label="Останні проекти"
         data-i18n-aria="dash.overview.recent_projects_aria"
+        data-owner-overview
+        hidden
       >
         <div class="dash-section__header">
           <!-- Section title: Recent projects -->

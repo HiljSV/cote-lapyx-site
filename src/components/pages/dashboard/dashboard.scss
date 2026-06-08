@@ -232,11 +232,29 @@
   }
 
   // ----- Logout button -----
+  // iOS Safari fix: env(safe-area-inset-bottom) prevents the bottom
+  // toolbar from overlapping the logout button inside position:fixed drawer.
+  // The base 16px ensures breathing room even on non-notched devices.
 
   &__logout {
     margin: 16px 20px 0;
     width: calc(100% - 40px);
     justify-content: center;
+    // iOS safe-area bottom spacing — must be on the element or a wrapper
+    // that is NOT clipped by overflow:hidden on the sidebar itself.
+    // We use flex-shrink:0 so this element never gets squished out of view.
+    flex-shrink: 0;
+  }
+
+  // ----- Sidebar footer — wraps admin-link + logout, holds iOS safe area -----
+  // On mobile the sidebar is position:fixed with bottom:0 and overflow:hidden.
+  // Without padding-bottom:env(safe-area-inset-bottom) the iOS Safari toolbar
+  // overlaps the logout button.  We add the padding here so the flex column
+  // pushes the button above the home-indicator / bottom bar.
+
+  @media (max-width: toEm($tablet)) {
+    /* Reserve safe-area space at the bottom of the sidebar drawer on iOS */
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   }
 }
 
@@ -1727,5 +1745,125 @@
   /* Toolbar: allow icons to wrap on 320px instead of overflowing */
   .toastui-editor-toolbar-group {
     flex-wrap: wrap !important;
+  }
+}
+
+// =============================================================================
+// Overview welcome card — shown to non-OWNER users instead of stat tiles
+// JS reveals #overview-welcome by removing [hidden] when user.role !== "OWNER"
+// =============================================================================
+
+/* ===== Welcome card container ===== */
+.dash-overview-welcome {
+  /* Glass card style matches the rest of the dashboard */
+  @include glass-card;
+  padding: 40px 32px;
+  margin-bottom: 32px;
+  text-align: center;
+
+  /* Hidden by default — JS removes [hidden] for non-OWNER */
+  &[hidden] {
+    display: none;
+  }
+
+  /* ===== Welcome title ===== */
+  &__title {
+    font-family: $fontHeading;
+    font-size: clamp(22px, 3vw, 32px);
+    font-weight: 700;
+    color: $neon-cyan;
+    text-shadow: 0 0 16px rgba($neon-cyan, 0.45);
+    margin: 0 0 12px;
+
+    /* Cyan underline accent */
+    &::after {
+      content: "";
+      display: block;
+      width: 60px;
+      height: 2px;
+      background: linear-gradient(90deg, $neon-cyan, transparent);
+      box-shadow: 0 0 8px $neon-cyan;
+      margin: 10px auto 0;
+    }
+  }
+
+  /* ===== Greeting line (e.g. "Вітаємо, Serhii!") — injected by JS ===== */
+  &__greeting {
+    font-family: $fontFamily;
+    font-size: 16px;
+    color: $text-secondary;
+    margin: 0 0 36px;
+  }
+
+  /* ===== Quick-link cards row ===== */
+  &__links {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  /* ===== Individual quick-link card (button) ===== */
+  &__link-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 24px 28px;
+    min-width: 140px;
+    /* Glass card base */
+    background: rgba($neon-cyan, 0.04);
+    border: 1px solid rgba($neon-cyan, 0.25);
+    border-radius: 12px;
+    color: $text-secondary;
+    font-family: $fontHeading;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition:
+      color 0.25s ease,
+      border-color 0.25s ease,
+      background 0.25s ease,
+      box-shadow 0.25s ease,
+      transform 0.25s ease;
+
+    /* Icon color */
+    svg {
+      color: $neon-cyan;
+      opacity: 0.8;
+      transition:
+        opacity 0.2s ease,
+        filter 0.2s ease;
+    }
+
+    /* Hover state — neon glow */
+    &:hover {
+      color: $neon-cyan;
+      border-color: $neon-cyan;
+      background: rgba($neon-cyan, 0.08);
+      box-shadow: 0 0 20px rgba($neon-cyan, 0.18);
+      transform: translateY(-3px);
+
+      svg {
+        opacity: 1;
+        filter: drop-shadow(0 0 6px rgba($neon-cyan, 0.7));
+      }
+    }
+
+    /* Focus visible — keyboard accessible */
+    &:focus-visible {
+      outline: 2px solid $neon-cyan;
+      outline-offset: 3px;
+    }
+
+    /* Mobile: fill available width on very small screens */
+    @media (max-width: toEm($mobileSmall)) {
+      min-width: 0;
+      width: 100%;
+      flex-direction: row;
+      justify-content: center;
+      padding: 16px 20px;
+    }
   }
 }
