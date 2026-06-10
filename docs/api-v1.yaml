@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Cote Lapyx API
-  version: 1.18.0
+  version: 1.19.0
   description: |
     REST API for cote-lapyx.com — a team website for Валерія, Сергій, Андрій.
 
@@ -341,6 +341,22 @@ components:
           minLength: 8
           maxLength: 72
           example: "S3cur3P@ss!"
+
+    # "Sign in with Google" payload (FEAT-054). The credential is the Google ID
+    # token (a JWT) issued by Google Identity Services on the frontend; the server
+    # verifies signature, audience (= configured client-id), issuer, expiry and
+    # email_verified before logging the user in.
+    GoogleLoginRequest:
+      type: object
+      required: [credential]
+      properties:
+        credential:
+          type: string
+          description: |
+            Google ID token (JWT) returned by the Google Identity Services
+            (GIS) button callback on the frontend. Opaque to the client —
+            pass it through unmodified.
+          example: "eyJhbGciOiJSUzI1NiIs..."
 
     RegisterRequest:
       type: object
@@ -2551,6 +2567,66 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         "429":
           $ref: "#/components/responses/TooManyRequests"
+
+  # "Sign in with Google" (FEAT-054, deployed 2026-06-08). Same response contract
+  # as /auth/login: access token in body, refresh token via cl_refresh cookie.
+  /auth/google:
+    post:
+      tags: [Auth]
+      summary: Authenticate with a Google ID token (Sign in with Google)
+      operationId: googleLogin
+      security: []
+      x-roles: [public]
+      description: |
+        Verifies the Google ID token (`credential`) obtained from the Google
+        Identity Services button and logs the user in:
+
+        1. If a user with this Google account ID exists — log them in.
+        2. Else, if a user with the same **verified** email exists — link the
+           Google account to it and log them in.
+        3. Else — create a new `SUBSCRIBER` account (no password; `authProvider`
+           = `GOOGLE`, email is considered verified by Google).
+
+        Server-side checks: JWT signature, `aud` equals the configured Google
+        client-id, issuer, expiry, and `email_verified=true`.
+        Response shape is identical to `POST /auth/login`: the JWT access token
+        is in the body, the refresh token is delivered via the `cl_refresh`
+        HttpOnly cookie.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoogleLoginRequest"
+      responses:
+        "200":
+          description: |
+            Authentication successful (existing, linked, or newly created user).
+            The `cl_refresh` HttpOnly cookie is set in `Set-Cookie`. Body contains
+            `user` and `accessToken` only.
+          headers:
+            Set-Cookie:
+              $ref: "#/components/headers/SetCookieRefresh"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          description: |
+            The Google ID token is missing, malformed, expired, has a wrong
+            audience/issuer, or the Google email is not verified.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+              example:
+                type: https://cote-lapyx.com/errors/google-token-invalid
+                title: Unauthorized
+                status: 401
+                detail: Google ID token is invalid or expired.
+                instance: /api/v1/auth/google
 
   /auth/refresh:
     post:
