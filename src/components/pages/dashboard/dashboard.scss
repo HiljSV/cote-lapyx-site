@@ -38,6 +38,12 @@
     top: 70px;
     left: 0;
     bottom: 0;
+    // iOS Safari fix: the desktop height (calc(100vh - 70px)) must NOT apply
+    // here — 100vh on iOS equals the LARGE viewport (toolbar collapsed), so
+    // the drawer extended below the visible area and hid admin-link/logout
+    // behind the bottom toolbar. height:auto lets top+bottom anchor the
+    // drawer to the real visible viewport (fixed bottom:0 tracks the toolbar).
+    height: auto;
     width: 100%;
     z-index: 50;
     transform: translateX(-100%);
@@ -45,6 +51,30 @@
 
     &.is-open {
       transform: translateX(0);
+    }
+  }
+
+  // Short screens (phone landscape): compact paddings so the user block,
+  // nav rows and footer (admin-link + logout) all fit without overlapping;
+  // the nav itself keeps its internal scroll for the remaining rows.
+  @media (max-height: 30em) {
+    padding: 10px 0;
+
+    .dash-sidebar__user {
+      padding-bottom: 10px;
+    }
+
+    .dash-sidebar__nav {
+      padding: 6px 0;
+    }
+
+    .dash-sidebar__nav-link {
+      padding: 7px 20px;
+    }
+
+    .dash-sidebar__logout {
+      margin-top: 8px;
+      min-height: 36px;
     }
   }
 
@@ -1142,6 +1172,9 @@
   align-items: center;
   gap: 10px;
   margin: 0 12px 12px;
+  // Footer item of the sidebar flex column — must never be squished out
+  // of view on short screens (the nav above it shrinks/scrolls instead).
+  flex-shrink: 0;
   padding: 10px 16px;
   border: 1px solid rgba(224, 64, 251, 0.35);
   border-radius: 6px;
