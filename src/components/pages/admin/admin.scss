@@ -285,6 +285,53 @@
   }
 }
 
+// =============================================================================
+// Maintenance ETA row — modifier for toggle row that contains a datetime input
+// =============================================================================
+
+.admin-toggle-row--eta {
+  /* Stack info block and input vertically on narrow screens */
+  flex-wrap: wrap;
+}
+
+// Maintenance ETA datetime-local input — styled to match the cyberpunk form language
+.admin-settings__datetime-input {
+  /* Constrained width — matches a readable date+time string */
+  width: 200px;
+  flex-shrink: 0;
+
+  /* Dark glass background matching other inputs */
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid $border-cyan;
+  border-radius: 8px;
+  color: $text-primary;
+  font-family: $fontFamily;
+  font-size: 14px;
+  padding: 8px 12px;
+  line-height: 1.4;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  /* Cyan focus glow — consistent with site form inputs */
+  &:focus {
+    outline: none;
+    border-color: rgba($neon-cyan, 0.6);
+    box-shadow:
+      0 0 0 3px rgba($neon-cyan, 0.12),
+      0 0 8px rgba($neon-cyan, 0.2);
+  }
+
+  /* Browser color-scheme hint so the date picker calendar matches dark theme */
+  color-scheme: dark;
+
+  /* Mobile: full width below info block */
+  @media (max-width: toEm($mobile)) {
+    width: 100%;
+    margin-top: 8px;
+  }
+}
+
 // CSS-only toggle switch
 .admin-toggle {
   position: relative;

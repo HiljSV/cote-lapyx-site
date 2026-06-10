@@ -611,5 +611,10 @@
   "admin.activity_type.SUBSCRIPTION_CANCEL": "Subscription cancelled",
   "admin.activity_type.STATUS_CHANGE": "Status change",
   "admin.activity_type.ACCOUNT_DELETE": "Account deleted",
-  "admin.activity_type.EMAIL_VERIFIED": "Email verified"
+  "admin.activity_type.EMAIL_VERIFIED": "Email verified",
+
+  "maintenance.banner_text": "Site under maintenance",
+  "maintenance.until_prefix": "estimated until",
+  "admin.toggle.maintenance_eta": "Maintenance ETA",
+  "admin.toggle.maintenance_eta_desc": "Expected maintenance end time; cleared automatically when maintenance is turned off"
 }

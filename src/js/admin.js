@@ -459,8 +459,79 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (maintToggle) {
         maintToggle.checked = settings.maintenanceMode ?? false;
       }
+
+      // Populate maintenanceUntil ETA field (F4-064)
+      // API returns ISO 8601 string or null; datetime-local needs "YYYY-MM-DDTHH:MM"
+      const etaInput = document.getElementById("settings-maintenance-until");
+      if (etaInput) {
+        if (settings.maintenanceUntil) {
+          // Convert ISO 8601 (e.g. "2026-06-10T14:30:00Z") to datetime-local format
+          // datetime-local value must be "YYYY-MM-DDTHH:MM" (no seconds, no Z)
+          const isoStr = settings.maintenanceUntil;
+          const localDt = isoToDatetimeLocal(isoStr);
+          etaInput.value = localDt;
+        } else {
+          // Clear the field when no ETA is set
+          etaInput.value = "";
+        }
+      }
     } catch (err) {
       console.error("Admin settings load error:", err);
+    }
+  }
+
+  // =============================================================================
+  // isoToDatetimeLocal — convert ISO 8601 string to datetime-local value
+  // datetime-local accepts "YYYY-MM-DDTHH:MM" without timezone suffix.
+  // We use local time so the admin sees/sets time in their own timezone.
+  // =============================================================================
+  /**
+   * Convert an ISO 8601 string to a "YYYY-MM-DDTHH:MM" string for datetime-local.
+   *
+   * @param {string} isoStr - ISO 8601 date-time string from API
+   * @returns {string}      - datetime-local value string
+   */
+  function isoToDatetimeLocal(isoStr) {
+    try {
+      const d = new Date(isoStr);
+      // Pad helper: ensure 2-digit output
+      const pad = (n) => String(n).padStart(2, "0");
+      // Build local-time string: YYYY-MM-DDTHH:MM
+      return (
+        d.getFullYear() +
+        "-" +
+        pad(d.getMonth() + 1) +
+        "-" +
+        pad(d.getDate()) +
+        "T" +
+        pad(d.getHours()) +
+        ":" +
+        pad(d.getMinutes())
+      );
+    } catch (_) {
+      // Return empty string on any parse failure
+      return "";
+    }
+  }
+
+  // =============================================================================
+  // datetimeLocalToIso — convert datetime-local value back to ISO 8601
+  // The browser gives us local time; we create a Date from it and call toISOString()
+  // to get the UTC ISO string that the backend expects.
+  // =============================================================================
+  /**
+   * Convert a datetime-local input value ("YYYY-MM-DDTHH:MM") to ISO 8601 UTC.
+   *
+   * @param {string} localStr - value from datetime-local input
+   * @returns {string|null}   - ISO 8601 UTC string, or null if input is empty
+   */
+  function datetimeLocalToIso(localStr) {
+    if (!localStr) return null;
+    try {
+      // new Date("YYYY-MM-DDTHH:MM") interprets as local time on all modern browsers
+      return new Date(localStr).toISOString();
+    } catch (_) {
+      return null;
     }
   }
 
@@ -490,6 +561,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     const maintenanceMode =
       document.getElementById("settings-toggle-maintenance")?.checked ?? false;
 
+    // Read maintenanceUntil ETA (F4-064) — convert datetime-local to ISO 8601 or null
+    const etaInputValue =
+      document.getElementById("settings-maintenance-until")?.value || "";
+    // datetimeLocalToIso returns null when the input is empty.
+    // Backend semantics: a non-null value updates the ETA; null leaves it
+    // UNCHANGED (partial-update). The ETA is cleared automatically by the backend
+    // when maintenanceMode is turned off — there is no "clear while still on".
+    const maintenanceUntil = datetimeLocalToIso(etaInputValue);
+
     // Build PATCH payload — only include defined fields
     const payload = {};
     if (siteName !== undefined) payload.siteName = siteName;
@@ -498,6 +578,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       payload.siteDescription = siteDescription;
     payload.registrationEnabled = registrationEnabled;
     payload.maintenanceMode = maintenanceMode;
+    // Include maintenanceUntil: non-null updates the ETA, null = unchanged
+    // (backend clears it automatically when maintenanceMode is set to false)
+    payload.maintenanceUntil = maintenanceUntil;
 
     try {
       // Authenticated PATCH — ROLE_OWNER required

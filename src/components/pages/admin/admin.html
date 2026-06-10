@@ -1351,6 +1351,37 @@
               <span class="admin-toggle__slider"></span>
             </label>
           </div>
+
+          <!-- Maintenance ETA field — appears below the toggle -->
+          <!-- Value is an ISO 8601 datetime, converted to/from datetime-local by admin.js -->
+          <div class="admin-toggle-row admin-toggle-row--eta">
+            <div class="admin-toggle-row__info">
+              <!-- ETA label — i18n: admin.toggle.maintenance_eta -->
+              <label
+                class="admin-toggle-row__label"
+                for="settings-maintenance-until"
+                data-i18n="admin.toggle.maintenance_eta"
+              >
+                Maintenance ETA
+              </label>
+              <!-- ETA description — i18n: admin.toggle.maintenance_eta_desc -->
+              <p
+                class="admin-toggle-row__desc"
+                data-i18n="admin.toggle.maintenance_eta_desc"
+              >
+                Очікуваний час завершення технічного обслуговування
+              </p>
+            </div>
+            <!-- datetime-local input: JS loads ISO value from API and converts it;
+                 on save, empty value sends null, non-empty sends ISO 8601 string -->
+            <input
+              type="datetime-local"
+              id="settings-maintenance-until"
+              name="maintenanceUntil"
+              class="admin-settings__datetime-input"
+              aria-label="Maintenance ETA"
+            />
+          </div>
         </div>
         <!-- /admin-settings-block: system toggles -->
       </section>
