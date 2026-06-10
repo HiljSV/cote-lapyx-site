@@ -615,6 +615,6 @@
 
   "maintenance.banner_text": "Site en maintenance technique",
   "maintenance.until_prefix": "estimé jusqu'à",
-  "admin.toggle.maintenance_eta": "Maintenance ETA",
-  "admin.toggle.maintenance_eta_desc": "Heure de fin prévue de la maintenance (optionnel)"
+  "admin.toggle.maintenance_eta": "Heure de fin estimée",
+  "admin.toggle.maintenance_eta_desc": "Heure de fin estimée ; effacée automatiquement à la désactivation de la maintenance"
 }

@@ -616,5 +616,5 @@
   "maintenance.banner_text": "Site under maintenance",
   "maintenance.until_prefix": "estimated until",
   "admin.toggle.maintenance_eta": "Maintenance ETA",
-  "admin.toggle.maintenance_eta_desc": "Expected completion time for maintenance (optional)"
+  "admin.toggle.maintenance_eta_desc": "Expected maintenance end time; cleared automatically when maintenance is turned off"
 }

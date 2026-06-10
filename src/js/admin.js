@@ -564,7 +564,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Read maintenanceUntil ETA (F4-064) — convert datetime-local to ISO 8601 or null
     const etaInputValue =
       document.getElementById("settings-maintenance-until")?.value || "";
-    // datetimeLocalToIso returns null when input is empty (clears ETA on backend)
+    // datetimeLocalToIso returns null when the input is empty.
+    // Backend semantics: a non-null value updates the ETA; null leaves it
+    // UNCHANGED (partial-update). The ETA is cleared automatically by the backend
+    // when maintenanceMode is turned off — there is no "clear while still on".
     const maintenanceUntil = datetimeLocalToIso(etaInputValue);
 
     // Build PATCH payload — only include defined fields
@@ -575,7 +578,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       payload.siteDescription = siteDescription;
     payload.registrationEnabled = registrationEnabled;
     payload.maintenanceMode = maintenanceMode;
-    // Always include maintenanceUntil (null clears it on the backend)
+    // Include maintenanceUntil: non-null updates the ETA, null = unchanged
+    // (backend clears it automatically when maintenanceMode is set to false)
     payload.maintenanceUntil = maintenanceUntil;
 
     try {

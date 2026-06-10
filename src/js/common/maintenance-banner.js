@@ -215,6 +215,19 @@ export async function initMaintenanceBanner() {
     // Inject and animate the banner with optional ETA
     const banner = injectBanner(data.maintenanceUntil || null);
     revealBanner(banner);
+
+    // Push page content down so the fixed banner does not cover the top of the
+    // page. `.page` already carries padding-top:70px to clear the sticky header;
+    // add the banner's measured height on top of that. Re-measured on resize
+    // because the banner wraps to multiple lines on narrow viewports.
+    const page = document.querySelector(".page");
+    if (page) {
+      const applyBannerOffset = () => {
+        page.style.paddingTop = `${70 + banner.offsetHeight}px`;
+      };
+      applyBannerOffset();
+      window.addEventListener("resize", applyBannerOffset);
+    }
   } catch (_) {
     // Silent fail — network error, CORS, JSON parse error — all ignored
     // The banner is a non-critical progressive enhancement

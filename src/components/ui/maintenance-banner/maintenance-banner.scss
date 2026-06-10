@@ -104,8 +104,8 @@ $amber-border: rgba(255, 171, 0, 0.35);
 
 /* ── Responsive ─────────────────────────────────────────────────────────── */
 
-/* Tablet: 991.98px and below */
-@media (max-width: 991.98px) {
+/* Tablet and below */
+@media (max-width: toEm($tablet)) {
   .maintenance-banner {
     /* Tablet — header height stays 70px */
     top: 70px;
@@ -117,8 +117,8 @@ $amber-border: rgba(255, 171, 0, 0.35);
   }
 }
 
-/* Mobile: 767.98px and below */
-@media (max-width: 767.98px) {
+/* Mobile and below */
+@media (max-width: toEm($mobile)) {
   .maintenance-banner__body {
     /* Stack icon+text on a single line, allow wrap */
     flex-direction: row;
@@ -140,8 +140,8 @@ $amber-border: rgba(255, 171, 0, 0.35);
   }
 }
 
-/* Mobile small: 479.98px and below */
-@media (max-width: 479.98px) {
+/* Mobile small and below */
+@media (max-width: toEm($mobileSmall)) {
   .maintenance-banner__body {
     /* Single column on very small screens */
     flex-direction: column;

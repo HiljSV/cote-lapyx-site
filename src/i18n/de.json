@@ -615,6 +615,6 @@
 
   "maintenance.banner_text": "Website in Wartung",
   "maintenance.until_prefix": "voraussichtlich bis",
-  "admin.toggle.maintenance_eta": "Maintenance ETA",
-  "admin.toggle.maintenance_eta_desc": "Erwartete Abschlusszeit der Wartung (optional)"
+  "admin.toggle.maintenance_eta": "Voraussichtliches Ende",
+  "admin.toggle.maintenance_eta_desc": "Voraussichtliches Ende; wird beim Deaktivieren der Wartung automatisch gelöscht"
 }

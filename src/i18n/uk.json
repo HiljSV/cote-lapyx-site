@@ -615,6 +615,6 @@
 
   "maintenance.banner_text": "Сайт на технічному обслуговуванні",
   "maintenance.until_prefix": "орієнтовно до",
-  "admin.toggle.maintenance_eta": "Maintenance ETA",
-  "admin.toggle.maintenance_eta_desc": "Очікуваний час завершення технічного обслуговування (необов'язково)"
+  "admin.toggle.maintenance_eta": "Орієнтовний час завершення",
+  "admin.toggle.maintenance_eta_desc": "Орієнтовний час завершення; очищується при вимкненні режиму обслуговування"
 }
