@@ -354,6 +354,8 @@
           <p class="dash-stat-card__label" data-i18n="admin.stat.new_comments">
             Нових коментарів
           </p>
+          <!-- Archived comments count — i18n label resolved in admin.js -->
+          <p class="dash-stat-card__sub" id="admin-stat-comments-archived"></p>
         </div>
 
         <!-- Unread contact messages count -->
@@ -644,66 +646,88 @@
           </h2>
         </div>
 
-        <!-- Filter tabs: Всі / Очікують / Схвалено / Переглянуто / Відхилені -->
-        <div
-          class="admin-filter-tabs"
-          role="tablist"
-          aria-label="Фільтр коментарів"
-        >
-          <!-- Tab: all statuses — i18n: admin.filter.all -->
+        <div class="admin-comments-toolbar">
+          <!-- Filter tabs: Всі / Очікують / Схвалено / Переглянуто / Відхилені / Архів -->
+          <div
+            class="admin-filter-tabs"
+            role="tablist"
+            aria-label="Фільтр коментарів"
+          >
+            <!-- Tab: all statuses — i18n: admin.filter.all -->
+            <button
+              type="button"
+              class="admin-filter-tab is-active"
+              role="tab"
+              aria-selected="true"
+              data-comment-filter=""
+              data-i18n="admin.filter.all"
+            >
+              Всі
+            </button>
+            <!-- Tab: PENDING — needs manual bad-words review — i18n: admin.filter.pending -->
+            <button
+              type="button"
+              class="admin-filter-tab"
+              role="tab"
+              aria-selected="false"
+              data-comment-filter="PENDING"
+              data-i18n="admin.filter.pending"
+            >
+              Очікують
+            </button>
+            <!-- Tab: APPROVED — auto-approved, admin hasn't seen yet — i18n: admin.filter.approved -->
+            <button
+              type="button"
+              class="admin-filter-tab"
+              role="tab"
+              aria-selected="false"
+              data-comment-filter="APPROVED"
+              data-i18n="admin.filter.approved"
+            >
+              Схвалено
+            </button>
+            <!-- Tab: SEEN — admin has marked as reviewed — i18n: admin.filter.seen -->
+            <button
+              type="button"
+              class="admin-filter-tab"
+              role="tab"
+              aria-selected="false"
+              data-comment-filter="SEEN"
+              data-i18n="admin.filter.seen"
+            >
+              Переглянуто
+            </button>
+            <!-- Tab: REJECTED — manually rejected by admin — i18n: admin.filter.rejected -->
+            <button
+              type="button"
+              class="admin-filter-tab"
+              role="tab"
+              aria-selected="false"
+              data-comment-filter="REJECTED"
+              data-i18n="admin.filter.rejected"
+            >
+              Відхилені
+            </button>
+            <!-- Tab: ARCHIVE — deleted and blocked comments — i18n: admin.filter.archive -->
+            <button
+              type="button"
+              class="admin-filter-tab"
+              role="tab"
+              aria-selected="false"
+              data-comment-filter="ARCHIVE"
+              data-i18n="admin.filter.archive"
+            >
+              Архів
+            </button>
+          </div>
+          <!-- Export archive button — i18n: admin.comments.btn_export -->
           <button
             type="button"
-            class="admin-filter-tab is-active"
-            role="tab"
-            aria-selected="true"
-            data-comment-filter=""
-            data-i18n="admin.filter.all"
+            class="btn btn--ghost btn--sm"
+            id="admin-comments-export"
+            data-i18n="admin.comments.btn_export"
           >
-            Всі
-          </button>
-          <!-- Tab: PENDING — needs manual bad-words review — i18n: admin.filter.pending -->
-          <button
-            type="button"
-            class="admin-filter-tab"
-            role="tab"
-            aria-selected="false"
-            data-comment-filter="PENDING"
-            data-i18n="admin.filter.pending"
-          >
-            Очікують
-          </button>
-          <!-- Tab: APPROVED — auto-approved, admin hasn't seen yet — i18n: admin.filter.approved -->
-          <button
-            type="button"
-            class="admin-filter-tab"
-            role="tab"
-            aria-selected="false"
-            data-comment-filter="APPROVED"
-            data-i18n="admin.filter.approved"
-          >
-            Схвалено
-          </button>
-          <!-- Tab: SEEN — admin has marked as reviewed — i18n: admin.filter.seen -->
-          <button
-            type="button"
-            class="admin-filter-tab"
-            role="tab"
-            aria-selected="false"
-            data-comment-filter="SEEN"
-            data-i18n="admin.filter.seen"
-          >
-            Переглянуто
-          </button>
-          <!-- Tab: REJECTED — manually rejected by admin — i18n: admin.filter.rejected -->
-          <button
-            type="button"
-            class="admin-filter-tab"
-            role="tab"
-            aria-selected="false"
-            data-comment-filter="REJECTED"
-            data-i18n="admin.filter.rejected"
-          >
-            Відхилені
+            Експорт архіву
           </button>
         </div>
 
