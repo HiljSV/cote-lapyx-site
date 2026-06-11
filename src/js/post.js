@@ -407,8 +407,10 @@ document.addEventListener("DOMContentLoaded", () => {
           // Support both paginated (data.content) and plain array responses
           const items = data.content || data || [];
           // Check if current post slug is in the favorites list
+          // API returns { postSlug, postTitle, favoritedAt } items — match postSlug
+          // first; keep legacy slug/post.slug checks for older response shapes.
           const isFaved = items.some(
-            (p) => p.slug === slug || p.post?.slug === slug,
+            (p) => p.postSlug === slug || p.slug === slug || p.post?.slug === slug,
           );
           if (isFaved) favBtn.classList.add("is-active");
         }
@@ -435,6 +437,12 @@ document.addEventListener("DOMContentLoaded", () => {
         );
         if (res && (res.ok || res.status === 204 || res.status === 200)) {
           favBtn.classList.toggle("is-active");
+        } else if (res && res.status === 409) {
+          // Already in favorites on the server — sync visual state instead of failing
+          favBtn.classList.add("is-active");
+        } else if (res && res.status === 404 && isActive) {
+          // Already removed on the server — sync visual state
+          favBtn.classList.remove("is-active");
         }
       } catch {
         /* silent */
@@ -531,10 +539,14 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       if (subMsg) {
         // Translated success/error message
+        // 409 = this email is already subscribed — informational, not an error
+        const already = res.status === 409;
         subMsg.textContent = res.ok
           ? translate("post.subscribe_ok")
-          : translate("post.subscribe_err");
-        subMsg.className = `post-subscribe-form__msg ${res.ok ? "post-subscribe-form__msg--ok" : "post-subscribe-form__msg--err"}`;
+          : already
+            ? translate("post.subscribe_already")
+            : translate("post.subscribe_err");
+        subMsg.className = `post-subscribe-form__msg ${res.ok || already ? "post-subscribe-form__msg--ok" : "post-subscribe-form__msg--err"}`;
         subMsg.removeAttribute("hidden");
       }
       if (res.ok) subFormEl.reset();

@@ -512,7 +512,6 @@
   "admin.status.archived": "Архівовано",
   "admin.status.draft": "Чернетка",
   "admin.status.published": "Опубліковано",
-
   "dash.action.edit": "Редагувати",
   "dash.action.cancel_sub": "Скасувати",
   "dash.state.saving": "Збереження...",
@@ -559,7 +558,6 @@
   "dash.export.no_data": "Немає даних для експорту. Спочатку завантажте список підписників.",
   "dash.show_pwd.show": "Показати пароль",
   "dash.show_pwd.hide": "Сховати пароль",
-
   "auth.verify_email.title": "Підтвердження email",
   "auth.verify_email.checking": "Перевіряємо посилання...",
   "auth.verify_email.success_title": "Email підтверджено!",
@@ -569,14 +567,12 @@
   "auth.verify_email.error_text": "Посилання для підтвердження недійсне або прострочене. Запросіть нове посилання.",
   "auth.verify_email.error_btn": "На головну",
   "auth.verify_email.no_token": "Посилання для підтвердження не знайдено. Перевірте email.",
-
   "dash.verify_banner.text": "Підтвердьте email",
   "dash.verify_banner.hint": "Перевірте вашу поштову скриньку та натисніть посилання у листі.",
   "dash.verify_banner.resend_btn": "Надіслати знову",
   "dash.verify_banner.sent": "Лист надіслано! Перевірте вашу поштову скриньку.",
   "dash.verify_banner.resend_error": "Помилка надсилання. Спробуйте ще раз.",
   "dash.verify_banner.resend_network": "Помилка зʼєднання. Спробуйте ще раз.",
-
   "admin.user_detail.back": "← Назад до користувачів",
   "admin.user_detail.member_since": "Учасник з",
   "admin.user_detail.section_mgmt": "Управління",
@@ -612,9 +608,9 @@
   "admin.activity_type.STATUS_CHANGE": "Зміна статусу",
   "admin.activity_type.ACCOUNT_DELETE": "Видалення акаунта",
   "admin.activity_type.EMAIL_VERIFIED": "Email підтверджено",
-
   "maintenance.banner_text": "Сайт на технічному обслуговуванні",
   "maintenance.until_prefix": "орієнтовно до",
   "admin.toggle.maintenance_eta": "Орієнтовний час завершення",
-  "admin.toggle.maintenance_eta_desc": "Орієнтовний час завершення; очищується при вимкненні режиму обслуговування"
+  "admin.toggle.maintenance_eta_desc": "Орієнтовний час завершення; очищується при вимкненні режиму обслуговування",
+  "post.subscribe_already": "Цей email вже підписаний на оновлення."
 }

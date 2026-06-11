@@ -512,7 +512,6 @@
   "admin.status.archived": "Archivé",
   "admin.status.draft": "Brouillon",
   "admin.status.published": "Publié",
-
   "dash.action.edit": "Modifier",
   "dash.action.cancel_sub": "Annuler",
   "dash.state.saving": "Enregistrement...",
@@ -559,7 +558,6 @@
   "dash.export.no_data": "Aucune donnée à exporter. Veuillez d'abord charger la liste des abonnés.",
   "dash.show_pwd.show": "Afficher le mot de passe",
   "dash.show_pwd.hide": "Masquer le mot de passe",
-
   "auth.verify_email.title": "Vérification de l'email",
   "auth.verify_email.checking": "Vérification du lien...",
   "auth.verify_email.success_title": "Email vérifié !",
@@ -569,14 +567,12 @@
   "auth.verify_email.error_text": "Le lien de vérification est invalide ou expiré. Veuillez en demander un nouveau.",
   "auth.verify_email.error_btn": "Accueil",
   "auth.verify_email.no_token": "Lien de vérification introuvable. Veuillez vérifier votre email.",
-
   "dash.verify_banner.text": "Confirmez votre email",
   "dash.verify_banner.hint": "Vérifiez votre boîte de réception et cliquez sur le lien dans l'email.",
   "dash.verify_banner.resend_btn": "Renvoyer",
   "dash.verify_banner.sent": "Email envoyé ! Vérifiez votre boîte de réception.",
   "dash.verify_banner.resend_error": "Échec de l'envoi. Veuillez réessayer.",
   "dash.verify_banner.resend_network": "Erreur de connexion. Veuillez réessayer.",
-
   "admin.user_detail.back": "← Retour aux utilisateurs",
   "admin.user_detail.member_since": "Membre depuis",
   "admin.user_detail.section_mgmt": "Gestion",
@@ -612,9 +608,9 @@
   "admin.activity_type.STATUS_CHANGE": "Changement de statut",
   "admin.activity_type.ACCOUNT_DELETE": "Compte supprimé",
   "admin.activity_type.EMAIL_VERIFIED": "Email vérifié",
-
   "maintenance.banner_text": "Site en maintenance technique",
   "maintenance.until_prefix": "estimé jusqu'à",
   "admin.toggle.maintenance_eta": "Heure de fin estimée",
-  "admin.toggle.maintenance_eta_desc": "Heure de fin estimée ; effacée automatiquement à la désactivation de la maintenance"
+  "admin.toggle.maintenance_eta_desc": "Heure de fin estimée ; effacée automatiquement à la désactivation de la maintenance",
+  "post.subscribe_already": "Cet e-mail est déjà abonné."
 }
