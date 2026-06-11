@@ -111,9 +111,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.title = `${post.title} — cote-lapyx`;
 
     /* SEO: inject dynamic canonical, OG tags and JSON-LD BlogPosting */
-    (function injectPostSEO(post, slug) {
-      // Canonical uses the SEO-friendly URL form.
-      const canonical = `https://cote-lapyx.com/blog/${encodeURIComponent(slug)}`;
+    (function injectPostSEO(post) {
+      // Use the API primary slug so every translation URL points to one canonical post URL.
+      const canonical = `https://cote-lapyx.com/blog/${encodeURIComponent(post.slug)}`;
 
       let canonEl = document.querySelector("link[rel='canonical']");
       if (!canonEl) {
@@ -172,7 +172,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.head.appendChild(ldEl);
       }
       ldEl.textContent = JSON.stringify(ld);
-    })(post, slug || "");
+    })(post);
 
     // Title + meta
     const titleEl = document.getElementById("post-title");
