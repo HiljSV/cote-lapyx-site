@@ -512,7 +512,6 @@
   "admin.status.archived": "Archived",
   "admin.status.draft": "Draft",
   "admin.status.published": "Published",
-
   "dash.action.edit": "Edit",
   "dash.action.cancel_sub": "Cancel",
   "dash.state.saving": "Saving...",
@@ -559,7 +558,6 @@
   "dash.export.no_data": "No data to export. Please load the subscribers list first.",
   "dash.show_pwd.show": "Show password",
   "dash.show_pwd.hide": "Hide password",
-
   "auth.verify_email.title": "Email Verification",
   "auth.verify_email.checking": "Checking link...",
   "auth.verify_email.success_title": "Email verified!",
@@ -569,14 +567,12 @@
   "auth.verify_email.error_text": "The verification link is invalid or has expired. Please request a new one.",
   "auth.verify_email.error_btn": "Go home",
   "auth.verify_email.no_token": "No verification link found. Please check your email.",
-
   "dash.verify_banner.text": "Confirm your email",
   "dash.verify_banner.hint": "Check your inbox and click the link in the email.",
   "dash.verify_banner.resend_btn": "Resend",
   "dash.verify_banner.sent": "Email sent! Check your inbox.",
   "dash.verify_banner.resend_error": "Failed to send. Please try again.",
   "dash.verify_banner.resend_network": "Connection error. Please try again.",
-
   "admin.user_detail.back": "← Back to users",
   "admin.user_detail.member_since": "Member since",
   "admin.user_detail.section_mgmt": "Management",
@@ -612,9 +608,9 @@
   "admin.activity_type.STATUS_CHANGE": "Status change",
   "admin.activity_type.ACCOUNT_DELETE": "Account deleted",
   "admin.activity_type.EMAIL_VERIFIED": "Email verified",
-
   "maintenance.banner_text": "Site under maintenance",
   "maintenance.until_prefix": "estimated until",
   "admin.toggle.maintenance_eta": "Maintenance ETA",
-  "admin.toggle.maintenance_eta_desc": "Expected maintenance end time; cleared automatically when maintenance is turned off"
+  "admin.toggle.maintenance_eta_desc": "Expected maintenance end time; cleared automatically when maintenance is turned off",
+  "post.subscribe_already": "This email is already subscribed."
 }
