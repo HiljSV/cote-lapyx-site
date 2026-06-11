@@ -280,8 +280,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.addEventListener("cl:languagechange", async () => {
     // Only act when we are on the post page
     if (!document.getElementById("post-main")) return;
+    // Slug comes from the SEO path /blog/<slug> first (Apache rewrite keeps no
+    // query string), with legacy ?slug= as fallback — same rule as the main loader.
     const params = new URLSearchParams(window.location.search);
-    const slug = params.get("slug");
+    const pathMatch = window.location.pathname.match(/^\/blog\/([^/]+)\/?$/);
+    const slug = pathMatch ? decodeURIComponent(pathMatch[1]) : params.get("slug");
     if (!slug) return;
     const lang = localStorage.getItem("cl_lang") || "uk";
     try {
@@ -343,9 +346,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 // =============================================================================
 document.addEventListener("DOMContentLoaded", () => {
   if (!document.getElementById("post-main")) return;
-  // interactions init — runs after main block (slug already in URL)
+  // interactions init — runs after main block (slug already in URL).
+  // Slug from SEO path /blog/<slug> first, legacy ?slug= fallback: on pretty
+  // URLs there is no query string, and reading only ?slug= silently disabled
+  // likes/favorites/subscribe/comments (bug found 2026-06-11).
   const params = new URLSearchParams(window.location.search);
-  const slug = params.get("slug");
+  const pathMatch = window.location.pathname.match(/^\/blog\/([^/]+)\/?$/);
+  const slug = pathMatch ? decodeURIComponent(pathMatch[1]) : params.get("slug");
   if (!slug) return;
 
   const API = "https://api.cote-lapyx.com/api/v1";
