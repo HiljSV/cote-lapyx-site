@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Cote Lapyx API
-  version: 1.19.0
+  version: 1.20.0
   description: |
     REST API for cote-lapyx.com — a team website for Валерія, Сергій, Андрій.
 
@@ -206,7 +206,9 @@ components:
 
     SubscriptionStatus:
       type: string
-      enum: [active, cancelled, expired]
+      # FEAT-065: PENDING added for double opt-in flow. A subscription starts in PENDING
+      # and transitions to ACTIVE when the user clicks the confirmation link in the email.
+      enum: [pending, active, cancelled, expired]
 
     ContactMessageStatus:
       type: string
@@ -4432,13 +4434,38 @@ paths:
   /subscriptions:
     post:
       tags: [Subscriptions]
-      summary: Subscribe to content updates
+      summary: Subscribe to content updates (double opt-in)
       operationId: createSubscription
       security: []
       x-roles: [public]
       description: |
-        Anonymous users may subscribe by email only.
-        Authenticated subscribers can also link the subscription to their account.
+        Creates a new subscription using a **double opt-in** flow (FEAT-065).
+
+        **Happy path:**
+        1. Client POSTs `{email, type}`.
+        2. Server creates a subscription with `status: PENDING` and sends a confirmation
+           email containing a one-time link to `GET /subscriptions/confirm?token=<hex>`.
+        3. The user clicks the link; the server activates the subscription (`status: ACTIVE`)
+           and redirects the browser to `https://cote-lapyx.com/?subscribed=1`.
+
+        **Re-subscribe (PENDING already exists):**
+        If a `PENDING` subscription for the supplied email already exists, the server
+        regenerates the confirmation token and re-sends the confirmation email.
+        The response is still `201` with `status: PENDING`.
+
+        **409 (already ACTIVE):**
+        If an `ACTIVE` subscription for the supplied email exists the request is rejected
+        with `409 Conflict`. `CANCELLED` or `EXPIRED` subscriptions do not trigger 409 —
+        a new `PENDING` subscription is created in their place.
+
+        **403 (unverified LOCAL user):**
+        If the caller is an authenticated LOCAL-auth user whose email has not yet been
+        verified (FEAT-061), subscription creation is blocked with 403.
+        Google OAuth users and anonymous callers are never blocked.
+
+        Anonymous users (no Bearer token) may subscribe freely.
+        Authenticated subscribers can link the subscription to their account
+        by passing a valid JWT — the `userId` field in the response will be populated.
       requestBody:
         required: true
         content:
@@ -4447,18 +4474,120 @@ paths:
               $ref: "#/components/schemas/SubscriptionCreateRequest"
       responses:
         "201":
-          description: Subscription created.
+          description: |
+            Subscription created with `status: PENDING`. A confirmation email has been
+            dispatched. If a PENDING subscription already existed for this email the
+            token was regenerated and the email re-sent — the response is still 201.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/SubscriptionDTO"
+              example:
+                id: 42
+                userId: null
+                email: user@example.com
+                type: general
+                status: pending
+                plan: null
+                createdAt: "2026-06-11T10:00:00Z"
+                expiresAt: null
         "400":
           $ref: "#/components/responses/ValidationError"
+        "403":
+          description: |
+            The authenticated caller is a LOCAL-auth user whose email address has not
+            been verified yet. The user must complete email verification via
+            `POST /auth/verify-email` before subscribing. Google OAuth users and
+            anonymous callers are unaffected and will never receive this response.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+              example:
+                type: https://cote-lapyx.com/errors/email-not-verified
+                title: Forbidden
+                status: 403
+                detail: Please verify your email first.
+                instance: /api/v1/subscriptions
         "409":
-          $ref: "#/components/responses/Conflict"
+          description: |
+            An `ACTIVE` subscription for this email address already exists.
+            `CANCELLED` or `EXPIRED` subscriptions do not trigger this error.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+              example:
+                type: https://cote-lapyx.com/errors/conflict
+                title: Conflict
+                status: 409
+                detail: This email is already subscribed.
+                instance: /api/v1/subscriptions
+        "422":
+          $ref: "#/components/responses/ValidationError"
         # F064: MaintenanceFilter blocks this write for non-owners when maintenanceMode=true.
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
+
+  # FEAT-065: double opt-in confirmation endpoint.
+  # Reached from the link in the confirmation email; always responds with a browser redirect.
+  /subscriptions/confirm:
+    get:
+      tags: [Subscriptions]
+      summary: Confirm a newsletter subscription via email link
+      operationId: confirmSubscription
+      # Public — no authentication required; the token in the link IS the credential.
+      security: []
+      x-roles: [public]
+      description: |
+        Consumes the single-use confirmation token sent via email as part of the double
+        opt-in flow initiated by `POST /subscriptions`.
+
+        **Token format:** 64-character lowercase hexadecimal string (32 cryptographically
+        secure bytes rendered as hex).
+
+        **Always responds with `302 Found`** — no JSON body, no state leak:
+        - Token valid and subscription activated → redirect to
+          `https://cote-lapyx.com/?subscribed=1`
+        - Token invalid, expired, already used, missing, or blank → redirect to
+          `https://cote-lapyx.com/?subscribed=0`
+
+        The frontend reads the `?subscribed=` query parameter and renders the appropriate
+        confirmation or error banner.
+
+        **Single-use guarantee:** a successful confirmation clears the token from the
+        database. Replaying the same link redirects to `?subscribed=0`.
+      parameters:
+        - name: token
+          in: query
+          # required=false matches the controller (@RequestParam(required = false)).
+          # An absent/blank token is treated as invalid and produces ?subscribed=0.
+          required: false
+          description: |
+            64-character lowercase hexadecimal confirmation token extracted from the
+            email link. Optional in the HTTP sense — an absent or blank value is
+            treated as invalid and produces a `?subscribed=0` redirect.
+          schema:
+            type: string
+            minLength: 64
+            maxLength: 64
+            pattern: "^[0-9a-f]{64}$"
+            example: "a3f8b2c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9"
+      responses:
+        "302":
+          description: |
+            Browser redirect to the frontend with the outcome flag:
+            - `https://cote-lapyx.com/?subscribed=1` — subscription successfully activated.
+            - `https://cote-lapyx.com/?subscribed=0` — token is invalid, expired, already
+              used, missing, or blank. No additional information is returned to prevent
+              enumeration of subscription state.
+          headers:
+            Location:
+              description: Frontend URL with `?subscribed=1` (success) or `?subscribed=0` (failure).
+              schema:
+                type: string
+                format: uri
+                example: "https://cote-lapyx.com/?subscribed=1"
 
   /subscriptions/me:
     get:
