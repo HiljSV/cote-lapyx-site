@@ -542,7 +542,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // 409 = this email is already subscribed — informational, not an error
         const already = res.status === 409;
         subMsg.textContent = res.ok
-          ? translate("post.subscribe_ok")
+          ? translate("post.subscribe_check_email")
           : already
             ? translate("post.subscribe_already")
             : translate("post.subscribe_err");

@@ -25,6 +25,72 @@ import { initMaintenanceBanner } from "@js/common/maintenance-banner.js";
 // Run maintenance banner check on every public page load
 initMaintenanceBanner();
 
+/**
+ * Inject a brief DOM toast for subscription confirmation redirect feedback.
+ * The toast uses inline cyberpunk styling and is removed automatically.
+ */
+function showSubscribeConfirmToast(message, variant = "success") {
+  const isError = variant === "error";
+  const accent = isError ? "#ffb84d" : "#00e5ff";
+  const shadow = isError
+    ? "0 0 16px rgba(255,184,77,0.32)"
+    : "0 0 16px rgba(0,229,255,0.3)";
+  const toast = document.createElement("div");
+
+  toast.textContent = message;
+  toast.style.cssText = [
+    "position:fixed",
+    "bottom:24px",
+    "left:50%",
+    "transform:translateX(-50%)",
+    "max-width:min(520px,calc(100vw - 32px))",
+    "background:#1a1f3a",
+    `color:${accent}`,
+    `border:1px solid ${accent}`,
+    "padding:12px 24px",
+    "border-radius:8px",
+    "font-size:14px",
+    "line-height:1.45",
+    "text-align:center",
+    "z-index:99999",
+    "pointer-events:none",
+    `box-shadow:${shadow}`,
+  ].join(";");
+
+  document.body?.appendChild(toast);
+  window.setTimeout(() => toast.remove(), 6000);
+}
+
+/**
+ * Read the subscription confirmation redirect query param, show translated
+ * feedback on the homepage, then clean the URL while preserving other state.
+ */
+function handleSubscribeConfirmRedirect() {
+  const params = new URLSearchParams(window.location.search);
+  const status = params.get("subscribed");
+
+  if (status !== "1" && status !== "0") return;
+
+  showSubscribeConfirmToast(
+    translate(
+      status === "1"
+        ? "home.subscribe_confirmed"
+        : "home.subscribe_confirm_failed",
+    ),
+    status === "1" ? "success" : "error",
+  );
+
+  params.delete("subscribed");
+
+  const nextSearch = params.toString();
+  const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ""}${window.location.hash}`;
+
+  window.history.replaceState({}, "", nextUrl);
+}
+
+// Handle subscription confirmation redirects after the document body exists.
+document.addEventListener("DOMContentLoaded", handleSubscribeConfirmRedirect);
+
 // =============================================================================
 // Header auth state — show "Кабінет" or "Увійти" based on localStorage token
 // =============================================================================

@@ -375,6 +375,7 @@
   "post.content_empty": "Aucun contenu disponible.",
   "post.login_for_favorites": "Connectez-vous pour ajouter aux favoris.",
   "post.subscribe_ok": "Merci ! Vous êtes abonné aux mises à jour.",
+  "post.subscribe_check_email": "Presque terminé ! Vérifiez votre boîte mail et confirmez votre abonnement via le lien dans le message.",
   "post.subscribe_err": "Erreur d'abonnement. Veuillez réessayer.",
   "post.login_for_comment": "Connectez-vous pour laisser un commentaire.",
   "post.comment_err": "Erreur d'envoi.",
@@ -612,5 +613,7 @@
   "maintenance.until_prefix": "estimé jusqu'à",
   "admin.toggle.maintenance_eta": "Heure de fin estimée",
   "admin.toggle.maintenance_eta_desc": "Heure de fin estimée ; effacée automatiquement à la désactivation de la maintenance",
+  "home.subscribe_confirmed": "Abonnement confirmé ! Merci, vous recevrez désormais les mises à jour.",
+  "home.subscribe_confirm_failed": "Le lien de confirmation est invalide ou expiré. Veuillez réessayer de vous abonner.",
   "post.subscribe_already": "Cet e-mail est déjà abonné."
 }

@@ -375,6 +375,7 @@
   "post.content_empty": "Зміст відсутній.",
   "post.login_for_favorites": "Увійдіть, щоб додати в обране.",
   "post.subscribe_ok": "Дякуємо! Ви підписані на оновлення.",
+  "post.subscribe_check_email": "Майже готово! Перевірте пошту та підтвердіть підписку за посиланням у листі.",
   "post.subscribe_err": "Помилка підписки. Спробуйте ще раз.",
   "post.login_for_comment": "Увійдіть, щоб залишити коментар.",
   "post.comment_err": "Помилка надсилання.",
@@ -612,5 +613,7 @@
   "maintenance.until_prefix": "орієнтовно до",
   "admin.toggle.maintenance_eta": "Орієнтовний час завершення",
   "admin.toggle.maintenance_eta_desc": "Орієнтовний час завершення; очищується при вимкненні режиму обслуговування",
+  "home.subscribe_confirmed": "Підписку підтверджено! Дякуємо, тепер ви отримуватимете оновлення.",
+  "home.subscribe_confirm_failed": "Посилання підтвердження недійсне або застаріле. Спробуйте підписатися ще раз.",
   "post.subscribe_already": "Цей email вже підписаний на оновлення."
 }

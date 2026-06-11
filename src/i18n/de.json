@@ -375,6 +375,7 @@
   "post.content_empty": "Kein Inhalt verfügbar.",
   "post.login_for_favorites": "Melden Sie sich an, um zu den Favoriten hinzuzufügen.",
   "post.subscribe_ok": "Danke! Sie sind für Updates angemeldet.",
+  "post.subscribe_check_email": "Fast geschafft! Prüfen Sie Ihr Postfach und bestätigen Sie das Abonnement über den Link in der E-Mail.",
   "post.subscribe_err": "Abonnementfehler. Bitte versuchen Sie es erneut.",
   "post.login_for_comment": "Melden Sie sich an, um einen Kommentar zu hinterlassen.",
   "post.comment_err": "Sendungsfehler.",
@@ -612,5 +613,7 @@
   "maintenance.until_prefix": "voraussichtlich bis",
   "admin.toggle.maintenance_eta": "Voraussichtliches Ende",
   "admin.toggle.maintenance_eta_desc": "Voraussichtliches Ende; wird beim Deaktivieren der Wartung automatisch gelöscht",
+  "home.subscribe_confirmed": "Abonnement bestätigt! Danke, Sie erhalten ab jetzt Updates.",
+  "home.subscribe_confirm_failed": "Der Bestätigungslink ist ungültig oder abgelaufen. Bitte versuchen Sie erneut, sich anzumelden.",
   "post.subscribe_already": "Diese E-Mail ist bereits angemeldet."
 }

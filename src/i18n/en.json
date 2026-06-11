@@ -375,6 +375,7 @@
   "post.content_empty": "No content available.",
   "post.login_for_favorites": "Sign in to add to favorites.",
   "post.subscribe_ok": "Thank you! You are subscribed to updates.",
+  "post.subscribe_check_email": "Almost done! Check your inbox and confirm your subscription via the link in the email.",
   "post.subscribe_err": "Subscription error. Please try again.",
   "post.login_for_comment": "Sign in to leave a comment.",
   "post.comment_err": "Submission error.",
@@ -612,5 +613,7 @@
   "maintenance.until_prefix": "estimated until",
   "admin.toggle.maintenance_eta": "Maintenance ETA",
   "admin.toggle.maintenance_eta_desc": "Expected maintenance end time; cleared automatically when maintenance is turned off",
+  "home.subscribe_confirmed": "Subscription confirmed! Thank you, you will now receive updates.",
+  "home.subscribe_confirm_failed": "The confirmation link is invalid or expired. Please try subscribing again.",
   "post.subscribe_already": "This email is already subscribed."
 }
