@@ -721,6 +721,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       set("admin-stat-users", stats.usersTotal);
       set("admin-stat-posts", stats.postsTotal);
       set("admin-stat-comments", stats.commentsPending);
+      // Archived comments subline — backend returns DELETED + BLOCKED count.
+      const archivedCommentsEl = document.getElementById(
+        "admin-stat-comments-archived",
+      );
+      if (archivedCommentsEl) {
+        archivedCommentsEl.textContent = `${translate("admin.stats.archived_fmt")}: ${stats.commentsArchived ?? 0}`;
+      }
       set("admin-stat-projects", stats.projectsPublished);
       set("admin-stat-contacts", stats.messagesUnread);
       // Update nav badge for unread contacts
@@ -1172,13 +1179,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   // ---------------------------------------------------------------------------
 
   // Comment status display labels — resolved via translate() at render time
-  // Keys: admin.comment_status.pending / approved / seen / rejected / deleted
+  // Keys: admin.comment_status.pending / approved / seen / rejected / deleted / blocked
   const COMMENT_STATUS_LABEL = () => ({
     PENDING: translate("admin.comment_status.pending"),
     APPROVED: translate("admin.comment_status.approved"),
     SEEN: translate("admin.comment_status.seen"),
     REJECTED: translate("admin.comment_status.rejected"),
     DELETED: translate("admin.comment_status.deleted"),
+    BLOCKED: translate("admin.comment_status.blocked"),
   });
 
   // Comment status CSS modifier for dash-status badge
@@ -1188,24 +1196,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     SEEN: "archived",
     REJECTED: "archived",
     DELETED: "archived",
+    BLOCKED: "archived",
   };
 
   /**
-   * Load admin comments with optional status filter.
+   * Load admin comments with optional status filter or archive mode.
    * Shows PENDING (needs bad-words review) + APPROVED (auto-approved, not seen yet).
    * @param {number} page - zero-based page number
-   * @param {string} statusFilter - empty string = all, or PENDING/APPROVED/SEEN/REJECTED
+   * @param {string} statusFilter - empty string = all, ARCHIVE, or PENDING/APPROVED/SEEN/REJECTED
    */
   async function loadAdminComments(page, statusFilter) {
     adminCommentsPage = page;
     const body = document.getElementById("admin-comments-body");
     if (!body) return;
     body.innerHTML = '<div class="dash-list__empty">Завантаження...</div>';
-    const statusParam = statusFilter ? `&status=${statusFilter}` : "";
+    // Archive mode uses a backend partition and must not send a status filter.
+    const isArchiveMode = statusFilter === "ARCHIVE";
+    const archiveParam = isArchiveMode ? "&archive=true" : "";
+    const statusParam =
+      !isArchiveMode && statusFilter ? `&status=${statusFilter}` : "";
     try {
       // GET /api/v1/admin/comments — returns all comments for admin review
       const res = await fetchWithAuth(
-        `${ADMIN_API}/admin/comments?size=20&sort=createdAt,desc&page=${page}${statusParam}`,
+        `${ADMIN_API}/admin/comments?size=20&sort=createdAt,desc&page=${page}${archiveParam}${statusParam}`,
       );
       if (!res.ok) {
         body.innerHTML =
@@ -1220,9 +1233,10 @@ document.addEventListener("DOMContentLoaded", async () => {
           const sClass = COMMENT_STATUS_CLASS[c.status] || "draft";
           const sLabel = commentStatusLabels[c.status] || c.status;
 
-          // PENDING — show Approve + Reject (manual bad-words moderation)
-          const canApprove = c.status === "PENDING" || c.status === "REJECTED";
-          const canReject = c.status === "PENDING";
+          // Live moderation actions are hidden while browsing archived rows.
+          const canApprove =
+            !isArchiveMode && (c.status === "PENDING" || c.status === "REJECTED");
+          const canReject = !isArchiveMode && c.status === "PENDING";
           // Action button labels — localized
           const approveBtn = canApprove
             ? `<button type="button" class="btn btn--cyan btn--sm" data-action="approve" data-id="${c.id}">${translate("admin.action.approve")}</button>`
@@ -1231,14 +1245,41 @@ document.addEventListener("DOMContentLoaded", async () => {
             ? `<button type="button" class="btn btn--ghost btn--sm" data-action="reject" data-id="${c.id}">${translate("admin.action.reject")}</button>`
             : "";
 
-          // APPROVED — show "Mark Seen" button (PATCH /comments/{id}/seen)
+          // APPROVED — show "Mark Seen" button (PATCH /comments/{id}/seen) in live view only.
           const seenBtn =
-            c.status === "APPROVED"
+            !isArchiveMode && c.status === "APPROVED"
               ? `<button type="button" class="btn btn--ghost btn--sm" data-action="seen" data-id="${c.id}">${translate("admin.action.mark_seen")}</button>`
               : "";
 
-          // Delete — available for all statuses
-          const deleteBtn = `<button type="button" class="btn btn--magenta btn--sm" data-action="delete-comment" data-id="${c.id}">${translate("admin.action.delete")}</button>`;
+          // Block is limited to live moderation rows and requires a reason prompt before PATCH.
+          const canBlock =
+            !isArchiveMode &&
+            ["PENDING", "APPROVED", "REJECTED"].includes(c.status);
+          const blockBtn = canBlock
+            ? `<button type="button" class="btn btn--ghost btn--sm" data-action="block-comment" data-id="${c.id}">${translate("admin.comments.btn_block")}</button>`
+            : "";
+
+          // Restore is the only archive-view row action.
+          const restoreBtn = isArchiveMode
+            ? `<button type="button" class="btn btn--cyan btn--sm" data-action="restore-comment" data-id="${c.id}">${translate("admin.comments.btn_restore")}</button>`
+            : "";
+
+          // Delete remains available in live view only; archive rows are never force-deleted from UI.
+          const deleteBtn = !isArchiveMode
+            ? `<button type="button" class="btn btn--magenta btn--sm" data-action="delete-comment" data-id="${c.id}">${translate("admin.action.delete")}</button>`
+            : "";
+
+          // Archive evidence shows stored block reason and timestamp when backend provides them.
+          const blockReason = c.blockReason
+            ? `<small class="dash-list__muted" title="${escHtml(c.blockReason)}">${translate("admin.comments.blocked_reason_label")}: ${escHtml(c.blockReason)}</small>`
+            : "";
+          const blockedAt = c.blockedAt
+            ? `<small class="dash-list__muted">${fmtDate(c.blockedAt)}</small>`
+            : "";
+          const commentEvidence =
+            isArchiveMode && (blockReason || blockedAt)
+              ? `<div class="dash-list__meta">${blockReason}${blockedAt}</div>`
+              : "";
 
           // Post link — show slug if available, fallback to postId
           const postRef = c.postSlug
@@ -1247,11 +1288,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
           return `<div class="dash-list__row">
             <div data-label="${translate("admin.col.author")}">${escHtml(c.author?.name || c.author?.email || "—")}</div>
-            <div data-label="${translate("admin.col.comment")}">${escHtml((c.content || "").slice(0, 60))}${(c.content || "").length > 60 ? "…" : ""}</div>
+            <div data-label="${translate("admin.col.comment")}">${escHtml((c.content || "").slice(0, 60))}${(c.content || "").length > 60 ? "…" : ""}${commentEvidence}</div>
             <div class="dash-list__title" data-label="${translate("admin.col.post")}">${postRef}</div>
             <div class="dash-list__date" data-label="${translate("admin.col.date")}">${fmtDate(c.createdAt)}</div>
             <div data-label="${translate("admin.col.status")}"><span class="dash-status dash-status--${sClass}">${sLabel}</span></div>
-            <div class="dash-list__actions" data-label="${translate("admin.col.actions")}">${approveBtn}${rejectBtn}${seenBtn}${deleteBtn}</div>
+            <div class="dash-list__actions" data-label="${translate("admin.col.actions")}">${approveBtn}${rejectBtn}${seenBtn}${blockBtn}${restoreBtn}${deleteBtn}</div>
           </div>`;
         })
         .join("");
@@ -1270,6 +1311,86 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error("Admin comments error:", err);
       body.innerHTML =
         '<div class="dash-list__empty">Помилка завантаження</div>';
+    }
+  }
+
+  /**
+   * Block a live comment after collecting required evidence.
+   * @param {number} id - comment ID
+   */
+  async function blockComment(id) {
+    // Block reason is required by the backend and capped at 500 characters.
+    const reason = prompt(translate("admin.comments.block_reason_prompt"));
+    const trimmedReason = reason?.trim();
+    if (!trimmedReason) return;
+    try {
+      // PATCH /api/v1/admin/comments/{id}/block — move live comment to BLOCKED archive.
+      const res = await fetchWithAuth(`${ADMIN_API}/admin/comments/${id}/block`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: trimmedReason.slice(0, 500) }),
+      });
+      if (res.ok || res.status === 204)
+        loadAdminComments(adminCommentsPage, adminCommentsFilter);
+      else alert(translate("admin.error.save"));
+    } catch (err) {
+      console.error("Block comment error:", err);
+      alert(translate("admin.error.network"));
+    }
+  }
+
+  /**
+   * Restore an archived comment to PENDING.
+   * @param {number} id - comment ID
+   */
+  async function restoreComment(id) {
+    try {
+      // PATCH /api/v1/admin/comments/{id}/restore — return archived row to live moderation.
+      const res = await fetchWithAuth(
+        `${ADMIN_API}/admin/comments/${id}/restore`,
+        {
+          method: "PATCH",
+        },
+      );
+      if (res.ok || res.status === 204)
+        loadAdminComments(adminCommentsPage, adminCommentsFilter);
+      else alert(translate("admin.error.save"));
+    } catch (err) {
+      console.error("Restore comment error:", err);
+      alert(translate("admin.error.network"));
+    }
+  }
+
+  /** Export the comment archive as a JSON attachment. */
+  async function exportCommentsArchive() {
+    try {
+      // GET /api/v1/admin/comments/archive/export — authenticated JSON file download.
+      const res = await fetchWithAuth(
+        `${ADMIN_API}/admin/comments/archive/export`,
+      );
+      if (!res.ok) {
+        console.error("Export comments archive failed:", res.status);
+        alert(translate("admin.error.network"));
+        return;
+      }
+      const blob = await res.blob();
+      const today = new Date();
+      const stamp = [
+        today.getFullYear(),
+        String(today.getMonth() + 1).padStart(2, "0"),
+        String(today.getDate()).padStart(2, "0"),
+      ].join("");
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `comments-archive-${stamp}.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Export comments archive error:", err);
+      alert(translate("admin.error.network"));
     }
   }
 
@@ -1348,10 +1469,19 @@ document.addEventListener("DOMContentLoaded", async () => {
         moderateComment(Number(id), action);
       } else if (action === "seen") {
         markCommentSeen(Number(id));
+      } else if (action === "block-comment") {
+        blockComment(Number(id));
+      } else if (action === "restore-comment") {
+        restoreComment(Number(id));
       } else if (action === "delete-comment") {
         deleteComment(Number(id));
       }
     });
+
+  // Export button downloads the archived comments JSON from the admin endpoint.
+  document
+    .getElementById("admin-comments-export")
+    ?.addEventListener("click", exportCommentsArchive);
 
   // ---------------------------------------------------------------------------
   // Contact messages filter tabs

@@ -2,7 +2,7 @@ openapi: 3.1.0
 
 info:
   title: Cote Lapyx API
-  version: 1.20.0
+  version: 1.21.0
   description: |
     REST API for cote-lapyx.com — a team website for Валерія, Сергій, Андрій.
 
@@ -198,7 +198,10 @@ components:
 
     CommentStatus:
       type: string
-      enum: [pending, approved, rejected, deleted]
+      # v1.21.0: BLOCKED added — evidence-preserving hidden status set by OWNER via
+      # PATCH /admin/comments/{id}/block. BLOCKED comments are never auto-purged
+      # and are counted in commentsArchived (not commentsTotal) on the dashboard.
+      enum: [pending, approved, rejected, deleted, blocked]
 
     SubscriptionType:
       type: string
@@ -1463,6 +1466,28 @@ components:
             ISO 8601 UTC timestamp of the last author edit.
             Null if the comment has never been edited after initial submission.
           example: "2026-05-10T08:15:00Z"
+        # v1.21.0: block evidence fields — populated only for BLOCKED comments.
+        # Both fields are null for PENDING/APPROVED/REJECTED/DELETED comments.
+        # Present in admin context (GET /admin/comments, moderation responses);
+        # subscriber-facing endpoints never expose these fields.
+        blockedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: |
+            ISO 8601 UTC timestamp when an OWNER blocked this comment.
+            Non-null only when `status` is `blocked`. Always `null` in subscriber-facing
+            responses — exposed only in admin/owner context.
+          example: "2026-06-11T10:00:00Z"
+        blockReason:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: |
+            OWNER-supplied reason for blocking this comment (audit evidence).
+            Non-null only when `status` is `blocked`. Always `null` in subscriber-facing
+            responses — exposed only in admin/owner context.
+          example: "Repeated spam content, third offence."
 
     CommentCreateRequest:
       type: object
@@ -1482,6 +1507,99 @@ components:
           type: string
           enum: [approved, rejected]
           description: "`approved` makes the comment visible; `rejected` hides it from public."
+
+    # v1.21.0: request body for PATCH /admin/comments/{id}/block.
+    # Separate from CommentModerationRequest — blocking is a distinct evidence-preserving action.
+    CommentBlockRequest:
+      type: object
+      required: [reason]
+      description: |
+        Owner-only payload for blocking a comment with an explicit audit reason.
+        Blocking sets `status = blocked`, records `blockedAt` (server timestamp),
+        and stores `reason` as `blockReason`. The comment is retained as permanent
+        evidence and is never auto-purged.
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: |
+            Mandatory audit reason for the block. Stored verbatim as `blockReason` alongside
+            the comment content. Max 500 characters (`block_reason` column constraint).
+          example: "Repeated spam content, third offence."
+
+    # v1.21.0: single row in the archive export array returned by
+    # GET /admin/comments/archive/export. Contains full evidence fields.
+    CommentArchiveExportRow:
+      type: object
+      required: [id, postId, postSlug, authorName, authorEmail, content, status, createdAt]
+      description: |
+        Single row in the archived-comments JSON export. Contains all evidence fields
+        for DELETED and BLOCKED comments. Client IP is NOT included — the `comments`
+        table does not track per-comment IP addresses.
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Primary key of the comment.
+          example: 42
+        postId:
+          type: integer
+          format: int64
+          description: PK of the post this comment belongs to.
+          example: 7
+        postSlug:
+          type: string
+          pattern: "^[a-z0-9-]+$"
+          description: URL-friendly slug of the post for direct link generation.
+          example: my-first-post
+        authorName:
+          type: string
+          description: Display name of the comment author at export time.
+          example: "Andrii K."
+        authorEmail:
+          type: string
+          format: email
+          description: |
+            Email of the comment author at export time. Preserved as evidence even if the
+            user later changes their email address.
+          example: andrii@cote-lapyx.com
+        content:
+          type: string
+          description: Full comment text (always included — this is the owner/admin export context).
+          example: "This is the blocked comment content."
+        status:
+          $ref: "#/components/schemas/CommentStatus"
+          description: Archived status — always `deleted` or `blocked`.
+        createdAt:
+          type: string
+          format: date-time
+          description: ISO 8601 UTC timestamp when the comment was originally created.
+          example: "2026-05-01T09:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: ISO 8601 UTC timestamp of the last author edit. Null if never edited.
+          example: "2026-05-02T11:30:00Z"
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: ISO 8601 UTC timestamp of soft-deletion. Null for BLOCKED-only comments.
+          example: "2026-05-10T08:00:00Z"
+        blockedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: ISO 8601 UTC timestamp when an OWNER blocked this comment. Null for DELETED-only comments.
+          example: "2026-06-11T10:00:00Z"
+        blockReason:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: OWNER-supplied reason for blocking. Null for DELETED-only comments.
+          example: "Repeated spam content, third offence."
 
     PagedCommentResponse:
       type: object
@@ -2060,11 +2178,17 @@ components:
           projectsTotal,
           subscribersTotal,
           commentsTotal,
+          commentsArchived,
           messagesUnread,
         ]
       description: |
         Aggregated statistics for the owner dashboard home screen.
         Counts reflect all records visible to the authenticated owner.
+
+        **v1.21.0 — comment count split:**
+        `commentsTotal` now counts LIVE comments only (PENDING + APPROVED).
+        Archived comments (DELETED + BLOCKED) are reported separately in `commentsArchived`.
+        This fixes the previous bug where deleted/blocked rows inflated `commentsTotal`.
       properties:
         postsTotal:
           type: integer
@@ -2096,15 +2220,30 @@ components:
           format: int64
           description: Total number of active subscriptions.
           example: 340
+        # v1.21.0: semantics changed — LIVE comments only (PENDING + APPROVED).
+        # Previously included DELETED + BLOCKED rows, inflating the counter.
+        # Archived comments are now counted separately in commentsArchived.
         commentsTotal:
           type: integer
           format: int64
-          description: Total comments across all moderation states.
-          example: 87
+          description: |
+            **v1.21.0 — live comments only.**
+            Count of comments with `status` in `[pending, approved]`.
+            Does NOT include DELETED or BLOCKED rows — those are counted in `commentsArchived`.
+          example: 82
         commentsPending:
           type: integer
           format: int64
-          description: Comments awaiting moderation (`status = pending`).
+          description: Comments awaiting moderation (`status = pending`). Subset of `commentsTotal`.
+          example: 5
+        # v1.21.0: new field — archived (soft-deleted + blocked) comment count.
+        commentsArchived:
+          type: integer
+          format: int64
+          description: |
+            **v1.21.0 — new field.**
+            Count of archived comments: `status` in `[deleted, blocked]`.
+            Displayed separately in the admin panel as an archive counter.
           example: 5
         messagesUnread:
           type: integer
@@ -5555,22 +5694,50 @@ paths:
         - bearerAuth: []
       x-roles: [owner]
       description: |
-        Returns all comments across all posts. Supports filtering by moderation status.
-        Used by the admin panel's comments moderation section (filter tabs: Всі / Очікують / Спам).
+        Returns all comments across all posts, partitioned by archive state.
+
+        **v1.21.0 — archive filter:**
+
+        - `archive=false` (default) — **live view**: PENDING + APPROVED + REJECTED comments.
+          The optional `status` param can narrow to a single status within this live set.
+        - `archive=true` — **archive view**: DELETED + BLOCKED evidence only.
+          The `status` param is ignored when `archive=true`.
+
+        The legacy `status` param remains supported for the live view (archive=false).
+        When both params are present, `archive=true` takes precedence and `status` is ignored.
+
+        Used by the admin panel's comments moderation section
+        (filter tabs: Всі / Очікують / Заблоковані / Архів).
       parameters:
+        # v1.21.0: archive partition switch (false=live, true=archived evidence).
+        # When true, status param is ignored; when false, status narrows within live statuses.
+        - name: archive
+          in: query
+          required: false
+          description: |
+            Partition selector:
+            - `false` (default) — return live comments (PENDING, APPROVED, REJECTED).
+              Optionally narrow with `status`.
+            - `true` — return archived evidence (DELETED, BLOCKED only).
+              `status` param is ignored when `archive=true`.
+          schema:
+            type: boolean
+            default: false
         - name: status
           in: query
           required: false
-          description: Filter by moderation status. Omit to return all statuses.
+          description: |
+            Filter live view by a single moderation status. Ignored when `archive=true`.
+            Valid values for the live view: `pending`, `approved`, `rejected`.
+            Omit to return all live statuses.
           schema:
-            type: string
-            enum: [pending, approved, rejected, spam, deleted]
+            $ref: "#/components/schemas/CommentStatus"
         - $ref: "#/components/parameters/PageParam"
         - $ref: "#/components/parameters/SizeParam"
         - $ref: "#/components/parameters/SortParam"
       responses:
         "200":
-          description: Paginated list of comments.
+          description: Paginated list of comments (includes `blockedAt` and `blockReason` fields for owner context).
           content:
             application/json:
               schema:
@@ -5590,7 +5757,9 @@ paths:
       x-roles: [owner]
       description: |
         Changes the moderation status of a comment to `approved` or `rejected`.
-        Returns 409 if the comment is already in `deleted` status (terminal state).
+
+        Returns 409 if the comment is in an archived state (`deleted` or `blocked`).
+        For blocked comments, use `PATCH /admin/comments/{id}/restore` first, then moderate.
         This endpoint is separate from `PATCH /comments/{id}`, which is for author edits.
       parameters:
         - name: id
@@ -5621,11 +5790,199 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
         "409":
-          description: Comment is in a terminal state (deleted) and cannot be moderated.
+          description: |
+            Comment is in an archived state (`deleted` or `blocked`) and cannot be moderated.
+            Restore the comment first via `PATCH /admin/comments/{id}/restore`.
           content:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/ProblemDetail"
+              example:
+                type: https://cote-lapyx.com/errors/conflict
+                title: Conflict
+                status: 409
+                detail: Cannot moderate a blocked comment — restore it first.
+                instance: /api/v1/admin/comments/42
+
+  # v1.21.0 — block a comment with an explicit reason (evidence-preserving hidden status).
+  # Separate path from moderation to avoid ambiguity with approve/reject action.
+  /admin/comments/{id}/block:
+    patch:
+      tags: [Admin]
+      summary: Block a comment with audit reason (owner only)
+      operationId: blockComment
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Sets `status = blocked` on the specified comment and records `blockedAt` (server
+        timestamp) plus the supplied `reason` as `blockReason`.
+
+        **Semantics vs. delete:**
+        - `BLOCKED` comments are hidden from all non-owner views, like `DELETED`.
+        - Unlike soft-delete, BLOCKED comments are **never auto-purged** by the retention job
+          — they are preserved as permanent evidence.
+        - `blockedAt` and `blockReason` populate in the `CommentDTO` response and in the
+          archive export.
+
+        Returns 409 if the comment is already `blocked` or `deleted`.
+        To undo a block, use `PATCH /admin/comments/{id}/restore`.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 42
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentBlockRequest"
+      responses:
+        "200":
+          description: Comment blocked. Returns the full CommentDTO with `status=blocked`, `blockedAt`, and `blockReason` populated.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentDTO"
+        "400":
+          $ref: "#/components/responses/ValidationError"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: |
+            Comment is already in an archived state (`blocked` or `deleted`) and cannot
+            be blocked again. Use `PATCH /admin/comments/{id}/restore` to unarchive it first.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+              example:
+                type: https://cote-lapyx.com/errors/conflict
+                title: Conflict
+                status: 409
+                detail: Comment is already blocked.
+                instance: /api/v1/admin/comments/42/block
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  # v1.21.0 — restore a BLOCKED or DELETED comment back to PENDING for re-moderation.
+  # Clears block evidence fields so the comment can be approved or rejected normally.
+  /admin/comments/{id}/restore:
+    patch:
+      tags: [Admin]
+      summary: Restore an archived comment to PENDING (owner only)
+      operationId: restoreComment
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Returns a `blocked` or `deleted` comment to `pending` status, re-entering it
+        into the moderation queue for a fresh approve/reject decision.
+
+        **Side effects:**
+        - `status` → `pending`
+        - `deletedAt` → `null` (cleared)
+        - `blockedAt` → `null` (cleared)
+        - `blockReason` → `null` (cleared)
+
+        Returns 409 if the comment is **not** archived (i.e. already `pending`, `approved`,
+        or `rejected`).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+          example: 42
+      # No request body — no input required for restore
+      responses:
+        "200":
+          description: Comment restored to PENDING. Returns the full CommentDTO with cleared evidence fields.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommentDTO"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: |
+            Comment is not in an archived state. Only `blocked` or `deleted` comments
+            can be restored. Comments in `pending`, `approved`, or `rejected` state
+            return this error.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+              example:
+                type: https://cote-lapyx.com/errors/conflict
+                title: Conflict
+                status: 409
+                detail: Comment is not archived — only BLOCKED or DELETED comments can be restored.
+                instance: /api/v1/admin/comments/42/restore
+
+  # v1.21.0 — export all archived (DELETED + BLOCKED) comments as a downloadable JSON file.
+  # Path is /archive/export (not /{id}/...) to avoid conflict with the {id} path template.
+  /admin/comments/archive/export:
+    get:
+      tags: [Admin]
+      summary: Export archived comments as JSON attachment (owner only)
+      operationId: exportCommentArchive
+      security:
+        - bearerAuth: []
+      x-roles: [owner]
+      description: |
+        Returns all archived comments (`status` in `[deleted, blocked]`) as a JSON array
+        attached as a downloadable file.
+
+        **Response headers:**
+        - `Content-Type: application/json`
+        - `Content-Disposition: attachment; filename="comments-archive-YYYY-MM-DD.json"`
+          (date is server-side today's date at the time of the request)
+
+        **Export fields per row:** `id`, `postId`, `postSlug`, `authorName`, `authorEmail`,
+        `content`, `status`, `createdAt`, `updatedAt`, `deletedAt`, `blockedAt`, `blockReason`.
+
+        **Note:** client IP is NOT included — the `comments` table does not record
+        per-comment IP addresses (only `user_activity` and `contact_messages` track IPs).
+
+        No pagination — the export returns the complete archive in a single response.
+        For large archives, consider a future streaming/async endpoint.
+      responses:
+        "200":
+          description: |
+            JSON array of archived comment rows. Delivered as a file attachment.
+            The array may be empty `[]` if no archived comments exist.
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+                example: 'attachment; filename="comments-archive-2026-06-11.json"'
+              description: |
+                Instructs the browser to download the response as a file.
+                Filename includes today's date for easy snapshot identification.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CommentArchiveExportRow"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
 
   # ---------------------------------------------------------------------------
   # Admin — Subscriptions
