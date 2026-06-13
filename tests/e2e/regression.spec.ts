@@ -6,7 +6,8 @@
 // the live UI; prefer role/semantic/data-testid as they are added to the app.
 import { test, expect, request } from "@playwright/test";
 
-const API = "https://api.cote-lapyx.com/api/v1";
+// Production API by default; staging CI overrides via E2E_API_BASE.
+const API = process.env.E2E_API_BASE || "https://api.cote-lapyx.com/api/v1";
 
 test.describe("Navigation regression", () => {
   // Header navigation must render and expose primary links

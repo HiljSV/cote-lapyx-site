@@ -20,11 +20,22 @@ export default defineConfig({
   reporter: "list",
 
   use: {
-    // All relative URLs in specs resolve against production
-    baseURL: "https://cote-lapyx.com",
+    // Relative URLs resolve against this host. Production by default; the staging
+    // CI workflow overrides E2E_BASE_URL to target https://staging.cote-lapyx.com.
+    baseURL: process.env.E2E_BASE_URL || "https://cote-lapyx.com",
     headless: true,
-    // Production must have valid TLS — fail loudly on cert errors
+    // Production/staging both have valid TLS — fail loudly on cert errors
     ignoreHTTPSErrors: false,
+    // The staging FE sits behind HTTP basic-auth; pass credentials when present.
+    // No-op against production (vars unset) so prod behaviour is unchanged.
+    ...(process.env.STAGING_BASIC_AUTH_USER && process.env.STAGING_BASIC_AUTH_PASSWORD
+      ? {
+          httpCredentials: {
+            username: process.env.STAGING_BASIC_AUTH_USER,
+            password: process.env.STAGING_BASIC_AUTH_PASSWORD,
+          },
+        }
+      : {}),
   },
 
   // Single browser project — Chromium covers ~90% of real traffic
