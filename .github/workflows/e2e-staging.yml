@@ -1,0 +1,84 @@
+# Full E2E suite against the STAGING stack (incl. authenticated paths).
+#
+# Distinct from e2e-readonly.yml (read-only subset vs production). This workflow:
+#   - starts the on-demand staging backend over SSH, waits for health,
+#   - runs the full Playwright suite against staging (baseURL/API overridden),
+#   - always stops the staging backend afterwards.
+# Auth uses the dedicated STAGING test user (never the production owner account).
+# The staging FE sits behind basic-auth, passed to Playwright via httpCredentials.
+#
+# Gate policy: NON-BLOCKING for now. Promotion to a required check on `main`
+# (variant C) happens only after >=5 consecutive clean runs — see staging-sprint.md S6.
+name: E2E (staging)
+
+on:
+  workflow_dispatch: {}
+  # Enable after the suite is stable on staging:
+  # workflow_run:
+  #   workflows: ["Deploy to Staging"]
+  #   types: [completed]
+
+# Serialise: the on-demand backend is a single shared instance.
+concurrency:
+  group: staging-e2e
+  cancel-in-progress: false
+
+jobs:
+  e2e-staging:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser (chromium)
+        run: npx playwright install chromium --with-deps
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p 142 -H cote-lapyx.com >> ~/.ssh/known_hosts
+
+      - name: Start staging backend (on-demand)
+        run: |
+          ssh -i ~/.ssh/deploy_key -p 142 -o StrictHostKeyChecking=no \
+            hilj@cote-lapyx.com 'sudo systemctl start cote-lapyx-backend-staging'
+
+      # Poll health instead of a fixed sleep; cold start measured ~56 s.
+      - name: Wait for staging API health
+        run: |
+          for i in $(seq 1 45); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 \
+              "${{ secrets.E2E_API_BASE }}/posts?size=1" || true)
+            if [ "$code" = "200" ]; then echo "staging API up after ~$((i*3))s"; exit 0; fi
+            sleep 3
+          done
+          echo "staging API did not become healthy in time"; exit 1
+
+      - name: Run full E2E suite against staging
+        env:
+          CI: true
+          E2E_BASE_URL: ${{ secrets.E2E_BASE_URL }}
+          E2E_API_BASE: ${{ secrets.E2E_API_BASE }}
+          E2E_EMAIL: ${{ secrets.STAGING_E2E_EMAIL }}
+          E2E_PASSWORD: ${{ secrets.STAGING_E2E_PASSWORD }}
+          STAGING_BASIC_AUTH_USER: ${{ secrets.STAGING_BASIC_AUTH_USER }}
+          STAGING_BASIC_AUTH_PASSWORD: ${{ secrets.STAGING_BASIC_AUTH_PASSWORD }}
+        run: npx playwright test --reporter=list
+
+      # Free the ~450 MB JVM whatever the test outcome.
+      - name: Stop staging backend
+        if: always()
+        run: |
+          ssh -i ~/.ssh/deploy_key -p 142 -o StrictHostKeyChecking=no \
+            hilj@cote-lapyx.com 'sudo systemctl stop cote-lapyx-backend-staging' || true

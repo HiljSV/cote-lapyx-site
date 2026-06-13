@@ -2,8 +2,10 @@
 // Read-only: GETs against public endpoints, no auth, no mutations.
 import { test, expect, request } from "@playwright/test";
 
-// Backend lives on a different origin than the frontend — pin it explicitly
-const API_BASE = "https://api.cote-lapyx.com/api/v1";
+// Backend lives on a different origin than the frontend — pin it explicitly.
+// Production by default; staging CI overrides via E2E_API_BASE.
+const API_BASE =
+  process.env.E2E_API_BASE || "https://api.cote-lapyx.com/api/v1";
 
 test.describe("Public API — health", () => {
   // Posts feed powers blog list and homepage cards

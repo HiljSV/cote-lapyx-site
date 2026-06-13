@@ -1,0 +1,56 @@
+# Build the SPA and deploy it to the STAGING vhost (staging.cote-lapyx.com).
+#
+# Staging mirrors `main`. The source hard-codes the production API host, so after
+# the build we rewrite the built assets to point at the staging API. This is the
+# interim approach until the API base is centralised behind a VITE_API_BASE env
+# (tracked as follow-up tech-debt). Production deploy is a separate workflow
+# (deploy.yml) and is unaffected.
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [main] # staging tracks main
+  workflow_dispatch: {} # manual redeploy
+
+# Never let two staging deploys overlap on the shared docroot.
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: true
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # Repoint built assets at the staging API + keep staging out of indexes.
+      - name: Point built assets at staging API
+        run: |
+          grep -rlZ 'api\.cote-lapyx\.com' dist \
+            | xargs -0 -r sed -i 's/api\.cote-lapyx\.com/api.staging.cote-lapyx.com/g'
+          printf 'User-agent: *\nDisallow: /\n' > dist/robots.txt
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p 142 -H cote-lapyx.com >> ~/.ssh/known_hosts
+
+      - name: Deploy to staging vhost
+        run: |
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key -p 142 -o StrictHostKeyChecking=no" \
+            dist/ hilj@cote-lapyx.com:/var/www/staging.cote-lapyx.com/html/
