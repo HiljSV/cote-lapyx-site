@@ -27,13 +27,13 @@ jobs:
     timeout-minutes: 15
     steps:
       # Check out the PR head so the spec files under test match the PR.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       # Pinned Node version (matches deploy.yml) with npm cache for fast installs.
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: "20"
+          node-version: "24"
           cache: "npm"
 
       # Reproducible install from the lockfile.
