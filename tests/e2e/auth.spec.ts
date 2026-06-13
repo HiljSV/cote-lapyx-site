@@ -7,6 +7,14 @@ const EMAIL = process.env.E2E_EMAIL ?? "";
 const PASSWORD = process.env.E2E_PASSWORD ?? "";
 
 test.describe("Auth — login flow", () => {
+  // Skip the whole suite unless a dedicated E2E test user is provided via env
+  // (E2E_EMAIL / E2E_PASSWORD). This keeps the gate green without credentials and
+  // prevents accidental use of a personal/owner account. See Phase 2F report.
+  test.skip(
+    !EMAIL || !PASSWORD,
+    "E2E_EMAIL/E2E_PASSWORD not set — dedicated test user required for auth suite",
+  );
+
   // Shared login state: log in once, reuse for subsequent tests in this suite
   test.beforeEach(async ({ page }) => {
     await page.goto("/login.html", { waitUntil: "load" });
