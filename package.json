@@ -97,5 +97,8 @@
     "cropperjs": "^1.6.2",
     "dompurify": "^3.4.7",
     "marked": "^18.0.4"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
