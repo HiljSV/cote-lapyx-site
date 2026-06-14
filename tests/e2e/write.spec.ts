@@ -9,6 +9,9 @@ import { test, expect } from "@playwright/test";
 const EMAIL = process.env.E2E_EMAIL ?? "";
 const PASSWORD = process.env.E2E_PASSWORD ?? "";
 const BASE = process.env.E2E_BASE_URL ?? "";
+const API_BASE = process.env.E2E_API_BASE ?? "";
+// A published post seeded into the staging DB (see staging-seed.sql).
+const SEED_POST_SLUG = "staging-welcome";
 const WRITES_ALLOWED = process.env.E2E_ALLOW_WRITES === "1";
 // Must point at the staging host (prod baseURL "cote-lapyx.com" lacks "staging.").
 const ON_STAGING = BASE.includes("staging.cote-lapyx.com");
@@ -60,5 +63,49 @@ test.describe("Write paths (staging only)", () => {
     await expect(page.locator("#profile-bio")).toHaveValue(marker, {
       timeout: 10_000,
     });
+  });
+
+  // Registration write-path (API): a brand-new account must be created without the
+  // user_activity FK 500 (regression guard for fix/registration-activity-fk).
+  // Uses a unique email each run (idempotent); the new account then logs in.
+  test("registration creates a new account and it can log in", async ({
+    request,
+  }) => {
+    const email = `e2e-reg-${Date.now()}@example.test`;
+    const password = "E2eRegTest123!";
+
+    const reg = await request.post(`${API_BASE}/auth/register`, {
+      data: { email, password, name: "E2E Reg" },
+    });
+    expect(reg.status(), "register should return 201").toBe(201);
+    expect((await reg.json()).accessToken, "register returns a token").toBeTruthy();
+
+    const login = await request.post(`${API_BASE}/auth/login`, {
+      data: { email, password },
+    });
+    expect(login.status(), "new account can log in").toBe(200);
+  });
+
+  // Comment posting (API): an authenticated subscriber posts a comment on a seeded
+  // published post. New comments are created PENDING moderation, so we assert the
+  // create succeeds (201) rather than public visibility. Unique content each run.
+  test("authenticated user can post a comment (PENDING)", async ({ request }) => {
+    const login = await request.post(`${API_BASE}/auth/login`, {
+      data: { email: EMAIL, password: PASSWORD },
+    });
+    expect(login.status()).toBe(200);
+    const token = (await login.json()).accessToken;
+    expect(token).toBeTruthy();
+
+    const res = await request.post(
+      `${API_BASE}/posts/${SEED_POST_SLUG}/comments`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        data: { content: `E2E staging comment ${Date.now()}` },
+      },
+    );
+    expect(res.status(), "comment create should return 201").toBe(201);
+    const body = await res.json();
+    expect(body.id, "created comment has an id").toBeTruthy();
   });
 });
