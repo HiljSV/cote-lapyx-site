@@ -13,10 +13,11 @@ name: E2E (staging)
 
 on:
   workflow_dispatch: {}
-  # Enable after the suite is stable on staging:
-  # workflow_run:
-  #   workflows: ["Deploy to Staging"]
-  #   types: [completed]
+  # Runs automatically after each staging deploy to accrue clean runs toward the
+  # S6 gate promotion. Guarded below to only proceed on a successful deploy.
+  workflow_run:
+    workflows: ["Deploy to Staging"]
+    types: [completed]
 
 # Serialise: the on-demand backend is a single shared instance.
 concurrency:
@@ -27,6 +28,10 @@ jobs:
   e2e-staging:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Manual dispatch always runs; the post-deploy trigger only on a green deploy.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     steps:
       - uses: actions/checkout@v6
 
